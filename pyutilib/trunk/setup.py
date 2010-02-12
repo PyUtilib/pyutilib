@@ -26,7 +26,7 @@ setup(name="PyUtilib",
     url = 'https://software.sandia.gov/trac/pyutilib.ply',
     license = 'BSD',
     platforms = ["any"],
-    description = 'A collection of Python utilities',
+    description = 'PyUtilib: A collection of Python utilities',
     long_description = read('README.txt'),
     classifiers = [
         'Development Status :: 4 - Beta',
