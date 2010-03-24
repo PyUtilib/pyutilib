@@ -60,7 +60,9 @@ setup(name="PyUtilib",
             'pyutilib.services',
             'pyutilib.subprocess',
             'pyutilib.th',
-            'pyutilib.virtualenv'
+            'pyutilib.virtualenv',
+            'nose',
+            'unittest2'
       ]
       )
 
