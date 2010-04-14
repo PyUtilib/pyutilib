@@ -4,7 +4,7 @@ PyUtilib README
 
 PyUtilib is a collection of Python utility packages.  Although each package
 can be installed separately, this package can be used to install all
-of the PyUtilib packages, as well as the third-party packages that they depend on.
+of the PyUtilib packages.
 
 
 -------
