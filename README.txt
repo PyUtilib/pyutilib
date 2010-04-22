@@ -36,12 +36,10 @@ Organization
 
 + Mailing List
 
-  * PyUtilib is managed with the Acro Project. A separate checkins mailing
-    list is managed for PyUtilib, but otherwise the main Acro mailing lists
-    are used to manage the development of this software:
-
-    - acro-developers@software.sandia.gov
-    - acro-users@software.sandia.gov
+  * pyutilib-forum@googlegroups.com
+    - The main list for help and announcements
+  * pyutilib-developers@googlegroups.com
+    - Where developers of PyUtilib discuss new features
 
 --------------------
 Third Party Software
