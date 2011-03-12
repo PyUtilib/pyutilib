@@ -3,10 +3,29 @@
 ========================
 
 -------------------------------------------------------------------------------
- Version 3.4
+ Version 3.5
 -------------------------------------------------------------------------------
 
-- Under development
+- Under development.
+
+-------------------------------------------------------------------------------
+ Version 3.4.2289
+-------------------------------------------------------------------------------
+
+- pyutilib.autotest 1.4.4
+  pyutilib.component.app 3.1.5
+  pyutilib.component.config 3.3.1
+  pyutilib.component.core 4.3
+  pyutilib.component.loader 3.3
+  pyutilib.dev 1.14
+  pyutilib.enum 1.0.6
+  pyutilib.excel 3.0.5
+  pyutilib.math 3.0.5
+  pyutilib.misc 4.5.1
+  pyutilib.pyro 3.2.1
+  pyutilib.th 4.6
+  pyutilib.virtualenv 2.3
+  pyutilib.workflow 2.2.2
 
 -------------------------------------------------------------------------------
  Version 3.3.2092
