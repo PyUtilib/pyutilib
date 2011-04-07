@@ -20,7 +20,7 @@ def read(*rnames):
 
 
 setup(name="PyUtilib",
-    version='3.6',
+    version='3.5.2320',
     maintainer='William E. Hart',
     maintainer_email='wehart@sandia.gov',
     url = 'https://software.sandia.gov/trac/pyutilib',
