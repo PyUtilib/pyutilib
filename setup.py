@@ -20,7 +20,7 @@ def read(*rnames):
 
 
 setup(name="PyUtilib",
-    version='3.11',
+    version='3.12',
     maintainer='William E. Hart',
     maintainer_email='wehart@sandia.gov',
     url = 'https://software.sandia.gov/trac/pyutilib',
@@ -44,7 +44,7 @@ setup(name="PyUtilib",
       namespace_packages=['pyutilib'],
       install_requires=[
             'pyutilib.autotest>=1.6',
-            'pyutilib.common>=3.0.6',
+            'pyutilib.common>=3.0.7',
             'pyutilib.component.app>=3.1.7', 
             'pyutilib.component.config>=3.3.3',
             'pyutilib.component.core>=4.4.1',
@@ -64,7 +64,7 @@ setup(name="PyUtilib",
             'pyutilib.svn>=1.2',
             'pyutilib.th>=5.2',
             'pyutilib.virtualenv>=2.9',
-            'pyutilib.workflow>=3.1',
+            'pyutilib.workflow>=3.1.1',
             'argparse',
             'nose',
             'unittest2'
