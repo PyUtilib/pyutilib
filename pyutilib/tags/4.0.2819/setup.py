@@ -11,6 +11,7 @@
 Setup for PyUtilib package
 """
 
+import sys
 import os
 from setuptools import setup
 
@@ -18,31 +19,7 @@ from setuptools import setup
 def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
-
-setup(name="PyUtilib",
-    version='4.0.2819',
-    maintainer='William E. Hart',
-    maintainer_email='wehart@sandia.gov',
-    url = 'https://software.sandia.gov/trac/pyutilib',
-    license = 'BSD',
-    platforms = ["any"],
-    description = 'PyUtilib: A collection of Python utilities',
-    long_description = read('README.txt'),
-    classifiers = [
-        'Development Status :: 4 - Beta',
-        'Intended Audience :: End Users/Desktop',
-        'License :: OSI Approved :: BSD License',
-        'Natural Language :: English',
-        'Operating System :: Microsoft :: Windows',
-        'Operating System :: Unix',
-        'Programming Language :: Python',
-        'Programming Language :: Unix Shell',
-        'Topic :: Scientific/Engineering :: Mathematics',
-        'Topic :: Software Development :: Libraries :: Python Modules'],
-      packages=['pyutilib'],
-      keywords=['utility'],
-      namespace_packages=['pyutilib'],
-      install_requires=[
+requires=[
             'pyutilib.autotest>=2.0',
             'pyutilib.common>=3.0.7',
             'pyutilib.component.app>=3.2', 
@@ -65,9 +42,35 @@ setup(name="PyUtilib",
             'pyutilib.th>=5.3',
             'pyutilib.virtualenv>=3.0',
             'pyutilib.workflow>=3.2',
-            'argparse',
-            'nose',
-            'unittest2'
+            'nose'
       ]
+if sys.version_info < (3,0):
+    requires.append('argparse')
+    requires.append('unittest2')
+
+setup(name="PyUtilib",
+    version='4.1',
+    maintainer='William E. Hart',
+    maintainer_email='wehart@sandia.gov',
+    url = 'https://software.sandia.gov/trac/pyutilib',
+    license = 'BSD',
+    platforms = ["any"],
+    description = 'PyUtilib: A collection of Python utilities',
+    long_description = read('README.txt'),
+    classifiers = [
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: End Users/Desktop',
+        'License :: OSI Approved :: BSD License',
+        'Natural Language :: English',
+        'Operating System :: Microsoft :: Windows',
+        'Operating System :: Unix',
+        'Programming Language :: Python',
+        'Programming Language :: Unix Shell',
+        'Topic :: Scientific/Engineering :: Mathematics',
+        'Topic :: Software Development :: Libraries :: Python Modules'],
+      packages=['pyutilib'],
+      keywords=['utility'],
+      namespace_packages=['pyutilib'],
+      install_requires=requires
       )
 
