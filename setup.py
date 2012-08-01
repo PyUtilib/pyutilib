@@ -23,12 +23,12 @@ requires=[
             'pyutilib.autotest>=2.0',
             'pyutilib.common>=3.0.7',
             'pyutilib.component.app>=3.2', 
-            'pyutilib.component.config>=3.4',
-            'pyutilib.component.core>=4.5.2',
+            'pyutilib.component.config>=3.5',
+            'pyutilib.component.core>=4.5.5',
             'pyutilib.component.doc>=1.0.1',
             'pyutilib.component.executables>=3.5',
             'pyutilib.component.loader>=3.4',
-            'pyutilib.dev>=2.0',
+            'pyutilib.dev>=2.1',
             'pyutilib.enum>=1.1',
             'pyutilib.excel>=3.1.1',
             'pyutilib.math>=3.3',
@@ -40,8 +40,8 @@ requires=[
             'pyutilib.subprocess>=3.5.2',
             'pyutilib.svn>=1.3.1',
             'pyutilib.th>=5.3',
-            'pyutilib.virtualenv>=3.0',
-            'pyutilib.workflow>=3.2',
+            'pyutilib.virtualenv>=3.1',
+            'pyutilib.workflow>=3.3',
             'nose'
       ]
 if sys.version_info < (3,0):
@@ -49,7 +49,7 @@ if sys.version_info < (3,0):
     requires.append('unittest2')
 
 setup(name="PyUtilib",
-    version='4.1',
+    version='4.2',
     maintainer='William E. Hart',
     maintainer_email='wehart@sandia.gov',
     url = 'https://software.sandia.gov/trac/pyutilib',
