@@ -23,8 +23,8 @@ requires=[
             'pyutilib.autotest>=2.0',
             'pyutilib.common>=3.0.7',
             'pyutilib.component.app>=3.2', 
-            'pyutilib.component.config>=3.5',
-            'pyutilib.component.core>=4.5.5',
+            'pyutilib.component.config>=3.5.1',
+            'pyutilib.component.core>=4.5.6',
             'pyutilib.component.doc>=1.0.1',
             'pyutilib.component.executables>=3.5',
             'pyutilib.component.loader>=3.4',
@@ -41,7 +41,7 @@ requires=[
             'pyutilib.svn>=1.3.1',
             'pyutilib.th>=5.3',
             'pyutilib.virtualenv>=3.1',
-            'pyutilib.workflow>=3.3',
+            'pyutilib.workflow>=3.3.1',
             'nose'
       ]
 if sys.version_info < (3,0):
