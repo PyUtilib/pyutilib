@@ -25,7 +25,6 @@ requires=[
             'pyutilib.component.app>=3.2', 
             'pyutilib.component.config>=3.5.1',
             'pyutilib.component.core>=4.5.6',
-            'pyutilib.component.doc>=1.0.1',
             'pyutilib.component.executables>=3.5',
             'pyutilib.component.loader>=3.4',
             'pyutilib.dev>=2.1',
@@ -44,7 +43,7 @@ requires=[
             'pyutilib.workflow>=3.3.1',
             'nose'
       ]
-if sys.version_info < (3,0):
+if sys.version_info < (2,7):
     requires.append('argparse')
     requires.append('unittest2')
 
