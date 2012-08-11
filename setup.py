@@ -40,7 +40,7 @@ requires=[
             'pyutilib.svn>=1.3.1',
             'pyutilib.th>=5.3',
             'pyutilib.virtualenv>=3.1',
-            'pyutilib.workflow>=3.3.1',
+            'pyutilib.workflow>=3.3.2',
             'nose'
       ]
 if sys.version_info < (2,7):
