@@ -3,10 +3,28 @@
 ========================
 
 -------------------------------------------------------------------------------
- Version 4.2
+ Version 4.3
 -------------------------------------------------------------------------------
 
 - Under development.
+
+-------------------------------------------------------------------------------
+ Version 4.2.2964
+-------------------------------------------------------------------------------
+
+- pyutilib.component.config 3.6
+  pyutilib.component.core 4.6
+  pyutilib.component.loader 3.4.1
+  pyutilib.dev 2.2
+  pyutilib.excel 3.1.2
+  pyutilib.math 3.3.1
+  pyutilib.misc 5.5
+  pyutilib.ply 3.0.8
+  pyutilib.pyro 3.5.3
+  pyutilib.subprocess 3.5.3
+  pyutilib.th 5.4
+  pyutilib.virtualenv 3.2
+  pyutilib.workflow 3.4
 
 -------------------------------------------------------------------------------
  Version 4.1.2918
