@@ -48,7 +48,7 @@ if sys.version_info < (2,7):
     requires.append('unittest2')
 
 setup(name="PyUtilib",
-    version='4.5',
+    version='4.4.3026',
     maintainer='William E. Hart',
     maintainer_email='wehart@sandia.gov',
     url = 'https://software.sandia.gov/trac/pyutilib',
