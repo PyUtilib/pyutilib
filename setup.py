@@ -39,7 +39,7 @@ requires=[
             'pyutilib.subprocess>=3.5.4',
             'pyutilib.svn>=1.4',
             'pyutilib.th>=5.4.1',
-            'pyutilib.virtualenv>=3.2',
+            'pyutilib.virtualenv>=3.3',
             'pyutilib.workflow>=3.4',
             'nose'
       ]
@@ -48,7 +48,7 @@ if sys.version_info < (2,7):
     requires.append('unittest2')
 
 setup(name="PyUtilib",
-    version='4.4',
+    version='4.5',
     maintainer='William E. Hart',
     maintainer_email='wehart@sandia.gov',
     url = 'https://software.sandia.gov/trac/pyutilib',
