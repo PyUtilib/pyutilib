@@ -20,7 +20,8 @@ def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 requires=[
-            'pyutilib.autotest>=2.0',
+            'pyutilib.autodist>=1.0',
+            'pyutilib.autotest>=2.0.1',
             'pyutilib.common>=3.0.7',
             'pyutilib.component.app>=3.2', 
             'pyutilib.component.config>=3.6',
@@ -37,9 +38,9 @@ requires=[
             'pyutilib.R>=3.1',
             'pyutilib.services>=3.4',
             'pyutilib.subprocess>=3.5.4',
-            'pyutilib.svn>=1.4',
+            'pyutilib.svn>=1.4.1',
             'pyutilib.th>=5.4.1',
-            'pyutilib.virtualenv>=3.3',
+            'pyutilib.virtualenv>=4.0',
             'pyutilib.workflow>=3.4',
             'nose'
       ]
@@ -48,7 +49,7 @@ if sys.version_info < (2,7):
     requires.append('unittest2')
 
 setup(name="PyUtilib",
-    version='4.5',
+    version='4.6',
     maintainer='William E. Hart',
     maintainer_email='wehart@sandia.gov',
     url = 'https://software.sandia.gov/trac/pyutilib',
