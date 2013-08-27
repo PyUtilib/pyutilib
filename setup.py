@@ -20,7 +20,6 @@ def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 requires=[
-            'pyutilib.autodist>=1.0',
             'pyutilib.autotest>=2.0.1',
             'pyutilib.common>=3.0.7',
             'pyutilib.component.app>=3.2', 
