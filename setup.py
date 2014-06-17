@@ -38,7 +38,7 @@ requires=[
             'pyutilib.services>=3.4',
             'pyutilib.subprocess>=3.6.2',
             'pyutilib.svn>=1.5.1',
-            'pyutilib.th>=5.4.1',
+            'pyutilib.th>=5.4.2',
             'pyutilib.virtualenv>=4.3.4',
             'pyutilib.workflow>=3.5.1',
             'nose'
