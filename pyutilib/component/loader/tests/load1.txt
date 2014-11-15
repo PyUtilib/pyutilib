@@ -1,0 +1,63 @@
+--------------------------------------------------------------
+ Registered Environments
+--------------------------------------------------------------
+ <default>
+ pca
+
+--------------------------------------------------------------
+ Environment Stack
+--------------------------------------------------------------
+ Level=1  name=<default>
+ Level=2  name=pca
+
+--------------------------------------------------------------
+ Interfaces Declared
+--------------------------------------------------------------
+ IConfiguration
+ IEnvironmentConfig
+ IExternalExecutable
+ IFileOption
+ IIgnorePluginWhenLoading
+ IOption
+ IOptionDataProvider
+ IPluginLoadPath
+ IPluginLoader
+ ITempfileManager
+ IUpdatedOptionsAction
+
+--------------------------------------------------------------
+ Interfaces Declared by Namespace
+--------------------------------------------------------------
+ pca
+     IConfiguration
+     IEnvironmentConfig
+     IExternalExecutable
+     IFileOption
+     IIgnorePluginWhenLoading
+     IOption
+     IOptionDataProvider
+     IPluginLoadPath
+     IPluginLoader
+     ITempfileManager
+     IUpdatedOptionsAction
+
+--------------------------------------------------------------
+ Services for Registered Environments
+--------------------------------------------------------------
+ Services for Environment '<default>'
+   None
+
+ Services for Environment 'pca'
+   <BoolOption [Services] 'Configuration_ConfigParser'>
+   <BoolOption [Services] 'ImportLoader'>
+   <BoolOption [Services] 'TempfileManager'>
+   <Option [globals] 'bar'>
+   <Option [globals] 'tempdir'>
+   <Plugin Configuration_ConfigParser>
+   <Plugin IgnorePluginPlugins>
+   <Plugin ImportLoader>
+   <Plugin OptionData 'Plugin.4'>
+   <Plugin TempfileManagerPlugin 'TempfileManager'>
+
+--------------------------------------------------------------
+

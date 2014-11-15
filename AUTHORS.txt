@@ -1,2 +1,7 @@
-William Hart - wehart@sandia.gov
+William Hart
   lead developer
+
+John Siirola
+    contributor
+Kevin Hunter
+    contributor

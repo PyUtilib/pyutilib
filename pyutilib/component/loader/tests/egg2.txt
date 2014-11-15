@@ -1,0 +1,77 @@
+--------------------------------------------------------------
+ Registered Environments
+--------------------------------------------------------------
+ <default>
+ pca
+ testing
+
+--------------------------------------------------------------
+ Environment Stack
+--------------------------------------------------------------
+ Level=1  name=<default>
+ Level=2  name=pca
+ Level=3  name=testing
+
+--------------------------------------------------------------
+ Interfaces Declared
+--------------------------------------------------------------
+ IConfiguration
+ IEnvironmentConfig
+ IExternalExecutable
+ IFileOption
+ IIgnorePluginWhenLoading
+ IOption
+ IOptionDataProvider
+ IPackage1Util
+ IPackage3Util
+ IPluginLoadPath
+ IPluginLoader
+ ITempfileManager
+ IUpdatedOptionsAction
+
+--------------------------------------------------------------
+ Interfaces Declared by Namespace
+--------------------------------------------------------------
+ pca
+     IConfiguration
+     IEnvironmentConfig
+     IExternalExecutable
+     IFileOption
+     IIgnorePluginWhenLoading
+     IOption
+     IOptionDataProvider
+     IPluginLoadPath
+     IPluginLoader
+     ITempfileManager
+     IUpdatedOptionsAction
+
+ testing
+     IPackage1Util
+     IPackage3Util
+
+--------------------------------------------------------------
+ Services for Registered Environments
+--------------------------------------------------------------
+ Services for Environment '<default>'
+   None
+
+ Services for Environment 'pca'
+   <BoolOption [Services] 'Configuration_ConfigParser'>
+   <BoolOption [Services] 'EggLoader.project1'>
+   <BoolOption [Services] 'ImportLoader'>
+   <BoolOption [Services] 'TempfileManager'>
+   <Option [globals] 'tempdir'>
+   <Plugin Configuration_ConfigParser>
+   <Plugin EggLoader 'EggLoader.project1'>
+   <Plugin IgnorePluginPlugins>
+   <Plugin ImportLoader>
+   <Plugin OptionData 'Plugin.4'>
+   <Plugin TempfileManagerPlugin 'TempfileManager'>
+
+ Services for Environment 'testing'
+   <Plugin Package1Util>
+   <Plugin Package3Util 'Plugin.15'>
+   <Plugin Package3Util 'Plugin.16'>
+
+--------------------------------------------------------------
+

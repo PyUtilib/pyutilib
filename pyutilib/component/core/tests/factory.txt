@@ -1,0 +1,78 @@
+--------------------------------------------------------------
+ Registered Environments
+--------------------------------------------------------------
+ <default>
+ env4
+ p6
+ pca
+ testing
+
+--------------------------------------------------------------
+ Environment Stack
+--------------------------------------------------------------
+ Level=1  name=<default>
+ Level=2  name=testing
+
+--------------------------------------------------------------
+ Interfaces Declared
+--------------------------------------------------------------
+ IConfiguration
+ IDebug1
+ IDebug2
+ IDebug3
+ IDebug4
+ IEnvironmentConfig
+ IExternalExecutable
+ IFileOption
+ IIgnorePluginWhenLoading
+ IOption
+ IOptionDataProvider
+ IPluginLoadPath
+ IPluginLoader
+ ITempfileManager
+ IUpdatedOptionsAction
+
+--------------------------------------------------------------
+ Interfaces Declared by Namespace
+--------------------------------------------------------------
+ pca
+     IConfiguration
+     IEnvironmentConfig
+     IExternalExecutable
+     IFileOption
+     IIgnorePluginWhenLoading
+     IOption
+     IOptionDataProvider
+     IPluginLoadPath
+     IPluginLoader
+     ITempfileManager
+     IUpdatedOptionsAction
+
+ testing
+     IDebug1
+     IDebug2
+     IDebug3
+     IDebug4
+
+--------------------------------------------------------------
+ Services for Registered Environments
+--------------------------------------------------------------
+ Services for Environment '<default>'
+   None
+
+ Services for Environment 'env4'
+   None
+
+ Services for Environment 'p6'
+   None
+
+ Services for Environment 'pca'
+   None
+
+ Services for Environment 'testing'
+   <Plugin Plugin5_factory 'p5'>  (2)
+   <Plugin Plugin6_factory 'env4'>  (3)
+   <Plugin Plugin6_factory 'p6'>  (1)
+
+--------------------------------------------------------------
+
