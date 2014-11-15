@@ -1,0 +1,139 @@
+%\newfloat{example}{htbp}{lop}
+%\floatname{example}{Example}
+
+%\newcommand{\code}[1]{\textmd{\texttt{#1}}}
+%\newcommand{\todo}[1]{\textbf{\textit{TODO: #1}}}
+%\newcommand{\comment}[1]{\marginpar{\textit{#1}}}
+
+%\newenvironment{notebox}%
+  %{\begin{table}\begin{center}\begin{Sbox}\begin{minipage}{.8\textwidth}{\bf NOTE:}}
+  %{\end{minipage}\end{Sbox}\fbox{\TheSbox}\end{center}\end{table}}
+%
+%\newenvironment{Xnotebox}%
+  %{\begin{table}\begin{center}\begin{svgraybox}\begin{minipage}{.8\textwidth}{\bf NOTE:}}
+  %{\end{minipage}\end{svgraybox}\end{center}\end{table}}
+
+\lstnewenvironment{otherlisting}%
+  {\lstset{
+    aboveskip=0.3em,
+    belowskip=0.3em,
+    xleftmargin=1.5em,
+    xrightmargin=1.5em,
+    showspaces=false,
+    showstringspaces=false,
+    columns=fullflexible,
+    frame=single,
+    basicstyle=\footnotesize\ttfamily ,
+    backgroundcolor=\color{white}
+    }}
+  {}
+
+\lstnewenvironment{qlisting}%
+  {\lstset{
+    aboveskip=0.3em,
+    belowskip=0.3em,
+    xleftmargin=1.5em,
+    xrightmargin=1.5em,
+    showspaces=false,
+    showstringspaces=false,
+    columns=fullflexible,
+    frame=single,
+    basicstyle=\footnotesize\ttfamily ,
+    backgroundcolor=\color{white},
+    language=Python
+    }}
+  {}
+
+\lstnewenvironment{qautobreaklisting}%
+  {\lstset{
+    aboveskip=0.3em,
+    belowskip=0.3em,
+    xleftmargin=1.5em,
+    xrightmargin=1.5em,
+    showspaces=false,
+    showstringspaces=false,
+    columns=fullflexible,
+    frame=single,
+    breaklines=true,
+    breakatwhitespace=true,
+    prebreak={\textbackslash},
+    basicstyle=\footnotesize\ttfamily ,
+    backgroundcolor=\color{white},
+    language=Python
+    }}
+  {}
+
+
+%
+% Syntax: \listing{<filename>}{<anchor>}{<firstline>}{<lastline>}
+%
+% NOTE: the firstline and lastline data is automatically generated.  For example:
+%
+%   \listing{foo}{bar}
+%
+% is initialized to find the 'bar' anchor in file 'foo'.  Additionally, if we have
+%
+%   \listing{foo}{}
+%
+% then the entire file 'foo' is include.
+%
+\newcommand{\listing}[4]{\lstinputlisting[firstline=#3,lastline=#4,
+    aboveskip=0.3em,
+    belowskip=0.3em,
+    xleftmargin=1.5em,
+    xrightmargin=1.5em,
+    showspaces=false,
+    showstringspaces=false,
+    columns=fullflexible,
+    frame=single,
+    basicstyle=\footnotesize\ttfamily ,
+    backgroundcolor=\color{white},
+    language=Python
+    ]{#1}}
+
+\newcommand{\autobreaklisting}[4]{\lstinputlisting[firstline=#3,lastline=#4,
+    aboveskip=0.3em,
+    belowskip=0.3em,
+    xleftmargin=1.5em,
+    xrightmargin=1.5em,
+    showspaces=false,
+    showstringspaces=false,
+    columns=fullflexible,
+    frame=single,
+    breaklines=true,
+    breakatwhitespace=true,
+    prebreak={\textbackslash},
+    basicstyle=\footnotesize\ttfamily ,
+    backgroundcolor=\color{white},
+    language=Python
+    ]{#1}}
+
+
+\newcommand{\scriptsizelisting}[4]{\lstinputlisting[firstline=#3,lastline=#4,
+    aboveskip=0.3em,
+    belowskip=0.3em,
+    xleftmargin=1.5em,
+    xrightmargin=1.5em,
+    showspaces=false,
+    showstringspaces=false,
+    columns=fullflexible,
+    frame=single,
+    basicstyle=\scriptsize\ttfamily ,
+    backgroundcolor=\color{white},
+    language=Python
+    ]{#1}}
+
+\newcommand{\tinylisting}[4]{\lstinputlisting[firstline=#3,lastline=#4,
+    aboveskip=0.3em,
+    belowskip=0.3em,
+    xleftmargin=1.5em,
+    xrightmargin=1.5em,
+    showspaces=false,
+    showstringspaces=false,
+    columns=fullflexible,
+    frame=single,
+    basicstyle=\tiny\ttfamily ,
+    backgroundcolor=\color{white},
+    language=Python
+    ]{#1}}
+

@@ -1,0 +1,2 @@
+Running... /bin/ls /Users/wehart/home/mac/src/python/src/pyutilib.workflow/doc/workflow/examples/dummy
+list: ['bar', 'foo']
