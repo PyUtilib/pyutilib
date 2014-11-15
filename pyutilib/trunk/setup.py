@@ -16,35 +16,31 @@ import os
 from setuptools import setup
 
 
+def _find_packages(path):
+    """
+    Generate a list of nested packages
+    """
+    pkg_list=[]
+    if not os.path.exists(path):
+        return []
+    if not os.path.exists(path+os.sep+"__init__.py"):
+        return []
+    else:
+        pkg_list.append(path)
+    for root, dirs, files in os.walk(path, topdown=True):
+        if root in pkg_list and "__init__.py" in files:
+            for name in dirs:
+                if os.path.exists(root+os.sep+name+os.sep+"__init__.py"):
+                    pkg_list.append(root+os.sep+name)
+    return [pkg for pkg in map(lambda x:x.replace(os.sep,"."), pkg_list)]
+
 def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
-requires=[
-            'pyutilib.autotest>=2.0.1',
-            'pyutilib.common>=3.0.7',
-            'pyutilib.component.app>=3.2', 
-            'pyutilib.component.config>=3.8',
-            'pyutilib.component.core>=4.6.4',
-            'pyutilib.component.executables>=3.5',
-            'pyutilib.component.loader>=3.4.1',
-            'pyutilib.dev>=2.5',
-            'pyutilib.enum>=1.2',
-            'pyutilib.excel>=3.1.2',
-            'pyutilib.math>=3.3.1',
-            'pyutilib.misc>=5.9.1',
-            'pyutilib.ply>=3.0.8',
-            'pyutilib.pyro>=3.6.1',
-            'pyutilib.R>=3.1',
-            'pyutilib.services>=3.4',
-            'pyutilib.subprocess>=3.6.2',
-            'pyutilib.svn>=1.5.1',
-            'pyutilib.th>=5.4.2',
-            'pyutilib.virtualenv>=4.3.4',
-            'pyutilib.workflow>=3.5.1',
-            'nose',
-
+packages = _find_packages('pyutilib')
+requires=[  'nose',
             'six'
-      ]
+            ]
 if sys.version_info < (2,7):
     requires.append('argparse')
     requires.append('unittest2')
@@ -69,7 +65,7 @@ setup(name="PyUtilib",
         'Programming Language :: Unix Shell',
         'Topic :: Scientific/Engineering :: Mathematics',
         'Topic :: Software Development :: Libraries :: Python Modules'],
-      packages=['pyutilib'],
+      packages=packages,
       keywords=['utility'],
       namespace_packages=['pyutilib', 'pyutilib.component'],
       install_requires=requires
