@@ -45,6 +45,11 @@ if sys.version_info < (2,7):
     requires.append('argparse')
     requires.append('unittest2')
 
+extra = {}
+if sys.version_info >= (3,):
+    extra['use_2to3'] = True
+    extra['convert_2to3_doctests'] = ['README.txt']
+
 setup(name="PyUtilib",
     version='5.0',
     maintainer='William E. Hart',
@@ -68,6 +73,27 @@ setup(name="PyUtilib",
       packages=packages,
       keywords=['utility'],
       namespace_packages=['pyutilib', 'pyutilib.component'],
-      install_requires=requires
+      install_requires=requires,
+      entry_points="""
+        [pyutilib.component]
+        component.app = pyutilib.component.app
+        component.config = pyutilib.component.config
+        component.executables = pyutilib.component.executables
+        component.loader = pyutilib.component.loader
+        [pyutilib.th]
+        nose.testdata = pyutilib.th.nose_testdata:TestData
+        nose.forcedgc = pyutilib.th.nose_gc:ForcedGC
+        nose.timeout = pyutilib.th.nose_timeout:TestTimeout
+        [console_scripts]
+        test.pyutilib = pyutilib.dev.runtests:runPyUtilibTests
+        lbin = pyutilib.dev.lbin:main
+        lpython = pyutilib.dev.lpython:main
+        pypi_downloads = pyutilib.dev.pypi_downloads:main
+        replaceCopyright = pyutilib.dev.replaceCopyright:main
+        checkCopyright = pyutilib.dev.checkCopyright:main
+        pyutilib_test_driver = pyutilib.autotest.driver:main
+        dispatch_srvr=pyutilib.pyro.dispatch_srvr:main
+      """,
+      **extra
       )
 
