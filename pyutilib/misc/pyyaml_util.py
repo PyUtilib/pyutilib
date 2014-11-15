@@ -220,7 +220,6 @@ def compare_repn(baseline, output, tolerance=0.0, prefix="<root>", exact=True, u
         i=0
         msg = ''
         while j < len(baseline) and i < len(output):
-            compare_repn(baseline[j], output[i], tolerance=tolerance, prefix=prefix+"["+str(i)+"]", exact=exact, using_yaml=using_yaml)
             try:
                 compare_repn(baseline[j], output[i], tolerance=tolerance, prefix=prefix+"["+str(i)+"]", exact=exact, using_yaml=using_yaml)
                 j += 1
