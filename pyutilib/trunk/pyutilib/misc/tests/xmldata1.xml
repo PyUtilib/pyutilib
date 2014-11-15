@@ -1,0 +1,10 @@
+<root>
+<a>
+    <b value="1"/>
+    <c value="1.3"/>
+</a>
+<d>
+    <e>the rain in spain</e>
+    <f>is mostly on the plain</f>
+</d>
+</root>

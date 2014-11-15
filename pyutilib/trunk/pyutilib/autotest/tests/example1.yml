@@ -1,0 +1,88 @@
+driver: default
+
+solvers:
+    s1:
+        soption1: s1_opt1
+    s2:
+        name: solver2
+    s3:
+        soption1: s3_opt1
+
+problems:
+    p1:
+        option1: p1_opt1
+        option2: p1_opt2
+    p2:
+        option1: p2_opt1
+    p3:
+        option1: p3_opt1
+        option2: p3_opt2
+
+suites:
+
+    suite1:
+        categories:
+            - x_nightly
+            - x_smoke
+            - x_suite1
+        solvers:
+            s1:
+            s2:
+        problems:
+            p1:
+
+    suite1a:
+        categories:
+            - x_nightly
+            - x_suite1
+        solvers:
+            s1:
+            s2:
+        problems:
+            p2:
+
+    suite2:
+        categories:
+            - x_nightly
+            - x_smoke
+            - x_suite2
+        solvers:
+            s1:
+              soption1: s1_option1
+            s3:
+        problems:
+            p1:
+            p2:
+              option2: p2_option2
+            p3:
+              option2: p3_option2
+
+    suite3:
+        categories:
+            - x_nightly
+            - x_smoke
+            - x_suite3
+        solvers:
+            sx1:
+                solver: s1
+                soption1: s1_option1
+            sx3:
+                solver: s3
+        problems:
+            px1:
+                problem: p1
+            px2:
+                problem: p2
+                option2: p2_option2
+            px3:
+                problem: p3
+                option2: p3_option2
+        tests:
+            - 
+              solver: sx1
+              problem: px1
+            - 
+              solver: sx3
+              problem: px2
+
+

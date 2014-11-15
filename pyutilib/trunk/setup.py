@@ -41,14 +41,16 @@ requires=[
             'pyutilib.th>=5.4.2',
             'pyutilib.virtualenv>=4.3.4',
             'pyutilib.workflow>=3.5.1',
-            'nose'
+            'nose',
+
+            'six'
       ]
 if sys.version_info < (2,7):
     requires.append('argparse')
     requires.append('unittest2')
 
 setup(name="PyUtilib",
-    version='4.8',
+    version='5.0',
     maintainer='William E. Hart',
     maintainer_email='wehart@sandia.gov',
     url = 'https://software.sandia.gov/trac/pyutilib',
@@ -69,7 +71,7 @@ setup(name="PyUtilib",
         'Topic :: Software Development :: Libraries :: Python Modules'],
       packages=['pyutilib'],
       keywords=['utility'],
-      namespace_packages=['pyutilib'],
+      namespace_packages=['pyutilib', 'pyutilib.component'],
       install_requires=requires
       )
 

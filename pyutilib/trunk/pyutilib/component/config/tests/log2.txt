@@ -1,0 +1,7 @@
+[Services] Configuration_ConfigParser = True
+[globals] a = XX 1
+[globals] b = /dev/null
+[globals] c = XX 1,2,3
+[globals] yy = foo
+[globals] zz = 4.5
+
