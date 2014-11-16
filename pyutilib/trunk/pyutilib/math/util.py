@@ -9,15 +9,11 @@
 
 __all__ = ['approx_equal', 'as_number', 'isint', 'argmax', 'argmin', 'mean', 'median', 'factorial', 'perm']
 
-try:
-    from itertools import izip
-except:
-    # 3.x compatibility
-    izip = zip
-    xrange = range
-    basestring = unicode = str
 import math
 import sys
+import six
+from six.moves import zip
+from six.moves import xrange
 
 
 def approx_equal(A, B, abstol, reltol):
@@ -41,7 +37,7 @@ try:
     def as_number(value):
         if type(value) in [int, float, long]:
             return value
-        if isinstance(value,basestring):
+        if isinstance(value,six.string_types):
             try:
                 tmp = int(value)
                 return tmp
@@ -62,7 +58,7 @@ except:
     def as_number(value):
         if type(value) in [int, float]:
             return value
-        if isinstance(value,basestring):
+        if isinstance(value,six.string_types):
             try:
                 tmp = int(value)
                 return tmp
@@ -85,7 +81,7 @@ def isint(arg):
     if type(arg) is float:
         tmp = int(arg)
         return (tmp == arg)
-    if isinstance(arg,basestring):
+    if isinstance(arg,six.string_types):
         try:
             num=float(arg)
             tmp = int(num)
