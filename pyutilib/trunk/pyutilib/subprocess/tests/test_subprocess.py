@@ -20,6 +20,7 @@ except:
     is_pypy = False
 
 pyutilib.services.register_executable("memmon")
+global_memmon = pyutilib.services.registered_executable('memmon')
 pyutilib.services.register_executable("valgrind")
 global_valgrind = pyutilib.services.registered_executable('valgrind')
 
@@ -50,7 +51,7 @@ class Test(unittest.TestCase):
 
     @unittest.skipIf(subprocess.mswindows, "Cannot test the use of 'memmon' on MS Windows")
     @unittest.skipIf(sys.platform == 'darwin', "Cannot test the use of 'memmon' on Darwin")
-    @unittest.skipIf(pyutilib.services.registered_executable('memmon') is None, "The 'memmon' executable is not available.")
+    @unittest.skipIf(global_memmon is None, "The 'memmon' executable is not available.")
     def test_memmon(self):
         pyutilib.services.register_executable('ls')
         pyutilib.subprocess.run(pyutilib.services.registered_executable('ls').get_path()+' *.py', memmon=True, outfile=currdir+'ls.out')
@@ -66,10 +67,8 @@ class Test(unittest.TestCase):
         os.remove(currdir+'ls.out')
 
     @unittest.skipIf(subprocess.mswindows, "Cannot test the use of 'valgrind' on MS Windows")
-    @unittest.skipIf(pyutilib.services.registered_executable('valgrind') is None, "The 'valgrind' executable is not available.")
+    @unittest.skipIf(global_valgrind is None, "The 'valgrind' executable is not available.")
     def test_valgrind(self):
-        print("HERE "+str(global_valgrind))
-        print("HERE "+str(pyutilib.services.registered_executable('valgrind')))
         pyutilib.services.register_executable('ls')
         pyutilib.subprocess.run(pyutilib.services.registered_executable('ls').get_path()+' *.py', valgrind=True, outfile=currdir+'valgrind.out')
         INPUT = open(currdir+'valgrind.out','r')
