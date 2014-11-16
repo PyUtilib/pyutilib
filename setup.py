@@ -46,9 +46,9 @@ if sys.version_info < (2,7):
     requires.append('unittest2')
 
 extra = {}
-if sys.version_info >= (3,):
-    extra['use_2to3'] = True
-    extra['convert_2to3_doctests'] = ['README.txt']
+#if sys.version_info >= (3,):
+    #extra['use_2to3'] = True
+    #extra['convert_2to3_doctests'] = ['README.txt']
 
 setup(name="PyUtilib",
     version='5.0',
