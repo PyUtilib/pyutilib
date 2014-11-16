@@ -48,13 +48,13 @@ def main():
             # Print new copyright
             #
             for crline in new_cr:
-                print >>OUTPUT, crline,
+                OUTPUT.write(crline)
             i=i+1
         if i > len(old_cr):
             #
             # Print lines from the old file
             #
-            print >>OUTPUT, line,
+            OUTPUT.write(line)
         else:
             #
             # Keep checking that the copyright is what is expected
