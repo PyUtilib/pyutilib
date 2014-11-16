@@ -67,6 +67,7 @@ class Test(unittest.TestCase):
     @unittest.skipIf(subprocess.mswindows, "Cannot test the use of 'valgrind' on MS Windows")
     @unittest.skipIf(pyutilib.services.registered_executable('valgrind') is None, "The 'valgrind' executable is not available.")
     def test_valgrind(self):
+        print("HERE "+str(pyutilib.services.registered_executable('valgrind')))
         pyutilib.services.register_executable('ls')
         pyutilib.subprocess.run(pyutilib.services.registered_executable('ls').get_path()+' *.py', valgrind=True, outfile=currdir+'valgrind.out')
         INPUT = open(currdir+'valgrind.out','r')
