@@ -154,7 +154,14 @@ def runPyUtilibTests():
         outfile = None
     if _options.dir is None:
         # the /src directory (for development installations)
-        os.chdir( os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))) )
+        dir_ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) 
+        #
+        # This is needed if 2to3 is run
+        #
+        #print("HERE x %s" % dir_)
+        #if os.path.basename(dir_) == 'build':
+        #    dir_ = os.path.dirname(os.path.dirname(dir_))
+        os.chdir(dir_)
     else:
         if os.path.exists(_options.dir):
             os.chdir( _options.dir )
