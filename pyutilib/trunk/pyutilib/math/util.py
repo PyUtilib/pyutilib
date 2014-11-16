@@ -93,11 +93,11 @@ def isint(arg):
 
 def argmax(array):
     """ Return the index to the maximum element of an array """
-    return max(izip(array, xrange(len(array))))[1]
+    return max(zip(array, xrange(len(array))))[1]
 
 def argmin(array):
     """ Return the index to the maximum element of an array """
-    return min(izip(array, xrange(len(array))))[1]
+    return min(zip(array, xrange(len(array))))[1]
 
 def mean(mylist):
     """
