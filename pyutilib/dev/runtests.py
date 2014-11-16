@@ -62,17 +62,18 @@ def run(package, argv):
     else:
         coverage_flags = []
 
+    cwd = os.path.dirname(os.getcwd())
+
     dirs=set()
     if len(args[1:]) == 0:
         dirs.add( os.getcwd() )
     for arg in args[1:]:
-        for dir in glob.glob(arg):
-            dirs.add(dir)
+        for dir_ in glob.glob(arg):
+            dirs.add(dir_)
     if len(dirs) == 0:
         print("No valid test directory has been specified!")
         return
 
-    cwd = os.path.dirname(os.getcwd())
     if platform == 'win':
         srcdirs=[]
         for dir in glob.glob('*'):
@@ -147,29 +148,33 @@ def runPyUtilibTests():
 
     _options, args = parser.parse_args(sys.argv)
 
-    #if len(args) == 1:
-        #parser.print_help()
-        #sys.exit(1)
-
     if _options.output:
         outfile = os.path.abspath(_options.output)
     else:
         outfile = None
     if _options.dir is None:
-        os.chdir( os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) )
+        # the /src directory (for development installations)
+        os.chdir( os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))) )
     else:
-        os.chdir( _options.dir )
+        if os.path.exists(_options.dir):
+            os.chdir( _options.dir )
 
     print( "Running tests in directory %s" % os.getcwd())
     if _options.all_cats is True:
         _options.cats = []
+    elif os.environ.get('PYUTILIB_UNITTEST_CATEGORIES',''):
+        _options.cats = [x.strip() for x in
+                         os.environ['PYUTILIB_UNITTEST_CATEGORIES'].split(',')
+                         if x.strip()]
     elif len(_options.cats) == 0:
         _options.cats = ['smoke']
-    elif 'all' in _options.cats:
+    if 'all' in _options.cats:
         _options.cats = []
     if len(_options.cats) > 0:
         os.environ['PYUTILIB_UNITTEST_CATEGORIES'] = ",".join(_options.cats)
         print(" ... for test categories: %s" % os.environ['PYUTILIB_UNITTEST_CATEGORIES'])
+    elif 'PYUTILIB_UNITTEST_CATEGORIES' in os.environ:
+        del os.environ['PYUTILIB_UNITTEST_CATEGORIES']
     options=[]
     if _options.coverage:
         options.append('--coverage')
@@ -182,13 +187,21 @@ def runPyUtilibTests():
         dirs=['pyutilib*']
     else:
         dirs=[]
-        for dir in args:
+        for dir in args[1:]:
             if dir.startswith('-'):
                 options.append(dir)
-            elif dir.startswith('pyutilib'):
-                dirs.append(dir)
+            if dir.startswith('pyutilib'):
+                if os.path.exists(dir):
+                    dirs.append(dir)
+                elif '.' in dir:
+                    dirs.append(os.path.join('pyutilib','pyutilib',dir.split('.')[1]))
+                else:
+                    dirs.append(os.path.join('pyutilib','pyutilib'))
             else:
-                dirs.append('pyutilib.'+dir)
+                if os.path.exists('pyutilib.'+dir):
+                    dirs.append('pyutilib.'+dir)
+                else:
+                    dirs.append(os.path.join('pyutilib', 'pyutilib', dir))
         if len(dirs) == 0:
             dirs = ['pyutilib*']
     pyutilib.dev.runtests.run('pyutilib',['runtests']+options+['-p','pyutilib']+dirs)
