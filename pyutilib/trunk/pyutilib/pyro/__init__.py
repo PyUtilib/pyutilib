@@ -13,18 +13,39 @@ Python modules that use Pyro to manage a generic task queue.
 These modules were adapted from Pyro's distributed2 example.
 """
 
+# For now, default to using Pyro3 if available
+# otherwise, check for Pyro4
+Pyro = None
+using_pyro3 = False
+using_pyro4 = False
 try:
     import Pyro
-    pyro_available=True
+    import Pyro.core
+    import Pyro.naming
+    using_pyro3 = True
+    using_pyro4 = False
 except:
-    pyro_available=False
+    try:
+        import Pyro4
+        #Pyro4.config.SERIALIZERS_ACCEPTED.add('pickle')
+        #Pyro4.config.SERIALIZER = 'pickle'
+        Pyro = Pyro4
+        using_pyro3 = False
+        using_pyro4 = True
+    except:
+        Pyro = None
+        using_pyro3 = False
+        using_pyro4 = False
 
-if pyro_available:
-    from task import *
-    from client import *
-    from worker import *
-    from dispatcher import *
-    import util
+from pyutilib.pyro.util import *
+from pyutilib.pyro.task import *
+from pyutilib.pyro.client import *
+from pyutilib.pyro.worker import *
+from pyutilib.pyro.dispatcher import *
+
+#
+# Pyro3 License
+#
 
 #
 #Pyro Software License (MIT license):
@@ -54,3 +75,36 @@ if pyro_available:
 #http://www.opensource.org/licenses/mit-license.php (it strongly resembles
 #the modified BSD license).
 #
+
+
+#
+# Pyro4 License
+#
+
+#
+#Pyro - Python Remote Objects
+#Software License, copyright, and disclaimer
+#
+#  Pyro is Copyright (c) by Irmen de Jong (irmen@razorvine.net).
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to deal
+#  in the Software without restriction, including without limitation the rights
+#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#  copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#  SOFTWARE.
+#
+#
+#This is the "MIT Software License" which is OSI-certified, and GPL-compatible.
+#See http://www.opensource.org/licenses/mit-license.php
