@@ -62,7 +62,7 @@ class Configuration_ConfigParser(ManagedSingletonPlugin):
         for (section,option,value) in config:
             if not parser.has_section(section):
                 parser.add_section(section)
-            parser.set(section,option,str(value))
+            parser.set(section, option, str(value))
         OUTPUT=open(filename,"w")
         if not header is None:
             for line in header.split("\n"):
