@@ -25,13 +25,12 @@ class SimpleApplication(object):
             self.filename = 'config.ini'
         else:
             self.filename = filename
-        self.env = pyutilib.component.core.PluginEnvironment(name)
-        pyutilib.component.core.PluginGlobals.push_env(self.env)
+        self.env = pyutilib.component.core.PluginGlobals.add_env(self.name)
         self.config = pyutilib.component.config.Configuration(filename)
         self._env_config = pyutilib.component.config.EnvironmentConfig(name)
         self._env_config.options.path = os.getcwd()
         self.logger = pyutilib.component.config.LoggingConfig(name)
-        self._egg_plugin = pyutilib.component.core.PluginFactory("EggLoader",namespace=name,env='pca')
+        self._egg_plugin = pyutilib.component.core.PluginFactory("EggLoader", namespace=name, env='pca')
 
     def configure(self, filename):
         """Load a configuration file, and update options"""

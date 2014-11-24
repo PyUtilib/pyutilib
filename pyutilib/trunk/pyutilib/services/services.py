@@ -41,10 +41,13 @@ If this executable has been registered, then do not reregister it
 def register_executable(name, validate=None):
     ep = ExtensionPoint(IExternalExecutable)
     if len(ep(name, all=True)) == 0:
-        ExternalExecutable(name=name, validate=validate)
+        PluginGlobals.add_env("pca")
+        PluginGlobals._executables.append( ExternalExecutable(name=name, validate=validate) )
+        PluginGlobals.pop_env()
     else:
         #
         # If the executable is being 'registered', then we search for it
         # again, since the user environment may have changed.
         #
         list(ep(name,all=True))[0].find_executable()
+

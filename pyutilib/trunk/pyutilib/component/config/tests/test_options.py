@@ -2,7 +2,6 @@
 import os
 import sys
 from os.path import abspath, dirname
-sys.path.insert(0, dirname(dirname(abspath(__file__)))+os.sep+".."+os.sep+"..")
 currdir = dirname(abspath(__file__))+os.sep
 
 import unittest
@@ -11,13 +10,42 @@ from pyutilib.component.core import *
 from pyutilib.component.config import *
 
 
+PluginGlobals.add_env("testing.options")
+
+class IDummyOption(Interface):
+    """An interface that supports the initialization of the directory for
+    options that specify files.  This is needed to correctly initialize
+    relative paths for files."""
+
+
+class DummyOption1(Option):
+    """A test class that converts option data into float values."""
+
+    implements(IDummyOption)
+
+    def convert(self, value, default):
+        """Conversion routine."""
+        val = value[-1]
+        if not val:
+            return 0
+        try:
+            return float(val)
+        except ValueError:
+            raise OptionError('Expected float, got %s' % repr(value))
+        except TypeError:
+            raise OptionError('Expected string or float type, got %s' % repr(value))
+
+PluginGlobals.pop_env()
+
+
 class TestOption(unittest.TestCase):
 
     def setUp(self):
-        PluginGlobals.push_env(PluginEnvironment())
+        PluginGlobals.add_env("testing.options")
+        PluginGlobals.clear_global_data()
 
     def tearDown(self):
-        PluginGlobals.clear()
+        PluginGlobals.remove_env("testing.options", cleanup=True)
 
     def test_init1(self):
         """Test Option construction"""
@@ -61,16 +89,16 @@ class TestOption(unittest.TestCase):
     def test_set_get1(self):
         """Test set/get values"""
         class TMP_set_get1(Plugin):
-            ep = ExtensionPoint(IOption)
-            declare_option("foo", local_name="opt", default=4)
+            ep = ExtensionPoint(IDummyOption)
+            declare_option("foo", local_name="opt", default=4, cls=DummyOption1)
         obj = TMP_set_get1()
+        self.assertTrue(obj.opt == 4)
         self.assertTrue(obj.opt/2 == 2)
         obj.opt = 6
         self.assertTrue(obj.opt/2 == 3)
         #
         # Verify that the TMP instance has value 6
         #
-        #PluginGlobals.pprint()
         for pt in obj.ep:
             self.assertEqual(pt.get_value(),6)
 

@@ -8,7 +8,7 @@
 #  _________________________________________________________________________
 
 import pyutilib.component.core
-pyutilib.component.core.PluginGlobals.push_env("pyutilib.workflow")
+pyutilib.component.core.PluginGlobals.add_env("pyutilib.workflow")
 
 from pyutilib.workflow.globals import *
 from pyutilib.workflow.connector import *

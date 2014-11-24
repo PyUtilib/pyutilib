@@ -20,7 +20,7 @@ class IExternalExecutable(Interface):
 
 class ExternalExecutable(Plugin):
 
-    implements(IExternalExecutable)
+    implements(IExternalExecutable, service=True)
 
     def __init__(self,**kwds):
         if 'doc' in kwds:

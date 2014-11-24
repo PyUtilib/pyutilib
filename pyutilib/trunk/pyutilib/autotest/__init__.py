@@ -11,7 +11,7 @@
 __test__=False
 
 import pyutilib.component.core
-pyutilib.component.core.PluginGlobals.push_env('pyutilib.autotest')
+pyutilib.component.core.PluginGlobals.add_env('pyutilib.autotest')
 
 from pyutilib.autotest.plugins import *
 import pyutilib.autotest.yaml_plugin

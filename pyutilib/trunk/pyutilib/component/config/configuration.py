@@ -122,7 +122,7 @@ class Configuration(Plugin):
                 flag = False
                 for plugin in plugins:
                     if plugin.matches_name(option):
-                        flag = plugin.load(option,self.data[sec][option]) or flag
+                        flag = plugin.load(option, self.data[sec][option]) or flag
                 if not flag:
                     raise ConfigurationError("Problem loading file %r. Option %r in section %r is not recognized!" % (self.filename, option,sec))
         #
@@ -146,20 +146,28 @@ class Configuration(Plugin):
         self.section.sort()
         flag=False
         header = "\nNote: the following configuration options have been omitted because their\nvalue is 'None':\n"
-        for key in self.section:
-            options = list(self.data[key].keys())
+        for sec in self.section:
+            plugins = []
+            for plugin in self.option_plugins:
+                if plugin.matches_section(sec):
+                    plugins.append(plugin)
+            #
+            options = list(self.data[sec].keys())
             options.sort()
-            for name in options:
-                if not self.data[key][name] is None:
-                    self.config.append( (key,name,self.data[key][name]) )
-                else:
-                    flag=True
-                    header = header + "  section=%r option=%r\n" % (key,name)
+            for option in options:
+                for plugin in plugins:
+                    if plugin.matches_name(option):
+                        if not self.data[sec][option] is None:
+                            val = self.data[sec][option]
+                            self.config.append( (sec,option,val) )
+                        else:
+                            flag=True
+                            header = header + "  section=%r option=%r\n" % (sec,option)
+                        break
         if flag:
             header = header + "\n"
         else:
             header = None
-
         #
         # Write config file
         #
@@ -176,7 +184,7 @@ class Configuration(Plugin):
         """Summarize options"""
         tmp = {}
         for option in self.option_plugins:
-            tmp.setdefault(option.section,{})[option.name] = option
+            tmp.setdefault(option.section, {})[option.name] = option
         keys = list(tmp.keys())
         keys.sort()
         for key in keys:
