@@ -6,7 +6,6 @@
 import os
 import sys
 from os.path import abspath, dirname, join
-sys.path.insert(0, dirname(dirname(abspath(__file__)))+os.sep+".."+os.sep+"..")
 pkgdir = dirname(abspath(__file__))
 
 import pyutilib.th as unittest

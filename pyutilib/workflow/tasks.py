@@ -24,7 +24,7 @@ TaskFactory = CreatePluginFactory(IWorkflowTask)
 
 class TaskPlugin(Plugin, task.Task):
 
-    implements(IWorkflowTask, service=False)
+    implements(IWorkflowTask)
 
     def __init__(self, *args, **kwds):      #pragma:nocover
         Plugin.__init__(self, *args, **kwds)
@@ -36,7 +36,7 @@ class TaskPlugin(Plugin, task.Task):
 
 class WorkflowPlugin(Plugin, workflow.Workflow):
 
-    implements(IWorkflowTask, service=False)
+    implements(IWorkflowTask)
 
     def __init__(self, *args, **kwds):      #pragma:nocover
         Plugin.__init__(self, *args, **kwds)

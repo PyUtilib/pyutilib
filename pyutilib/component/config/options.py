@@ -23,6 +23,7 @@ a Configuration object.
 
 """
 
+import weakref
 import sys
 import re
 import os
@@ -78,24 +79,9 @@ class IFileOption(Interface):
         """Sets the directory of the configuration data file."""
 
 
-class IOptionDataProvider(Interface):
-    """An interface that supports the management of common data between
-    Options.  This interface is also used to share this data with
-    the Configuration class."""
-
-    def get_data():
-        """Returns a dictionary of dictionaries that represents the
-        options data."""
-
-    def set(self, section, name, value):
-        """Sets the value of a given (section,name) pair"""
-
-    def get(self, section, name):
-        """Returns the value of a given (section,name) pair"""
-
-
 class OptionData(Plugin):
-    """A class that is used to share option data between Option objects.
+    """
+    A class that is used to share option data between Option objects.
     This data in this class represents option data as
 
         section -> option -> data
@@ -105,7 +91,7 @@ class OptionData(Plugin):
     names to the Option classes that declare them.
     """
 
-    implements(IOptionDataProvider)
+    implements(IOptionDataProvider, service=True)
 
     def __init__(self):
         """Constructor"""
@@ -134,11 +120,15 @@ class OptionData(Plugin):
             else:
                 raise OptionError("Problem retrieving the value of option %r from section %r. Undefined section." % (name, section))
 
+    def clear(self):
+        """Clears the data"""
+        self.data={}
+
 
 class OptionPlugin(Plugin):
     """Manages the initialization of an Option."""
 
-    implements(IOption)
+    implements(IOption, service=True)
 
     def __init__(self):
         """
@@ -146,8 +136,37 @@ class OptionPlugin(Plugin):
         construct one if one hasn't already been provided.
         """
         self.data = ExtensionPoint(IOptionDataProvider)
+        if PluginGlobals._default_OptionData is None:
+            PluginGlobals._default_OptionData = OptionData()
+        #
+        # This is a hack.  We shouldn't need to test if len(self.data) is zero.
+        # Somewhere in our tests, the weakref to the OptionData object is being 
+        # corrupted.  Perhaps this is caused by 'nose' or 'import' logic?
+        #
+        if True and len(self.data) == 0:
+            PluginGlobals.interface_services[IOptionDataProvider].add(PluginGlobals._default_OptionData._id)
+            PluginGlobals.plugin_instances[PluginGlobals._default_OptionData._id] = weakref.ref(PluginGlobals._default_OptionData)
+        #
         if len(self.data) == 0:
-            OptionData()
+            if False:
+                print "ZZZ", ep.Xextensions()
+                print "HERE", PluginGlobals._default_OptionData._id, PluginGlobals._default_OptionData.ctr
+                print "HERE", PluginGlobals._default_OptionData
+                print "HERE - id", id(PluginGlobals._default_OptionData)
+                print "HERE", getattr(PluginGlobals._default_OptionData, '_HERE_', None)
+                print "HERE", PluginGlobals._default_OptionData.__interfaces__
+                print ""
+                print "HERE", PluginGlobals.interface_services
+                print "HERE", PluginGlobals.plugin_instances.keys()
+                for exe_ in PluginGlobals._executables:
+                    print exe_._id, exe_
+                print "LEN", len(PluginGlobals.env)
+                for name_ in PluginGlobals.env:
+                    env_ = PluginGlobals.env[name_]
+                    print env_.name
+                    print env_.nonsingleton_plugins
+                    print [env_.singleton_services[cls_] for cls_ in env_.singleton_services]
+            raise PluginError("Problem constructing a global OptionData object %s" % self.name)
 
     def matches_section(self, section):
         """
@@ -306,7 +325,7 @@ class VirtualOption(object):
         return "<VirtualOption %s>" % self.name
 
 
-def declare_option(name,cls=Option,**kwds):
+def declare_option(name, cls=Option, **kwds):
     if not issubclass(cls, Option):
         raise PluginError("The 'cls' argument must specify an Option class type: %s" % cls)
     local_name = kwds.get("local_name",name)
@@ -316,12 +335,13 @@ def declare_option(name,cls=Option,**kwds):
     #print "HERE", locals_ is not frame.f_globals, '__module__' in locals_
     if locals_ is not frame.f_globals:
         kwds["name"]=name
+        option_ = cls(**kwds)
         if '__module__' in locals_:
             #
             # Class decorator.  Initialize the VirtualOption, and then
             # create a locally-available Option instance.
             #
-            locals_[local_name] = VirtualOption("_"+local_name,cls(**kwds))
+            locals_[local_name] = VirtualOption("_"+local_name, option_)
         else:
             #
             # Class constructor.  If a VirtualOption does not exist in this
@@ -329,7 +349,7 @@ def declare_option(name,cls=Option,**kwds):
             #
             if not local_name in locals_["self"].__class__.__dict__:
                 setattr(locals_["self"].__class__, local_name, VirtualOption("_"+local_name))
-            setattr(locals_["self"],"_"+local_name,cls(**kwds))
+            setattr(locals_["self"], "_"+local_name, option_)
     else:
         raise PluginError("declare_option() can only be used in a class definition")
 
@@ -409,6 +429,7 @@ class DictOption(Option):
         """
         If the value is a dictionary, then it is evaluated to populate
         corresponding data in the options data.
+
         NOTE: the raw option is ignored, but maintained for compatibility with the
         parent class.
         """
@@ -418,8 +439,10 @@ class DictOption(Option):
             self.default.__setattr__(key,_value_[key])
 
     def load(self, _option_, _value_):
-        """Data is loaded one option/value pair at a time, so this
-        method circumvents the core logic of this class."""
+        """
+        Data is loaded one option/value pair at a time, so this
+        method circumvents the core logic of this class.
+        """
         self.data.service().set(self.section, _option_, _value_[-1])
         return True
 
@@ -477,8 +500,8 @@ class FileOption(Option):
     """A class that converts option data into a path.  Relative paths are
     converted using the path for the configuration file."""
 
-    implements(IFileOption)
-    implements(IUpdatedOptionsAction)
+    implements(IFileOption, service=True)
+    implements(IUpdatedOptionsAction, service=True)
 
     def __init__(self, name, **kwds):
         """
@@ -486,8 +509,7 @@ class FileOption(Option):
         path used in this data.
         """
         self.dir = None
-        Option.__init__(self,name,**kwds)
-        #super(FileOption,self).__init__(name,**kwds)
+        Option.__init__(self, name, **kwds)
 
     def _parse_option(self, k, v):
         """Parse options that are specific to the FileOption class"""
@@ -555,3 +577,4 @@ class ExecutableOption(FileOption):
 
     def reset_after_updates(self):
         pass
+

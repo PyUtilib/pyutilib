@@ -37,3 +37,4 @@ class ManagedSingletonPlugin(SingletonPlugin):
         Plugin.__init__(self,**kwds)
         #super(ManagedSingletonPlugin,self).__init__(**kwds)
         declare_option(name=self.name, section="Services", local_name="enable", default=self._enable, cls=BoolOption, doc="Option that controls behavior of service %s." % self.name )
+

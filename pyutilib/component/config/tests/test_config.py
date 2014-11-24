@@ -6,7 +6,6 @@
 import os
 import sys
 from os.path import abspath, dirname
-sys.path.insert(0, dirname(dirname(abspath(__file__)))+os.sep+".."+os.sep+"..")
 currdir = dirname(abspath(__file__))+os.sep
 
 from nose.tools import nottest
@@ -16,6 +15,9 @@ import pyutilib.th as unittest
 import pyutilib.misc
 
 
+def filter(line):
+    return line.startswith(";   section='")
+
 class Test(unittest.TestCase):
 
     class TMP(Plugin):
@@ -24,18 +26,17 @@ class Test(unittest.TestCase):
             declare_option("b", local_name="bb")
             declare_option("b")
             declare_option("c")
-            declare_option("zz",section='a.b')
-            declare_option("yy",default="foo")
+            declare_option("zz", section='a.b')
+            declare_option("yy", default="foo")
 
     def setUp(self):
-        PluginGlobals.clear()
-        PluginGlobals.push_env(PluginEnvironment())
+        PluginGlobals.add_env("testing.config")
         pyutilib.component.config.plugin_ConfigParser.Configuration_ConfigParser(name="Configuration_ConfigParser")
         self.tmp=Test.TMP()
 
     def tearDown(self):
         del self.tmp
-        PluginGlobals.clear()
+        PluginGlobals.remove_env("testing.config", cleanup=True)
 
     def test_init(self):
         """Test Configuration construction"""
@@ -108,13 +109,13 @@ class Test(unittest.TestCase):
     @unittest.skipIf(sys.version_info[:2] < (2,6), "Skipping tests because configuration output is not guaranteed to be sorted")
     def test_load5(self):
         """Test load method"""
-        PluginGlobals.push_env(PluginEnvironment())
-        class TMP2(object):
+        PluginGlobals.add_env("testing.config_loading")
+        class TMP2(Plugin):
             def __init__(self):
                 declare_option("a")
                 declare_option("b", cls=FileOption)
                 declare_option("c")
-                declare_option("xx",cls=DictOption,section_re='globals.*')
+                declare_option("xx", section_re='globals.*')
 
         config = Configuration()
         tmp2=TMP2()
@@ -130,12 +131,12 @@ class Test(unittest.TestCase):
         #PluginGlobals.pprint()
         config.save(currdir+"config4.out")
         #print config
-        self.assertFileEqualsBaseline(currdir+"config4.out",currdir+"config4.txt")
+        self.assertFileEqualsBaseline(currdir+"config4.out",currdir+"config4.txt", filter=filter)
         pyutilib.misc.setup_redirect(currdir+"log2.out")
         config.pprint()
         pyutilib.misc.reset_redirect()
-        self.assertFileEqualsBaseline(currdir+"log2.out", currdir+"log2.txt")
-        PluginGlobals.pop_env()
+        self.assertFileEqualsBaseline(currdir+"log2.out", currdir+"log2.txt", filter=filter)
+        PluginGlobals.remove_env("testing.config_loading", cleanup=True)
 
     @unittest.skipIf(sys.version_info[:2] < (2,6), "Skipping tests because configuration output is not guaranteed to be sorted")
     def test_save1(self):
@@ -151,7 +152,7 @@ class Test(unittest.TestCase):
                 ep.set_value("/dev/null", raw=True)
         config.save(currdir+"config1.out")
         #PluginGlobals.pprint()
-        self.assertFileEqualsBaseline(currdir+"config1.out",currdir+"config1.txt")
+        self.assertFileEqualsBaseline(currdir+"config1.out",currdir+"config1.txt", filter=filter)
 
     def test_save2(self):
         """Test save method"""

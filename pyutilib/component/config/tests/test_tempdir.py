@@ -7,7 +7,6 @@ import os
 import sys
 import shutil
 from os.path import abspath, dirname
-sys.path.insert(0, dirname(dirname(abspath(__file__)))+os.sep+".."+os.sep+"..")
 currdir = dirname(abspath(__file__))+os.sep
 tempdir = dirname(abspath(__file__))+os.sep+'tempdir'+os.sep
 
@@ -23,8 +22,7 @@ old_tempdir = TempfileManager.tempdir
 class Test(unittest.TestCase):
 
     def setUp(self):
-        PluginGlobals.clear()
-        PluginGlobals.push_env(PluginEnvironment())
+        PluginGlobals.add_env("testing.options")
         TempfileManager.tempdir = tempdir
         TempfileManager.push()
         if os.path.exists(tempdir):
@@ -35,7 +33,7 @@ class Test(unittest.TestCase):
     def tearDown(self):
         TempfileManager.pop()
         TempfileManager.tempdir = old_tempdir
-        PluginGlobals.clear()
+        PluginGlobals.remove_env("testing.options")
         if os.path.exists(tempdir):
             shutil.rmtree(tempdir)
 

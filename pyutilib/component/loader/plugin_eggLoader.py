@@ -46,7 +46,7 @@ class EggLoader(ManagedPlugin):
     the user should employ the PluginFactory_EggLoader function.
     """
 
-    implements(IPluginLoader)
+    implements(IPluginLoader, service=True)
 
     def __init__(self, **kwds):
         """EggLoader constructor.  The 'namespace' keyword option is

@@ -1,52 +1,13 @@
-#  _________________________________________________________________________
-#
-#  PyUtilib: A Python utility library.
-#  Copyright (c) 2008 Sandia Corporation.
-#  This software is distributed under the BSD License.
-#  Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
-#  the U.S. Government retains certain rights in this software.
-#  _________________________________________________________________________
 
-# This software is adapted from the Trac software (specifically, the trac.core
-# module.  The Trac copyright statement is included below.
+__all__ = ['Plugin', 'implements', 'Interface', 'CreatePluginFactory', 'PluginMeta', 'alias', 'ExtensionPoint', 'SingletonPlugin', 'PluginFactory', 'PluginError', 'PluginGlobals', 'with_metaclass', 'IPluginLoader', 'IPluginLoadPath', 'IIgnorePluginWhenLoading', 'IOptionDataProvider', 'PluginEnvironment']
 
-"""
-The PyUtilib Component Architecture (PCA) consists of the following core classes:
-
-* Interface - Subclasses of this class declare component interfaces that are registered in the framework
-
-* ExtensionPoint - A class used to declare extension points, which can access services with a particular interface
-
-* Plugin - Subclasses of this class declare plugins, which can be used to provide services within the PCA.
-
-* SingletonPlugin - Subclasses of this class declare singleton plugins, for which a single instance can be declared.
-
-* PluginEnvironment - A class that maintains the registries for interfaces, extension points and components.
-
-* PluginGlobals - A class that maintains global data concerning the set of environments that are currently being used.
-
-* PluginError - The exception class that is raised when errors arise in this framework.
-
-Note: The outline of this framework is adapted from Trac (see the trac.core module).  This framework generalizes the Trac by supporting multi-environment management of components, as well as non-singleton plugins.  For those familiar with Trac, the following classes roughly correspond with each other:
-
-  Trac                  PyUtilib
-  ----------------------------------------
-  Interface             Interface
-  ExtensionPoint        ExtensionPoint
-  Component             SingletonPlugin
-  ComponentManager      PluginEnvironment
-"""
-
-__all__ = ['Plugin', 'SingletonPlugin', 'PluginGlobals', 'PluginMeta',
-           'ExtensionPoint', 'implements', 'Interface',
-           'PluginError', 'PluginEnvironment', 'IPluginLoader',
-           'IPluginLoadPath', 'PluginFactory', 'alias', 'CreatePluginFactory',
-           'IIgnorePluginWhenLoading' ]
-
+##print "ZZZ - IMPORTING CORE"
 import re
-import logging
 import sys
-import six
+import weakref
+from six import itervalues, string_types
+import logging
+logger = logging.getLogger('pyutilib.component.core')
 
 # This is a copy of the with_metaclass function from 'six' from the 
 # development branch.  This fixes a bug in six 1.6.1.
@@ -87,6 +48,9 @@ def with_metaclass(meta, *bases):
             return meta(name, bases, d)
     return metaclass('temporary_class', None, {})
 
+#
+# Plugins define within Pyomo
+#
 
 #
 # Define the default logging behavior for a given namespace, which is to
@@ -113,484 +77,72 @@ class PluginError(Exception):
         return str(self.value)
 
 
-"""
-Global data for plugins.  The main role of this class is to manage the stack of PluginEnvironment instances.
-
-Note: a single ID counter is used for tagging both environment and plugins registrations.  This enables the user to track the relative order of construction of these objects.
-"""
-class PluginGlobals(object):
-
-    def __init__(self):                         #pragma:nocover
-        """Disable construction."""
-        raise PluginError("The PluginGlobals class should not be created.")
-
-    """The registry of interfaces, by name"""
-    interface_registry = {}
-
-    """The registry of environments, by name"""
-    env_registry = {}
-
-    """The stack of environments that is being used."""
-    env_stack = []
-
-    """A unique id used to name plugin objects"""
-    id_counter = 0
-
-    @staticmethod
-    def clear(bootstrap=False):
-        """
-        Clears the environment stack and defines a new default environment.
-        This setup is non-standard because we need to bootstrap the
-        configuration of the 'pyutilib.component' environment.
-
-        NOTE: I _think_ that the plugin_registry should also be cleared,
-        but in practice that may not make sense since it's not easy to
-        reload modules in Python.
-        """
-        PluginGlobals.clearing=True
-        if len(PluginGlobals.env_stack) > 0:
-            PluginGlobals.env_stack[0].log.info("Clearing the PluginGlobals data")
-        PluginGlobals.env_registry = {}
-        PluginGlobals.env_stack=[]
-        PluginGlobals.id_counter=0
-        env = PluginEnvironment(name="pca", bootstrap=True)
-        PluginGlobals.env_registry[env.name] = env
-        PluginGlobals.push_env( PluginEnvironment(name="<default>", bootstrap=bootstrap) )
-        PluginGlobals.clearing=False
-
-    @staticmethod
-    def next_id():
-        """Generate the next id for plugin objects"""
-        PluginGlobals.id_counter += 1
-        return PluginGlobals.id_counter
-
-    @staticmethod
-    def default_env():
-        """
-        Return the default environment, which is constructed when the
-        plugins framework is loaded.
-        """
-        return PluginGlobals.env_stack[0]             #pragma:nocover
-
-    @staticmethod
-    def env(arg=None):
-        """Return the current environment."""
-        if arg is None:
-            return PluginGlobals.env_stack[-1]
-        else:
-            if not arg in PluginGlobals.env_registry:
-                raise PluginError("Unknown environment %r" % arg)
-            return PluginGlobals.env_registry[arg]
-
-    @staticmethod
-    def push_env(arg, validate=False):
-        """Push the given environment on the stack."""
-        if isinstance(arg,six.string_types):
-            if not arg in PluginGlobals.env_registry:
-                if validate:
-                    raise PluginError("Unknown environment %r" % arg)
-                else:
-                    env = PluginEnvironment(arg)
-            env = PluginGlobals.env_registry[arg]
-        else:
-            env = arg
-        PluginGlobals.env_stack.append(env)
-        if __debug__ and env.log.isEnabledFor(logging.DEBUG):
-            env.log.debug("Pushing environment %r on the PluginGlobals stack" % env.name)
-
-    @staticmethod
-    def pop_env():
-        """Pop the current environment from the stack."""
-        if len(PluginGlobals.env_stack) == 1:
-            env = PluginGlobals.env_stack[0]
-        else:
-            env = PluginGlobals.env_stack.pop()
-            if __debug__ and env.log.isEnabledFor(logging.DEBUG):
-                env.log.debug("Popping environment %r from the PluginGlobals stack" % env.name)
-        return env
-
-    @staticmethod
-    def services(name=None):
-        """
-        A convenience function that returns the services in the
-        current environment.
-        """
-        return PluginGlobals.env(name).services
-
-    @staticmethod
-    def singleton_services(name=None):
-        """
-        A convenience function that returns the singleton
-        services in the current environment.
-        """
-        return PluginGlobals.env(name).singleton_services
-
-    @staticmethod
-    def load_services(**kwds):
-        """Load services from IPluginLoader extension points"""
-        PluginGlobals.env().load_services(**kwds)
-
-    @staticmethod
-    def pprint(**kwds):
-        """A pretty-print function"""
-        s = ""
-        s += "--------------------------------------------------------------\n"
-        s += " Registered Environments\n"
-        s += "--------------------------------------------------------------\n"
-        keys = list(PluginGlobals.env_registry.keys())
-        keys.sort()
-        for key in keys:
-            s += " "+key+"\n"
-        s += "\n"
-        s += "--------------------------------------------------------------\n"
-        s += " Environment Stack\n"
-        s += "--------------------------------------------------------------\n"
-        i=1
-        for env in PluginGlobals.env_stack:
-            s += " Level="+str(i)+"  name="
-            s += env.name
-            s += "\n"
-            i += 1
-        s += "\n"
-        s += "--------------------------------------------------------------\n"
-        s += " Interfaces Declared\n"
-        s += "--------------------------------------------------------------\n"
-        keys = list(PluginGlobals.interface_registry.keys())
-        keys.sort()
-        for key in keys:
-            s += " "+key+"\n"
-        s += "\n"
-        s += "--------------------------------------------------------------\n"
-        s += " Interfaces Declared by Namespace\n"
-        s += "--------------------------------------------------------------\n"
-        keys = list(PluginGlobals.interface_registry.keys())
-        keys.sort()
-        tmp = {}
-        for key in keys:
-            tmp.setdefault(PluginGlobals.interface_registry[key].__interface_namespace__,[]).append(key)
-        keys = list(tmp.keys())
-        keys.sort()
-        for key in keys:
-            s += " "+str(key)+"\n"
-            for item in tmp[key]:
-                s += "     "+item+"\n"
-            s += "\n"
-        #
-        # Coverage is disabled here because different platforms give different
-        # results.
-        #
-        if "plugins" not in kwds or kwds["plugins"] is True:    #pragma:nocover
-            s += "--------------------------------------------------------------\n"
-            s += " Registered Plugins by Interface\n"
-            s += "--------------------------------------------------------------\n"
-            tmp = {}
-            for key in PluginGlobals.interface_registry:
-                tmp[PluginGlobals.interface_registry[key]] = []
-            for env in PluginGlobals.env_stack:
-                for key in env.plugin_registry:
-                    for item in env.plugin_registry[key].__interfaces__:
-                        tmp[item].append(key)
-            keys = list(PluginGlobals.interface_registry.keys())
-            keys.sort()
-            for key in keys:
-                if key == "":                   #pragma:nocover
-                    s += " `"+str(key)+"`\n"
-                else:
-                    s += " "+str(key)+"\n"
-                ttmp = tmp[PluginGlobals.interface_registry[key]]
-                ttmp.sort()
-                if len(ttmp) == 0:
-                    s += "     None\n"
-                else:
-                    for item in ttmp:
-                        s += "     "+item+"\n"
-                s += "\n"
-            s += "--------------------------------------------------------------\n"
-            s += " Registered Plugins by Python Module\n"
-            s += "--------------------------------------------------------------\n"
-            tmp = {}
-            for env in PluginGlobals.env_stack:
-                for key in env.plugin_registry:
-                    tmp.setdefault(env.plugin_registry[key].__module__,[]).append(key)
-            keys = list(tmp.keys())
-            keys.sort()
-            for key in keys:
-                if key == "":                   #pragma:nocover
-                    s += " `"+str(key)+"`\n"
-                else:
-                    s += " "+str(key)+"\n"
-                ttmp = tmp[key]
-                ttmp.sort()
-                for item in ttmp:
-                    s += "     "+item+"\n"
-                s += "\n"
-        s += "--------------------------------------------------------------\n"
-        s += " Services for Registered Environments\n"
-        s += "--------------------------------------------------------------\n"
-        keys = list(PluginGlobals.env_registry.keys())
-        keys.sort()
-        if 'show_ids' in kwds:
-            show_ids = kwds['show_ids']
-        else:
-            show_ids = True
-        for key in keys:
-            s += PluginGlobals.env(key).pprint(show_ids=show_ids)
-            s += "\n"
-        s += "--------------------------------------------------------------\n"
-        print(s)
-
-
-class InterfaceMeta(type):
-    """Meta class that registered the declaration of an interface"""
-
-    def __new__(cls, name, bases, d):
-        """Register this interface"""
-        if name == "Interface":
-            d['__interface_namespace__'] = 'pca'
-        else:
-            d['__interface_namespace__'] = PluginGlobals.env().name
-        new_class = type.__new__(cls, name, bases, d)
-        if name != "Interface":
-            if name in list(PluginGlobals.interface_registry.keys()):
-                raise PluginError("Interface %s has already been defined" % name)
-            PluginGlobals.interface_registry[name] = new_class
-        return new_class
-
-
-class Interface(with_metaclass(InterfaceMeta,object)):
-    """
-    Marker base class for extension point interfaces.  This class
-    is not intended to be instantiated.  Instead, the declaration
-    of subclasses of Interface are recorded, and these
-    classes are used to define extension points.
-    """
-    pass
-
-
-class ExtensionPoint(object):
-    """Marker class for extension points in services."""
-
-    def __init__(self, *args):
-        """Create the extension point.
-
-        @param interface: the `Interface` subclass that defines the protocol
-            for the extension point
-        @param env: the `PluginEnvironment` instance that this extension point
-            references
-        """
-        #
-        # Construct the interface, passing in this extension
-        #
-        nargs=len(args)
-        if nargs == 0:
-            raise PluginError("Must specify interface class used in the ExtensionPoint")
-        self.interface = args[0]
-        self.env = [ PluginGlobals.env(self.interface.__interface_namespace__) ]
-        if nargs > 1:
-            for arg in args[1:]:
-                if isinstance(arg,six.string_types):
-                    self.env.append( PluginGlobals.env(arg) )
-                else:
-                    self.env.append(arg)
-        self.__doc__ = 'List of services that implement `%s`' % self.interface.__name__
-
-    def __iter__(self):
-        """
-        Return an iterator to a set of services that match the interface of this
-        extension point.
-        """
-        return self.extensions().__iter__()
-
-    def __call__(self, key=None, all=False):
-        """
-        Return a set of services that match the interface of this
-        extension point.
-        """
-        if type(key) in six.integer_types:
-            #
-            # Q: should this be a warning?  A user _might_ be trying
-            # to use an integer as a key.  But in practice that's not
-            # likely.
-            #
-            raise PluginError("Access of the n-th extension point is disallowed.  This is not well-defined, since ExtensionPoints are stored as unordered sets.")
-        return self.extensions(all=all, key=key)
-
-    def service(self, key=None, all=False):
-        """
-        Return the unique service that matches the interface of this
-        extension point.  An exception occurs if no service matches the
-        specified key, or if multiple services match.
-        """
-        ans = ExtensionPoint.__call__(self, key=key, all=all)
-        if len(ans)== 1:
-            #
-            # There is a single service, so return it.
-            #
-            return ans.pop()
-        elif len(ans) == 0:
-            return None
-        else:
-            raise PluginError("The ExtensionPoint does not have a unique service!  %d services are defined for interface %s.  (key=%s)" % (len(ans), self.interface. __name__, str(key)))
-
-    def __len__(self):
-        """
-        Return the number of services that match the interface of this
-        extension point.
-        """
-        return len(self.extensions())
-
-    def extensions(self, all=False, key=None):
-        """
-        Return a set of services that match the interface of this
-        extension point.  This tacitly filters out disabled extension points.
-        """
-        ans = set()
-        for env in self.env:
-            ans.update(env.active_services(self.interface, all=all, key=key))
-
-        return sorted( ans, key=lambda x:x.id )
-
-    def __repr__(self):
-        """Return a textual representation of the extension point."""
-        env_str = ""
-        for env in self.env:
-            env_str += " env=%s" % env.name
-        return '<ExtensionPoint %s%s>' % (self.interface.__name__,env_str)
-
-
-"""
-The environment for the components in the PCA.
-
-This class has the following attributes that a user may use:
-
-* name - A string that identifies this environment.  By default a unique integer id is used to define the name "env.<id>"
-* namespace - A name the defines the relationship of this environment to other environments
-* registry - A map from interfaces to registered services that match each interface
-* services - The set of all services (Plugin instances) that have been registered in this environment
-* singleton_services - Singleton services, which can only be registered once in each environment
-* enabled - A cache that denotes whether a service has been enabled.
-
-The namespace of Environment instances is dynamically generated by extending the namespace of the current environment.  However, the environment namespace can be explicitly declared in the constructor.
-"""
 class PluginEnvironment(object):
 
     def __init__(self, name=None, bootstrap=False):
-        # The registry of plugins, by name
-        self.plugin_registry = {}
-        if name is None:
-            self.name = "env"+str(PluginGlobals.next_id())
+        if bootstrap:
+            self.env_id = 1
         else:
-            self.name = name
-        if self.name in PluginGlobals.env_registry:
-            raise PluginError("The Environment %r already exists!" % self.name)
-        PluginGlobals.env_registry[self.name] = self
-        self.singleton_services={}
-        self.services=set()
-        if not bootstrap:
-            self.loaders = ExtensionPoint(IPluginLoader)
-            self.loader_paths = ExtensionPoint(IPluginLoadPath)
+            PluginGlobals.env_counter += 1
+            self.env_id = PluginGlobals.env_counter
+            if name is None:
+                name = "env%d" % PluginGlobals.env_counter
+            if name in PluginGlobals.env:
+                raise PluginError("Environment %s is already defined" % name)
+        #
+        self.loaders = None
+        self.loader_paths = None
+        #
+        self.name = name
         self.log = logger_factory(self.name)
         if __debug__ and self.log.isEnabledFor(logging.DEBUG):
             self.log.debug("Creating PluginEnvironment %r" % self.name)
-        self.level = []
-        self.clear_cache()
+        # A dictionary of plugin classes
+        #   name -> plugin cls
+        self.plugin_registry = {}
+        # The interfaces that have been defined
+        #   name -> interface cls
+        self.interfaces = {}
+        # A dictionary of singleton plugin class instance ids
+        #   plugin cls -> id
+        self.singleton_services = {}
+        # A set of nonsingleton plugin instances
+        self.nonsingleton_plugins = set()
 
-    def __del__(self):
-        #
-        # Don't delete the two standard environments.
-        #
-        if self.name == 'pca' or self.name == '<default>':
+    def cleanup(self):
+        # ZZZ
+        ##return
+        if PluginGlobals is None or PluginGlobals.plugin_instances is None:
             return
+        for id_ in itervalues(self.singleton_services):
+            if id_ in PluginGlobals.plugin_instances and not PluginGlobals.plugin_instances[id_] is None:
+                del PluginGlobals.plugin_instances[id_]
+        self.singleton_services= {}
         #
-        # If the PluginGlobals.clear() method is being called, then
-        # don't try to remove data from the environment registry.  It
-        # has already been deleted!
-        #
-        if not PluginGlobals.clearing:
-            if self.name in PluginGlobals.env_registry:
-                del PluginGlobals.env_registry[self.name]
+        for id_ in self.nonsingleton_plugins:
+            del PluginGlobals.plugin_instances[id_]
+        self.nonsingleton_plugins = set()
 
-    def __contains__(self, cls):
-        """
-        Return whether the given service is in the set of services.
-        """
-        return cls in self.services
-
-    def active_services(self, cls, all=False, key=None):
-        """
-        Return the services that have been activated for a specific interface class.
-        """
-        if isinstance(cls,Plugin):
-            id = cls.__class__
-        else:
-            id = cls
-        try:
-            return self._cache[id,all,key]
-        except KeyError:
-            if not issubclass(id,Interface):
-                raise PluginError("PluginEnvironment[x] expects "+str(id)+" to be an Interface class")
-            strkey = str(key)
-            tmp = [x for x in self.services if id in x.__interfaces__ and (all or x.enabled()) and (key is None or x.name == strkey)]
-            self._cache[id,all,key]=tmp
-            return tmp
-
-    def activate(self, service):
-        """
-        This adds the service to this environment.
-        """
-        self.log.info("Adding service %s to environment %s" % (service.name, self.name))
-        self.services.add(service)
-        self.clear_cache()
-
-    def deactivate(self, service):
-        """
-        This removes the service from this environment.
-        """
-        self.log.info("Removing service %s from environment %s" % (service.name, self.name))
-        if service in self.services:
-            self.services.remove(service)
-        self.clear_cache()
-
-    def __repr__(self):
-        return self.pprint()
-
-    def pprint(self, show_ids=True):
-        """
-        Provides a detailed summary of this environment
-        """
-        s = ""
-        s += " Services for Environment %r\n" % self.name
-        flag=True
-        tmp = {}
-        for service in self.services:
-            tmp[str(service)] = service
-        keys = list(tmp.keys())
-        keys.sort()
-        for key in keys:
-            flag=False
-            s += "   "+key
-            if show_ids:
-                s += "  ("
-                if not tmp[key].enabled():
-                    s += "-"                    #pragma:nocover
-                s += str(tmp[key].id)
-                if tmp[key].__class__ in self.singleton_services:
-                    s += "*"
-                s += ")\n"
-            else:
-                s += "\n"
-        if flag:
-            s += "   None\n"
-        return s
+    def plugins(self):
+        for id_ in itervalues(self.singleton_services):
+            if id_ in PluginGlobals.plugin_instances and not PluginGlobals.plugin_instances[id_] is None:
+                yield PluginGlobals.plugin_instances[id_]
+        for id_ in sorted(self.nonsingleton_plugins):
+            yield PluginGlobals.plugin_instances[id_]
 
     def load_services(self, path=None, auto_disable=False, name_re=True):
-        """Load services from IPluginLoader extension points"""
+        """
+        Load services from IPluginLoader extension points
+        """
+        if self.loaders is None:
+            self.loaders = ExtensionPoint(IPluginLoader)
+            self.loader_paths = ExtensionPoint(IPluginLoadPath)
         #
         # Construct the search path
         #
         search_path = []
         if not path is None:
-            if isinstance(path,six.string_types):
+            if isinstance(path, string_types):
                 search_path.append(path)
             elif type(path) is list:
                 search_path += path
@@ -619,21 +171,438 @@ class PluginEnvironment(object):
                 raise PluginError("It doesn't make sense to specify name_re=False")
         else:
             name_p = re.compile(name_re)
-
+        #
         for loader in self.loaders:
             loader.load(self, search_path, disable_p, name_p)
-        self.clear_cache()
+        #self.clear_cache()
 
-    def clear_cache(self):
+    def Xclear_cache(self):
         """ Clear the cache of active services """
         self._cache = {}
 
+                
+class ExtensionPoint(object):
+    """Marker class for extension points in services."""
 
-#
-# Reset the plugins environment when this module is first loaded.
-#
-PluginGlobals.clear(bootstrap=True)
-PluginGlobals.push_env("pca")
+    def __init__(self, *args):
+        """Create the extension point.
+
+        @param interface: the `Interface` subclass that defines the protocol
+            for the extension point
+        """
+        #
+        # Construct the interface, passing in this extension
+        #
+        nargs=len(args)
+        if nargs == 0:
+            raise PluginError("Must specify interface class used in the ExtensionPoint")
+        self.interface = args[0]
+        self.__doc__ = 'List of services that implement `%s`' % self.interface.__name__
+
+    def __iter__(self):
+        """
+        Return an iterator to a set of services that match the interface of this
+        extension point.
+        """
+        return self.extensions().__iter__()
+
+    def __call__(self, key=None, all=False):
+        """
+        Return a set of services that match the interface of this
+        extension point.
+        """
+        if type(key) in (int, int):
+            raise PluginError("Access of the n-th extension point is disallowed.  This is not well-defined, since ExtensionPoints are stored as unordered sets.")
+        return self.extensions(all=all, key=key)
+
+    def service(self, key=None, all=False):
+        """
+        Return the unique service that matches the interface of this
+        extension point.  An exception occurs if no service matches the
+        specified key, or if multiple services match.
+        """
+        ans = ExtensionPoint.__call__(self, key=key, all=all)
+        if len(ans)== 1:
+            #
+            # There is a single service, so return it.
+            #
+            return ans.pop()
+        elif len(ans) == 0:
+            return None
+        else:
+            raise PluginError("The ExtensionPoint does not have a unique service!  %d services are defined for interface %s.  (key=%s)" % (len(ans), self.interface.__name__, str(key)))
+
+    def __len__(self):
+        """
+        Return the number of services that match the interface of this
+        extension point.
+        """
+        return len(self.extensions())
+
+    def extensions(self, all=False, key=None):
+        """
+        Return a set of services that match the interface of this
+        extension point.  This tacitly filters out disabled extension points.
+        """
+        strkey = str(key)
+        ans = set()
+        remove = set()
+        if self.interface in PluginGlobals.interface_services:
+            for id_ in PluginGlobals.interface_services[self.interface]:
+                if not id_ in PluginGlobals.plugin_instances:
+                    remove.add(id_)
+                    continue
+                if id_ < 0:
+                    plugin = PluginGlobals.plugin_instances[id_]
+                else:
+                    plugin = PluginGlobals.plugin_instances[id_]()
+                if plugin is None:
+                    remove.add(id_)
+                elif (all or plugin.enabled()) and (key is None or strkey == plugin.name):
+                    ans.add(plugin)
+            # Remove weakrefs that were empty
+            ## Z
+            ##for id_ in remove:
+                ##PluginGlobals.interface_services[self.interface].remove(id_)
+        return sorted( ans, key=lambda x:x._id )
+
+    def Xextensions(self, all=False, key=None):
+        """
+        Return a set of services that match the interface of this
+        extension point.  This tacitly filters out disabled extension points.
+        """
+        strkey = str(key)
+        ans = set()
+        remove = set()
+        if self.interface in PluginGlobals.interface_services:
+            print "HERE"
+            for id_ in PluginGlobals.interface_services[self.interface]:
+                print "HERE", id_
+                if not id_ in PluginGlobals.plugin_instances:
+                    remove.add(id_)
+                    continue
+                if id_ < 0:
+                    plugin = PluginGlobals.plugin_instances[id_]
+                else:
+                    plugin = PluginGlobals.plugin_instances[id_]()
+                print "HERE", PluginGlobals.plugin_instances[id_], plugin
+                if plugin is None:
+                    remove.add(id_)
+                elif (all or plugin._enable) and (key is None or strkey == plugin.name):
+                    ans.add(plugin)
+            # Remove weakrefs that were empty
+            ## Z
+            ##for id_ in remove:
+                ##PluginGlobals.interface_services[self.interface].remove(id_)
+        return sorted( ans, key=lambda x:x._id )
+
+    def __repr__(self):
+        """Return a textual representation of the extension point."""
+        env_str = ""
+        for env_ in itervalues(PluginGlobals.env):
+            if self.interface in set(itervalues(env_.interfaces)):
+                env_str += " env=%s" % env_.name
+        return '<ExtensionPoint %s%s>' % (self.interface.__name__,env_str)
+
+
+"""
+Global data for plugins.  The main role of this class is to manage
+the stack of PluginEnvironment instances.
+
+Note: a single ID counter is used for tagging both environment and
+plugins registrations.  This enables the  user to track the relative
+order of construction of these objects.
+"""
+class PluginGlobals(object):
+
+    def __init__(self):                         #pragma:nocover
+        """Disable construction."""
+        raise PluginError("The PluginGlobals class should not be created.")
+
+    # A dictionary of interface classes mapped to sets of plugin class instance ids
+    #   interface cls -> set(ids)
+    interface_services = {}
+
+    # A dictionary of plugin instances
+    #   id -> weakref(instance)
+    plugin_instances = {}
+
+    # Environments
+    env = {'pca': PluginEnvironment('pca', bootstrap=True)}
+    env_map = {1: 'pca'}
+    env_stack = ['pca']
+
+    """A unique id used to name plugin objects"""
+    plugin_counter = 0
+
+    """A unique id used to name environment objects"""
+    env_counter = 1
+
+    """A list of executables"""
+    _executables = []
+
+    """TODO"""
+    _default_OptionData = None
+
+    @staticmethod
+    def get_env(arg=None):
+        """Return the current environment."""
+        if arg is None:
+            return PluginGlobals.env[PluginGlobals.env_stack[-1]]
+        else:
+            return PluginGlobals.env.get(arg, None)
+
+    @staticmethod
+    def add_env(name=None, validate=False):
+        if not name is None and not isinstance(name, basestring):
+            if validate and name.name in PluginGlobals.env:
+                raise PluginError("Environment %s is already defined" % name)
+            PluginGlobals.env[name.name] = name
+            PluginGlobals.env_map[name.env_id] = name.name
+            PluginGlobals.env_stack.append(name.name)
+            if __debug__ and name.log.isEnabledFor(logging.DEBUG):
+                env_.log.debug("Pushing environment %r on the PluginGlobals stack" % name.name)
+            return name
+        else:
+            env_ = PluginGlobals.env.get(name,None)
+            if validate and not env_ is None:
+                raise PluginError("Environment %s is already defined" % name)
+            if env_ is None:
+                env_ = PluginEnvironment(name)
+                PluginGlobals.env[env_.name] = env_
+            PluginGlobals.env_map[env_.env_id] = env_.name
+            PluginGlobals.env_stack.append(env_.name)
+            if __debug__ and env_.log.isEnabledFor(logging.DEBUG):
+                env_.log.debug("Pushing environment %r on the PluginGlobals stack" % env_.name)
+            return env_
+
+
+    @staticmethod
+    def pop_env():
+        if len(PluginGlobals.env_stack) > 1:
+            name = PluginGlobals.env_stack.pop()
+            env_ = PluginGlobals.env[name]
+            if __debug__ and env_.log.isEnabledFor(logging.DEBUG):
+                env_.log.debug("Popping environment %r from the PluginGlobals stack" % env_.name)
+            return env_
+        else:
+            return PluginGlobals.env[PluginGlobals.env_stack[0]]
+
+    @staticmethod
+    def remove_env(name, cleanup=False):
+        tmp = PluginGlobals.env.get(name, None)
+        if tmp is None:
+            raise PluginError("No environment %s is defined" % name)
+        ##print "HERE - remove", name, tmp.env_id
+        del PluginGlobals.env_map[tmp.env_id]
+        del PluginGlobals.env[name]
+        if cleanup:
+            tmp.cleanup()
+        PluginGlobals.env_stack = [name_ for name_ in PluginGlobals.env_stack if name_ in PluginGlobals.env]
+        return tmp
+
+    @staticmethod
+    def clear():
+        ## ZZ
+        ##return
+        for env_ in itervalues(PluginGlobals.env):
+            env_.cleanup()
+        PluginGlobals.interface_services = {}
+        PluginGlobals.plugin_instances = {}
+        PluginGlobals.env = {'pca': PluginEnvironment('pca', bootstrap=True)}
+        PluginGlobals.env_map = {1: 'pca'}
+        PluginGlobals.env_stack = ['pca']
+        PluginGlobals.plugin_counter = 0
+        PluginGlobals.env_counter = 1
+        PluginGlobals._executables = []
+
+    @staticmethod
+    def clear_global_data():
+        # ZZ
+        ##return
+        ep = ExtensionPoint(IOptionDataProvider)
+        for ep_ in ep:
+            ep_.clear()
+
+    @staticmethod
+    def services(name=None):
+        """
+        A convenience function that returns the services in the
+        current environment.
+
+        TODO:  env-specific services?
+        """
+        ans = set()
+        for ids in itervalues(PluginGlobals.interface_services):
+            for id_ in ids:
+                if not id_ in PluginGlobals.plugin_instances:
+                    # TODO: discard the id from the set?
+                    continue
+                if id_ < 0:
+                    ans.add( PluginGlobals.plugin_instances[id_] )
+                else:
+                    ans.add( PluginGlobals.plugin_instances[id_]() )
+        return ans
+            
+    @staticmethod
+    def load_services(**kwds):
+        """Load services from IPluginLoader extension points"""
+        PluginGlobals.get_env().load_services(**kwds)
+
+    @staticmethod
+    def pprint(**kwds):
+        """A pretty-print function"""
+        s  = "#--------------------------------------------------------------\n"
+        i=1
+        s += "Environment Stack:\n"
+        for env in PluginGlobals.env_stack:
+            s += "  "+str(i)+": "+env+"\n"
+            i += 1
+        s += "#--------------------------------------------------------------\n"
+        s += "Interfaces Declared:\n"
+        keys = []
+        for env_ in itervalues(PluginGlobals.env):
+            keys.extend(interface_ for interface_ in env_.interfaces)
+        keys.sort()
+        for key in keys:
+            s += "  "+key+":\n"
+        s += "#--------------------------------------------------------------\n"
+        s += "Interfaces Declared by Environment:\n"
+        for env_name in sorted(PluginGlobals.env.keys()):
+            env_ = PluginGlobals.env[env_name]
+            if len(env_.interfaces) == 0:
+                continue
+            s += "  "+env_.name+":\n"
+            for interface_ in sorted(env_.interfaces.keys()):
+                s += "    "+interface_+":\n"
+        #
+        # Coverage is disabled here because different platforms give different
+        # results.
+        #
+        if kwds.get('plugins', True):    #pragma:nocover
+            s += "#--------------------------------------------------------------\n"
+            s += "Plugins by Environment:\n"
+            for env_name in sorted(PluginGlobals.env.keys()):
+                env_ = PluginGlobals.env[env_name]
+                s += "  "+env_.name+":\n"
+                flag=True
+                for service_ in env_.plugins():
+                    flag=False
+                    try:
+                        service_.name
+                    except:
+                        service_ = service_()
+                    service_active = False
+                    for interface in service_.__interfaces__:
+                        if not interface in PluginGlobals.interface_services:
+                            continue
+                        service_active = service_._id in PluginGlobals.interface_services[interface]
+                        break
+                    s += "    "+service_.__repr__(simple=not kwds.get('show_ids',True))+":\n"
+                    if kwds.get('show_ids',True):
+                        s += "       name:      "+service_.name+"\n"
+                    s += "       id:        "+str(service_._id)+"\n"
+                    s += "       singleton: "+str(service_.__singleton__)+"\n"
+                    s += "       service:   "+str(service_active)+"\n"
+                    s += "       disabled:  "+str(not service_.enabled())+"\n"
+                if flag:
+                    s += "       None:\n"
+        s += "#--------------------------------------------------------------\n"
+        s += "Plugins by Interface:\n"
+        tmp = {}
+        for env_ in itervalues(PluginGlobals.env):
+            for interface_ in itervalues(env_.interfaces):
+                tmp[interface_] = []
+        for env_ in itervalues(PluginGlobals.env):
+            for key in env_.plugin_registry:
+                for item in env_.plugin_registry[key].__interfaces__:
+                    if item in tmp:
+                        tmp[item].append(key)
+        keys = list(tmp.keys())
+        for key in sorted(keys, key=lambda v: v.__name__.upper()):
+            if key.__name__ == "":                   #pragma:nocover
+                s += "  `"+str(key.__name__)+"`:\n"
+            else:
+                s += "  "+str(key.__name__)+":\n"
+            ttmp = tmp[key]
+            ttmp.sort()
+            if len(ttmp) == 0:
+                s += "    None:\n"
+            else:
+                for item in ttmp:
+                    s += "    "+item+":\n"
+        s += "#--------------------------------------------------------------\n"
+        s += "Plugins by Python Module:\n"
+        tmp = {}
+        for env_ in itervalues(PluginGlobals.env):
+            for name_ in env_.plugin_registry:
+                tmp.setdefault(env_.plugin_registry[name_].__module__,[]).append(name_)
+        if '__main__' in tmp:
+            # This is a hack to ensure consistency in the tests
+            tmp['pyutilib.component.core.tests.test_core'] = tmp['__main__']
+            del tmp['__main__']
+        keys = list(tmp.keys())
+        keys.sort()
+        for key in keys:
+            if key == "":                   #pragma:nocover
+                s += "  `"+str(key)+"`:\n"
+            else:
+                s += "  "+str(key)+":\n"
+            ttmp = tmp[key]
+            ttmp.sort()
+            for item in ttmp:
+                s += "    "+item+":\n"
+        print(s)
+
+    @staticmethod
+    def display(interface=None, verbose=False):
+        print("Plugin Instances:", len(PluginGlobals.plugin_instances))
+        if not interface is None:
+            print("Interface:",interface.name)
+            print("Count:",len(PluginGlobals.interface_services.get(interface,[])))
+            if verbose:
+                for service in interface.services.get(interface,[]):
+                    print(service)
+        else:
+            print("Interfaces", len(PluginGlobals.interface_services))
+            for interface in PluginGlobals.interface_services:
+                print("  Interface:", interface)
+                print("  Count:",len(PluginGlobals.interface_services.get(interface,[])))
+                if verbose:
+                    for service in PluginGlobals.interface_services.get(interface,[]):
+                        print("     ",PluginGlobals.plugin_instances[service])
+        #
+        print("")
+        for env_ in itervalues(PluginGlobals.env):
+            print("Plugin Declarations:",env_.name) 
+            for interface in sorted(env_.interfaces.keys(), key=lambda v: v.upper()):
+                print("Interface:", interface)
+                #print "Aliases:"
+                #for alias in sorted(interface._factory_cls.keys(), key=lambda v: v.upper()):
+                    #print "   ",alias,interface._factory_cls[alias]
+
+
+class InterfaceMeta(type):
+    """Meta class that registered the declaration of an interface"""
+
+    def __new__(cls, name, bases, d):
+        """Register this interface"""
+        new_class = type.__new__(cls, name, bases, d)
+        if name != "Interface":
+            if name in PluginGlobals.get_env().interfaces:
+                raise PluginError("Interface %s has already been defined" % name)
+            PluginGlobals.get_env().interfaces[name] = new_class
+        return new_class
+
+
+class Interface(with_metaclass(InterfaceMeta,object)):
+    """
+    Marker base class for extension point interfaces.  This class
+    is not intended to be instantiated.  Instead, the declaration
+    of subclasses of Interface are recorded, and these
+    classes are used to define extension points.
+    """
+    pass
 
 
 class IPluginLoader(Interface):
@@ -661,10 +630,25 @@ class IIgnorePluginWhenLoading(Interface):
         """Returns true if a loader should ignore a plugin during loading"""
 
 
-PluginGlobals.env("<default>").loaders = ExtensionPoint(IPluginLoader)
-PluginGlobals.env("<default>").loader_paths = ExtensionPoint(IPluginLoadPath)
-PluginGlobals.env("pca").loaders = ExtensionPoint(IPluginLoader)
-PluginGlobals.env("pca").loader_paths = ExtensionPoint(IPluginLoadPath)
+class IOptionDataProvider(Interface):
+    """
+    An interface that supports the management of common data between
+    Options.  This interface is also used to share this data with
+    the Configuration class.
+    """
+
+    def get_data():
+        """Returns a dictionary of dictionaries that represents the
+        options data."""
+
+    def set(self, section, name, value):
+        """Sets the value of a given (section,name) pair"""
+
+    def get(self, section, name):
+        """Returns the value of a given (section,name) pair"""
+
+    def clear():
+        """Clears the data"""
 
 
 class PluginMeta(type):
@@ -695,12 +679,8 @@ class PluginMeta(type):
         #
         # Check if plugin has already been registered
         #
-        if len(d.get('_implements', [])) == 0 and name in PluginGlobals.env().plugin_registry:
-            raise PluginError("Plugin class %r does not implement an interface, and it has already been defined in environment '%r'." % (str(name), PluginGlobals.env().name))
-        #
-        # Capture the environment namespace that this plugin is declared in
-        #
-        d['__plugin_namespace__'] = PluginGlobals.env().name
+        if len(d.get('_implements', [])) == 0 and name in PluginGlobals.get_env().plugin_registry:
+            return PluginGlobals.get_env().plugin_registry[name]
         #
         # Find all interfaces that this plugin will support
         #
@@ -723,18 +703,21 @@ class PluginMeta(type):
         # Add interfaces to the list of base classes if they are
         # declared inherited.
         #
-        flag=False
+        flag = False
         bases = list(bases)
         for interface in d.get('_inherited_interfaces', set()):
             if not interface in bases:
                 bases.append(interface)
-                flag=True
+                flag = True
         if flag:
             cls=MergedPluginMeta
         #
         # Create new class
         #
-        new_class = type.__new__(cls, name, tuple(bases), d)
+        try:
+            new_class = type.__new__(cls, name, tuple(bases), d)
+        except:
+            raise
         setattr(new_class,'__name__',name)
         #
         for _interface in __interfaces__:
@@ -745,7 +728,7 @@ class PluginMeta(type):
                     if _subclass:
                         continue
                     else:
-                        raise PluginError("Alias '%s' has already been defined for interface '%s'" % (_name, str(_interface)))
+                        raise PluginError("Alias '%s' has already been defined for interface '%s'" % (_name,str(_interface)))
                 _interface._factory_active[_name] = name
                 _interface._factory_doc[_name] = _doc
                 _interface._factory_cls[_name] = new_class
@@ -753,19 +736,18 @@ class PluginMeta(type):
         if d['__singleton__']:
             #
             # Here, we create an instance of a singleton class, which
-            # registers itself in PluginGlobals.singleton_services
+            # registers itself in singleton_services
             #
-            PluginGlobals.singleton_services()[new_class] = True
+            PluginGlobals.get_env().singleton_services[new_class] = True
             __instance__ = new_class()
-            PluginGlobals.singleton_services()[new_class] = __instance__
+            PluginGlobals.plugin_instances[__instance__._id] = __instance__
+            PluginGlobals.get_env().singleton_services[new_class] = __instance__._id
         else:
             __instance__ = None
-        setattr(new_class,'__instance__',__instance__)
-        setattr(new_class,'__env__',PluginGlobals.env().name)
         #
         # Register this plugin
         #
-        PluginGlobals.env().plugin_registry[name] = new_class
+        PluginGlobals.get_env().plugin_registry[name] = new_class
         return new_class
 
 
@@ -775,7 +757,7 @@ class MergedPluginMeta(PluginMeta,InterfaceMeta):
         return PluginMeta.__new__(cls, name, bases, d)
 
 
-class Plugin(with_metaclass(PluginMeta,object)):
+class Plugin(with_metaclass(PluginMeta, object)):
     """Base class for plugins.  A 'service' is an instance of a Plugin.
 
     Every Plugin class can declare what extension points it provides, as
@@ -783,7 +765,17 @@ class Plugin(with_metaclass(PluginMeta,object)):
     """
 
     def __del__(self):
-        pass
+        #print "HERE - plugin __del__", self._id, self.name, self.__class__.__name__
+        # ZZZ
+        ##return
+        self.deactivate()
+        if not PluginGlobals is None and not PluginGlobals.plugin_instances is None and self._id in PluginGlobals.plugin_instances and not PluginGlobals.plugin_instances[self._id] is None:
+            #print "HERE - plugin __del__", self._id
+            #print "interface_services", PluginGlobals.interface_services
+            #print "HERE", self.name, self.__class__.__name__
+            del PluginGlobals.plugin_instances[self._id]
+        if not PluginGlobals is None and not PluginGlobals.env_map is None and self._id_env in PluginGlobals.env_map:
+            PluginGlobals.env[PluginGlobals.env_map[self._id_env]].nonsingleton_plugins.discard(self._id)
 
     def __init__(self, **kwargs):
         if "name" in kwargs:
@@ -795,28 +787,58 @@ class Plugin(with_metaclass(PluginMeta,object)):
         # If this service is a singleton, then allocate and configure
         # it differently.
         #
-        env = getattr(cls,'__env__',None)
-        if cls in PluginGlobals.singleton_services(env):       #pragma:nocover
-            self = PluginGlobals.singleton_services(env)[cls]
-            if self is True:
+        if cls in PluginGlobals.get_env().singleton_services:       #pragma:nocover
+            id = PluginGlobals.get_env().singleton_services[cls]
+            if id is True:
                 self = super(Plugin, cls).__new__(cls)
-                self.id=PluginGlobals.next_id()
+                PluginGlobals.plugin_counter += 1
+                self._id = - PluginGlobals.plugin_counter
+                self._id_env = PluginGlobals.get_env().env_id
                 self.name = self.__class__.__name__
+                self._enable = True
                 self.activate()
-            self._enable = True
-            cls.__instance__ = self
+            else:
+                self = PluginGlobals.plugin_instances[id]
+            ##print "HERE - Plugin singleton:", self._id, self.name, self._id_env
             return self
+        #
+        # Else we generate a normal plugin
+        #
         self = super(Plugin, cls).__new__(cls)
-        #
-        # Set unique instance id value
-        #
-        self.id=PluginGlobals.next_id()
-        self.name = "Plugin."+str(self.id)
+        PluginGlobals.plugin_counter += 1
+        self._id = PluginGlobals.plugin_counter
+        self._id_env = PluginGlobals.get_env().env_id
+        self.name = "Plugin."+str(self._id)
+        PluginGlobals.get_env().nonsingleton_plugins.add(self._id)
+        ##print "HERE - Normal Plugin:", self._id, self.name, self.__class__.__name__, self._id_env
         self._enable = True
-        cls.__instance__ = None
-        if getattr(cls,'_service',True):
+        PluginGlobals.plugin_instances[self._id] = weakref.ref(self)
+        if getattr(cls, '_service', True):
+            self._HERE_ = self._id
             self.activate()
         return self
+
+    def activate(self):
+        """
+        Register this plugin with all interfaces that it implements.
+        """
+        for interface in self.__interfaces__:
+            PluginGlobals.interface_services.setdefault(interface,set()).add(self._id)
+
+    def deactivate(self):
+        """
+        Unregister this plugin with all interfaces that it implements.
+        """
+        ## ZZ
+        ##return
+        if PluginGlobals is None or PluginGlobals.interface_services is None:
+            # This could happen when python quits
+            return
+        #for interface in self.__interfaces__:
+            #if interface in PluginGlobals.interface_services:
+        for interface in PluginGlobals.interface_services:
+                # Remove an element if it exists
+                PluginGlobals.interface_services[interface].discard(self._id)
 
     @staticmethod
     def alias(name, doc=None, subclass=False):
@@ -831,18 +853,15 @@ class Plugin(with_metaclass(PluginMeta,object)):
         frame = sys._getframe(1)
         locals_ = frame.f_locals
         assert locals_ is not frame.f_globals and '__module__' in locals_, \
-               'register() can only be used in a class definition'
+               'alias() can only be used in a class definition'
         locals_.setdefault('_factory_aliases', set()).add((name,doc,subclass))
 
     @staticmethod
-    def implements(interface, namespace=None, inherit=False, service=True):
+    def implements(interface, inherit=None, namespace=None, service=False):
         """
         Can be used in the class definition of `Plugin` subclasses to
         declare the extension points that are implemented by this
         interface class.
-
-        If the `inherits` option is True, then this `Plugin` class
-        inherits from the `interface` class.
         """
         frame = sys._getframe(1)
         locals_ = frame.f_locals
@@ -854,67 +873,29 @@ class Plugin(with_metaclass(PluginMeta,object)):
         assert locals_ is not frame.f_globals and '__module__' in locals_, \
                'implements() can only be used in a class definition'
         #
-        if namespace is None:
-            namespace = interface.__interface_namespace__
+        locals_.setdefault('_implements', {}).setdefault(interface,[]).append(namespace)
         if inherit:
             locals_.setdefault('_inherited_interfaces', set()).add(interface)
-        locals_.setdefault('_implements', {}).setdefault(interface,[]).append(namespace)
         locals_['_service'] = service
 
-    def __repr__(self):
+    def disable(self):
+        """Disable this plugin"""
+        self._enable = False
+
+    def enable(self):
+        """Enable this plugin"""
+        self._enable = True
+
+    def enabled(self):
+        """Return value indicating if this plugin is enabled"""
+        return self._enable
+
+    def __repr__(self, simple=False):
         """Return a textual representation of the plugin."""
-        if self.__class__.__name__ == self.name:
+        if simple or self.__class__.__name__ == self.name:
             return '<Plugin %s>' % (self.__class__.__name__)
         else:
             return '<Plugin %s %r>' % (self.__class__.__name__, self.name)
-
-    def activate(self):
-        """
-        Add this service to the global environment, and environments that manage the service's
-        interfaces.
-        """
-        for interface in self.__interfaces__:
-            for ns in self.__interfaces__[interface]:
-                PluginGlobals.env(ns).activate(self)
-        PluginGlobals.env(self.__plugin_namespace__).activate(self)
-        return self
-
-    def deactivate(self):
-        """
-        Remove this service from the global environment, and environments that manage the service's
-        interfaces.
-        """
-        for interface in self.__interfaces__:
-            for ns in self.__interfaces__[interface]:
-                PluginGlobals.env(ns).deactivate(self)
-        PluginGlobals.env(self.__plugin_namespace__).deactivate(self)
-        return self
-
-    def disable(self):
-        """Disable this plugin."""
-        self._enable = False
-        #
-        # Clear the cache for environments that use this plugin
-        #
-        for interface in self.__interfaces__:
-            for ns in self.__interfaces__[interface]:
-                PluginGlobals.env(ns).clear_cache()
-        PluginGlobals.env(self.__plugin_namespace__).clear_cache()
-
-    def enable(self):
-        """Enable this plugin."""
-        self._enable = True
-        #
-        # Clear the cache for environments that use this plugin
-        #
-        for interface in self.__interfaces__:
-            for ns in self.__interfaces__[interface]:
-                PluginGlobals.env(ns).clear_cache()
-        PluginGlobals.env(self.__plugin_namespace__).clear_cache()
-
-    def enabled(self):
-        """Can be overriden to control whether a plugin is enabled."""
-        return self._enable
 
 alias = Plugin.alias
 implements = Plugin.implements
@@ -964,43 +945,22 @@ def CreatePluginFactory(_interface):
     return PluginFactoryFunctor()
 
 
-def PluginFactory(classname, args=[], env=None, **kwds):
+def PluginFactory(classname, args=[], **kwds):
     """Construct a Plugin instance, and optionally assign it a name"""
-    if isinstance(classname, six.string_types):
+    if isinstance(classname, str):
         try:
-            if isinstance(env, six.string_types):
-                env = PluginGlobals.env(env)
-            elif env is None:
-                env = PluginGlobals.env()
-            cls = env.plugin_registry[classname]
+            cls = PluginGlobals.get_env(kwds.get('env',None)).plugin_registry[classname]
         except KeyError:
-            raise PluginError("Unknown class %r in environment %r" % (str(classname), env.name))
+            raise PluginError("Unknown class %r" % str(classname))
     else:
         cls = classname
     obj = cls(*args, **kwds)
     if 'name' in kwds:
         obj.name = kwds['name']
-    if __debug__ and PluginGlobals.env().log.isEnabledFor(logging.DEBUG):
+    if __debug__ and logger.isEnabledFor(logging.DEBUG):
         if obj is None:
-            PluginGlobals.env().log.debug("Failed to create plugin %s" % (classname))
+            logger.debug("Failed to create plugin %s" % (classname))
         else:
-            PluginGlobals.env().log.debug("Creating plugin %s with name %s" % (classname, obj.name))
+            logger.debug("Creating plugin %s with name %s" % (classname, obj.name))
     return obj
 
-
-#
-# Copyright (C) 2003-2008 Edgewall Software
-# Copyright (C) 2003-2004 Jonas Borgstram <jonas@edgewall.com>
-# Copyright (C) 2004-2005 Christopher Lenz <cmlenz@gmx.de>
-# All rights reserved.
-#
-# This software is licensed as described in the file COPYING, which
-# you should have received as part of this distribution. The terms
-# are also available at http://trac.edgewall.org/wiki/TracLicense.
-#
-# This software consists of voluntary contributions made by many
-# individuals. For the exact contribution history, see the revision
-# history and logs, available at http://trac.edgewall.org/log/.
-#
-# Author: Jonas Borgstram <jonas@edgewall.com>
-#         Christopher Lenz <cmlenz@gmx.de>

@@ -8,7 +8,7 @@
 #  _________________________________________________________________________
 
 from pyutilib.component.core import PluginGlobals
-PluginGlobals.push_env("pca")
+PluginGlobals.add_env("pca")
 
 from pyutilib.component.loader.plugin_importLoader import *
 from pyutilib.component.loader.plugin_eggLoader import *

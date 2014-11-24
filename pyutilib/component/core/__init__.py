@@ -23,7 +23,7 @@ this package can be independently used in other projects.
 import sys
 from pyutilib.component.core.core import *
 
-PluginGlobals.push_env("pca")
+PluginGlobals.add_env("pca")
 
 #
 # This declaration is here because this is a convenient place where
@@ -43,6 +43,7 @@ class IgnorePluginPlugins(SingletonPlugin):
 # Import the 'pyutilib.component' plugins
 #
 try:
+    #raise ImportError("INGORE")
     import pkg_resources
     #
     # Load modules associated with Plugins that are defined in

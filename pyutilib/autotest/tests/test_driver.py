@@ -6,7 +6,6 @@
 import os
 import sys
 from os.path import abspath, dirname
-sys.path.insert(0, dirname(dirname(abspath(__file__)))+os.sep+".."+os.sep+"..")
 currdir = dirname(abspath(__file__))+os.sep
 bindir = dirname(abspath(sys.executable))+os.sep
 
@@ -158,7 +157,7 @@ class TestJson(pyutilib.th.TestCase):
         self.assertFileEqualsBaseline(currdir+'test5.out', currdir+'test5.txt', filter=filter)
 
     def test6(self):
-        """run --cat x_suite2 --cat x_suite1 example1.json"""
+        # run --cat x_suite2 --cat x_suite1 example1.json
         pyutilib.subprocess.run(bindir+'pyutilib_test_driver --cat x_suite2 --cat x_suite1 '+currdir+'example1.json', outfile=currdir+'test6.out')
         self.assertFileEqualsBaseline(currdir+'test6.out', currdir+'test6.txt', filter=filter)
 

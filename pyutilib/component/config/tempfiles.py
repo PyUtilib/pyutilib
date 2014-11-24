@@ -52,13 +52,16 @@ class ITempfileManager(Interface):
     def pop(self, remove=True):
         """Pop tempfiles onto a stack.  Tempfiles that are popped off the stack are deleted."""
 
-
 class TempfileManagerPlugin(ManagedSingletonPlugin):
     """A plugin that manages temporary files."""
 
     implements(ITempfileManager)
 
     def __init__(self, **kwds):
+        if getattr(self, '_initialized', False) is True:
+            return
+        self._initialized = True
+        #
         kwds['name']='TempfileManager'
         ManagedSingletonPlugin.__init__(self,**kwds)
         self._tempfiles = [[]]
@@ -184,3 +187,4 @@ class TempfileManagerPlugin(ManagedSingletonPlugin):
 # singleton plugin
 #
 TempfileManager = TempfileManagerPlugin()
+

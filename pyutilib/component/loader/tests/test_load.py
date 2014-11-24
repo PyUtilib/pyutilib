@@ -30,21 +30,21 @@ class DummyPlugin(pyutilib.component.core.Plugin):
 class TestLoader(unittest.TestCase):
 
     def setUp(self):
-        pyutilib.component.core.PluginGlobals.push_env(pyutilib.component.core.PluginEnvironment())
+        pyutilib.component.core.PluginGlobals.add_env("testing.loader")
         DummyPlugin()
 
     def tearDown(self):
-        pyutilib.component.core.PluginGlobals.pop_env()
+        pyutilib.component.core.PluginGlobals.remove_env("testing.loader")
 
     def test_load1(self):
-        pyutilib.component.core.PluginGlobals.env().load_services(path=currdir+"plugins1", auto_disable=True, name_re="^$")
+        pyutilib.component.core.PluginGlobals.get_env().load_services(path=currdir+"plugins1", auto_disable=True, name_re="^$")
 
     def test_load2(self):
-        pyutilib.component.core.PluginGlobals.env().load_services(path=[currdir+"plugins1", currdir+"plugins2"], auto_disable="^$", name_re="^$")
+        pyutilib.component.core.PluginGlobals.get_env().load_services(path=[currdir+"plugins1", currdir+"plugins2"], auto_disable="^$", name_re="^$")
 
     def test_load3(self):
         try:
-            pyutilib.component.core.PluginGlobals.env().load_services(path={})
+            pyutilib.component.core.PluginGlobals.get_env().load_services(path={})
             self.fail("expect error")
         except pyutilib.component.core.PluginError:
             pass
@@ -53,10 +53,10 @@ class TestLoader(unittest.TestCase):
         pyutilib.component.core.PluginGlobals.load_services(auto_disable="", name_re="^$")
 
     def test_load5(self):
-        pyutilib.component.core.PluginGlobals.env().load_services(path=[currdir+"plugins1", currdir+"plugins2"], auto_disable=False, name_re="^$")
+        pyutilib.component.core.PluginGlobals.get_env().load_services(path=[currdir+"plugins1", currdir+"plugins2"], auto_disable=False, name_re="^$")
 
     def test_load6(self):
-        pyutilib.component.core.PluginGlobals.env().load_services(path=[currdir+"plugins1", currdir+"plugins2"], auto_disable=False, name_re=True)
+        pyutilib.component.core.PluginGlobals.get_env().load_services(path=[currdir+"plugins1", currdir+"plugins2"], auto_disable=False, name_re=True)
 
 
 if __name__ == "__main__":

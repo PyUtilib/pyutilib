@@ -224,7 +224,7 @@ def functor_api(fn=None, implements=None, outputs=None, namespace=None):
 
             pyutilib.component.core.alias(_alias)
 
-            pyutilib.component.core.implements(IFunctorTask, service=False)
+            pyutilib.component.core.implements(IFunctorTask)
 
             def __init__(self, *args, **kwargs):
                 kwargs['fn'] = fn
