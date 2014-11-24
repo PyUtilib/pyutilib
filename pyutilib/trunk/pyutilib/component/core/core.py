@@ -261,9 +261,9 @@ class ExtensionPoint(object):
                 elif (all or plugin.enabled()) and (key is None or strkey == plugin.name):
                     ans.add(plugin)
             # Remove weakrefs that were empty
-            ## Z
-            ##for id_ in remove:
-                ##PluginGlobals.interface_services[self.interface].remove(id_)
+            ## ZZ
+            for id_ in remove:
+                PluginGlobals.interface_services[self.interface].remove(id_)
         return sorted( ans, key=lambda x:x._id )
 
     def Xextensions(self, all=False, key=None):
@@ -291,9 +291,9 @@ class ExtensionPoint(object):
                 elif (all or plugin._enable) and (key is None or strkey == plugin.name):
                     ans.add(plugin)
             # Remove weakrefs that were empty
-            ## Z
-            ##for id_ in remove:
-                ##PluginGlobals.interface_services[self.interface].remove(id_)
+            ## ZZ
+            for id_ in remove:
+                PluginGlobals.interface_services[self.interface].remove(id_)
         return sorted( ans, key=lambda x:x._id )
 
     def __repr__(self):
