@@ -120,9 +120,15 @@ class OptionData(Plugin):
             else:
                 raise OptionError("Problem retrieving the value of option %r from section %r. Undefined section." % (name, section))
 
-    def clear(self):
+    def clear(self, keys=None):
         """Clears the data"""
-        self.data={}
+        if keys is None:
+            self.data={}
+        else:
+            for key in keys:
+                if not key in self.data:
+                    continue
+                del self.data[key]
 
 
 class OptionPlugin(Plugin):
