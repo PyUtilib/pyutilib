@@ -275,9 +275,9 @@ class ExtensionPoint(object):
         ans = set()
         remove = set()
         if self.interface in PluginGlobals.interface_services:
-            print "HERE"
+            #print "HERE"
             for id_ in PluginGlobals.interface_services[self.interface]:
-                print "HERE", id_
+                #print "HERE", id_
                 if not id_ in PluginGlobals.plugin_instances:
                     remove.add(id_)
                     continue
@@ -285,7 +285,7 @@ class ExtensionPoint(object):
                     plugin = PluginGlobals.plugin_instances[id_]
                 else:
                     plugin = PluginGlobals.plugin_instances[id_]()
-                print "HERE", PluginGlobals.plugin_instances[id_], plugin
+                #print "HERE", PluginGlobals.plugin_instances[id_], plugin
                 if plugin is None:
                     remove.add(id_)
                 elif (all or plugin._enable) and (key is None or strkey == plugin.name):
@@ -354,7 +354,7 @@ class PluginGlobals(object):
 
     @staticmethod
     def add_env(name=None, validate=False):
-        if not name is None and not isinstance(name, basestring):
+        if not name is None and not isinstance(name, string_types):
             if validate and name.name in PluginGlobals.env:
                 raise PluginError("Environment %s is already defined" % name)
             PluginGlobals.env[name.name] = name

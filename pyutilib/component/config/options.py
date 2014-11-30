@@ -148,24 +148,24 @@ class OptionPlugin(Plugin):
             PluginGlobals.plugin_instances[PluginGlobals._default_OptionData._id] = weakref.ref(PluginGlobals._default_OptionData)
         #
         if len(self.data) == 0:
-            if False:
-                print "ZZZ", ep.Xextensions()
-                print "HERE", PluginGlobals._default_OptionData._id, PluginGlobals._default_OptionData.ctr
-                print "HERE", PluginGlobals._default_OptionData
-                print "HERE - id", id(PluginGlobals._default_OptionData)
-                print "HERE", getattr(PluginGlobals._default_OptionData, '_HERE_', None)
-                print "HERE", PluginGlobals._default_OptionData.__interfaces__
-                print ""
-                print "HERE", PluginGlobals.interface_services
-                print "HERE", PluginGlobals.plugin_instances.keys()
-                for exe_ in PluginGlobals._executables:
-                    print exe_._id, exe_
-                print "LEN", len(PluginGlobals.env)
-                for name_ in PluginGlobals.env:
-                    env_ = PluginGlobals.env[name_]
-                    print env_.name
-                    print env_.nonsingleton_plugins
-                    print [env_.singleton_services[cls_] for cls_ in env_.singleton_services]
+            #if False:
+                #print "ZZZ", ep.Xextensions()
+                #print "HERE", PluginGlobals._default_OptionData._id, PluginGlobals._default_OptionData.ctr
+                #print "HERE", PluginGlobals._default_OptionData
+                #print "HERE - id", id(PluginGlobals._default_OptionData)
+                #print "HERE", getattr(PluginGlobals._default_OptionData, '_HERE_', None)
+                #print "HERE", PluginGlobals._default_OptionData.__interfaces__
+                #print ""
+                #print "HERE", PluginGlobals.interface_services
+                #print "HERE", PluginGlobals.plugin_instances.keys()
+                #for exe_ in PluginGlobals._executables:
+                    #print exe_._id, exe_
+                #print "LEN", len(PluginGlobals.env)
+                #for name_ in PluginGlobals.env:
+                    #env_ = PluginGlobals.env[name_]
+                    #print env_.name
+                    #print env_.nonsingleton_plugins
+                    #print [env_.singleton_services[cls_] for cls_ in env_.singleton_services]
             raise PluginError("Problem constructing a global OptionData object %s" % self.name)
 
     def matches_section(self, section):
