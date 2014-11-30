@@ -140,7 +140,7 @@ class LoggingConfig(Plugin):
             if self.timestamp and logtype in ('file', 'stderr'):
                 format = '%(asctime)s ' + format
             format = format.replace('$(', '%(') \
-                    .replace('%(env)s', PluginGlobals.env().name)
+                    .replace('%(env)s', PluginGlobals.get_env().name)
         datefmt = ''
         if self.timestamp and self.log_type == 'stderr':
             datefmt = '%X'
