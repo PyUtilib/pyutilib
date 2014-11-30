@@ -296,8 +296,11 @@ class ExtensionPoint(object):
                 PluginGlobals.interface_services[self.interface].remove(id_)
         return sorted( ans, key=lambda x:x._id )
 
-    def __repr__(self):
-        """Return a textual representation of the extension point."""
+    def __repr__(self, simple=False):
+        """
+        Return a textual representation of the extension point.
+        """
+        # TODO: use the 'simple' argument
         env_str = ""
         for env_ in itervalues(PluginGlobals.env):
             if self.interface in set(itervalues(env_.interfaces)):
