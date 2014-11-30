@@ -286,7 +286,7 @@ class Option(OptionPlugin):
     def __set__(self, instance, value):
         raise PluginError("The Option class cannot be used as a class decorator")
 
-    def __repr__(self):
+    def __repr__(self, simple=False):
         """Returns a string representation of the option name"""
         sec = " ["+self.section+"]"
         return '<%s%s %r>' % (self.__class__.__name__, sec, self.name)
@@ -320,7 +320,7 @@ class VirtualOption(object):
         """Sets the value of the option"""
         self._get_option(instance).set_value(value)
 
-    def __repr__(self):
+    def __repr__(self, simple=False):
         """Returns a string representation of the option name"""
         return "<VirtualOption %s>" % self.name
 
