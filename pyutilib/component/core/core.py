@@ -420,12 +420,12 @@ class PluginGlobals(object):
         PluginGlobals._executables = []
 
     @staticmethod
-    def clear_global_data():
+    def clear_global_data(keys=None):
         # ZZ
         ##return
         ep = ExtensionPoint(IOptionDataProvider)
         for ep_ in ep:
-            ep_.clear()
+            ep_.clear(keys=keys)
 
     @staticmethod
     def services(name=None):

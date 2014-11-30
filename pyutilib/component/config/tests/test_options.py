@@ -42,7 +42,7 @@ class TestOption(unittest.TestCase):
 
     def setUp(self):
         PluginGlobals.add_env("testing.options")
-        PluginGlobals.clear_global_data()
+        PluginGlobals.clear_global_data(keys=['globals', 'a.b'])
 
     def tearDown(self):
         PluginGlobals.remove_env("testing.options", cleanup=True)
