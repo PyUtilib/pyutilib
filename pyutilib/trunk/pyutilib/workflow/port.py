@@ -251,7 +251,7 @@ class Ports(dict):
         # JPW: a port can't really exist independently of a task - we should check 
         #      this in the constructor.
         if self._task is not None:
-            tmp['Owner'] = str(self._task())
+            tmp['Owner'] = self._task()._name()
         return tmp
         
 

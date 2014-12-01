@@ -72,7 +72,7 @@ class Task(object):
            
     def execute(self, debug=False):
         """Execute this task."""
-        raise ValueError("There is no default execution for an abstract Task object! Task=%s" % str(self))  #pragma:nocover
+        raise ValueError("There is no default execution for an abstract Task object! Task=%s" % self._name())  #pragma:nocover
 
     def busy_resources(self):
         """Return the list of resources that this task is waiting for."""
@@ -210,12 +210,15 @@ class Task(object):
         tmp['OutputControls'] = self.output_controls._repn_()
         return tmp 
 
-    def __repr__(self):
-        """Return a string representation for this task."""
-        return pprint.pformat(self._repn_(), 2)
+    #def __repr__(self):
+        #"""Return a string representation for this task."""
+        #return pprint.pformat(self._repn_(), 2)
 
     def __str__(self):
         """Return a string representation for this task."""
+        return pprint.pformat(self._repn_(), 2)
+
+    def _name(self):
         return "%s prev: %s next: %s resources: %s" % (str(self.name),str(sorted(list(self.prev_task_ids()))),str(sorted(list(self.next_task_ids()))), str(sorted(self._resources.keys())))
 
     def reset(self):

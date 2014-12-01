@@ -219,10 +219,10 @@ class Workflow(Task):
             print(self.name, '---------------')
 
     def __str__(self):
-        return "\n".join(["Workflow %s:" % self.name]+self._dfs_([self._start_task.id], lambda t: str(t)))
+        return "\n".join(["Workflow %s:" % self.name]+self._dfs_([self._start_task.id], lambda t: t._name()))
 
     def __repr__(self):
-        return "Workflow %s:\n" % self.name+Task.__repr__(self)+'\n'+"\n".join(self._dfs_([self._start_task.id], lambda t: repr(t)))
+        return "Workflow %s:\n" % self.name+Task.__repr__(self)+'\n'+"\n".join(self._dfs_([self._start_task.id], lambda t: str(t)))
 
     def _dfs_(self, indices, fn, touched=None):
         if touched is None:
