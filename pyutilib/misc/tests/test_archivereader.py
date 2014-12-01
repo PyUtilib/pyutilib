@@ -163,6 +163,10 @@ class _TestArchiveReaderBaseNested(object):
 
         tmpdir = a.extract('directory',recursive=True)
         self.assertEqual(os.path.exists(tmpdir),True)
+        if not os.path.exists(os.path.join(tmpdir, 'fileA.txt')):
+            import pyutilib.subprocess
+            print("HERE %s %s" % (tmpdir, os.path.abspath(tmpdir)))
+            pyutilib.subprocess.run("ls "+tmpdir)
         self.assertEqual(os.path.exists(os.path.join(tmpdir,'fileA.txt')),True)
         self.assertEqual(os.path.exists(os.path.join(tmpdir,'fileB.txt')),True)
         a.clear_extractions()
