@@ -281,7 +281,7 @@ Task7 prev: [1] next: [] resources: []""")
                       'Ready': 'False',
                       'Task': '1',
                       'Value': 'None'}}}"""
-        self.assertEqual(repr(A), base)
+        self.assertEqual(str(A), base)
 
     @unittest.skipIf( is_python24or25, "There is a slight (space) formatting difference from pformat from Python2.6.  Skipping test.")
     def test3(self):
@@ -308,7 +308,7 @@ Task7 prev: [1] next: [] resources: []""")
         A.inputs['x'] = 2
         self.assertEqual(A.inputs['x'].get_value(), 2)
         OUTPUT = open(currdir+'test4.out','w')
-        OUTPUT.write(repr(A)+'\n')
+        OUTPUT.write(str(A)+'\n')
         OUTPUT.close()
         self.assertFileEqualsBaseline(currdir+'test4.out', currdir+'test4.txt')
 
@@ -371,7 +371,7 @@ Task7 prev: [1] next: [] resources: []""")
         w.set_options(['--i=3','--a=2'])
         w()
         OUTPUT = open(currdir+'test5b.out','w')
-        OUTPUT.write(repr(w)+'\n')
+        OUTPUT.write(str(w)+'\n')
         OUTPUT.close()
         self.assertFileEqualsBaseline(currdir+'test5b.out', currdir+'test5b.txt')
 
