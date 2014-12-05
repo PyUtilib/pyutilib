@@ -6,6 +6,11 @@ import os
 import sys
 from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
+try:
+    import yaml
+    yaml_available=True
+except ImportError:
+    yaml_available=False
 
 import re
 from nose.tools import nottest
@@ -336,9 +341,19 @@ class TestMisc(unittest.TestCase):
             self.assertFalse(re.match("<Plugin Plugin1",str(s4)) is None)
             self.assertFalse(re.match("<Plugin Plugin3",str(s5)) is None)
             pyutilib.misc.setup_redirect(currdir+"log1.out")
-            PluginGlobals.pprint(plugins=False)
+            PluginGlobals.pprint(plugins=False, json=True)
             pyutilib.misc.reset_redirect()
-            self.assertMatchesYamlBaseline(currdir+"log1.out",currdir+"log1.yml")
+            self.assertMatchesJsonBaseline(currdir+"log1.out",currdir+"log1.jsn")
+            if yaml_available:
+                pyutilib.misc.setup_redirect(currdir+"log1.out")
+                PluginGlobals.pprint(plugins=False, json=True)
+                pyutilib.misc.reset_redirect()
+                self.assertMatchesYamlBaseline(currdir+"log1.out",currdir+"log1.yml")
+                #
+                pyutilib.misc.setup_redirect(currdir+"log1.out")
+                PluginGlobals.pprint(plugins=False)
+                pyutilib.misc.reset_redirect()
+                self.assertMatchesYamlBaseline(currdir+"log1.out",currdir+"log1.yml")
         finally:
             PluginGlobals.remove_env("foo")
             PluginGlobals.remove_env("bar")
@@ -417,10 +432,19 @@ class TestManager(unittest.TestCase):
         except PluginError:
             pass
         pyutilib.misc.setup_redirect(currdir+"factory.out")
-        PluginGlobals.pprint(plugins=False)
-        #PluginGlobals.pprint()
+        PluginGlobals.pprint(plugins=False, json=True)
         pyutilib.misc.reset_redirect()
-        self.assertMatchesYamlBaseline(currdir+"factory.out",currdir+"factory.yml")
+        self.assertMatchesJsonBaseline(currdir+"factory.out",currdir+"factory.jsn")
+        if yaml_available:
+            pyutilib.misc.setup_redirect(currdir+"factory.out")
+            PluginGlobals.pprint(plugins=False, json=True)
+            pyutilib.misc.reset_redirect()
+            self.assertMatchesYamlBaseline(currdir+"factory.out",currdir+"factory.yml")
+            #
+            pyutilib.misc.setup_redirect(currdir+"factory.out")
+            PluginGlobals.pprint(plugins=False)
+            pyutilib.misc.reset_redirect()
+            self.assertMatchesYamlBaseline(currdir+"factory.out",currdir+"factory.yml")
 
 
 if __name__ == "__main__":
