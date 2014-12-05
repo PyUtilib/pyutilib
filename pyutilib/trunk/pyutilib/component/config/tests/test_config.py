@@ -13,6 +13,7 @@ from pyutilib.component.core import ExtensionPoint
 from pyutilib.component.config import *
 import pyutilib.th as unittest
 import pyutilib.misc
+import pyutilib.subprocess
 
 
 def filter(line):
@@ -143,12 +144,12 @@ class Test(unittest.TestCase):
         """Test save method"""
         config = Configuration()
         config.load(currdir+"config1.ini")
-        if sys.platform == "win32":
-            #
-            # A hack, to ensure cross-platform portability of this test
-            #
-            e = ExtensionPoint(IFileOption)
-            for ep in e.extensions():
+        #
+        # A hack, to ensure cross-platform portability of this test
+        #
+        e = ExtensionPoint(IFileOption)
+        for ep in e.extensions():
+            if ep.enabled():
                 ep.set_value("/dev/null", raw=True)
         config.save(currdir+"config1.out")
         #PluginGlobals.pprint()
