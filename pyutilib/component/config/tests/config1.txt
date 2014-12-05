@@ -12,6 +12,10 @@ TempfileManager = True
 [a.b]
 zz = 4.5
 
+[executables]
+memmon = /dev/null
+valgrind = /dev/null
+
 [globals]
 a = 1
 b = /dev/null
