@@ -26,18 +26,18 @@ class Test(pyutilib.th.TestCase):
 
     def test_egg1(self):
         """Load an egg for the 'project1' project.  Eggs are loaded in the 'eggs1' directory, but only the Project1 stuff is actually imported."""
-        pyutilib.subprocess.run(sys.executable+" "+currdir+os.sep+"egg1.py "+currdir+" json")
+        pyutilib.subprocess.run([sys.executable, currdir+os.sep+"egg1.py", currdir, "json"])
         self.assertMatchesJsonBaseline(currdir+"egg1.out", currdir+"egg1.jsn")
         if yaml_available:
-            pyutilib.subprocess.run(sys.executable+" "+currdir+os.sep+"egg1.py "+currdir+" yaml")
+            pyutilib.subprocess.run([sys.executable, currdir+os.sep+"egg1.py", currdir, "yaml"])
             self.assertMatchesYamlBaseline(currdir+"egg1.out", currdir+"egg1.yml")
 
     def test_egg2(self):
         """Load an egg for the 'project1' project.  Eggs are loaded in the 'eggs1' and 'eggs2' directories, but only the Project1 and Project 3 stuff is actually imported."""
-        pyutilib.subprocess.run(sys.executable+" "+currdir+os.sep+"egg2.py "+currdir+" json")
+        pyutilib.subprocess.run([sys.executable, currdir+os.sep+"egg2.py", currdir, "json"])
         self.assertMatchesJsonBaseline(currdir+"egg2.out", currdir+"egg2.jsn")
         if yaml_available:
-            pyutilib.subprocess.run(sys.executable+" "+currdir+os.sep+"egg2.py "+currdir+" yaml")
+            pyutilib.subprocess.run([sys.executable, currdir+os.sep+"egg2.py", currdir, "yaml"])
             self.assertMatchesYamlBaseline(currdir+"egg2.out", currdir+"egg2.yml")
 
 # Apply class decorator explicitly, which works in Python 2.5

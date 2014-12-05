@@ -4,8 +4,6 @@ import os
 import sys
 import logging
 
-print("HERE1")
-print(str(sys.argv))
 currdir=sys.argv[-2]+os.sep
 
 logging.basicConfig(level=logging.DEBUG)
@@ -16,4 +14,3 @@ if sys.argv[-1] == "json":
 else:
     pyutilib.component.core.PluginGlobals.pprint()
 pyutilib.misc.reset_redirect()
-print("HERE2")
