@@ -3,7 +3,7 @@ import sys
 import os
 import logging
 
-currdir=sys.argv[-1]+os.sep
+currdir=sys.argv[-2]+os.sep
 
 pyutilib.component.core.PluginGlobals.add_env(pyutilib.component.core.PluginEnvironment("testing"))
 service = pyutilib.component.core.PluginFactory("EggLoader", namespace='project1', env='pca')
@@ -16,5 +16,8 @@ if service is None:
 #
 pyutilib.component.core.PluginGlobals.get_env().load_services(path=currdir+"eggs1")
 #
-pyutilib.component.core.PluginGlobals.pprint()
+if sys.argv[-1] == 'json':
+    pyutilib.component.core.PluginGlobals.pprint(json=True)
+else:
+    pyutilib.component.core.PluginGlobals.pprint()
 pyutilib.misc.reset_redirect()
