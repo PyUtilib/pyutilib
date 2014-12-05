@@ -515,7 +515,7 @@ class PluginGlobals(object):
                         break
                     service_s = service_.__repr__(simple=not kwds.get('show_ids',True))
                     ans['Plugins by Environment'][env_.name][service_s] = {}
-                    s += "    "+service_+":\n"
+                    s += "    "+service_s+":\n"
                     if kwds.get('show_ids',True):
                         ans['Plugins by Environment'][env_.name][service_s]['name'] = service_.name
                         s += "       name:      "+service_.name+"\n"
