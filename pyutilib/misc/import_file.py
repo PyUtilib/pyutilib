@@ -64,7 +64,9 @@ def import_file(filename, context=None, name=None, clear_cache=False):
     # For 2.4 compatibility we will call endswith() twice.
     if modulename.endswith('.py') or modulename.endswith('.pyc'):
         if not os.path.exists(filename):
-            raise IOError("File %s does not exist" % (filename))
+            if not os.path.exists(os.path.expanduser(filename)):
+                raise IOError("File %s does not exist" % (filename))
+            filename = os.path.expanduser(filename)
         if filename.endswith('.pyc'):
             filename = filename[:-1]
         modulename = modulename.rsplit('.', 1)[0]
