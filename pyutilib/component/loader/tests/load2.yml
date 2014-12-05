@@ -1,6 +1,6 @@
 #--------------------------------------------------------------
 Environment Stack:
-  1: pca
+  '1': pca
 #--------------------------------------------------------------
 Interfaces Declared:
   IConfiguration:
@@ -35,7 +35,7 @@ Plugins by Environment:
        name:      TempfileManager
        singleton: True
        service:   True
-       disabled:  True
+       disabled:  False
     <Plugin IgnorePluginPlugins>:
        name:      IgnorePluginPlugins
        singleton: True
@@ -46,6 +46,11 @@ Plugins by Environment:
        singleton: True
        service:   True
        disabled:  False
+    <Plugin test2_foo>:
+       name:      test2_foo
+       singleton: True
+       service:   False
+       disabled:  False
     <Plugin Configuration_ConfigParser>:
        name:      Configuration_ConfigParser
        singleton: True
@@ -53,6 +58,11 @@ Plugins by Environment:
        disabled:  False
     <Plugin OptionData 'Plugin.4'>:
        name:      Plugin.4
+       singleton: False
+       service:   True
+       disabled:  False
+    <BoolOption [Services] 'TempfileManager'>:
+       name:      TempfileManager
        singleton: False
        service:   True
        disabled:  False
@@ -75,6 +85,21 @@ Plugins by Environment:
        name:      bar
        singleton: False
        service:   True
+       disabled:  False
+    <Option [globals] 'abc'>:
+       name:      abc
+       singleton: False
+       service:   True
+       disabled:  False
+    <Option [globals] 'ABC'>:
+       name:      ABC
+       singleton: False
+       service:   True
+       disabled:  False
+    <Plugin test3_foo 'Plugin.14'>:
+       name:      Plugin.14
+       singleton: False
+       service:   False
        disabled:  False
 #--------------------------------------------------------------
 Plugins by Interface:
@@ -145,4 +170,8 @@ Plugins by Python Module:
     ImportLoader:
   test1:
     test1_foo:
+  test2:
+    test2_foo:
+  test3:
+    test3_foo:
 
