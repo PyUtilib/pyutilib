@@ -167,6 +167,8 @@ class _TestArchiveReaderBaseNested(object):
             import pyutilib.subprocess
             print("HERE %s %s" % (tmpdir, os.path.abspath(tmpdir)))
             pyutilib.subprocess.run(["ls", tmpdir], tee=True)
+            import glob
+            print("HERE %s" % str(glob.glob(tmpdir+'/*')))
         self.assertEqual(os.path.exists(os.path.join(tmpdir,'fileA.txt')),True)
         self.assertEqual(os.path.exists(os.path.join(tmpdir,'fileB.txt')),True)
         a.clear_extractions()
