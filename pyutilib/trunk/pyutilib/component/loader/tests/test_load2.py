@@ -19,7 +19,7 @@ import pyutilib.subprocess
 class Test(unittest.TestCase):
 
     def test_load1(self):
-        pyutilib.subprocess.run([sys.executable, currdir+os.sep+"load1.py", currdir, "json"], tee=True)
+        pyutilib.subprocess.run([sys.executable, currdir+os.sep+"load1.py", currdir, "json"])
         self.assertMatchesJsonBaseline(currdir+"load1.out", currdir+"load1.jsn")
         if yaml_available:
             pyutilib.subprocess.run([sys.executable, currdir+os.sep+"load1.py", currdir, "yaml"])
