@@ -122,7 +122,7 @@ class Test(unittest.TestCase):
         tmp2=TMP2()
         config.load(currdir+"config4.ini")
         #config.pprint()
-        if False and sys.platform == "win32":
+        if sys.platform == "win32":
             #
             # A hack, to ensure cross-platform portability of this test
             #
