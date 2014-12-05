@@ -1,7 +1,7 @@
 #--------------------------------------------------------------
 Environment Stack:
-  1: pca
-  2: testing
+  '1': pca
+  '2': testing
 #--------------------------------------------------------------
 Interfaces Declared:
   IConfiguration:
@@ -12,7 +12,6 @@ Interfaces Declared:
   IOption:
   IOptionDataProvider:
   IPackage1Util:
-  IPackage3Util:
   IPluginLoadPath:
   IPluginLoader:
   ITempfileManager:
@@ -33,7 +32,6 @@ Interfaces Declared by Environment:
     IUpdatedOptionsAction:
   testing:
     IPackage1Util:
-    IPackage3Util:
 #--------------------------------------------------------------
 Plugins by Environment:
   pca:
@@ -98,16 +96,6 @@ Plugins by Environment:
        singleton: False
        service:   True
        disabled:  False
-    <Plugin Package3Util 'Plugin.13'>:
-       name:      Plugin.13
-       singleton: False
-       service:   False
-       disabled:  False
-    <Plugin Package3Util 'Plugin.14'>:
-       name:      Plugin.14
-       singleton: False
-       service:   False
-       disabled:  False
 #--------------------------------------------------------------
 Plugins by Interface:
   IConfiguration:
@@ -134,8 +122,6 @@ Plugins by Interface:
     OptionData:
   IPackage1Util:
     Package1Util:
-  IPackage3Util:
-    Package3Util:
   IPluginLoader:
     EggLoader:
     ImportLoader:
@@ -151,8 +137,6 @@ Plugins by Interface:
 Plugins by Python Module:
   package1.main:
     Package1Util:
-  package3.main:
-    Package3Util:
   pyutilib.component.config.configuration:
     Configuration:
   pyutilib.component.config.env_config:
