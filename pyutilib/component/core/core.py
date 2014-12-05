@@ -454,29 +454,39 @@ class PluginGlobals(object):
 
     @staticmethod
     def pprint(**kwds):
-        """A pretty-print function"""
+        """
+        A pretty-print function
+        """
+        ans = {}
         s  = "#--------------------------------------------------------------\n"
         i=1
+        ans['Environment Stack'] = {}
         s += "Environment Stack:\n"
         for env in PluginGlobals.env_stack:
-            s += "  "+str(i)+": "+env+"\n"
+            ans['Environment Stack'][i] = env
+            s += "  '"+str(i)+"': "+env+"\n"
             i += 1
         s += "#--------------------------------------------------------------\n"
+        ans['Interfaces Declared'] = {}
         s += "Interfaces Declared:\n"
         keys = []
         for env_ in itervalues(PluginGlobals.env):
             keys.extend(interface_ for interface_ in env_.interfaces)
         keys.sort()
         for key in keys:
+            ans['Interfaces Declared'][key] = None
             s += "  "+key+":\n"
         s += "#--------------------------------------------------------------\n"
+        ans['Interfaces Declared by Environment'] = {}
         s += "Interfaces Declared by Environment:\n"
         for env_name in sorted(PluginGlobals.env.keys()):
             env_ = PluginGlobals.env[env_name]
             if len(env_.interfaces) == 0:
                 continue
+            ans['Interfaces Declared by Environment'][env_.name] = {}
             s += "  "+env_.name+":\n"
             for interface_ in sorted(env_.interfaces.keys()):
+                ans['Interfaces Declared by Environment'][env_.name][interface_] = None
                 s += "    "+interface_+":\n"
         #
         # Coverage is disabled here because different platforms give different
@@ -484,9 +494,11 @@ class PluginGlobals(object):
         #
         if kwds.get('plugins', True):    #pragma:nocover
             s += "#--------------------------------------------------------------\n"
+            ans['Plugins by Environment'] = {}
             s += "Plugins by Environment:\n"
             for env_name in sorted(PluginGlobals.env.keys()):
                 env_ = PluginGlobals.env[env_name]
+                ans['Plugins by Environment'][env_.name] = {}
                 s += "  "+env_.name+":\n"
                 flag=True
                 for service_ in env_.plugins():
@@ -501,16 +513,24 @@ class PluginGlobals(object):
                             continue
                         service_active = service_._id in PluginGlobals.interface_services[interface]
                         break
-                    s += "    "+service_.__repr__(simple=not kwds.get('show_ids',True))+":\n"
+                    service_s = service_.__repr__(simple=not kwds.get('show_ids',True))
+                    ans['Plugins by Environment'][env_.name][service_s] = {}
+                    s += "    "+service_+":\n"
                     if kwds.get('show_ids',True):
+                        ans['Plugins by Environment'][env_.name][service_s]['name'] = service_.name
                         s += "       name:      "+service_.name+"\n"
+                    ans['Plugins by Environment'][env_.name][service_s]['id'] = str(service_._id)
                     s += "       id:        "+str(service_._id)+"\n"
+                    ans['Plugins by Environment'][env_.name][service_s]['singleton'] = str(service_.__singleton__)
                     s += "       singleton: "+str(service_.__singleton__)+"\n"
+                    ans['Plugins by Environment'][env_.name][service_s]['service'] = str(service_active)
                     s += "       service:   "+str(service_active)+"\n"
+                    ans['Plugins by Environment'][env_.name][service_s]['disabled'] = str(not service_.enabled())
                     s += "       disabled:  "+str(not service_.enabled())+"\n"
                 if flag:
                     s += "       None:\n"
         s += "#--------------------------------------------------------------\n"
+        ans['Plugins by Interface'] = {}
         s += "Plugins by Interface:\n"
         tmp = {}
         for env_ in itervalues(PluginGlobals.env):
@@ -523,6 +543,7 @@ class PluginGlobals(object):
                         tmp[item].append(key)
         keys = list(tmp.keys())
         for key in sorted(keys, key=lambda v: v.__name__.upper()):
+            ans['Plugins by Interface'][str(key.__name__)] = {}
             if key.__name__ == "":                   #pragma:nocover
                 s += "  `"+str(key.__name__)+"`:\n"
             else:
@@ -533,8 +554,10 @@ class PluginGlobals(object):
                 s += "    None:\n"
             else:
                 for item in ttmp:
+                    ans['Plugins by Interface'][str(key.__name__)][item] = None
                     s += "    "+item+":\n"
         s += "#--------------------------------------------------------------\n"
+        ans['Plugins by Python Module'] = {}
         s += "Plugins by Python Module:\n"
         tmp = {}
         for env_ in itervalues(PluginGlobals.env):
@@ -547,6 +570,7 @@ class PluginGlobals(object):
         keys = list(tmp.keys())
         keys.sort()
         for key in keys:
+            ans['Plugins by Python Module'][str(key)] = {}
             if key == "":                   #pragma:nocover
                 s += "  `"+str(key)+"`:\n"
             else:
@@ -554,8 +578,13 @@ class PluginGlobals(object):
             ttmp = tmp[key]
             ttmp.sort()
             for item in ttmp:
+                ans['Plugins by Python Module'][str(key)][item] = None
                 s += "    "+item+":\n"
-        print(s)
+        if kwds.get('json',False):
+            import json
+            print(json.dumps(ans, sort_keys=True, indent=4, separators=(',', ': ')))
+        else:
+            print(s)
 
     @staticmethod
     def display(interface=None, verbose=False):
