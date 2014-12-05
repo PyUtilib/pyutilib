@@ -122,7 +122,7 @@ class Test(unittest.TestCase):
         tmp2=TMP2()
         config.load(currdir+"config4.ini")
         #config.pprint()
-        if sys.platform == "win32":
+        if False and sys.platform == "win32":
             #
             # A hack, to ensure cross-platform portability of this test
             #
@@ -147,10 +147,11 @@ class Test(unittest.TestCase):
         #
         # A hack, to ensure cross-platform portability of this test
         #
-        e = ExtensionPoint(IFileOption)
-        for ep in e.extensions():
-            if ep.enabled():
-                ep.set_value("/dev/null", raw=True)
+        if False and sys.platform == "win32":
+            e = ExtensionPoint(IFileOption)
+            for ep in e.extensions():
+                if ep.enabled():
+                    ep.set_value("/dev/null", raw=True)
         config.save(currdir+"config1.out")
         #PluginGlobals.pprint()
         self.assertFileEqualsBaseline(currdir+"config1.out",currdir+"config1.txt", filter=filter)
