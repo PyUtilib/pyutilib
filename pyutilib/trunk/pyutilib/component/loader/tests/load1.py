@@ -5,6 +5,7 @@ import sys
 import logging
 
 print("HERE1")
+print(str(sys.argv))
 currdir=sys.argv[-2]+os.sep
 
 logging.basicConfig(level=logging.DEBUG)
