@@ -1,6 +1,6 @@
 #--------------------------------------------------------------
 Environment Stack:
-  1: pca
+  '1': pca
 #--------------------------------------------------------------
 Interfaces Declared:
   IConfiguration:
@@ -31,16 +31,6 @@ Interfaces Declared by Environment:
 #--------------------------------------------------------------
 Plugins by Environment:
   pca:
-    <Plugin TempfileManagerPlugin 'TempfileManager'>:
-       name:      TempfileManager
-       singleton: True
-       service:   True
-       disabled:  False
-    <Plugin IgnorePluginPlugins>:
-       name:      IgnorePluginPlugins
-       singleton: True
-       service:   True
-       disabled:  False
     <Plugin ImportLoader>:
        name:      ImportLoader
        singleton: True
@@ -56,13 +46,18 @@ Plugins by Environment:
        singleton: True
        service:   True
        disabled:  False
-    <Plugin OptionData 'Plugin.4'>:
-       name:      Plugin.4
-       singleton: False
+    <Plugin TempfileManagerPlugin 'TempfileManager'>:
+       name:      TempfileManager
+       singleton: True
+       service:   True
+       disabled:  True
+    <Plugin IgnorePluginPlugins>:
+       name:      IgnorePluginPlugins
+       singleton: True
        service:   True
        disabled:  False
-    <BoolOption [Services] 'TempfileManager'>:
-       name:      TempfileManager
+    <Plugin OptionData 'Plugin.4'>:
+       name:      Plugin.4
        singleton: False
        service:   True
        disabled:  False
@@ -100,7 +95,7 @@ Plugins by Environment:
        name:      Plugin.14
        singleton: False
        service:   False
-       disabled:  False
+       disabled:  True
 #--------------------------------------------------------------
 Plugins by Interface:
   IConfiguration:
