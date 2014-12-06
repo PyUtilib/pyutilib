@@ -17,7 +17,7 @@ import pyutilib.subprocess
 
 
 def filter(line):
-    return line.startswith(";   section='")
+    return line.startswith(";   section='") or 'memmon' in line or 'valgrind' in line or '[executables]' in line
 
 class Test(unittest.TestCase):
 
@@ -122,7 +122,7 @@ class Test(unittest.TestCase):
         tmp2=TMP2()
         config.load(currdir+"config4.ini")
         #config.pprint()
-        if sys.platform == "win32":
+        if False and sys.platform == "win32":
             #
             # A hack, to ensure cross-platform portability of this test
             #
