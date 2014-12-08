@@ -17,7 +17,7 @@ import pyutilib.subprocess
 
 
 def filter(line):
-    return line.startswith(";   section='") or 'memmon' in line or 'valgrind' in line or '[executables]' in line
+    return line.startswith(";   section='") or 'memmon' in line or 'valgrind' in line or '[executables]' in line or 'null' in line
 
 class Test(unittest.TestCase):
 
