@@ -363,8 +363,8 @@ class TestMisc(unittest.TestCase):
                 pyutilib.misc.reset_redirect()
                 self.assertMatchesYamlBaseline(currdir+"log1.out",currdir+"log1.yml")
         finally:
-            PluginGlobals.remove_env("foo", cleanup=True)
-            PluginGlobals.remove_env("bar", cleanup=True)
+            PluginGlobals.remove_env("foo", cleanup=True, singleton=False)
+            PluginGlobals.remove_env("bar", cleanup=True, singleton=False)
 
 
 class TestManager(unittest.TestCase):
