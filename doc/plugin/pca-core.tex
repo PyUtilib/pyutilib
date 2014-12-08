@@ -7,15 +7,13 @@
 
 \label{chap:pca}
 
-The PyUtilib Component Architecture (\pca) is included in the PyUtilib software
-package~\cite{PyUtilib}.  It is based on the Trac
-plugin framework~\cite{Trac} and was initially motivated by our need for
-an independent, self-contained plugin framework for scientific computing
-applications.  
-The core
-of the \pcasp is provided through a small set of classes within
-PyUtilib's \code{pyutilib.component.core} package.  This section
-provides a
+The PyUtilib Component Architecture (\pca) is included in the
+PyUtilib software package~\cite{PyUtilib}.  It inspired by the Trac
+plugin framework~\cite{Trac}, and it was initially motivated by our
+need for an independent, self-contained plugin framework for
+scientific computing applications.  The core of the \pcasp is
+provided through a small set of classes within PyUtilib's
+\code{pyutilib.component.core} package.  This section provides a
 tutorial introduction of the \pcasp as well as a detailed description
 of the \pcasp classes and their functionality.
 
@@ -27,18 +25,6 @@ providing some definitions.  The relationships among these terms is
 illustrated in Figure \ref{fig:defs}.  A \textit{plugin} is a
 class that implements a set of related methods in the context of an
 application.  Thus, a plugin can be described as a component definition.
-A \textit{service} is an instance of a plugin class, so services are
-component instances.  A service can be an instance of either a singleton
-or non-singleton plugin. There is exactly one service for a singleton
-plugin (and that service is instantiated automatically), whereas there can be multiple services of non-singleton plugins.
-
-\begin{figure}[htb]
-  \center
-  \includegraphics[height=5in,angle=-90]{figures/definitions.pdf}
-  \caption{An illustration of how classes within the PCA relate to one another.  Interface classes are independent declarations of APIs.  Plugin classes can declare that they implement an Interface's API, and extension points declare that they require a specific
-Interface API.  Both singleton and non-singleton plugins can be used, but services for non-singleton plugins are explicitly constructed.}
-  \label{fig:defs}
-\end{figure}
 
 An \textit{interface} class defines a type that a plugin uses to register
 its capabilities.  A plugin class includes declarations that denote that
@@ -48,13 +34,32 @@ this interface or support interface conversions (see Zope~\cite{Zope}
 and Envisage~\cite{Envisage} for examples of plugin frameworks that
 support this functionality).
 
+A \textit{service} is an instance of a plugin class that is registered
+globally with its interfaces.  We say that a plugin class instance
+is \textit{active} if it is registered, and a plugin class instance
+is only treated as a service if it is active.  A service can be an
+instance of either a singleton or non-singleton plugin. There is
+exactly one service for a singleton plugin (and that service is
+instantiated automatically), whereas there can be multiple services
+of non-singleton plugins.  Singleton plugins are active by default,
+whereas non-singleton plugins are conditionally active depending
+how the plugin interface is declared.
+
+\begin{figure}[htb]
+  \center
+  \includegraphics[height=5in,angle=-90]{figures/definitions.pdf}
+  \caption{An illustration of how classes within the PCA relate to one another.  Interface classes are independent declarations of APIs.  Plugin classes can declare that they implement an Interface's API, and extension points declare that they require a specific
+Interface API.  Both singleton and non-singleton plugins can be used, but services for non-singleton plugins are explicitly constructed.}
+  \label{fig:defs}
+\end{figure}
+
 A software application or a component can declare \textit{extension
-  points} that other
-components can \textit{plug in} to. An extension point is defined with
-respect to a specific \textit{interface} class.  Thus, a service that
-supports an interface plugs into an extension point for that interface.
-In this way, extension points provide a generic mechanism for applications
-to employ the functionality provided by other services.
+points} that other components can \textit{plug in} to. An extension
+point is defined with respect to a specific \textit{interface}
+class.  Thus, a service that supports an interface plugs into an
+extension point for that interface.  In this way, extension points
+provide a generic mechanism for applications to employ the functionality
+provided by other services.
 
 This mechanisms supports a flexible,
 modular programming paradigm that enables software applications to
@@ -72,11 +77,12 @@ and application of components within large software systems.
 
 \subsubsection{Relationship to the Trac Component System}
 
-The general design of \pcasp is adapted from Trac~\cite{Trac}. The \pcasp
-generalizes the Trac component architecture by supporting namespace
-management of plugins, non-singleton plugins and caching of interface interactions. For those
-familiar with Trac, the following classes roughly correspond with
-each other:
+The general design of \pcasp is inspired by the plugin system
+included in Trac~\cite{Trac}. The \pcasp generalizes the Trac
+component architecture by supporting namespace management of plugins,
+non-singleton plugins, support for non-active plugin instances and
+caching of interface interactions. For those familiar with Trac,
+the following classes roughly correspond with each other:
 \begin{center}
 \begin{tabular}{|l|l|} \hline
     Trac Class Name &   PyUtilib Class Name \\ \hline
@@ -188,18 +194,18 @@ class TaskPrinter(SingletonPlugin):
 
 
 
-\section{PCA Plugin Classes}
+\section{PCA Classes}
 \label{chap:core}
 
-The \pcasp consists of the following core classes:
+The \pcasp consists of the following core classes that are defined in the \code{pyutilib.component.core} package:
 \begin{description}
-\item[pyutilib.component.core.Interface] Subclasses of this class declare plugin interfaces that are registered in the \pca. 
-\item[pyutilib.component.core.ExtensionPoint] A class used to declare extension points, which can access services with a particular interface.
-\item[pyutilib.component.core.Plugin] Subclasses of this class declare plugins, which can be used to implement interfaces within the \pca. 
-\item[pyutilib.component.core.SingletonPlugin] Subclasses of this class declare singleton plugins, for which a single service is constructed. 
-\item[pyutilib.component.core.PluginEnvironment] A class that maintains the registries for interfaces, extension points, plugins and services. 
-\item[pyutilib.component.core.PluginGlobals] A class that maintains global data concerning the set of environments that are currently being used. 
-\item[pyutilib.component.core.PluginError] The exception class that is raised when errors arise in the \pca. 
+\item[Interface] Subclasses of this class declare plugin interfaces that are registered in the \pca. 
+\item[ExtensionPoint] A class used to declare extension points, which can access services with a particular interface.
+\item[Plugin] Subclasses of this class declare plugins, which can be used to implement interfaces within the \pca. 
+\item[SingletonPlugin] Subclasses of this class declare singleton plugins, for which a single service is constructed. 
+\item[PluginEnvironment] A class that maintains the registries for interfaces, extension points, plugins and services. 
+\item[PluginGlobals] A class that maintains global data concerning the set of environments that are currently being used. 
+\item[PluginError] The exception class that is raised when errors arise in the \pca. 
 \end{description}
 The following sections provide a detailed description of how these classes are used in the
 \pca.
