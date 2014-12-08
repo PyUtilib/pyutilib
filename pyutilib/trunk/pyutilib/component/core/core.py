@@ -109,15 +109,16 @@ class PluginEnvironment(object):
         # A set of nonsingleton plugin instances
         self.nonsingleton_plugins = set()
 
-    def cleanup(self):
+    def cleanup(self, singleton=True):
         # ZZZ
         ##return
         if PluginGlobals is None or PluginGlobals.plugin_instances is None:
             return
-        for id_ in itervalues(self.singleton_services):
-            if id_ in PluginGlobals.plugin_instances and not PluginGlobals.plugin_instances[id_] is None:
-                del PluginGlobals.plugin_instances[id_]
-        self.singleton_services= {}
+        if singleton:
+            for id_ in itervalues(self.singleton_services):
+                if id_ in PluginGlobals.plugin_instances and not PluginGlobals.plugin_instances[id_] is None:
+                    del PluginGlobals.plugin_instances[id_]
+            self.singleton_services= {}
         #
         for id_ in self.nonsingleton_plugins:
             del PluginGlobals.plugin_instances[id_]

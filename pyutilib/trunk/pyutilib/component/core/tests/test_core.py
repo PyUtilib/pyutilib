@@ -134,7 +134,8 @@ class TestExtensionPoint(unittest.TestCase):
         PluginGlobals.add_env(testing_env)
 
     def tearDown(self):
-        PluginGlobals.pop_env()
+        env_ = PluginGlobals.pop_env()
+        env_.cleanup(singleton=False)
 
     def test_interface_decl(self):
         try:
@@ -224,7 +225,8 @@ class TestPlugin(unittest.TestCase):
         PluginGlobals.add_env("testing")
 
     def tearDown(self):
-        PluginGlobals.pop_env()
+        env_ = PluginGlobals.pop_env()
+        env_.cleanup(singleton=False)
 
     def test_init1(self):
         """Test the behavior of a plugin that is a service manager"""
@@ -285,11 +287,16 @@ class TestPlugin(unittest.TestCase):
         s7c = Plugin7()
         s7d = Plugin7()
         s7e = Plugin7()
+        s7f = Plugin7()
         #
         # Only s7b, and s7d will be returned from the exensions() calls
         #
-        self.assertEqual(set(ep.extensions()),set([s1,s2,s4,s7a,s7c,s7e]))
-        self.assertTrue(PluginGlobals.services() >= set([s1,s2,s3,s4,s5,s7a,s7b,s7c,s7d,s7e]))
+        tmp = set(ep.extensions())
+        if s7e in tmp:
+            self.assertEqual(set(ep.extensions()),set([s1,s2,s4,s7a,s7c,s7e]))
+        else:
+            self.assertEqual(set(ep.extensions()),set([s1,s2,s4,s7b,s7d,s7f]))
+        self.assertTrue(PluginGlobals.services() >= set([s1,s2,s3,s4,s5,s7a,s7b,s7c,s7d,s7e,s7f]))
 
     def test_implements1(self):
         p1 = Plugin11a()
@@ -317,7 +324,8 @@ class TestMisc(unittest.TestCase):
         PluginGlobals.add_env("testing")
 
     def tearDown(self):
-        PluginGlobals.remove_env("testing")
+        env_ = PluginGlobals.remove_env("testing")
+        env_.cleanup(singleton=False)
 
     def test_pprint(self):
         """Test the string representation generated"""
@@ -355,8 +363,8 @@ class TestMisc(unittest.TestCase):
                 pyutilib.misc.reset_redirect()
                 self.assertMatchesYamlBaseline(currdir+"log1.out",currdir+"log1.yml")
         finally:
-            PluginGlobals.remove_env("foo")
-            PluginGlobals.remove_env("bar")
+            PluginGlobals.remove_env("foo", cleanup=True)
+            PluginGlobals.remove_env("bar", cleanup=True)
 
 
 class TestManager(unittest.TestCase):
@@ -365,7 +373,8 @@ class TestManager(unittest.TestCase):
         PluginGlobals.add_env("testing")
 
     def tearDown(self):
-        PluginGlobals.pop_env()
+        env_ = PluginGlobals.pop_env()
+        env_.cleanup(singleton=False)
 
     def test_init(self):
         """Test the behavior of a plugin that is a service manager"""
