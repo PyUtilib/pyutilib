@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
 
     def tearDown(self):
         del self.tmp
-        PluginGlobals.remove_env("testing.config", cleanup=True)
+        PluginGlobals.remove_env("testing.config", cleanup=True, singleton=False)
 
     def test_init(self):
         """Test Configuration construction"""
@@ -137,7 +137,7 @@ class Test(unittest.TestCase):
         config.pprint()
         pyutilib.misc.reset_redirect()
         self.assertFileEqualsBaseline(currdir+"log2.out", currdir+"log2.txt", filter=filter)
-        PluginGlobals.remove_env("testing.config_loading", cleanup=True)
+        PluginGlobals.remove_env("testing.config_loading", cleanup=True, singleton=False)
 
     @unittest.skipIf(sys.version_info[:2] < (2,6), "Skipping tests because configuration output is not guaranteed to be sorted")
     def test_save1(self):

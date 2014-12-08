@@ -244,6 +244,8 @@ class ExtensionPoint(object):
         """
         Return a set of services that match the interface of this
         extension point.  This tacitly filters out disabled extension points.
+
+        TODO - Can this support caching?  How would that relate to the weakref test?
         """
         strkey = str(key)
         ans = set()
@@ -267,41 +269,12 @@ class ExtensionPoint(object):
                 PluginGlobals.interface_services[self.interface].remove(id_)
         return sorted( ans, key=lambda x:x._id )
 
-    def Xextensions(self, all=False, key=None):
-        """
-        Return a set of services that match the interface of this
-        extension point.  This tacitly filters out disabled extension points.
-        """
-        strkey = str(key)
-        ans = set()
-        remove = set()
-        if self.interface in PluginGlobals.interface_services:
-            #print "HERE"
-            for id_ in PluginGlobals.interface_services[self.interface]:
-                #print "HERE", id_
-                if not id_ in PluginGlobals.plugin_instances:
-                    remove.add(id_)
-                    continue
-                if id_ < 0:
-                    plugin = PluginGlobals.plugin_instances[id_]
-                else:
-                    plugin = PluginGlobals.plugin_instances[id_]()
-                #print "HERE", PluginGlobals.plugin_instances[id_], plugin
-                if plugin is None:
-                    remove.add(id_)
-                elif (all or plugin._enable) and (key is None or strkey == plugin.name):
-                    ans.add(plugin)
-            # Remove weakrefs that were empty
-            ## ZZ
-            for id_ in remove:
-                PluginGlobals.interface_services[self.interface].remove(id_)
-        return sorted( ans, key=lambda x:x._id )
-
     def __repr__(self, simple=False):
         """
         Return a textual representation of the extension point.
+
+        TODO: use the 'simple' argument
         """
-        # TODO: use the 'simple' argument
         env_str = ""
         for env_ in itervalues(PluginGlobals.env):
             if self.interface in set(itervalues(env_.interfaces)):
@@ -361,6 +334,7 @@ class PluginGlobals(object):
         if not name is None and not isinstance(name, string_types):
             if validate and name.name in PluginGlobals.env:
                 raise PluginError("Environment %s is already defined" % name)
+            # We assume we have a PluginEnvironment object here
             PluginGlobals.env[name.name] = name
             PluginGlobals.env_map[name.env_id] = name.name
             PluginGlobals.env_stack.append(name.name)
@@ -393,7 +367,7 @@ class PluginGlobals(object):
             return PluginGlobals.env[PluginGlobals.env_stack[0]]
 
     @staticmethod
-    def remove_env(name, cleanup=False):
+    def remove_env(name, cleanup=False, singleton=True):
         tmp = PluginGlobals.env.get(name, None)
         if tmp is None:
             raise PluginError("No environment %s is defined" % name)
@@ -401,7 +375,7 @@ class PluginGlobals(object):
         del PluginGlobals.env_map[tmp.env_id]
         del PluginGlobals.env[name]
         if cleanup:
-            tmp.cleanup()
+            tmp.cleanup(singleton=singleton)
         PluginGlobals.env_stack = [name_ for name_ in PluginGlobals.env_stack if name_ in PluginGlobals.env]
         return tmp
 
@@ -847,7 +821,7 @@ class Plugin(with_metaclass(PluginMeta, object)):
         self._enable = True
         PluginGlobals.plugin_instances[self._id] = weakref.ref(self)
         if getattr(cls, '_service', True):
-            self._HERE_ = self._id
+            #self._HERE_ = self._id
             self.activate()
         return self
 

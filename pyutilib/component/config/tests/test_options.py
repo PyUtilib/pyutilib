@@ -45,7 +45,7 @@ class TestOption(unittest.TestCase):
         PluginGlobals.clear_global_data(keys=['globals', 'a.b'])
 
     def tearDown(self):
-        PluginGlobals.remove_env("testing.options", cleanup=True)
+        PluginGlobals.remove_env("testing.options", cleanup=True, singleton=False)
 
     def test_init1(self):
         """Test Option construction"""
