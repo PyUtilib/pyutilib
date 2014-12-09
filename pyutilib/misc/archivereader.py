@@ -547,7 +547,7 @@ class DirArchiveReader(ArchiveReader):
                 names_list.append(posixpath.join(prefix,dname))
             if maxdepth is not None:
                 if prefix.count(_sep) >= maxdepth:
-                    break
+                    continue
         return names_list
 
     def _extractImp(self, absolute_name, relative_name, path, recursive):
