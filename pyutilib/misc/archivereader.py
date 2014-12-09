@@ -529,7 +529,9 @@ class DirArchiveReader(ArchiveReader):
             if not os.path.exists(rootdir):
                 raise IOError("Subdirectory '%s' does not exists in root directory: %s"
                               % (self._subdir, self._archive_name))
-        self._names_list = self._walk(rootdir, maxdepth=self._maxdepth)
+            self._names_list = self._walk(rootdir, maxdepth=self._maxdepth+1)
+        else:
+            self._names_list = self._walk(rootdir, maxdepth=self._maxdepth)
         self._fulldepth_names_list = self._walk(rootdir)
 
     @staticmethod
@@ -541,13 +543,12 @@ class DirArchiveReader(ArchiveReader):
                 prefix = prefix[:-1]
             if prefix == '.':
                 prefix = ''
-            for fname in files:
-                names_list.append(posixpath.join(prefix,fname))
             for dname in dirs:
                 names_list.append(posixpath.join(prefix,dname))
-            if maxdepth is not None:
-                if prefix.count(_sep) >= maxdepth:
-                    continue
+            if maxdepth is not None and prefix.count(_sep) >= maxdepth:
+                continue
+            for fname in files:
+                names_list.append(posixpath.join(prefix,fname))
         return names_list
 
     def _extractImp(self, absolute_name, relative_name, path, recursive):
