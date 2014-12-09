@@ -374,7 +374,8 @@ class TestManager(unittest.TestCase):
 
     def tearDown(self):
         env_ = PluginGlobals.pop_env()
-        env_.cleanup(singleton=False)
+        if env_.name == 'testing':
+            env_.cleanup(singleton=False)
 
     def test_init(self):
         """Test the behavior of a plugin that is a service manager"""
@@ -420,6 +421,7 @@ class TestManager(unittest.TestCase):
             pass
         PluginGlobals.add_env("pca")
         self.assertEqual(PluginGlobals.get_env().name,"pca")
+        PluginGlobals.pop_env()
 
     def test_factory(self):
         class Plugin5_factory(Plugin):

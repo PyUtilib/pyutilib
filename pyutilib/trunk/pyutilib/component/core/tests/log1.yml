@@ -2,9 +2,8 @@
 Environment Stack:
   '1': pca
   '2': testing
-  '3': testing
-  '4': foo
-  '5': bar
+  '3': foo
+  '4': bar
 #--------------------------------------------------------------
 Interfaces Declared:
   IConfiguration:
