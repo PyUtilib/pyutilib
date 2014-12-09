@@ -8,4 +8,9 @@
 #  _________________________________________________________________________
 #
 
+from pyutilib.component.core.core import *
+PluginGlobals.add_env("pyutilib")
+
 from pyutilib.subprocess.processmngr import *
+
+PluginGlobals.pop_env()
