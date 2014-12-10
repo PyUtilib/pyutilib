@@ -1,0 +1,686 @@
+= A Perspective on Software Testing =
+
+Software testing is an essential element of high-quality software
+development efforts.  Although there is an obvious up-front cost
+to software testing (e.g. the time spent writing the tests), software
+testing has many benefits that justify this effort, including:
+
+ * Illustration of the software design and functionality within
+ tests.
+
+ * Tests facilitate large-scale software changes (e.g. refactoring)
+ with a high level of confidence that the original software
+ functionality has been preserved.
+
+ * Test code coverage provides confidence that the software can be
+ a exercised without errors.
+
+Despite these advantages, software development tools have significant
+gaps in functionality.  Few software development frameworks and
+IDEs are comprehensive in their support for testing, code coverage
+and related testing capabilities.
+
+This report describes a component-based approach to software testing.
+Here, a component is a software testing tool that has a well-defined
+set of input and outputs that rely on standard file formats.  Our
+focus on component-based software testing tools is motivated by our
+experience with the Jenkins continuous integration server.  Jenkins
+plugins support the integration of testing tools that generate data
+in standard formats.
+
+The following sections describe different software testing activities,
+along with available testing components and the file formats that
+they support.
+
+
+== Unit Tests ==
+
+Various code-driven testing frameworks have come to be known
+collectively as xUnit.  These frameworks are based on SUnit, a test
+framework design developed by Kent Beck for Smalltalk.  JUnit was
+developed for Java by Erich Gamma and Kent Beck, and similar testing
+frameworks have been developed for other languages, e.g., !CppUnit
+(for C++), NUnit (for .NET).
+
+xUnit testing frameworks support test automation, sharing of setup
+and shutdown code for tests, aggregation of tests into collections,
+and independence of the tests from the reporting framework.  To
+achieve this, xUnit frameworks share the following basic component
+architecture:
+
+test fixture
+   A `test fixture` represents the preparation needed to perform one or more
+   tests, and any associate cleanup actions.  This may involve, for example,
+   creating temporary or proxy databases, directories, or starting a server
+   process.
+
+test case
+   A `test case` is the smallest unit of testing.  It checks for a specific
+   response to a particular set of inputs.
+
+test suite
+   A `test suite` is a collection of test cases that share the same fixture.
+
+test execution
+   The execution of an individual test proceeds by executing a
+   `setup` function, followed by the test body, and then finally
+   the execution of a `tearDown` function.
+
+assertions
+   A variety of test assertions are supported to check for different
+   test conditions.
+
+A variety of xUnit testing frameworks can generate an XML summary
+of test results.  Although there is no defined standard for the
+xUnit XML format, a variety of packages generate a similar XML
+summary:
+
+ * [http://sourceforge.net/projects/cppunit/ CppUnit] (C++)
+ * [http://cxxtest.tigris.org/ CxxTest] (C++)
+ * [http://www.junit.org/ JUnit] (Java)
+ * [http://cran.r-project.org/web/packages/RUnit/index.html RUnit] ( R )
+ * [http://www.mathworks.com/matlabcentral/fileexchange/11306-munit-a-unit-testing-framework-in-matlab MUnit] (Matlab)
+ * [http://somethingaboutorange.com/mrl/projects/nose/ Nose+PyUnit] (Python)
+
+The following sections illustrate the use of xUnit testing frameworks for Python and C++.
+
+=== Python ===
+
+The following example illustrates the use of the classes in `unittest` to define unit tests:
+{{{
+# Example 1
+
+import random
+import unittest
+
+# This class defines a set of tests.  The name is not important to the `unittest` framework,
+# but this class can be referenced from the command-line.
+#
+class Test(unittest.TestCase):
+
+    # This method is called before each test is executed.  In this example, a sequence of
+    # integers is created.
+    #
+    def setUp(self):
+        self.seq = range(10)
+
+    # This method is called after each test is executed.  In this example, nothing is done,
+    # but generally this is useful for test cleanup (e.g. to remove temporary files).
+    #
+    def tearDown(self):
+        pass
+
+    # A test that verifies that a shuffled sequence does not lose any elements.
+    #
+    def test_shuffle(self):
+        random.shuffle(self.seq)
+        self.seq.sort()
+        self.assertEqual(self.seq, range(10))
+
+    # A test that verifies that a randomly selected element of the sequence is a member of
+    # the sequence.
+    #
+    def test_choice(self):
+        element = random.choice(self.seq)
+        self.assertTrue(element in self.seq)
+
+    # A test that verifies that a sample of elements of a sequence contains only members of
+    # the sequence.
+    #
+    def test_sample_many(self):
+        for element in random.sample(self.seq, 5):
+            self.assertTrue(element in self.seq)
+
+    # A test that verifies that the shuffle function raises an exception on an immutable
+    # sequence.  Note that `assertRaises` accepts a function and a list of arguments that
+    # are passed to the function.
+    #
+    def test_shuffle_error(self):
+        self.assertRaises(TypeError, random.shuffle, (1,2,3))
+
+    # A test that verifies that a user cannot sample more elements than are available
+    # in the sequence.
+    #
+    def test_sample_error(self):
+        try:
+            random.sample(self.seq, 20)
+            self.fail("Expected ValueError")
+        except ValueError:
+            pass
+
+if __name__ == '__main__':
+    unittest.main()
+}}}
+
+A testcase is created by subclassing `unittest.TestCase`.  The
+individual tests are defined with methods whose names start with
+the letters `test_`.  This naming convention informs the test runner
+about which methods represent tests.  When a `TestCase.setUp` method
+is defined, the test runner will run that method prior to each test.
+Likewise, if a `TestCase.tearDown` method is defined, the test
+runner will invoke that method after each test.
+
+The crux of each test is a call to an assertion method that attempts to verify a
+condition of the data generated or execution process.  Note that the `assertTrue`, `assertRaise`
+and `assertEqual` are methods of `unittest`.  These methods are used instead of the `assert` function
+so the test runner can accumulate all test results and produce a report.
+
+The final block provides a simple way to run the tests. The `unittest.main` method
+provides a command-line interface to the test script.  When run from the command
+line, the above script produces an output that looks like this
+{{{
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.000s
+
+OK
+}}}
+
+
+=== C++ ===
+
+TODO: Illustrate tests using !CxxTest.
+{{{
+# Example 2
+}}}
+
+
+== Code Coverage ==
+
+Code coverage tools calculate the percentage of code that is executed
+by tests.  Although there is no standard code coverage framework,
+the XML output format used by the popular
+[http://cobertura.sourceforge.net/ Cobertura] tool has been copied
+by several other coverage packages:
+
+  * [http://cobertura.sourceforge.net/ Cobertura] (Java)
+  * [https://software.sandia.gov/trac/fast/wiki/gcovr gcovr] (C++)
+  * [https://bitbucket.org/ned/coveragepy coverage.py] (Python)
+
+The following sections illustrate the use of `coverage.py` and
+`gcovr` to summarize the coverage of Python and C++.
+
+=== Python ===
+
+TODO: Illustrate the use of `coverage` to generate an XML coverage summary.
+{{{
+# Example 3
+}}}
+
+=== C++ ===
+
+TODO: Illustrate the use of `gcovr` to generate an XML coverage summary.
+{{{
+# Exmample 4
+}}}
+
+
+== System Tests ==
+
+System testing of software is testing conducted on a complete,
+integrated system to evaluate the software's compliance with
+system-level requirements.  System testing is a form of black box
+testing, and as such does not rely on details of the software
+implementation.  System testing exercises an integrated set of
+software components, but its scope is more limited than ``integration
+testing``, which directly exercises the interaction of software
+components.  Instead, system testing seeks to detect defects within
+the software system as a whole.
+
+A common type of system testing involves the execution of command-line
+executables.  These tests aim to verify the API for the command-line
+executable, as well as the overall functionality of the software
+that can be exercised by the executable.
+
+Automated command-line tests analyze either (1) output generated
+during test execution, or (2) changes in files and other artifacts
+that were created or modified during the test.  Although these tests
+may require a custom logic to check test behavior (e.g. to verify
+changes in a database), file comparisons are commonly used in many
+system tests.
+
+Example 5 illustrates the use of the Python `pyutilib.th` package
+to support system tests.  The `pyutilib.th` package extends the
+functionality of the !PyUnit test framework.  Although this a Python
+software package, `pyutilib.th` can be easily applied to (1) launch
+command-line executables, (2) compare their output to baseline
+outputs, and (3) compare files generated with baseline files.
+
+Example 5 executes the `pyomo` command, which is part of the `Pyomo`
+software.  This command is used to construct an optimization model
+within a Python script, and then apply an optimizer to this model.
+For example, the command:
+{{{
+pyomo diet1.py diet1.dat
+}}}
+is used to solve the classic ``diet`` problem with the `GPLK`
+integer programming solver.  This command generates an output such
+as:
+{{{
+[    0.00] Setting up Pyomo environment
+[    0.00] Applying Pyomo preprocessing actions
+[    0.00] Creating model
+[    0.14] Applying solver
+[    0.16] Processing results
+    Number of solutions: 1
+    Solution Information
+      Gap: 0.0
+      Status: optimal
+      Function Value: 14.8557377
+    Solver results file: results.yml
+[    0.17] Applying Pyomo postprocessing actions
+[    0.17] Pyomo Finished
+}}}
+Additionally, this command creates a YAML results file, `results.yml`,
+that provides a detailed summary of optimization results.
+
+The following Python script illustrates how the `pyomo` command can
+be executed, the output captured to a logfile, and then comparisons
+of the logfile and results files with baseline data.
+{{{
+# Example 5
+
+import pyutilib.th as unittest
+import pyutilib.subprocess
+
+def filter_fn(line):
+    return line.startswith('[')
+
+class Tests(unittest.TestCase):
+
+    def run_pyomo(self, datafiles):
+        #
+        # Execute Pyomo
+        #
+        cmd = 'pyomo '+datafiles
+        pyutilib.subprocess.run(cmd, outfile='pyomo.log')
+
+    def test_diet1(self):
+        self.run_pyomo('diet1.py diet1.dat')
+        self.assertFileEqualsBaseline('pyomo.log', 'diet1.baseline', filter=filter_fn)
+        self.assertMatchesYamlBaseline('results.yml', 'diet1.yml')
+
+    def test_Whiskas(self):
+        self.run_pyomo('Whiskas.py')
+        self.assertFileEqualsBaseline('pyomo.log', 'Whiskas.baseline', filter=filter_fn)
+        self.assertMatchesYamlBaseline('results.yml', 'Whiskas.yml')
+
+if __name__ == '__main__':
+    unittest.main()
+}}}
+This script executes two tests, one for the ``diet`` problem, and
+one for the ``Whiskas`` problem.  In each test, two assertions
+are performed.  First, the logfile `pyomo.log` is compared with a
+baseline logfile.  The `assertFileEqualsBaseline` assertion includes
+a `filter` option that is used to ignore the lines that start with
+"[", since these lines contain timing data that will not be the
+same from one execution to the next.  If this assertion passes,
+then this assertion deletes the `pyomo.log` file for the user.
+
+Second, the results file `results.yml` is compared with a baseline
+Yaml results file.  The default behavior for the
+`assertMatchesYamlBaseline` assertion is to perform an inexact
+match, which allows for the match of the baseline YAML data to a
+subset of the results YAML data.  This is particularly useful for
+applications like `pyomo`, where the data generated is not fixed
+because dictionaries or hash tables are used to order the data.
+For example, a results YAML file might contain the following:
+{{{
+# ==========================================================
+# = Solver Results                                         =
+# ==========================================================
+
+# ----------------------------------------------------------
+#   Problem Information
+# ----------------------------------------------------------
+Problem:
+- Lower bound: 14.8557377
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 9
+  Number of variables: 10
+  Number of nonzeros: 68
+  Sense: minimize
+
+# ----------------------------------------------------------
+#   Solver Information
+# ----------------------------------------------------------
+Solver:
+- Status: ok
+  Termination condition: optimal
+  Error rc: 0
+
+# ----------------------------------------------------------
+#   Solution Information
+# ----------------------------------------------------------
+Solution:
+- number of solutions: 1
+  number of solutions displayed: 1
+- Gap: 0.0
+  Status: optimal
+  Objective:
+    Total_Cost:
+      Id: 0
+      Value: 14.8557377
+  Variable:
+    Buy[Quarter Pounder w Cheese]:
+      Id: 4
+      Value: 4.38525
+    Buy[1% Lowfat Milk]:
+      Id: 5
+      Value: 3.42213
+    Buy[Fries, small]:
+      Id: 6
+      Value: 6.14754
+}}}
+The `Id` data in the objective and variable data blocks are arbitrary
+values that may differ when `pyomo` is run on different compute
+platforms or with different versions of Python.  These data can be
+omitted from the baseline YAML file, and the inexact YAML match
+will correctly ignore the `Id` data in the results YAML file.
+
+
+
+== Performance Tests ==
+
+Performance characteristics for software include runtime, scalability,
+reliability and resource usage (e.g. maximum memory usage).
+Performance testing is testing measures performance characteristics
+of software under a particular workload, and it can be used to
+verify that these performance characteristics meet performance
+requirements.
+
+There are several goals that motivate the use of performance tests:
+
+Verify performance goals:
+    Many performance testing frameworks allow users to specify
+    performance goals.  These frameworks then provide utilities for
+    executing the software, perhaps iteratively to identify the
+    mean or median behavior.  Deviations from the performance goals
+    are treated as test failures in a manner similar to standard
+    unit tests.
+
+Generate synthetic load scenarios:
+    A key issue for software developers is developing tests that
+    mimic real-world demands on the software.  This is particularly
+    true in environments like web-development, where user behavior
+    represents a stream of events that need to be handle in a
+    real-time manner.  Many performance testing frameworks are
+    tailored to support the generation of synthetic test data that
+    can stress the capabilities of software.
+
+Monitor performance characteristics:
+    Even without clear performance requirements, performance tests
+    can be invaluable to assess whether software changes impact its
+    performance characteristics.  Seemingly innocuous changes in
+    software can lead to significant changes in performance.
+    Performance tests are particularly useful because they can be
+    used to automatically evaluate software in a wide variety of
+    contexts that might not otherwise be evaluated by developers.
+
+A wide variety of performance testing tools are available:
+  * [http://en.wikipedia.org/wiki/Software_performance_testing Wikipedia Software Performance Testing]
+  * [http://www.opensourcetesting.org/performance.php Open Source Performance Testing Tools]
+However, most of these packages appear to be designed to test web applications.
+
+The remainder of this section will focus on a strategy for monitoring
+performance characteristics that leverages `nose`, `pyutilib.th`
+and `Jenkins`.  Performance monitoring is a key issue for many
+software development projects, and thus this seems a more fundamental
+testing capability than performance tests that validate specific
+goals.
+
+The [https://software.sandia.gov/trac/pyutilib/wiki/Documentation/pyutilib.th pyutilib.th documentation] describes
+a plugin for `nose` that allows the user to archive test data.
+Use the following command-line option with nosetests to collect test data:
+{{{
+nosetests --with-testdata
+}}}
+By default, a file named `testdata.csv` will be written to the working directory.
+If you need to change the name or location of the file, you can set the
+`--testdata-file` option.
+
+The `time` data is automatically recorded by this plugin.  Additional
+data can be reported when this plugin is used with `pyutilib.th`.
+Tests can call the `recordTestData` method to add additional columns
+of data.  Thus, `nose` can be combined with `pyutilib.th` to support a generic
+infrastructure for executing command-line tools, parsing their output, monitoring their
+progress, and otherwise summarizing their performance.
+
+For example, the following testing script executes the `PICO` optimizer and captures
+several key performance statistics:
+{{{
+# Example 6
+
+import pyutilib.th as unittest
+import pyutilib.subprocess
+import re
+
+class Tests(unittest.TestCase):
+
+    def run_pico(self, problem):
+        #
+        # Execute PICO
+        #
+        cmd = 'PICO '+problem
+        pyutilib.subprocess.run(cmd, outfile='pico.log')
+        #
+        # Parse logfile
+        #
+        INPUT = open('pico.log', 'r')
+        for line in INPUT:
+            words = re.split('[ \t]+',line.strip())
+            if len(words) < 2:
+                continue
+            if words[0] == "Created":
+                self.recordTestData('subproblems created', words[1])
+            elif words[0] == "Bounded":
+                self.recordTestData('subproblems bounded', words[1])
+            elif words[0] == "Split":
+                self.recordTestData('subproblems split', words[1])
+            elif words[0] == "Dead":
+                self.recordTestData('subproblems dead', words[1])
+            elif words[0] == "Started" and words[1] == "Bounding":
+                self.recordTestData('subproblems started bounding', words[2])
+            elif words[0] == "Started" and words[1] == "Splitting":
+                self.recordTestData('subproblems started splitting', words[2])
+
+    def test_SC(self):
+        self.run_pico('SC.mps')
+
+    def test_bell3a(self):
+        self.run_pico('bell3a')
+
+if __name__ == '__main__':
+    unittest.main()
+}}}
+This example generates a CSV file like the following:
+{{{
+classname,name,dataname,value
+test_pico.Tests,test_SC,subproblems split,0
+test_pico.Tests,test_SC,subproblems dead,1
+test_pico.Tests,test_SC,max memory used,23224
+test_pico.Tests,test_SC,subproblems started bounding,1
+test_pico.Tests,test_SC,subproblems started splitting,0
+test_pico.Tests,test_SC,subproblems created,1
+test_pico.Tests,test_SC,subproblems bounded,0
+test_pico.Tests,test_SC,time,0.0192639827728
+test_pico.Tests,test_bell3a,subproblems split,27730
+test_pico.Tests,test_bell3a,subproblems dead,27730
+test_pico.Tests,test_bell3a,max memory used,45024
+test_pico.Tests,test_bell3a,subproblems started bounding,55461
+test_pico.Tests,test_bell3a,subproblems started splitting,27730
+test_pico.Tests,test_bell3a,subproblems created,55461
+test_pico.Tests,test_bell3a,subproblems bounded,27731
+test_pico.Tests,test_bell3a,time,38.1778950691
+}}}
+
+As with system integration tests, the performance testing infrastructure
+supported by `pyutilib.th` and `nose` can be used to assess the
+performance of any command-line tool.  However, the tests performed
+by this script do not perform assertions.  Rather, these tests
+record test data, since the goal of the script is to monitor
+performance characteristics.
+
+
+== Practical Issues for Robust Testing ==
+
+=== Test Discovery ===
+
+Test discovery significantly simplifies the management and execution of tests.
+Starting with Python 2.7, the standard `unittest` package supports simple test discovery.
+However, the `nose` package provides a more comprehensive capability for test discovery.
+This package also includes functionality for generating test summaries in XML, including
+code coverage.  
+
+TODO: discuss CxxTest...
+
+=== Robust Testing Scripts ===
+
+There are a variety of issues the previous Python scripts would need to be addressed to ensure that they 
+work robustly.  Consider the following testing script:
+{{{
+# Example 7
+
+import pyutilib.th as unittest
+import pyutilib.subprocess
+import pyutilib.services
+import re
+import os.path
+
+currdir = os.path.dirname(os.path.abspath(__file__))+os.sep
+
+pyutilib.services.register_executable('PICO')
+
+
+@unittest.skipIf(pyutilib.services.registered_executable('PICO') is None, "PICO command is not available")
+class Tests(unittest.TestCase):
+
+    def run_pico(self, problem):
+        #
+        # Execute PICO
+        #
+        cmd = pyutilib.services.registered_executable('PICO').get_path()+' '+problem
+        pyutilib.subprocess.run(cmd, outfile=currdir+'pico.log')
+        #
+        # Parse logfile
+        #
+        INPUT = open(currdir+'pico.log', 'r')
+        for line in INPUT:
+            words = re.split('[ \t]+',line.strip())
+            if len(words) < 2:
+                continue
+            if words[0] == "Created":
+                self.recordTestData('subproblems created', words[1])
+            elif words[0] == "Bounded":
+                self.recordTestData('subproblems bounded', words[1])
+            elif words[0] == "Split":
+                self.recordTestData('subproblems split', words[1])
+            elif words[0] == "Dead":
+                self.recordTestData('subproblems dead', words[1])
+            elif words[0] == "Started" and words[1] == "Bounding":
+                self.recordTestData('subproblems started bounding', words[2])
+            elif words[0] == "Started" and words[1] == "Splitting":
+                self.recordTestData('subproblems started splitting', words[2])
+        os.remove(currdir+'pico.log')
+
+    def test_SC(self):
+        self.run_pico('SC.mps')
+
+    def test_bell3a(self):
+        self.run_pico('bell3a')
+
+if __name__ == '__main__':
+    unittest.main()
+}}}
+This script includes the following changes:
+
+ * Filenames are referenced with absolute paths.  This is necessary when working with `nose`, which 
+   does not automatically change the working directory to the directory where a testing script
+   resides.
+
+ * The `PICO` command is registered with `pyutilib.services`, and the test case is skipped if this 
+   executable is not found on the user's path.  This ensures that the tests execute without errors when 
+   the `PICO` command is not available.
+
+ * The test case is categorized with the `unittest.category` decorator.  This allows these tests to
+   be selectively executed.
+
+
+=== Defining Test Suites ===
+
+The Example 6 can be generalized to dynamically defined a test
+suite.  The `pyutilib.th` package supports several methods that can
+be used to dynamically declare tests.  For example, suppose that
+the `mpsfiles` directory contains MPS files that define integer
+programming problems.  Then the following script can be used to add
+tests for all files in this directory:
+{{{
+import glob
+import pyutilib.th as unittest
+import pyutilib.subprocess
+import pyutilib.services
+import re
+import os.path
+
+currdir = os.path.dirname(os.path.abspath(__file__))+os.sep
+
+pyutilib.services.register_executable('PICO')
+
+# Defining the class that will contain the new tests
+#
+class TestCases(unittest.TestCase):
+
+    def run_pico(self, problem):
+        #
+        # Execute PICO
+        #
+        cmd = pyutilib.services.registered_executable('PICO').get_path()+' '+problem
+        pyutilib.subprocess.run(cmd, outfile=currdir+'pico.log')
+        #
+        # Parse logfile
+        #
+        INPUT = open(currdir+'pico.log', 'r')
+        for line in INPUT:
+            words = re.split('[ \t]+',line.strip())
+            if len(words) < 2:
+                continue
+            if words[0] == "Created":
+                self.recordTestData('subproblems created', words[1])
+            elif words[0] == "Bounded":
+                self.recordTestData('subproblems bounded', words[1])
+            elif words[0] == "Split":
+                self.recordTestData('subproblems split', words[1])
+            elif words[0] == "Dead":
+                self.recordTestData('subproblems dead', words[1])
+            elif words[0] == "Started" and words[1] == "Bounding":
+                self.recordTestData('subproblems started bounding', words[2])
+            elif words[0] == "Started" and words[1] == "Splitting":
+                self.recordTestData('subproblems started splitting', words[2])
+        os.remove(currdir+'pico.log')
+
+# A generic function that performs a test on a particular file
+#
+def perform_test(self, file):
+    self.run_pico(currdir+file)
+
+# Insert test methods into the TestCases class
+#
+for file in glob.glob('mpsfiles/*'):
+    TestCases.add_fn_test(name=file, fn=perform_test)
+
+if __name__ == "__main__":
+    unittest.main()
+}}}
+
+More complex test suites can be defined using
+[http://pypi.python.org/pypi/pyutilib.autotest pyutilib.autotest],
+which allows the user to define tests with a YAML specification.
+This packge is tailored for tests where one or more command-line
+tools are applied to one or more data sets.  There are three main
+steps for configuring and applying `pyutilib.autotest`:
+
+ 1. Create a configuration file
+ 1. Create a test driver plugin
+ 1. Setup the Python module that is used to execute the tests
+

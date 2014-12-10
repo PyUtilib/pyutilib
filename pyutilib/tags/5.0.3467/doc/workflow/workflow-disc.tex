@@ -1,0 +1,46 @@
+
+\section{Discussion}
+
+\label{sec:disc}
+
+A major driver for the development of the \pwsp is the TEVA-SPOT
+Toolkit~\cite{SPOT}, which supports research on sensor placement
+optimization for water security applications.  TEVA-SPOT uses the
+\pwsp task driver to define the \code{sptk} script, which can execute
+a variety of different workflows that represent different strategies
+for sensor placement optimization.
+
+The fact that \pwsp provides a self-contain facility for defining
+and executing workflows is particularly important for TEVA-SPOT.
+This code is targeted for distribution on desktop computers, and
+\pwsp provides a convenient mechanism for flexibly developing new
+sensor placement strategies that can be executed without a cumbersome
+workflow management system.  Parallel execution of \pwsp workflows
+is a natural extension of the current capability, which would not
+require a signficant extension of the current class definitions and
+workflow syntax.
+
+Finally, here are some notes concerning the current status of development in \pw:
+\begin{itemize}
+
+\item \pwsp includes a variety of methods managing parsers used to
+initialize tasks.  These methods were intended to simplify the setup
+of commands using workflows.  However, these methods have not proven
+terribly useful in practice.  Consequently, we could imagine
+deprecating this feature of \pwsp unless clear use cases arise.
+
+\item The \pwsp execution logic is simply a method of the \code{Workflow}
+class.  It would be worth exploring how this could be generalized
+to (a) support threaded parallelism and (b) interface with third-party
+grid- or cloud- computing workflow engines.  This would provide a
+nice extensibility of this capability while preserving the simple
+Pythonic interface that \pwsp provides.
+
+\item A preliminary resource class for files has been developed,
+but simple use-cases for this class have not been flushed out.
+
+\item Control flow tasks for looping and other more advanced
+capabilities are not currently provided, but these will probably
+be developed as the need arises.
+
+\end{itemize}

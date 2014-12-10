@@ -1,0 +1,972 @@
+= !PyUtilib Test Harness =
+
+The !PyUtilib Test Harness is contained in the `pyutilib.th` package, which extends the functionality of the
+Python unit testing framework.  Python's unit testing framework is commonly called `!PyUnit`, but it is
+managed in the `unittest` package.  The `pyutilib.th` package has the following features:
+
+  Support for new unittest features
+    Testing classes from the `unittest2` package are included in
+    `pyutilib.th`, which allows newer testing features to be used
+    with older versions of Python (2.4, 2.5 and 2.6).
+
+  Nose decorator
+    The `nose` decorators `nottest` is defined, which supports test
+    skipping
+
+  Test categorization
+    The decorator `category` is defined, which supports test test
+    categorization.
+
+  Performance testing
+    A `nose` plugin is provided to support the collection of test
+    data, which is handy for managing performance testing.
+
+See the following links for more detailed discussions of testing in Python:
+ * [http://pypi.python.org/pypi/unittest2 unittest2]: Many new features were added to unittest in Python 2.7, including test discovery. unittest2 allows you to use these features with earlier versions of Python.
+ * [http://code.google.com/p/python-nose/ Nose]: A third-party unittest frameworks with automated test discovery.
+ * [http://pycheesecake.org/wiki/PythonTestingToolsTaxonomy The Python Testing Tools Taxonomy]: An extensive list of Python testing tools including functional testing frameworks and mock object libraries.
+
+-----
+
+== A Quick Review of the Python Unit Test Framework ==
+
+The Python unit testing framework, sometimes referred to as "!PyUnit,"
+is a Python language version of JUnit, by Kent Beck and Erich Gamma.
+!PyUnit and JUnit are the de facto standard unit testing frameworks
+for Python and Java respectively.  This section outlines the
+capabilities of the `unittest` package, particularly for features
+supported in Python 2.7.
+
+The `unittest` package supports test automation, sharing of setup
+and shutdown code for tests, aggregation of tests into collections,
+and independence of the tests from the reporting framework.  To
+achieve this, `unittest` supports some important concepts:
+
+test fixture
+   A `test fixture` represents the preparation needed to perform one or more
+   tests, and any associate cleanup actions.  This may involve, for example,
+   creating temporary or proxy databases, directories, or starting a server
+   process.
+
+test case
+   A `test case` is the smallest unit of testing.  It checks for a specific
+   response to a particular set of inputs.  `unittest` provides a base class,
+   `TestCase`, which may be used to create new test cases.
+
+test suite
+   A `test suite` is a collection of test cases, test suites, or both.  It is
+   used to aggregate tests that should be executed together.
+
+test runner
+   A `test runner` is a component which orchestrates the execution of tests
+   and provides the outcome to the user.
+
+The test case and test fixture concepts are supported through the
+`TestCase` and `FunctionTestCase` classes; the former should be
+used when creating new tests, and the latter can be used when integrating
+existing test code with a `unittest`-driven framework. When building test
+fixtures using `TestCase`, the `TestCase.setUp` and `TestCase.tearDown` methods can be overridden to provide initialization
+and cleanup for the fixture.
+
+
+=== A Basic Example ===
+
+The following example illustrates the use of the classes in `unittest` to define unit tests:
+{{{
+# Example 1
+
+import random
+import unittest
+
+# This class defines a set of tests.  The name is not important to the `unittest` framework,
+# but this class can be referenced from the command-line.
+#
+class Test(unittest.TestCase):
+
+    # This method is called once, before all tests are executed.  Note that this
+    # must be declared as a class method.
+    #
+    @classmethod
+    def setUpClass(self):
+        pass
+
+    # This method is called once, after all tests are executed.  Note that this
+    # must be declared as a class method.
+    #
+    @classmethod
+    def tearDownClass(self):
+        pass
+
+    # This method is called before each test is executed.  In this example, a sequence of
+    # integers is created.
+    #
+    def setUp(self):
+        self.seq = range(10)
+
+    # This method is called after each test is executed.  In this example, nothing is done,
+    # but generally this is useful for test cleanup (e.g. to remove temporary files).
+    #
+    def tearDown(self):
+        pass
+
+    # A test that verifies that a shuffled sequence does not lose any elements.
+    #
+    def test_shuffle(self):
+        random.shuffle(self.seq)
+        self.seq.sort()
+        self.assertEqual(self.seq, range(10))
+
+    # A test that verifies that a randomly selected element of the sequence is a member of
+    # the sequence.
+    #
+    def test_choice(self):
+        element = random.choice(self.seq)
+        self.assertTrue(element in self.seq)
+
+    # A test that verifies that a sample of elements of a sequence contains only members of
+    # the sequence.
+    #
+    def test_sample_many(self):
+        for element in random.sample(self.seq, 5):
+            self.assertTrue(element in self.seq)
+
+    # A test that verifies that the shuffle function raises an exception on an immutable
+    # sequence.  Note that `assertRaises` accepts a function and a list of arguments that
+    # are passed to the function.
+    #
+    def test_shuffle_error(self):
+        self.assertRaises(TypeError, random.shuffle, (1,2,3))
+
+    # A test that verifies that a user cannot sample more elements than are available 
+    # in the sequence.
+    #
+    def test_sample_error(self):
+        try:
+            random.sample(self.seq, 20)
+            self.fail("Expected ValueError")
+        except ValueError:
+            pass
+
+if __name__ == '__main__':
+    unittest.main()
+}}}
+
+A testcase is created by subclassing `unittest.TestCase`.  The
+individual tests are defined with methods whose names start with
+the letters `test_`.  This naming convention informs the test runner
+about which methods represent tests.  When a `TestCase.setUp` method
+is defined, the test runner will run that method prior to each test.
+Likewise, if a `TestCase.tearDown` method is defined, the test
+runner will invoke that method after each test.
+
+
+The crux of each test is a call to an assertion method that attempts to verify a 
+condition of the data generated or execution process.  Note that the `assertTrue`, `assertRaise`
+and `assertEqual` are methods of `unittest`.  These methods are used instead of the `assert` function
+so the test runner can accumulate all test results and produce a report.
+
+The final block provides a simple way to run the tests. The `unittest.main` method
+provides a command-line interface to the test script.  When run from the command
+line, the above script produces an output that looks like this
+{{{
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.000s
+
+OK
+}}}
+The command-line interface can specify the execution of specific test suites and 
+individual tests.  Suppose that these tests are in the file `tests.py`, then the following
+command-lines can be used:
+{{{
+python tests.py                     - run all test suites
+python tests.py Test                - run all 'test*' test methods in Test
+python tests.py Test.test_shuffle   - run Test.test_shuffle
+}}}
+Starting with Python 2.7, the `unittest` package can be used to execute tests 
+without requiring the the
+explicit call to `unittest.main` in the testing module.
+
+
+=== Test Discovery ===
+
+Starting with Python 2.7, the `unittest` package supports simple test discovery. 
+Test discovery can be used from the command line with the following syntax:
+{{{
+cd project_directory
+python -m unittest discover
+}}}
+
+For now, the `nose` package provides a more comprehensive capability for test discovery.
+This package includes functionality for generating test summaries in XML, including
+code coverage.  The `nose` package also supports plugins, which enables `pyutilib.th` to customize
+its behavior to support the collection of test data used for performance testing.  The `nosetests` command
+recursively through subdirectories looking for Python modules that start with `test`.  These are processed and their tests are executed and summarized together.  Note that `nosetests` only recurses through Python directories, which contain the file `__init__.py`.
+
+
+=== Skipping Tests and Expected Failures ===
+
+Starting with Python 2.7, the `unittest` package supports skipping
+individual test methods and even whole classes of tests.  In addition,
+it supports marking a test as a "expected failure," a test that is
+broken and will fail, but shouldn't be counted as a failure.
+
+Skipping a test is simply a matter of using the `skip` decorator
+or one of its conditional variants.  Similarly, 
+expected failures are indicated with the use of the `expectedFailure` decorator.  For example:
+{{{
+# Example 2
+
+import sys
+import unittest
+
+class MyTestCase(unittest.TestCase):
+
+    @unittest.skip("This test is skipped")
+    def test_nothing(self):
+        self.fail("shouldn't happen")
+
+    @unittest.skipIf(sys.version_info > (2,0), "Not supported in this Python version")
+    def test_version(self):
+        # Tests that work for only for an old version of Python
+        pass
+
+    @unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
+    def test_windows_support(self):
+        # windows specific testing code
+        pass
+
+    @unittest.expectedFailure
+    def test_fail(self):
+        self.assertEqual(1, 0, "broken")
+
+
+@unittest.skip("showing class skipping")
+class MySkippedTestCase(unittest.TestCase):
+
+    def test_not_run(self):
+        pass
+
+if __name__ == '__main__':
+    unittest.main()
+}}}
+This example works with Python 2.7.
+
+This is the output of running the example above in verbose mode:
+{{{
+test_not_run (__main__.MySkippedTestCase) ... skipped 'showing class skipping'
+test_fail (__main__.MyTestCase) ... expected failure
+test_nothing (__main__.MyTestCase) ... skipped 'This test is skipped'
+test_version (__main__.MyTestCase) ... skipped 'Not supported in this Python version'
+test_windows_support (__main__.MyTestCase) ... skipped 'requires Windows'
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+OK (skipped=4, expected failures=1)
+}}}
+Note that skipped tests will not have the `setUp` or `tearDown` methods run around them.
+Similarly, skipped classes will not have the `setUpClass` or `tearDownClass` methods run.
+
+
+=== Assertion Methods ===
+
+The following assertion methods are supported by the `unittest` package:
+{{{
+   +-----------------------------------+-----------------------------+---------------+
+   | Method                            | Checks that                 | New in        |
+   +===================================+=============================+===============+
+   |  assertEqual(a, b)                | ``a == b``                  |               |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertNotEqual(a, b)             | ``a != b``                  |               |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertTrue(x)                    | ``bool(x) is True``         |               |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertFalse(x)                   | ``bool(x) is False``        |               |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertIs(a, b)                   | ``a is b``                  | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertIsNot(a, b)                | ``a is not b``              | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertIsNone(x)                  | ``x is None``               | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertIsNotNone(x)               | ``x is not None``           | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertIn(a, b)                   | ``a in b``                  | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertNotIn(a, b)                | ``a not in b``              | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertIsInstance(a, b)           | ``isinstance(a, b)``        | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertNotIsInstance(a, b)        | ``not isinstance(a, b)``    | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertAlmostEqual(a, b)          | ``round(a-b, 7) == 0``      |               |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertNotAlmostEqual(a, b)       | ``round(a-b, 7) != 0``      |               |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertGreater(a, b)              | ``a > b``                   | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertGreaterEqual(a, b)         | ``a >= b``                  | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertLess(a, b)                 | ``a < b``                   | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertLessEqual(a, b)            | ``a <= b``                  | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertRegexpMatches(s, re)       | ``regex.search(s)``         | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertNotRegexpMatches(s, re)    | ``not regex.search(s)``     | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertItemsEqual(a, b)           | sorted(a) == sorted(b) and  | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+   |  assertDictContainsSubset(a, b)   | all the key/value pairs     | 2.7           |
+   +-----------------------------------+-----------------------------+---------------+
+}}}
+All the assert methods (except `assertRaises` and `assertRaisesRegexp`)
+accept a `msg` argument that, if specified, is used as the error
+message on failure.
+
+There are also type-specific methods that are automatically used by `assertEqual`.  It isusually not necessary to invoke these methods directly.
+{{{
+   +----------------------------------+-----------------------------+--------------+
+   | Method                           | Used to compare             | New in       |
+   +==================================+=============================+==============+
+   | assertMultiLineEqual(a, b)       | strings                     | 2.7          |
+   +----------------------------------+-----------------------------+--------------+
+   | assertSequenceEqual(a, b)        | sequences                   | 2.7          |
+   +----------------------------------+-----------------------------+--------------+
+   | assertListEqual(a, b)            | lists                       | 2.7          |
+   +----------------------------------+-----------------------------+--------------+
+   | assertTupleEqual(a, b)           | tuples                      | 2.7          |
+   +----------------------------------+-----------------------------+--------------+
+   | assertSetEqual(a, b)             | sets or frozensets          | 2.7          |
+   +----------------------------------+-----------------------------+--------------+
+   | assertDictEqual(a, b)            | dicts                       | 2.7          |
+   +----------------------------------+-----------------------------+--------------+
+}}}
+
+For historical reasons, some of the `TestCase` methods had one or more
+aliases that are now deprecated.  The following table lists the correct names
+along with their deprecated aliases:
+{{{
+   ======================  ===============================
+    Method Name             Deprecated alias(es)
+   ======================  ===============================
+    assertEqual             failUnlessEqual, assertEquals
+    assertNotEqual          failIfEqual
+    assertTrue              failUnless, assert\_
+    assertFalse             failIf
+    assertRaises            failUnlessRaises
+    assertAlmostEqual       failUnlessAlmostEqual
+    assertNotAlmostEqual    failIfAlmostEqual
+   ======================  ===============================
+}}}
+
+
+-----
+
+== Features of the !PyUtilib Test Harness ==
+
+=== Importing `unittest2` Capabilities ===
+
+The `unittest` package has continued to evolve with each Python
+release, and there were significant changes in this package with
+Python 2.7 and the associated release of `unittest` in Python 3.0.  The `unittest2` provides a backport of these facilities for Python 2.4, 2.5 and 2.6.
+
+The `pyutilib.th` package imports `unittest2` if it is available, and it provides a `TestCase` class that
+extends the functionality of `unittest2.TestCase`.  Consequently, a user can import `pyutilib.th` and treat it much the same as `unittest2` (or `unittest` in Python 2.7):
+{{{
+# Example 3
+
+import sys
+import pyutilib.th as unittest
+
+class MyTestCase(unittest.TestCase):
+
+    @unittest.skip("This test is skipped")
+    def test_nothing(self):
+        self.fail("shouldn't happen")
+
+    @unittest.skipIf(sys.version_info > (2,0), "Not supported in this Python version")
+    def test_version(self):
+        # Tests that work for only for an old version of Python
+        pass
+
+    @unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
+    def test_windows_support(self):
+        # windows specific testing code
+        pass
+
+    @unittest.expectedFailure
+    def test_fail(self):
+        self.assertEqual(1, 0, "broken")
+
+
+@unittest.skip("showing class skipping")
+class MySkippedTestCase(unittest.TestCase):
+
+    def test_not_run(self):
+        pass
+
+if __name__ == '__main__':
+    unittest.main()
+}}}
+
+
+=== New Assertions ===
+
+The `pyutilib.th` package provides several new assertions:
+ * `assertMatchesYamlBaseline` - Test if a YAML file matches a baseline YAML file.
+ * `assertFileEqualsBaseline` - Test if a text file matches a baseline text file.
+ * `assertFileEqualsLargeBaseline` - Test if a text file matches a large baseline text file.
+ * `assertFileEqualsBinaryFile` - Test if a binary file matches a baseline binary file.
+These assertions are described below.
+
+`assertMatchesYamlBaseline(testfile, baseline, delete=True, tolerance=0.0, exact=False)`
+    Test that the YAML data in `testfile` equals the YAML data in `baseline`.
+
+    YAML is a human friendly data serialization standard.  If
+    `delete` is True, then `testfile` is deleted when the assertion
+    passes;  otherwise, `testfile` is not deleted.  If `exact` is
+    True, then this test passes only if the YAML data exactly match.
+    When `exact` is False, then an inexact match is performed, in
+    which all YAML data from `baseline` must be captured by the
+    data in `testdata`.  This allows `testdata` to contain additional
+    data that is not checked by this assertion.  The `tolerance`
+    parameter specifies the absolute numerical tolerance that is
+    used to compare numerical values that are extracted from
+    `testfile` and `baseline`.
+
+`assertFileEqualsBaseline(testfile, baseline, filter=None, delete=True))`
+    Test that the text in `testfile` equals the text in `baseline`.
+
+    If `delete` is True, then `testfile` is deleted when the assertion
+    passes;  otherwise, `testfile` is not deleted.  If `filter`` is
+    not `None`, then it specifies a function that is used to ignore lines
+    of text in `testfile` and `baseline`.  The filter function is passed a string
+    that represents a line from `testfile`, and if it returns `True` then that 
+    line is ignored in the comparison.
+
+`assertFileEqualsLargeBaseline(testfile, baseline, delete=True)`
+    Test that the text in `testfile` equals the text in `baseline`.  For large files, this comparison is 
+    faster than `assertFileEqualsBaseline`, but it provides weaker diagnostic information when the
+    assertion fails.
+
+    If `delete` is True, then `testfile` is deleted when the assertion
+    passes;  otherwise, `testfile` is not deleted.  If `filter`` is
+    not `None`, then it specifies a function that is used to ignore lines
+    of text in `testfile` and `baseline`.  The filter function is passed a string
+    that represents a line from `testfile`, and if it returns `True` then that 
+    line is ignored in the comparison.
+
+`assertFileEqualsBinaryFile(testfile, baseline, delete=True)`
+    Perform a binary test for the equivalence of `testfile` and `baseline`.
+
+    This assertion uses `filecmp.cmp` to compare binary files.
+    If `delete` is True, then `testfile` is deleted when the assertion
+    passes;  otherwise, `testfile` is not deleted.
+
+
+=== Dynamic Test Declarations ===
+
+==== A Motivating Example ====
+
+There are many applications where you want to apply a code to a
+variety of data sets, and verify that you get the correct output.
+In this context, what you want is a test generator, which can
+dynamically create tests based on the set of data sets that are
+available for testing.
+
+Unfortunately, this does not appear to be a feature of `unittest`.
+The closest I have seen to this, is the support for test generators
+in the [http://somethingaboutorange.com/mrl/projects/nose nose]
+package.  The test generation feature in `nose` is somewhat limited;
+it only applies to test functions that are Python generators, and
+not to similar class methods.
+
+The following example shows how to directly insert new test methods into a `unittest.TestCase`:
+{{{
+# Example 4
+
+import glob
+import unittest
+
+# Defining the class that will contain the new tests
+#
+class TestCases(unittest.TestCase): pass
+
+# A generic function that performs a test on a particular file
+#
+def perform_test(self, file):
+    if len(file) > 20:
+        self.fail("Failing in file '%s' because its name is too long." % file)
+
+# Insert test methods into the TestCases class
+#
+for file in glob.glob("*")+glob.glob("*/*"):
+    tmp = file.replace("/","_")
+    tmp = tmp.replace("\\","_")
+    tmp = tmp.replace(".","_")
+    setattr(TestCases, "test_"+tmp, lambda self,x=file: perform_test(self,x))
+
+# Apply these unittests
+#
+if __name__ == "__main__":
+    unittest.main()
+}}}
+In this example, the files in the current directory and in all
+subdirectories are used to create new test methods.  For each file,
+a new test method is added to the `TestCases` class, which does a silly check to see if the file is ``too long``.
+
+The `pyutilib.th` package extends this idea by supporting three methods that allow users to dynamically 
+add test functions, baseline tests, and tests that are triggered by module imports.
+Although these methods operate on the same principle outlined in the previous example, further customization is done to simplify the test creation process, and to make it work robustly when used with `nose`.
+
+
+==== Adding Function Tests ====
+
+The `TestCase.add_fn_test` method can be used to dynamically add tests that are defined with a
+function:
+
+  `add_fn_test(suite=None, name=None, fn=None, options=None)`
+    Add function `fn` to the test case.  This function is executed
+    like any other test function within the test case.
+
+    The `fn` argument specifies the function that is added to the
+    test case.  The `name` argument specifies a string that is used
+    define an input for the test function.  This name is also used to
+    create the method name inside of the test suite, by translating
+    the '/', '\' and '.' characters into '_'.  Tests can be grouped
+    into named suites, using the `suite` option.  This is used with
+    the the 'options' argument specifies additional data that is
+    used by the test function to perform the test (see below).
+
+For example, the previous example can be rewritten as follows:
+{{{
+# Example 5
+
+import glob
+import pyutilib.th as unittest
+
+# Defining the class that will contain the new tests
+#
+class TestCases(unittest.TestCase): pass
+
+# A generic function that performs a test on a particular file
+#
+def perform_test(self, file):
+    if len(file) > 20:
+        self.fail("Failing in file '%s' because its name is too long." % file)
+
+# Insert test methods into the TestCases class
+#
+for file in glob.glob("*")+glob.glob("*/*"):
+    TestCases.add_fn_test(name=file, fn=perform_test)
+
+# Apply these unittests
+#
+if __name__ == "__main__":
+    unittest.main()
+}}}
+
+The `options` and `suite` arguments can be used to pass additional information into a test.  For example, suppose that a test is defined by executing a Python script and comparing its output to a baseline file.
+If the script is `foo.py`, then we assume that the baseline file is `foo.txt`.
+The following example illustrates how these tests could be dynamically setup using the `options` argument:
+{{{
+# Example 6
+
+import os.path
+import pyutilib.th as unittest
+import glob
+import commands
+import sys
+
+# Defining the class that will contain the new tests
+#
+class TestCases(unittest.TestCase): pass
+
+# Execute a script and compare its output to a baseline file
+#
+def perform_test(self, name):
+    output_txt = commands.getoutput(sys.executable+' '+name).strip()
+    baseline_txt = open(self.get_options(name), 'r').read().strip()
+    self.assertEqual(output_txt, baseline_txt)
+
+# Insert test methods into the TestCases class
+#
+for file in glob.glob('*.py'):
+    baseline = file[:-3]+'.txt'
+    if os.path.exists(baseline):
+        TestCases.add_fn_test(name=file, fn=perform_test, options=baseline)
+
+# Apply these unittests
+#
+if __name__ == "__main__":
+    unittest.main()
+}}}
+The `suite` option can be used to categorize tests further.  This is currently used within !PyUtilib to define test suites within `pyutilib.autotest`.  For example, the previous example can be generalized to 
+categorize tests based on their prefix:
+{{{
+# Example 7
+
+import os.path
+import pyutilib.th as unittest
+import glob
+import commands
+import sys
+
+# Defining the class that will contain the new tests
+#
+class TestCases(unittest.TestCase): pass
+
+# Execute a script and compare its output to a baseline file
+#
+def perform_test(self, name, suite):
+    output_txt = commands.getoutput(sys.executable+' '+name).strip()
+    baseline_txt = open(self.get_options(name, suite), 'r').read().strip()
+    self.assertEqual(output_txt, baseline_txt)
+
+# Insert test methods into the TestCases class
+#
+for file in glob.glob('*.py'):
+    baseline = file[:-3]+'.txt'
+    if os.path.exists(baseline):
+        if file.startswith('test'):
+            TestCases.add_fn_test(suite='test', name=file, fn=perform_test, options=baseline)
+        else:
+            TestCases.add_fn_test(suite='other', name=file, fn=perform_test, options=baseline)
+
+# Apply these unittests
+#
+if __name__ == "__main__":
+    unittest.main()
+}}}
+Note that the use of `suite` changes the required API for the test being added.  Also, the call to `get_options` must include the suite name as well.
+
+
+==== Adding File Comparison Tests ====
+
+The `TestCase.add_baseline_test` method can be used to dynamically add tests that compare output files with corresponding baseline files:
+
+  `add_baseline_test(cls, name=None, cmd=None, fn=None, baseline=None, filter=None, cwd=None,            cmdfile=None)`
+    Add a test that compares a baseline file with a generated output file.  The output file can be 
+    generated with either a specified command-line, or with a test function.
+
+    The `name` argument specifies a string that is used
+    to create the method name inside of the test suite, by translating
+    the '/', '\' and '.' characters into '_'.  
+
+    When the `fn` argument is specified, then the output file is
+    generated by a user-defined function.  This function has one
+    argument, the value of the `name` argument, and it returns a
+    list of files.  The first file is the output file that is
+    compared against the baseline file specified with the `baseline`
+    option.  A comparison test is performed with
+    `assertFileEqualsBaseline`, and the `filter` argument is passed
+    into this assertion.  If this assertion is successful then all
+    of the files returned by the function are deleted.  Otherwise,
+    these are left to assist in the diagnosis of the the test
+    failure.
+
+    When the `cmd` argument is specified, then the output file is
+    generated by executing this command.  The output file used for
+    this test is the test method name, followed by `.out`.  If the
+    `cwd` option is specified, then the current working directory
+    is changed to this value before executing the command.  If the
+    `cmdfile` argument is specified, then this file contains a shell
+    command that represents the command that has been executed;
+    this is used to debug test failures.  A comparison test is
+    performed with `assertFileEqualsBaseline`, and the `filter`
+    argument is passed into this assertion.  If this test files,
+    the output file is left to assist test diagnosis.
+
+For example, Example 6 can be rewritten using a baseline function test as follows:
+{{{
+# Example 8
+
+import os.path
+import pyutilib.th as unittest
+import pyutilib.subprocess
+import glob
+import sys
+
+# Defining the class that will contain the new tests
+#
+class TestCases(unittest.TestCase): pass
+
+# Execute a script and compare its output to a baseline file
+#
+def perform_test(name):
+    pyutilib.subprocess.run(sys.executable+' '+name, outfile=name+'.out')
+    return [name+'.out']
+
+# Insert test methods into the TestCases class
+#
+for file in glob.glob('*.py'):
+    baseline = file[:-3]+'.txt'
+    if os.path.exists(baseline):
+        TestCases.add_baseline_test(name=file, baseline=baseline, fn=perform_test)
+
+# Apply these unittests
+#
+if __name__ == "__main__":
+    unittest.main()
+}}}
+Similarly, Example 6 can be rewritten using a baseline command test as follows:
+{{{
+# Example 9
+
+import os.path
+import pyutilib.th as unittest
+import glob
+import sys
+
+# Defining the class that will contain the new tests
+#
+class TestCases(unittest.TestCase): pass
+
+# Insert test methods into the TestCases class
+#
+for file in glob.glob('*.py'):
+    baseline = file[:-3]+'.txt'
+    if os.path.exists(baseline):
+        cmd = sys.executable+' '+file
+        TestCases.add_baseline_test(name=file, baseline=baseline, cmd=cmd)
+
+# Apply these unittests
+#
+if __name__ == "__main__":
+    unittest.main()
+}}}
+
+It is important to specify the `cwd` argument for Python test modules
+that are executed with the `nose` test discovery framework.  This
+ensures that the test is executed in the directory where it is
+defined, which is typically assumed for most tests.  The previous
+example can easily be adapted to provide this argument:
+{{{
+# Example 10
+
+import os.path
+import pyutilib.th as unittest
+import glob
+import sys
+
+cwd = os.path.dirname(os.path.abspath(__file__))+os.sep
+
+# Defining the class that will contain the new tests
+#
+class TestCases(unittest.TestCase): pass
+
+# Insert test methods into the TestCases class
+#
+for file in glob.glob('*.py'):
+    baseline = file[:-3]+'.txt'
+    if os.path.exists(baseline):
+        cmd = sys.executable+' '+file
+        TestCases.add_baseline_test(name=file, baseline=baseline, cmd=cmd, cwd=cwd)
+
+# Apply these unittests
+#
+if __name__ == "__main__":
+    unittest.main()
+}}}
+
+==== Import Tests ====
+
+The `TestCase.add_import_test` method can be used to dynamically add tests that compare output generated by importing a Python module with a corresponding baseline file:
+
+  `add_import_test(cls, module=None, name=None, cwd=None, baseline=None, filter=None)`
+    Add a test that compares output generated by importing a Python module with a baseline file.
+
+    The `name` argument specifies a string that is used
+    to create the method name inside of the test suite, by translating
+    the '/', '\' and '.' characters into '_'.  
+
+    An output file is generated by importing a Python moduled
+    specified by the `module` argument.  The output file used for
+    this test is the test method name, followed by `.out`.  If the
+    `cwd` option is specified, then the current working directory
+    is changed to this value before performing the import.  A
+    comparison test is performed with `assertFileEqualsBaseline`,
+    and the `filter` argument is passed into this assertion.  If
+    this test files, the output file is left to assist test diagnosis.
+
+For example, Example 6 can be rewritten as follows:
+{{{
+# Example 11
+
+import os.path
+import pyutilib.th as unittest
+import glob
+import sys
+
+# Defining the class that will contain the new tests
+#
+class TestCases(unittest.TestCase): pass
+
+# Insert test methods into the TestCases class
+#
+for file in glob.glob('*.py'):
+    baseline = file[:-3]+'.txt'
+    if os.path.exists(baseline):
+        cmd = sys.executable+' '+file
+        TestCases.add_import_test(module=file[:-3], name=file, baseline=baseline)
+
+# Apply these unittests
+#
+if __name__ == "__main__":
+    unittest.main()
+}}}
+As with `add_baseline_test`, it is important to specify the `cwd`
+argument for Python test modules that are executed with the `nose`
+test discovery framework.
+
+Note that testing via Python imports can be fragile.  For example,
+if two Python modules have the same name (e.g. in different test
+directories), then only one of the import tests will be performed.
+Python's import caching logic will prevent the execution of both
+of the test modules.
+
+
+=== Test Categorization ===
+
+In large complex software packages, it is often useful to distinguish
+between different categories of tests.  This allows developers to
+focus on different aspects of the software package during different
+stages of the software development process.  For example, the
+following are commonly used test categories:
+
+  unit
+    Unit tests
+  nightly
+    Tests run nightly (or during a continuous integration process)
+  smoke
+    Fast tests that test overall software functionality
+  performance
+    Expensive performance tests
+
+The `category` decorator can be used to modify either `TestCase`
+declarations, or individual `TestCase` test methods.  This decorator
+accepts a list of strings that declare the test categories that can
+be used to select the testcase or test method.
+
+For example, consider the following test declarations:
+{{{
+# Example 12
+
+import pyutilib.th as unittest
+
+class Tests(unittest.TestCase):
+
+    @unittest.category('foo')
+    def test1(self):
+        print "TEST1"
+
+    @unittest.category('bar')
+    def test2(self):
+        print "TEST2"
+
+@unittest.category('foo', 'bar')
+class MoreTests(unittest.TestCase):
+
+    def test3(self):
+        print "TEST3"
+
+if __name__ == '__main__':
+    unittest.main()
+}}}
+The execution of these tests is controlled by the `PYUTILIB_UNITTEST_CATEGORIES` environment variable.  If this variable is not defined, then all tests are executed.  If this environment variable is defined with a comma-separated list of test categories, then tests that contain a matching test category are executed.  Similarly, `PYTUILIB_UNITTEST_CATEGORIES` can define a single test category.  The following table illustrates how different settings for this environment variable impact the execution of these tests:
+{{{
+PYUTILIB_TEST_CATEGORIES | Tests Executed
+-----------------------------------------------
+foo                      | test1, test3
+bar                      | test2, test3
+foo,bar                  | test1, test2, test3
+foo,x                    | test1, test3
+x,y                      | NONE
+}}}
+
+Finally, note that the `category` decorator is compatible with the boolean attributes recognized by `nose`.  For example, the command:
+{{{
+nosetests -a performance
+}}}
+will execute all commands labeled with the "performance" category.
+
+
+=== NOSE Plugins ===
+
+The `pyutilib.th` package includes several plugins that enhance the functionality of `nose`.
+
+==== Garbage Collection ====
+
+This module defines a nose plugin to forceably run the Python garbage collector before and after every test.
+Use the following command-line option with nosetests:
+{{{
+nosetests --with-forced-gc
+}}}
+
+
+==== Impose Test Timelimits ====
+
+This module defines a nose plugin to terminate a test after aspecified number of seconds.
+Use the following command-line option with nosetests ::
+{{{    
+nosetests --test-timeout=###
+}}}
+
+
+==== Collecting Performance Data ====
+
+This module defines a nose plugin that allows the user to archive test data.
+Use the following command-line option with nosetests:
+{{{
+nosetests --with-testdata
+}}}
+    
+By default, a file named `testdata.csv` will be written to the working directory.
+If you need to change the name or location of the file, you can set the
+`--testdata-file` option.
+
+Here is an abbreviated version of what the CSV file might look like:
+{{{
+classname,name,time
+pyutilib.th.tests.test_pyunit.Tester,test_fail,0.00291109085083 
+pyutilib.th.tests.test_pyunit.Tester,test_pass,5.57899475098e-05
+pyutilib.th.tests.test_pyunit.Tester2,test_pass,0.000113964080811
+pyutilib.th.tests.test_pyunit.Tester3,test_fail,7.60555267334e-05
+}}}
+
+The `time` data is automatically recorded by this plugin.  Additional data can be reported when this plugin is used with `pyutilib.th`.  Tests can call the 
+`recordTestData` method to add additional columns of data.  For example, consider the following test:
+{{{
+# Example 13
+
+import pyutilib.th as unittest
+
+class Tests(unittest.TestCase):
+
+    @classmethod
+    def setupClass(self):
+        self.counter = 1
+
+    def tearDown(self):
+        self.counter += 1
+
+    def test1(self):
+        self.recordTestData('counter', counter)
+
+    def test2(self):
+        self.recordTestData('counter', counter)
+}}}
+When running `nosetests`, the order of test execution may be different from the order of test declarations.  Thus, the value of `counter` is used to validate the order of test execution.  The command:
+{{{
+nosetests --with-testdata
+}}}
+generates the following CSV file:
+{{{
+classname,name,dataname,value
+test_tmp.Tests,test1,counter,1
+test_tmp.Tests,test1,time,2.71797180176e-05
+test_tmp.Tests,test2,counter,2
+test_tmp.Tests,test2,time,1.59740447998e-05
+}}}

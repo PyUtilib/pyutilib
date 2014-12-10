@@ -1,0 +1,345 @@
+
+\section{PCA Extensions}
+
+\label{chap:extensions}
+
+In addition to the core component framework, \pcasp includes implementations
+for a variety of components that support commonly used functionality. 
+These extensions of \pcasp are available in PyUtilib packages separate 
+from the \pcasp core.  This emphasizes the modularity of the \pca, 
+and it illustrates how to define \pcasp components that are 
+automatically registered as part of an application.
+The following sections briefly describe these \pcasp extensions.
+
+
+\subsection{Component Loaders}
+
+\label{sec:loaders}
+
+\pcasp components can be loaded from either Python modules or Python eggs. This
+capability supports the runtime extension of the \pca,
+which has proven very powerful in frameworks like Trac. 
+Component services for loading are defined in the \code{pyutilib.component.loader} package.
+The core \pcasp
+defines extension points that use these services, which can be
+applied as follows:
+\begin{quotation}
+\begin{lstlisting}
+import sys
+import os
+env = sys.environ["PATH"]
+PluginGlobals.load_services(path=env.split(os.sep))
+\end{lstlisting}
+\end{quotation}
+In this example, the user's \code{PATH} environment is used to define the list
+of directories that are searched for Python modules and eggs.  
+
+The \code{load\_services} takes two other optional arguments that control
+how components are loaded.  The \code{name\_re} argument can be used to
+define a regular expression that filters the files in the directories
+that are searched.  The following shows how to specify that services starting with \textit{my}
+are loaded:
+\begin{quotation}
+\begin{lstlisting}
+PluginGlobals.load_services(name_re="my.*")
+\end{lstlisting}
+\end{quotation}
+
+By default, when services are loaded they are disabled.  This facilitates the management of
+services in complex applications using 
+configuration files (see below).  The \code{auto\_disable} flag can be used
+to automatically activate services:
+\begin{quotation}
+\begin{lstlisting}
+PluginGlobals.load_services(auto_disable=False)
+\end{lstlisting}
+\end{quotation}
+
+
+\subsection{Registering Executables}
+
+The \code{pyutilib.component.executable} package defines the \code{ExternalExecutable} plugin, which is used to define services that provide
+information about external executables. Services declare the executable
+name and user documentation, and then service methods indicate whether
+the executable is enabled (i.e. whether it is found, and the path of
+the executable:
+\begin{quotation}
+\begin{lstlisting}
+service = ExternalExecutable(name='ls', 
+            doc='A utility to list file in Unix operating systems')
+
+service.enabled()     
+# Returns True if the executable is found on the user path.
+
+service.get_path()
+# Returns a string that defines the path to this executable, 
+# or None if service is disabled.
+\end{lstlisting}
+\end{quotation}
+The registration process is simplified with the \code{pyutilib.services} package, 
+which includes the \code{register\_executable} function:
+\begin{quotation}
+\begin{lstlisting}
+import pyutilib.services
+
+pyutilib.services.register_executable('zip')
+\end{lstlisting}
+\end{quotation}
+This function searches the user's \code{PATH} environment for the \code{zip} executable (or \code{zip.exe} on Windows machines).  
+
+A developer can use the \code{registered\_executable} function to the
+access the absolute path of a registered executable.  If the executable
+is not found in the user's \code{PATH}, then this returns \code{None}.
+Also, if no executable is specified, then this function returns a list
+of all registered executables.
+
+
+\subsection{Temporary Files}
+
+The \code{pyutilib.component.config} packages provides a services for managing temporary files.  The \code{TempfileManager} object is a component service whose methods can be used to create and
+cleanup temporary files;  for convenience, this object is accessible from the \code{pyutilib.services} package.
+
+The main method in this service is \code{create\_tempfile}, which can create a temporary file with a specified suffix and prefix in a specified directory:
+\begin{quotation}
+\begin{lstlisting}
+import pyutilib.services
+
+pyutilib.services.create_tempfile(prefix='myfile',
+                                  suffix='.txt', dir='/home/jdoe')
+\end{lstlisting}
+\end{quotation}
+By default, this service creates unique filenames.  However, if the \code{sequential\_files}
+method is called, then the body of the temporary files will be an integer that 
+is incremented every time a temporary file is created.  Although these filenames may not
+be unique, this sequential naming scheme may make it easier to diagnose errors in a
+complex application.
+
+This service keeps track of the temporary files that it creates.  This allows an application
+developer to avoid this bookkeeping, and instead rely on this service to delete temporary 
+files with the \code{clear\_tempfiles} method.  Furthermore, a developer can explicitly
+declare a file as temporary using the \code{add\_tempfile} method, thereby allowing this
+service to delete it.
+
+
+\subsection{Options and Configuration Files}
+
+The \code{pyutilib.component.config} package defines interfaces and plugins
+for managing service options. The \code{Configuration} service is used to manage
+the global configuration of all services. This class coordinates with
+\code{Option} services. Plugins can declare options with the \code{declare\_option}
+method, which registers these options with the \code{Configuration} service. This
+service reads and writes options to configuration files (using Python's
+\code{ConfigParser} package).
+
+This package also declares the \code{ManagedPlugin} and \code{ManagedSingletonPlugin}
+classes, which are plugin base classes that include options that can be
+used to enable or disable services using the \code{Configuration} service. 
+
+
+\subsubsection{Configuration Files}
+
+A \pcasp configuration file consists of a list of sections.  Each section is lead by a \code{[section]} header, and a section contains a list of \code{name = value} entries.  For example, 
+the following configuration file consists of two sections with four option values:
+\begin{quotation}
+\begin{lstlisting}
+# COMMENT
+[globals]
+a = 1
+b = /dev/null
+c = 1,2,3
+[a.b]
+zz = 4.5
+\end{lstlisting}
+\end{quotation}
+\pcasp plugin classes declare component options with the \code{declare\_option} method, which is defined in
+\code{pyutilib.component.doc}.
+These options can be initialized with a configuration file.  For example, the following plugin
+declares four options.  
+\begin{quotation}
+\begin{lstlisting}
+class PluginWithOptions(Plugin):
+    def __init__(self):
+        declare_option("a")
+        declare_option("b")
+        declare_option("c")
+        declare_option("zz",section='a.b')
+\end{lstlisting}
+\end{quotation}
+The default configuration section for an option is \code{[globals]},
+but the option declaration can specification the section name.  For example, the configuration file
+described above can be used to initialize the \code{PluginWithOptions} plugin.
+
+The \code{Configuration} class manages loading and storing configuration data for the options
+that are registered by \pcasp services.  This class defines the following methods:
+\begin{description}
+
+\item[clear] Clear the configuration data.
+\item[load] Load configuration data from a file.
+\item[pprint] Print a simple summary of the configuration data.
+\item[save] Write configuration data to a file.
+\item[sections] Return a list of the sections that have been loaded.
+\item[summarize] Summarize the options that have been registered with the \pca.
+
+\end{description}
+Once data is loaded with the \code{load} method, the \code{sections} method can be used to provide a list of the sections that were loaded.  The Python \code{\_\_contains\_\_} method can 
+also be used to check if a section was loaded:
+\begin{quotation}
+\begin{lstlisting}
+from pyutilib.component.config import *
+
+config = Configuration()
+
+# Load configuration data
+config.load('config.ini')
+
+# Check if the 'globals' section was loaded
+if 'globals' in config:
+    print "The 'globals' section was loaded"
+
+# Get the 'globals' section
+section = config['globals']
+\end{lstlisting}
+\end{quotation}
+The Python \code{\_\_getitem\_\_} method is used at the end of this example to get the data for the 'globals' section.  Section data consists of a dictionary that maps option names to value strings.  Note that the \code{Configuration} class automatically loads this data into the 
+corresponding options that have been registered with the \pca.
+
+
+\subsubsection{Declaring Options}
+
+The \code{declare\_option} creates an \code{Option} object that is a data member in a 
+plugin.  The standard syntax for this function is to specify the option name, which is used to define an attribute in the plugin with the same name:
+\begin{quotation}
+\begin{lstlisting}
+class TmpPlugin(SingletonPlugin):
+
+  declare_option('x')
+\end{lstlisting}
+\end{quotation}
+The \code{local\_name} keyword can be used to specify a different name for this attribute
+within the plugin.  For example, consider:
+\begin{quotation}
+\begin{lstlisting}
+class TmpPlugin(SingletonPlugin):
+
+  declare_option('x', local_name='y')
+\end{lstlisting}
+\end{quotation}
+In this example, the option is declared with name \code{x} in the \pcasp
+registry, but it has attribute name \code{y} within this plugin.  
+The \code{default}
+keyword defines the default value of an option, and the \code{doc} option specifies a
+document string that describes the option;  this information is used by the \code{Configuration} class when printing option summary information.
+
+As noted earlier, the \code{section} keyword can be used to specify
+the section in configuration data that this option is expected.
+The \code{section\_re} keyword supports a more generic mechanism.
+If the \code{section\_re} is specified with a regular expression,
+then this option will be initialized from any section that matches this
+regular expression.  If sections match and contain data for this option,
+then the last section specified in the configuration data will be used
+to initialize this option.
+
+Finally, the \code{cls} keyword specifies the option type.  Option types are described in 
+the next section.
+
+% TODO: should we change the syntax to 'type' instead of 'cls'?  I think that 'type' might
+% be a reserved word...
+
+
+\subsubsection{Options Types}
+
+The default option type is \code{Option}.  These options treat option values as strings, 
+even when they could be interpreted as numeric values.  The \code{BoolOption}, \code{IntOption} and \code{FloatOption} types respectively interpret option values as booleans, integers and floating point values.  The \code{OptionError} exception is raised if the option value is not the appropriate value.
+
+The \code{FileOption} type interprets the option value into a path.
+A relative path is converted to an absolute path using the path for
+the configuration file.  Thus, a user can load file path data from
+any directory but specify the file data relative to the path of the
+application configuration.  In addition, this option type also supports
+a \code{directory} keyword that can be used to specify how relative
+paths are resolved.  The \code{ExecutableOption} type is an extension of
+\code{FileOption} that confirms that the file can be executed.  If the
+file name does not include path information, then \pcasp will search
+for the executable using the user's \code{PATH} environment before
+initializing this option.
+
+The \code{DictOption} type supports an interface to all options in a section.
+For example, consider:
+\begin{quotation}
+\begin{lstlisting}
+class TmpPlugin(Plugin):
+
+    options = DictOption(section="bar")
+\end{lstlisting}
+\end{quotation}
+The \code{options} object will be populated by all data in the \code{bar} section.
+For example, if the names \code{a} and \code{b} are defined in this section, then
+they can be referenced as \code{options.a} and \code{options.b}.  Similarly,
+data can be inserted into the \code{bar} section by simply 
+specifying the value of attributes of this object:
+\begin{quotation}
+\begin{lstlisting}
+options.c = 2
+\end{lstlisting}
+\end{quotation}
+
+
+\subsubsection{Using Options in Services}
+
+It is convenient for singleton plugins to declare options as part of the class definition:
+\begin{quotation}
+\begin{lstlisting}
+class Plugin1(SingletonPlugin):
+
+  declare_option("x")
+\end{lstlisting}
+\end{quotation}
+This type of declaration makes sense since there is a single instance of the class \code{Plugin1}.
+For non-singleton plugins, this type of declaration would make the \textit{same} option data
+available to all instances of the plugin.  To declare different options for different 
+non-singleton plugin instances, it suffices to execute \code{declare\_option} within the
+plugin constructor:
+\begin{quotation}
+\begin{lstlisting}
+class Plugin2(Plugin):
+
+    def __init__(self, sec):
+        declare_option("x", section=sec)
+\end{lstlisting}
+\end{quotation}
+Note that this example allows the \code{Plugin2} services to distinguish the configuration of
+these different \code{x} options by specifying different sections in the configuration file.
+Although this is not required, this is often desirable in practice.
+
+
+\subsubsection{Managed Services}
+
+The \pcasp supports explicit management of services using the configuration management
+technology described in this section.  The \code{ManagedPlugin} and \code{ManagedSingletonPlugin}
+classes include an \code{enable} option that controls whether their corresponding
+services are activated.  When services are loaded from EGG files and modules, they
+are disabled by default.  The \code{Services} section of a configuration file can
+be used to activate these plugins:
+\begin{quotation}
+\begin{lstlisting}
+[Services]
+plugin1 = True
+plugin3 = True
+\end{lstlisting}
+\end{quotation}
+This allows an application administrator to install a variety number of application
+services that a user selectively enables.
+
+
+\subsection{Other Extensions}
+
+The following extension packages include plugins and applications interfaces for \pcasp applications.  These extension packages are less mature, and consequently they are not documented in detail right now.
+
+\paragraph{pyutilib.component.config}  This extension package defines a plugin that manages logging of \pcasp actions.
+
+\paragraph{pyutilib.component.app}  This package defines a simple application class that 
+can be used as the basis of a component-based application.  This application class provides support for managing configuration from a configuration file, and for managing logging activity.
+
+
+
+

@@ -1,0 +1,139 @@
+% TODO: should we refer to 'PCA' or 'the PCA' in the text?
+
+\section{Introduction}
+
+Component Based Software Engineering (CBSE) has become one of the
+leading approaches to developing complex extensible software
+systems~\cite{HeiCou01}.  CBSE implementations frequently rely on
+concepts from both object oriented programming (OOP) and event-driven
+programming.  Unlike traditional OOP where classes and polymorphism
+are used to manage related data-driven objects, CBSE leverages
+classes and polymorphism to represent related functional interfaces
+and programmatic \emph{services}.  The central idea underlying CBSE
+is \emph{equivalence of service}; that is, the separation of the
+declaration of component interfaces from their implementation.  This
+allows for more flexible software design that encourages modularity
+of component interface and definitions.  Furthermore, this segregation
+allows for explicit management of the interactions among components.
+We can begin to imagine software components as commodities that can
+be integrated into applications in a much more flexible and dynamic
+manner.
+
+A variety of mature, general purpose environments exist
+for defining and managing components (e.g., the CORBA Component
+Model~\cite{CORBA_CMS} and the Common Component
+Architecture~\cite{cca}).  Although 
+Python interfaces have been developed for some of these environments, a
+variety of native Python component environments have also been developed,
+including Zope~\cite{Zope}, Envisage~\cite{Envisage}, Trac~\cite{Trac},
+yapsy~\cite{yapsy} and SprinklesPy~\cite{SprinklesPy}.
+
+This report describes the PyUtilib Component Architecture (\pca),
+which was significantly revised in the PyUtilib 4.0 release.  The
+\pcasp is derived from the Trac component framework~\cite{Trac},
+and it is included in the PyUtilib software package~\cite{PyUtilib}.
+Our development of the \pcasp was motivated by our experience with
+a variety of scientific computing applications, which led to the
+following requirements for \pca:
+\begin{itemize}
+
+\item \textit{Independent, self-contained framework core}: Many
+  component architectures 
+are embedded in larger software frameworks (e.g. Zope, Trac), which
+  make it difficult 
+to extract and use just the software packages related to the component
+architecture.  
+%\todo{Reference websites that discuss components in zope and twisted, which are the two most widely-used Python architectures.  Discuss our experience using Trac's architecture.}
+
+\item \textit{Non-Singleton components}:  The computational science
+applications that motivate \pcasp require both singleton components
+(which have a single unique instance) and non-singleton components
+(which have many unique instances). 
+
+\item \textit{Namespaces}:  Using components in large software projects
+requires management across multiple libraries.  Namespaces are needed
+to effectively manage components in these complex software projects.
+
+\item \textit{Caching}:  Components need to support applications
+where component interfaces are called thousands or millions of times.
+Thus, caching of this 
+interaction 
+is needed to minimize the overhead of the component architecture.
+
+\item \textit{Loading from EGGs}:  Support for loading EGG files is
+invaluable in dynamic applications.  Further, loading components from EGG
+files provides another level of modularity to the management of software
+applications.
+
+\end{itemize}
+
+A key guiding principle behind our development of the \pcasp is a focus on
+simplicity and flexibility.  Our goal is to minimize the burden placed
+on application developers for both adding the \pcasp to a project and
+maintaining \pca-based applications.  One consequence is that the \pcasp
+explicitly does not provide some advanced capabilities, like interface
+validation and interface adaption, that are available in more
+heavyweight component architectures such as Zope or Envisage.
+
+%Another motivation for the development of the \pcasp was the desire to
+%employ a light-weight 
+%framework that could be easily deployed.  Thus, dependencies on a
+%general purpose  
+%environment was undesirable.  Additionally, support for interface
+%conversion was not  
+%deemed sufficiently important to justify the use of a more complex
+%framework like Zope or 
+%Envisage that supports this functionality.
+
+
+\if 0
+
+Pyomo leverages the PyUtilib Component Architecture (\pca) to support
+plugins that extend Pyomo's built-in functionality.  \pcasp supports an
+object oriented approach to software design, which is an accepted strategy
+for managing software complexity in large systems.  Object oriented
+design is traditionally done using classes and class inheritance;  classes
+define interfaces, which are extended and customized in subclasses using
+class inheritance.
+
+The main idea behind \pcasp is to separate the declaration of component
+interfaces from their implementation.  This allows for a more flexible
+design of software components that further encourages modularity of
+components.  Additionally, \pcasp includes a global component registry, as
+well as a framework for automating the execution of components that match
+a given interface.  This capability facilitates the dynamic registration
+and application of components within large software systems.
+
+The plugin components supported by Pyomo have a variety of significant impacts
+on the development and deployment of Pyomo applications:
+\begin{itemize}
+
+\item Plugins facilitate extensions of Pyomo without risk of destabilizing core functionality.  
+
+\item Plugins allow third-party developers to add value without requiring direct involvement of the core developers.  For example, Pyomo extensions can be developed and distributed without requiring developer access to Pyomo's subversion repository.  Similarly, third-party developers can develop 
+plugins that are specific to their working environment or business needs.
+
+\item The \pcasp can automate the activation of external software interfaces, based on the user's environment.  For example, optimization solvers can be
+automatically registered if they are found with the user's \code{PATH} environment.
+
+\item New capabilities can be dynamically loaded at run-time.  Python EGG files provide a standard, modular mechanism for distributing plugins.  The \pcasp can dynamically load EGG files, which allows users to dynamically activate 
+plugins.
+
+\end{itemize}
+
+\fi
+
+
+The remainder of this manuscript is divided into the following sections.
+Section~\ref{chap:pca} provides a tutorial introduction to the use of \pcasp classes,
+and Section~\ref{chap:core} provides a detailed description of \pcasp capabilities.
+Section~\ref{chap:extensions} describes PyUtilib extension
+packages that support specific components based on the \pca.  This section
+motivates these packages and provides examples of their use.  Section~\ref{chap:disc}
+discusses how the \pcasp has 
+fundamentally influenced the design of the Pyomo software project.
+
+
+
+% LocalWords:  CBSE CORBA Zope Trac yapsy SprinklesPy PyUtilib Trac's EGGs
+% LocalWords:  Namespaces Pyomo plugins Pyomo's plugin Pyomo
