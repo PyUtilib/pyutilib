@@ -3,10 +3,49 @@
 ====================
 
 -------------------------------------------------------------------------------
- Version 5.0
+ Version 5.1
 -------------------------------------------------------------------------------
 
 - Next release
+
+-------------------------------------------------------------------------------
+ Version 5.0
+-------------------------------------------------------------------------------
+
+- Integrating many PyUtilib sub-packages into a single source tree
+- Integrating the Coopr plugin framework in pyutilib.component.core
+
+- pyutilib.th
+  - Adding a forcedskip option, which can be used to add tests that
+    are skipped due to external factors.
+  - Extending baseline tests to allow comparison with YAML, XML and
+    JSON files.
+- pyutilib.pyro
+  - Changes to support clearing the dispatcher queue 
+  - Adding default value for TaskWorker type
+  - Allowing more control of blocking behavior when calling dispatcher
+  - Modifying dispatcher to look for the presence of an environment
+    variable called "MAX_PYRO_CONNECTIONS", to over-ride the default
+    number of allowed connections.
+  - Adding randomization of the sleep interval in a pyro client,
+    following failure to initially connect to a name server.
+    Randomization will better distribute the number of concurrent
+    re-connection attempts.
+- pyutilib.misc
+  - Allowing None tolerance when comparing YAML files.
+  - Disallowing whitespace between a +/- and the number.  Strings
+    cannot be converted to floats with whitespace
+  - Adding support for gzip and bz2 compressed files, which act as
+    single file archives
+  - Adding support to open readonly file objects (using the open()
+    method) rather than only supporting file extractions to disk
+  - Adding an option to clear sys.modules of the
+    module being imported. Sometimes, we really want to re-import
+    a module with the same 'name' that was located in a different
+    location.
+- pyutilib.dev
+  - Adding a '-f' [find only] option to lbin so that lbin can be
+    used to locate but not run local executables.
 
 -------------------------------------------------------------------------------
  Version 4.7.3340
