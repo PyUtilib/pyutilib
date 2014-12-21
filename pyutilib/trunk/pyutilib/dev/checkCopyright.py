@@ -9,7 +9,6 @@ import os
 import re
 
 suffixes = ['.c', '.cc', '.h', '.H', '.cpp', '.py']
-pat = re.compile('Copyright')
 
 def recurse(dir):
     for root, dirnames, filenames in os.walk(dir):
@@ -18,20 +17,33 @@ def recurse(dir):
                 if filename.endswith(suffix):
                     yield os.path.join(root,filename)
 
-def match(filename):
+def match(filename, pat):
     INPUT = open(filename,'r')
-    for line in INPUT:
-        if pat.search(line):
-            return True
+    fstring = INPUT.read()
+    INPUT.close()
+    if pat.search(fstring):
+        return True
     return False
 
 def main():
     nfiles = 0
     badfiles = []
-    for dir in sys.argv[1:]:
-        for filename in recurse(dir):
+    if sys.argv[1] == '-c':
+        cfile = sys.argv[2]
+        files = sys.argv[3:]
+        INPUT = open(cfile, 'r')
+        cstring = INPUT.read()
+        INPUT.close()
+        pat = re.compile(cstring)
+    else:
+        cfile = None
+        cstring = None
+        pat = re.compile('Copyright')
+        files = sys.argv[1:]
+    for dir_ in files:
+        for filename in recurse(dir_):
             nfiles += 1
-            if not match(filename):
+            if not match(filename, pat):
                 badfiles.append(filename)
 
     print("Total number of files missing copyright: "+str(len(badfiles)))
