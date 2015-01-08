@@ -43,7 +43,7 @@ def run(package, argv):
     if 'performance' in os.environ.get('PYUTILIB_UNITTEST_CATEGORIES','').split(','):
         os.environ['NOSE_WITH_TESTDATA'] = '1'
         os.environ['NOSE_WITH_FORCED_GC'] = '1'
-        attr = ['-a','performance']
+        attr = ['-a','performance', '--with-testdata']
     else:
         attr = []
 
