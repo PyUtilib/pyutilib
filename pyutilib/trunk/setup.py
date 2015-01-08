@@ -80,7 +80,7 @@ setup(name="PyUtilib",
         component.config = pyutilib.component.config
         component.executables = pyutilib.component.executables
         component.loader = pyutilib.component.loader
-        [pyutilib.th]
+        [nose.plugins.0.10]
         nose.testdata = pyutilib.th.nose_testdata:TestData
         nose.forcedgc = pyutilib.th.nose_gc:ForcedGC
         nose.timeout = pyutilib.th.nose_timeout:TestTimeout

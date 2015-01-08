@@ -113,8 +113,8 @@ class TestData(Plugin):
             for data in self.reportdata:
                 for key in data[2]:
                     self.report_file.write(prefix)
-                    self.report_file.write(data[0]+','+data[1])
-                    self.report_file.write(','+key+','+str(data[2][key]))
+                    self.report_file.write(str(data[0])+','+str(data[1]))
+                    self.report_file.write(','+str(key)+','+str(data[2][key]))
                     self.report_file.write('\n')
 
         if self.config.verbosity > 1:
