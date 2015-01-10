@@ -36,14 +36,13 @@ class IgnorePluginPlugins(SingletonPlugin):
     implements(IIgnorePluginWhenLoading)
 
     def ignore(self, name):
-        return name in list(globals().keys())
+        return name in globals()
 
 
 #
 # Import the 'pyutilib.component' plugins
 #
 try:
-    #raise ImportError("INGORE")
     import pkg_resources
     #
     # Load modules associated with Plugins that are defined in
