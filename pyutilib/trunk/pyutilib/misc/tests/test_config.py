@@ -731,12 +731,12 @@ scenarios[1].detection""")
             import argparse
         except ImportError:
             self.skipTest("argparse not available")
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(prog='tester')
         self.config.initialize_argparse(parser)
         help = parser.format_help()
         print(help)
         self.assertEqual(
-            """usage: nosetests [-h] [--epanet-file EPANET] [--scenario-file STR] [--merlion]
+            """usage: tester [-h] [--epanet-file EPANET] [--scenario-file STR] [--merlion]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -754,7 +754,7 @@ Scenario definition:
             import argparse
         except ImportError:
             self.skipTest("argparse not available")
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(prog='tester')
         self.config.initialize_argparse(parser)
 
         args = parser.parse_args([])
@@ -789,7 +789,7 @@ Scenario definition:
             import argparse
         except ImportError:
             self.skipTest("argparse not available")
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(prog='tester')
         parser.add_subparsers(title="Subcommands").add_parser('flushing')
 
         self.config['flushing']['flush nodes']['duration'].declare_as_argument(
@@ -803,8 +803,8 @@ Scenario definition:
         help = parser.format_help()
         print(help)
         self.assertEqual(
-            """usage: nosetests [-h] [--epanet-file EPANET] [--scenario-file STR] [--merlion]
-                 {flushing} ...
+            """usage: tester [-h] [--epanet-file EPANET] [--scenario-file STR] [--merlion]
+              {flushing} ...
 
 optional arguments:
   -h, --help            show this help message and exit
