@@ -103,11 +103,9 @@ class TaskWorkerBase(object):
                 if task is not None:
 
                     task['result'] = self.process(task['data'])
-
                     if task['generateResponse']:
                         task['processedBy'] = self.WORKERNAME
                         self.dispatcher.add_result(task, type=current_type)
-
                     # give the dispatch server a bit of time to recover
                     # and process the request - it is very unlikely
                     # that it can have another task ready (at least in
