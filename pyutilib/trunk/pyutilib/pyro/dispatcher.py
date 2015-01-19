@@ -21,8 +21,11 @@ else:
 
 if using_pyro3:
     base = _pyro.core.ObjBase
+    oneway = lambda method: method
 else:
     base = object
+    oneway = _pyro.oneway
+
 class Dispatcher(base):
 
     def __init__(self, **kwds):
@@ -30,8 +33,6 @@ class Dispatcher(base):
             raise ImportError("Pyro or Pyro4 is not available")
         if using_pyro3:
             _pyro.core.ObjBase.__init__(self)
-        else:
-            self._pyroOneway = set('shutdown')
         self.default_task_queue = Queue.Queue()
         self.default_result_queue = Queue.Queue()
         self.task_queue = {}
@@ -40,6 +41,7 @@ class Dispatcher(base):
         if self.verbose:
            print("Verbose output enabled...")
 
+    @oneway
     def shutdown(self):
         print("Dispatcher received request to shut down - initiating...")
         if using_pyro3:
@@ -57,6 +59,7 @@ class Dispatcher(base):
             if type in self.result_queue:
                 del self.result_queue[type]
 
+    @oneway
     def add_task(self, task, type=None):
         if self.verbose:
            print("Received request to add task=<Task id="
@@ -83,6 +86,7 @@ class Dispatcher(base):
         except Queue.Empty:
             return None
 
+    @oneway
     def add_result(self, data, type=None):
         if self.verbose:
            print("Received request to add result with "
