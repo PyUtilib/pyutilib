@@ -35,7 +35,7 @@ class Test(unittest.TestCase):
         net.declare( 'epanet file', ConfigValue( 
                 'Net3.inp', str, 
                 'EPANET network inp file', 
-                None ) )
+                None ) ).declare_as_argument(dest='epanet')
 
         sc = config.declare('scenario', ConfigBlock(
                 "Single scenario block" ) )
@@ -47,14 +47,14 @@ file' parameter.  It contains multiple lines, and some internal
 formatting; like a bulleted list:
   - item 1
   - item 2
-""" ) )
+""" ) ).declare_as_argument(group='Scenario definition')
         sc.declare( 'merlion', ConfigValue( 
                 False, bool, 
                 'Water quality model',
                 """This is the (long) documentation for the 'merlion'
 parameter.  It contains multiple lines, but no apparent internal
-formatting; so the outputter should re-warp everything.
-""" ) )
+formatting; so the outputter should re-wrap everything.
+""" ) ).declare_as_argument(group='Scenario definition')
         sc.declare( 'detection', ConfigValue(
                 # Note use of lambda for an "integer list domain"
                 [1,2,3], lambda x: list(int(i) for i in x),
@@ -725,7 +725,102 @@ scenarios[1].detection""")
   merlion: true
   detection: []
 """)
-       
+
+    def test_argparse_help(self):
+        try:
+            import argparse
+        except ImportError:
+            self.skipTest("argparse not available")
+        parser = argparse.ArgumentParser()
+        self.config.initialize_argparse(parser)
+        help = parser.format_help()
+        print(help)
+        self.assertEqual(
+            """usage: nosetests [-h] [--epanet-file EPANET] [--scenario-file STR] [--merlion]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --epanet-file EPANET  EPANET network inp file
+
+Scenario definition:
+  --scenario-file STR   Scenario generation file, see the TEVASIM
+                        documentation
+  --merlion             Water quality model
+""", help)
+        
+
+    def test_argparse_import(self):
+        try:
+            import argparse
+        except ImportError:
+            self.skipTest("argparse not available")
+        parser = argparse.ArgumentParser()
+        self.config.initialize_argparse(parser)
+
+        args = parser.parse_args([])
+        self.assertEqual(0, len(vars(args)))
+        leftovers = self.config.import_argparse(args)
+        self.assertEqual(0, len(vars(args)))
+        self.assertEqual(
+            [], [x.name(True) for x in self.config.unused_user_values()] )
+
+        args = parser.parse_args(['--merlion'])
+        self.assertEqual(1, len(vars(args)))
+        leftovers = self.config.import_argparse(args)
+        self.assertEqual(0, len(vars(args)))
+        self.assertEqual(
+            ['scenario.merlion'], 
+            [x.name(True) for x in self.config.unused_user_values()] )
+        self.assertTrue(self.config['scenario']['merlion'])
+
+        args = parser.parse_args(['--merlion','--epanet-file','foo'])
+        self.assertEqual(2, len(vars(args)))
+        leftovers = self.config.import_argparse(args)
+        self.assertEqual(1, len(vars(args)))
+        self.assertEqual(
+            ['network.epanet file','scenario.merlion'], 
+            [x.name(True) for x in self.config.unused_user_values()] )
+        self.assertTrue(self.config['scenario']['merlion'])
+        self.assertEqual('foo', self.config['network']['epanet file'].value())
+
+
+    def test_argparse_subparsers(self):
+        try:
+            import argparse
+        except ImportError:
+            self.skipTest("argparse not available")
+        parser = argparse.ArgumentParser()
+        parser.add_subparsers(title="Subcommands").add_parser('flushing')
+
+        self.config['flushing']['flush nodes']['duration'].declare_as_argument(
+            group='flushing')
+        self.config['flushing']['flush nodes']['feasible nodes'] \
+            .declare_as_argument( group=('flushing','Node information') )
+        self.config['flushing']['flush nodes']['infeasible nodes'] \
+            .declare_as_argument( group=('flushing','Node information') )
+        self.config.initialize_argparse(parser)
+
+        help = parser.format_help()
+        print(help)
+        self.assertEqual(
+            """usage: nosetests [-h] [--epanet-file EPANET] [--scenario-file STR] [--merlion]
+                 {flushing} ...
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --epanet-file EPANET  EPANET network inp file
+
+Subcommands:
+  {flushing}
+
+Scenario definition:
+  --scenario-file STR   Scenario generation file, see the TEVASIM
+                        documentation
+  --merlion             Water quality model
+""", help)
+
+        #parser.parse_args(['flushing','--help'])
+
 
 if __name__ == "__main__":
     unittest.main()

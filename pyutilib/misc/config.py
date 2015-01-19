@@ -8,6 +8,7 @@
 #  _________________________________________________________________________
 
 from copy import deepcopy
+import re
 from sys import exc_info, version_info
 from textwrap import wrap
 import six
@@ -30,11 +31,18 @@ if version_info[0] == 3:
 else:
     iteritems = lambda x: x.iteritems()
 
+try:
+    import argparse
+    argparse_is_available = True
+except ImportError:
+    argparse_is_available = False
+
+__all__ = ('ConfigBlock','ConfigList','ConfigValue')
 
 class ConfigBase(object):
     __slots__ = ( '_parent', '_name', '_userSet', '_userAccessed', 
                   '_data', '_default', '_domain', '_description', '_doc',
-                  '_visibility' )
+                  '_visibility', '_argparse' )
 
     # This just needs to be any reference-counted object; we use it so
     # that we can tell if an argument is provided (and we can't use None
@@ -54,6 +62,7 @@ class ConfigBase(object):
         self._description = description
         self._doc = doc
         self._visibility = visibility
+        self._argparse = None
 
         self.reset()
 
@@ -144,6 +153,111 @@ class ConfigBase(object):
         self._userAccessed = False
         self._userSet = False
 
+    def declare_as_argument(self, *args, **kwds):
+        """Map this Config item to an argparse argument.
+
+Valid arguments include all valid arguments to argparse's
+ArgumentParser.add_argument() with the exception of 'default'.  In addition,
+you may provide a group keyword argument can be used to either pass in a
+pre-defined option group or subparser, or else pass in the title of a
+group, subparser, or (subparser, group)."""
+
+        if 'default' in kwds:
+            raise TypeError(
+                "You cannot specify an argparse default value with "
+                "ConfigBase.declare_as_argument().  The default value is "
+                "supplied automatically from the Config definition.")
+
+        if 'help' not in kwds:
+            kwds['help'] = self._description
+        if 'action' not in kwds and self._domain is bool:
+            if not self._default:
+                kwds['action'] = 'store_true'
+            else:
+                kwds['action'] = 'store_false'
+                if not args:
+                    args = ( '--disable-'+re.sub( 
+                        r'[^a-zA-Z0-9-_]','_',re.sub(r'\s','-',self.name()) ), )
+        if not args:
+            args = ( '--'+re.sub( 
+                r'[^a-zA-Z0-9-_]','_',re.sub(r'\s','-',self.name()) ), )
+        self._argparse = (args, kwds)
+        return self
+
+    def initialize_argparse(self, parser):
+        def _get_subparser_or_group(_parser, name):
+            try:
+                for _grp in _parser._subparsers._group_actions:
+                    if name in _grp._name_parser_map:
+                        return 1, _grp._name_parser_map[name]
+            except AttributeError:
+                pass
+
+            for _grp in _parser._action_groups:
+                if _grp.title == _group:
+                    return 0, _grp
+            return 0, _parser.add_argument_group(title=_group)
+            
+
+        for level, value, obj in self._data_collector(None,""):
+            if obj._argparse is None:
+                continue
+            _args, _kwds = obj._argparse
+            _parser = parser
+            # shallow copy the dict so we can remove the group flag and
+            # add things like documentation, etc.
+            _kwds = dict(_kwds)
+            if 'group' in _kwds:
+                _group = _kwds.pop('group')
+                # Note: strings also have a 'title()' method.  We are
+                # looking for things that look like argparse
+                # groups/subparsers, so just checking for the attribute
+                # is insufficient: it needs to be a string attribute as
+                # well
+                if hasattr(_group, 'title') and \
+                   isinstance(_group.title, six.string_types):
+                    _group = _group.title
+                if isinstance(_group, tuple):
+                    _issub, _parser = _get_subparser_or_group(_parser,_group[0])
+                    if not _issub:
+                        raise RuntimeError(
+                            "Could not find subparser '%s' for Config item %s" 
+                            % (_group[0], obj.name(True)) )
+                    _group = _group[1]
+                if isinstance(_group, six.string_types):
+                    _issub, _parser = _get_subparser_or_group(_parser,_group)
+                else:
+                    raise RuntimeError(
+                        'Unknown datatype (%s) for argparse group' % 
+                        ( type(_group).__name__, ))
+            if 'dest' not in _kwds:
+                _kwds['dest'] = 'CONFIGBLOCK.'+obj.name(True)
+                if 'metavar' not in _kwds and \
+                   _kwds.get('action','') not in ('store_true','store_false'):
+                    if obj._domain is not None and \
+                       obj._domain.__class__ is type:
+                        _kwds['metavar'] = obj._domain.__name__.upper()
+                    else:
+                        _kwds['metavar'] = re.sub( 
+                            r'[^a-zA-Z0-9-_]', '_', self.name().upper() )
+            assert(argparse_is_available)
+            _parser.add_argument(default=argparse.SUPPRESS, *_args, **_kwds)
+
+    def import_argparse(self, parsed_args):
+        for level, value, obj in self._data_collector(None,""):
+            if obj._argparse is None:
+                continue
+            if 'dest' in obj._argparse[1]:
+                _dest = obj._argparse[1]['dest']
+                if _dest in parsed_args:
+                    obj.set_value(parsed_args.__dict__[_dest])
+            else:
+                _dest = 'CONFIGBLOCK.'+obj.name(True)
+                if _dest in parsed_args:
+                    obj.set_value(parsed_args.__dict__[_dest])
+                    del parsed_args.__dict__[_dest]
+        return parsed_args
+
     def display(self, content_filter=None, indent_spacing=2):
         if content_filter not in ConfigBlock.content_filters:
             raise ValueError(
@@ -181,7 +295,9 @@ class ConfigBase(object):
                 max( val if val < _ok else key 
                      for key,val,doc in level_info[lvl]['data'] )
             offset += indent + len(comment)
-            over = sum( 1 for key,val,doc in level_info[lvl]['data']
+            over = sum( 1 for key,val,doc in level_info[lvl
+
+        ]['data']
                         if doc + offset > width )
             if len(level_info[lvl]['data']) - over > 0:
                 line = max( offset + doc 
@@ -483,6 +599,10 @@ class ConfigBlock(ConfigBase):
             raise ValueError(
                 "duplicate config '%s' defined for Config Block '%s'"
                 % ( name, self.name(True) ) )
+        if '.' in name or '[' in name or ']' in name:
+            raise ValueError(
+                "Illegal character in config '%s' for config Block '%s': "
+                "'.[]' are not allowed." % ( name, self.name(True) ) )            
         self._data[name] = config
         self._decl_order.append(name)
         config._parent = self
@@ -552,7 +672,8 @@ class ConfigBlock(ConfigBase):
             return
         if prefix:
             yield( level, prefix.rstrip(), self )
-            level += 1
+            if level is not None:
+                level += 1
         for key in self._decl_order:
             for v in self._data[key]._data_collector( level, key+': ', 
                                                       visibility, docMode ):
