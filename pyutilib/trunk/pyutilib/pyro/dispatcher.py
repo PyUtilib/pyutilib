@@ -22,9 +22,12 @@ else:
 if using_pyro3:
     base = _pyro.core.ObjBase
     oneway = lambda method: method
-else:
+elif using_pyro4:
     base = object
     oneway = _pyro.oneway
+else:
+    base = object
+    oneway = lambda method: method
 
 class Dispatcher(base):
 
