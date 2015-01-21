@@ -1,0 +1,64 @@
+driver: example
+
+python:
+    - import example
+
+solvers:
+    cat:
+    cat2:
+        name: cat
+        cat_options: -n
+    echo:
+
+problems:
+    p1:
+        file: README.txt
+    p2:
+        file: example.py
+    p3:
+        file: LoremIpsum1.txt
+
+suites:
+
+    suite1:
+        categories:
+            - smoke
+            - suite1
+        solvers:
+            cat:
+            cat2:
+            echo:
+        problems:
+            p1:
+
+    suite2:
+        categories:
+            - nightly
+            - suite2
+        solvers:
+            cat:
+            cat2:
+            echo:
+        problems:
+            p1:
+            p2:
+            p3:
+        tests:
+            - solver: cat
+              problem: p1
+            - solver: cat2
+              problem: p2
+            - solver: echo
+              problem: p3
+
+    suite3:
+        categories:
+            - suite3
+        solvers:
+            cat:
+            catx:
+                solver: cat
+                cat_options: -n
+        problems:
+            p1:
+

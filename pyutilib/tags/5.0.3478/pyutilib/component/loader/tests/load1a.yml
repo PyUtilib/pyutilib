@@ -1,0 +1,148 @@
+#--------------------------------------------------------------
+Environment Stack:
+  '1': pca
+#--------------------------------------------------------------
+Interfaces Declared:
+  IConfiguration:
+  IEnvironmentConfig:
+  IExternalExecutable:
+  IFileOption:
+  IIgnorePluginWhenLoading:
+  IOption:
+  IOptionDataProvider:
+  IPluginLoadPath:
+  IPluginLoader:
+  ITempfileManager:
+  IUpdatedOptionsAction:
+#--------------------------------------------------------------
+Interfaces Declared by Environment:
+  pca:
+    IConfiguration:
+    IEnvironmentConfig:
+    IExternalExecutable:
+    IFileOption:
+    IIgnorePluginWhenLoading:
+    IOption:
+    IOptionDataProvider:
+    IPluginLoadPath:
+    IPluginLoader:
+    ITempfileManager:
+    IUpdatedOptionsAction:
+#--------------------------------------------------------------
+Plugins by Environment:
+  pca:
+    <Plugin TempfileManagerPlugin 'TempfileManager'>:
+       name:      TempfileManager
+       singleton: True
+       service:   True
+       disabled:  True
+    <Plugin IgnorePluginPlugins>:
+       name:      IgnorePluginPlugins
+       singleton: True
+       service:   True
+       disabled:  False
+    <Plugin ImportLoader>:
+       name:      ImportLoader
+       singleton: True
+       service:   True
+       disabled:  False
+    <Plugin Configuration_ConfigParser>:
+       name:      Configuration_ConfigParser
+       singleton: True
+       service:   True
+       disabled:  False
+    <Plugin OptionData 'Plugin.4'>:
+       name:      Plugin.4
+       singleton: False
+       service:   True
+       disabled:  False
+    <Option [globals] 'tempdir'>:
+       name:      tempdir
+       singleton: False
+       service:   True
+       disabled:  False
+    <BoolOption [Services] 'Configuration_ConfigParser'>:
+       name:      Configuration_ConfigParser
+       singleton: False
+       service:   True
+       disabled:  False
+    <BoolOption [Services] 'ImportLoader'>:
+       name:      ImportLoader
+       singleton: False
+       service:   True
+       disabled:  False
+    <Option [globals] 'bar'>:
+       name:      bar
+       singleton: False
+       service:   True
+       disabled:  False
+#--------------------------------------------------------------
+Plugins by Interface:
+  IConfiguration:
+    Configuration_ConfigParser:
+  IEnvironmentConfig:
+    EnvironmentConfig:
+  IExternalExecutable:
+    ExternalExecutable:
+  IFileOption:
+    ExecutableOption:
+    FileOption:
+  IIgnorePluginWhenLoading:
+    IgnorePluginPlugins:
+  IOption:
+    BoolOption:
+    DictOption:
+    ExecutableOption:
+    FileOption:
+    FloatOption:
+    IntOption:
+    Option:
+    OptionPlugin:
+  IOptionDataProvider:
+    OptionData:
+  IPluginLoader:
+    EggLoader:
+    ImportLoader:
+  IPluginLoadPath:
+    EnvironmentConfig:
+  ITempfileManager:
+    TempfileManagerPlugin:
+  IUpdatedOptionsAction:
+    ExecutableOption:
+    FileOption:
+    LoggingConfig:
+#--------------------------------------------------------------
+Plugins by Python Module:
+  pyutilib.component.config.configuration:
+    Configuration:
+  pyutilib.component.config.env_config:
+    EnvironmentConfig:
+  pyutilib.component.config.logging_config:
+    LoggingConfig:
+  pyutilib.component.config.managed_plugin:
+    ManagedPlugin:
+  pyutilib.component.config.options:
+    BoolOption:
+    DictOption:
+    ExecutableOption:
+    FileOption:
+    FloatOption:
+    IntOption:
+    Option:
+    OptionData:
+    OptionPlugin:
+  pyutilib.component.config.plugin_ConfigParser:
+    Configuration_ConfigParser:
+  pyutilib.component.config.tempfiles:
+    TempfileManagerPlugin:
+  pyutilib.component.core:
+    IgnorePluginPlugins:
+  pyutilib.component.executables.executable:
+    ExternalExecutable:
+  pyutilib.component.loader.plugin_eggLoader:
+    EggLoader:
+  pyutilib.component.loader.plugin_importLoader:
+    ImportLoader:
+  test1:
+    test1_foo:
+
