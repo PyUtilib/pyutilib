@@ -16,7 +16,7 @@ formatting; like a bulleted list:
     \item[{merlion}]\hfill
       \\This is the (long) documentation for the 'merlion' parameter.  It
       contains multiple lines, but no apparent internal formatting; so the
-      outputter should re-wrap everything.
+      outputter should re-warp everything.
     \item[{detection}]\hfill
       \\Sensor placement list, epanetID
   \end{description}
@@ -32,7 +32,7 @@ formatting; like a bulleted list:
     \item[{merlion}]\hfill
       \\This is the (long) documentation for the 'merlion' parameter.  It
       contains multiple lines, but no apparent internal formatting; so the
-      outputter should re-wrap everything.
+      outputter should re-warp everything.
     \item[{detection}]\hfill
       \\Sensor placement list, epanetID
   \end{description}
