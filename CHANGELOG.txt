@@ -9,7 +9,15 @@
 - Next release
 
 -------------------------------------------------------------------------------
- Version 5.0
+ Version 5.0.3478
+-------------------------------------------------------------------------------
+
+- Changing naming of nose plugins.
+- Adding the --with-testdata option when runing performance tests.
+- Pyro3/Pyro4 compatibility fixes
+
+-------------------------------------------------------------------------------
+ Version 5.0.3467
 -------------------------------------------------------------------------------
 
 - Integrating many PyUtilib sub-packages into a single source tree
