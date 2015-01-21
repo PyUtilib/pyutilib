@@ -1,0 +1,30 @@
+We are pleased to announce the release of !PyUtilib 5.0 (5.0.3478). The !PyUtilib project supports the development of an ensemble of Python packages that include a wide variety of utilities, including a well-developed component architecture.
+
+The following are highlights of this release:
+
+- Integrating many PyUtilib sub-packages into a single source tree
+- Integrating the Coopr plugin framework in pyutilib.component.core
+- pyutilib.th
+  - Adding a forcedskip option, which can be used to add tests that
+    are skipped due to external factors.
+  - Extending baseline tests to allow comparison with YAML, XML and
+    JSON files.
+- pyutilib.pyro
+  - Changes to support clearing the dispatcher queue
+  - Allowing more control of blocking behavior when calling dispatcher
+  - Adding randomization of the sleep interval in a pyro client,
+    following failure to initially connect to a name server.
+- pyutilib.misc
+  - Allowing None tolerance when comparing YAML files.
+  - Adding support for gzip and bz2 compressed files, which act as
+    single file archives
+  - Adding support to open readonly file objects (using the open()
+    method) rather than only supporting file extractions to disk
+
+See https://software.sandia.gov/trac/pyutilib/wiki/GettingStarted for instructions for getting started with !PyUtilib.  !PyUtilib can be downloaded from PyPI.  
+
+Enjoy!
+
+ - !PyUtilib Developer Team
+ - pyutilib-developers@googlecode.com
+ - https://software.sandia.gov/trac/pyutilib/
