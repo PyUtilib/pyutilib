@@ -809,7 +809,7 @@ scenarios[1].detection""")
         config['implicit_1'] = 5
         config.declare( 'formal', ConfigValue( 42, int ) )
         config['implicit_2'] = 5
-        print config.display()
+        print(config.display())
         self.assertEqual( 3, len(config) )
 
     def test_argparse_help(self):
