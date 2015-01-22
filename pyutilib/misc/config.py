@@ -12,6 +12,7 @@ import re
 from sys import exc_info, version_info
 from textwrap import wrap
 import six
+import logging
 
 try:
     from yaml import dump
@@ -26,10 +27,6 @@ try:
     import StringIO
 except ImportError:
     import io as StringIO
-if version_info[0] == 3:
-    iteritems = lambda x: x.items()
-else:
-    iteritems = lambda x: x.iteritems()
 
 try:
     import argparse
@@ -38,6 +35,8 @@ except ImportError:
     argparse_is_available = False
 
 __all__ = ('ConfigBlock','ConfigList','ConfigValue')
+
+logger = logging.getLogger('pyutilib.misc')
 
 class ConfigBase(object):
     __slots__ = ( '_parent', '_name', '_userSet', '_userAccessed', 
@@ -90,7 +89,7 @@ class ConfigBase(object):
         return state
 
     def __setstate__(self, state):
-        for key, val in iteritems(state):
+        for key, val in six.iteritems(state):
             # Note: per the Python data model docs, we explicitly
             # set the attribute using object.__setattr__() instead
             # of setting self.__dict__[key] = val.
@@ -168,8 +167,6 @@ group, subparser, or (subparser, group)."""
                 "ConfigBase.declare_as_argument().  The default value is "
                 "supplied automatically from the Config definition.")
 
-        if 'help' not in kwds:
-            kwds['help'] = self._description
         if 'action' not in kwds and self._domain is bool:
             if not self._default:
                 kwds['action'] = 'store_true'
@@ -178,14 +175,37 @@ group, subparser, or (subparser, group)."""
                 if not args:
                     args = ( '--disable-'+re.sub( 
                         r'[^a-zA-Z0-9-_]','_',re.sub(r'\s','-',self.name()) ), )
+                if 'help' not in kwds:
+                    kwds['help'] = "[DON'T] "+self._description
+        if 'help' not in kwds:
+            kwds['help'] = self._description
         if not args:
             args = ( '--'+re.sub( 
                 r'[^a-zA-Z0-9-_]','_',re.sub(r'\s','-',self.name()) ), )
-        self._argparse = (args, kwds)
+        if self._argparse:
+            self._argparse = self._argparse + ((args, kwds),)
+        else:
+            self._argparse = ((args, kwds),)
         return self
 
     def initialize_argparse(self, parser):
         def _get_subparser_or_group(_parser, name):
+            # Note: strings also have a 'title()' method.  We are
+            # looking for things that look like argparse
+            # groups/subparsers, so just checking for the attribute
+            # is insufficient: it needs to be a string attribute as
+            # well
+            if isinstance(name, argparse._ActionsContainer):
+                #hasattr(_group, 'title') and \
+                #    isinstance(_group.title, six.string_types):
+                return 2, name
+
+            if not isinstance(name, six.string_types):
+                raise RuntimeError(
+                    'Unknown datatype (%s) for argparse group on '
+                    'configuration definition %s' % 
+                    ( type(name).__name__, obj.name(True)))
+
             try:
                 for _grp in _parser._subparsers._group_actions:
                     if name in _grp._name_parser_map:
@@ -194,42 +214,26 @@ group, subparser, or (subparser, group)."""
                 pass
 
             for _grp in _parser._action_groups:
-                if _grp.title == _group:
+                if _grp.title == name:
                     return 0, _grp
-            return 0, _parser.add_argument_group(title=_group)
-            
+            return 0, _parser.add_argument_group(title=name)
 
-        for level, value, obj in self._data_collector(None,""):
-            if obj._argparse is None:
-                continue
-            _args, _kwds = obj._argparse
+        def _process_argparse_def(_args, _kwds):
             _parser = parser
             # shallow copy the dict so we can remove the group flag and
             # add things like documentation, etc.
             _kwds = dict(_kwds)
             if 'group' in _kwds:
                 _group = _kwds.pop('group')
-                # Note: strings also have a 'title()' method.  We are
-                # looking for things that look like argparse
-                # groups/subparsers, so just checking for the attribute
-                # is insufficient: it needs to be a string attribute as
-                # well
-                if hasattr(_group, 'title') and \
-                   isinstance(_group.title, six.string_types):
-                    _group = _group.title
                 if isinstance(_group, tuple):
-                    _issub, _parser = _get_subparser_or_group(_parser,_group[0])
-                    if not _issub:
-                        raise RuntimeError(
-                            "Could not find subparser '%s' for Config item %s" 
-                            % (_group[0], obj.name(True)) )
-                    _group = _group[1]
-                if isinstance(_group, six.string_types):
-                    _issub, _parser = _get_subparser_or_group(_parser,_group)
+                    for _idx, _grp in enumerate(_group):
+                        _issub, _parser = _get_subparser_or_group(_parser,_grp)
+                        if not _issub and _idx < len(_group)-1:
+                            raise RuntimeError(
+                                "Could not find argparse subparser '%s' for "
+                                "Config item %s" % (_grp, obj.name(True)) )
                 else:
-                    raise RuntimeError(
-                        'Unknown datatype (%s) for argparse group' % 
-                        ( type(_group).__name__, ))
+                    _issub, _parser = _get_subparser_or_group(_parser,_group)
             if 'dest' not in _kwds:
                 _kwds['dest'] = 'CONFIGBLOCK.'+obj.name(True)
                 if 'metavar' not in _kwds and \
@@ -240,22 +244,29 @@ group, subparser, or (subparser, group)."""
                     else:
                         _kwds['metavar'] = re.sub( 
                             r'[^a-zA-Z0-9-_]', '_', self.name().upper() )
-            assert(argparse_is_available)
             _parser.add_argument(default=argparse.SUPPRESS, *_args, **_kwds)
+
+        assert(argparse_is_available)
+        for level, value, obj in self._data_collector(None,""):
+            if obj._argparse is None:
+                continue
+            for _args, _kwds in obj._argparse:
+                _process_argparse_def(_args, _kwds)
 
     def import_argparse(self, parsed_args):
         for level, value, obj in self._data_collector(None,""):
             if obj._argparse is None:
                 continue
-            if 'dest' in obj._argparse[1]:
-                _dest = obj._argparse[1]['dest']
-                if _dest in parsed_args:
-                    obj.set_value(parsed_args.__dict__[_dest])
-            else:
-                _dest = 'CONFIGBLOCK.'+obj.name(True)
-                if _dest in parsed_args:
-                    obj.set_value(parsed_args.__dict__[_dest])
-                    del parsed_args.__dict__[_dest]
+            for _args, _kwds in obj._argparse:
+                if 'dest' in _kwds:
+                    _dest = _kwds['dest']
+                    if _dest in parsed_args:
+                        obj.set_value(parsed_args.__dict__[_dest])
+                else:
+                    _dest = 'CONFIGBLOCK.'+obj.name(True)
+                    if _dest in parsed_args:
+                        obj.set_value(parsed_args.__dict__[_dest])
+                        del parsed_args.__dict__[_dest]
         return parsed_args
 
     def display(self, content_filter=None, indent_spacing=2):
@@ -413,6 +424,13 @@ group, subparser, or (subparser, group)."""
                 os.write(indent+block_end)
         return os.getvalue()
                      
+    def user_values(self):
+        if self._userSet:
+            yield self
+        for level, value, obj in self._data_collector(0,""):
+            if obj._userSet:
+                yield obj
+
     def unused_user_values(self):
         if self._userSet and not self._userAccessed:
             yield self
@@ -490,6 +508,7 @@ class ConfigList(ConfigBase):
 
     #@deprecated
     def add(self, value=ConfigBase.NoArgument):
+        #logger.warning("ConfigList.add() has been deprecated.  Use append()") 
         return self.append(value)
 
     def _data_collector(self, level, prefix, visibility=None, docMode=False):
@@ -524,13 +543,15 @@ class ConfigList(ConfigBase):
 class ConfigBlock(ConfigBase):
     content_filters = (None, 'all', 'userdata')
 
-    __slots__ = ('_decl_order', '_declared', '_implicit_declaration' )
+    __slots__ = ( '_decl_order', '_declared', 
+                  '_implicit_declaration', '_implicit_domain' )
 
     def __init__( self, description=None, doc=None, implicit=False, 
-                  visibility=0 ):
+                  implicit_domain=None, visibility=0 ):
         self._decl_order = []
         self._declared = set()
         self._implicit_declaration = implicit
+        self._implicit_domain = implicit_domain
         ConfigBase.__init__(self, None, {}, description, doc, visibility)
         self._data = {}
 
@@ -552,7 +573,10 @@ class ConfigBlock(ConfigBase):
 
     def __setitem__(self, key, val):
         if key not in self._data:
-            self._data[key] = ConfigValue(val)
+            if self._implicit_domain is None:
+                self.add(key, ConfigValue(val))
+            else:
+                self.add(key, self._implicit_domain())
         else:
             self._data[key].set_value(val)
         #self._userAccessed = True
@@ -615,16 +639,18 @@ class ConfigBlock(ConfigBase):
         return ans
 
     def add(self, name, config):
+        if not self._implicit_declaration:
+            raise ValueError("Key '%s' not defined in Config Block '%s'"
+                             " and Block disallows implicit entries" 
+                             % ( name, self.name(True) ) )
         ans = self._add(name, config)
         self._userSet = True
         return ans
 
     def value(self):
         self._userAccessed = True
-        # This should use six.iteritems(), but right now, PyUtilib
-        # doesn't install six...
         return dict( (name, config.value()) 
-                     for name, config in iteritems(self._data) )
+                     for name, config in six.iteritems(self._data) )
 
     def set_value(self, value):
         if value is None:
@@ -679,4 +705,10 @@ class ConfigBlock(ConfigBase):
                                                       visibility, docMode ):
                 yield v
 
+# In Python3, the items(), etc methods of dict-like things return
+# generator-like objects.
+if six.PY3:
+    ConfigBlock.keys   = ConfigBlock.iterkeys
+    ConfigBlock.values = ConfigBlock.itervalues
+    ConfigBlock.items  = ConfigBlock.iteritems
 
