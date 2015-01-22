@@ -30,7 +30,7 @@ class Test(unittest.TestCase):
 
     def setUp(self):
         self.config = config = ConfigBlock(
-            "Basic configuration for Flushing models" )
+            "Basic configuration for Flushing models", implicit=True )
         net = config.declare('network', ConfigBlock())
         net.declare( 'epanet file', ConfigValue( 
                 'Net3.inp', str, 
@@ -38,7 +38,7 @@ class Test(unittest.TestCase):
                 None ) ).declare_as_argument(dest='epanet')
 
         sc = config.declare('scenario', ConfigBlock(
-                "Single scenario block" ) )
+                "Single scenario block", implicit=True ) )
         sc.declare( 'scenario file', ConfigValue(
                 'Net3.tsg', str,
                 'Scenario generation file, see the TEVASIM documentation', 
@@ -366,7 +366,8 @@ flushing:
 
     def test_display_userdata_block_nonDefault(self):
         self.config.add("foo", ConfigValue(0, int,None,None))
-        self.config.add("bar", ConfigBlock()).add("baz", ConfigBlock())
+        self.config.add("bar", ConfigBlock(implicit=True)) \
+                   .add("baz", ConfigBlock())
         test = self.config.display('userdata')
         sys.stdout.write(test)
         self.assertEqual(test, "bar:\n")
@@ -435,6 +436,73 @@ scenarios[1].detection""")
         self.assertEqual(test, "scenario")
 
 
+    def test_UserValues_default(self):
+        test = '\n'.join(x.name(True) for x in self.config.user_values())
+        sys.stdout.write(test)
+        self.assertEqual(test, "")
+
+    def test_UserValues_scalar(self):
+        self.config['scenario']['merlion'] = True
+        test = '\n'.join(x.name(True) for x in self.config.user_values())
+        sys.stdout.write(test)
+        self.assertEqual(test, "scenario.merlion")
+
+    def test_UserValues_list(self):
+        self.config['scenarios'].add()
+        test = '\n'.join(x.name(True) for x in self.config.user_values())
+        sys.stdout.write(test)
+        self.assertEqual(test, """scenarios
+scenarios[0]""")
+
+    def test_UserValues_list_nonDefault(self):
+        self.config['scenarios'].add()
+        self.config['scenarios'].add({'merlion':True, 'detection':[]})
+        test = '\n'.join(x.name(True) for x in self.config.user_values())
+        sys.stdout.write(test)
+        self.assertEqual(test, """scenarios
+scenarios[0]
+scenarios[1]
+scenarios[1].merlion
+scenarios[1].detection""")
+
+    def test_UserValues_list_nonDefault_listAccessed(self):
+        self.config['scenarios'].add()
+        self.config['scenarios'].add({'merlion':True, 'detection':[]})
+        for x in self.config['scenarios']:
+            pass
+        test = '\n'.join(x.name(True) for x in self.config.user_values())
+        sys.stdout.write(test)
+        self.assertEqual(test, """scenarios
+scenarios[0]
+scenarios[1]
+scenarios[1].merlion
+scenarios[1].detection""")
+
+    def test_UserValues_list_nonDefault_itemAccessed(self):
+        self.config['scenarios'].add()
+        self.config['scenarios'].add({'merlion':True, 'detection':[]})
+        self.config['scenarios'][1]['merlion'].value()
+        test = '\n'.join(x.name(True) for x in self.config.user_values())
+        sys.stdout.write(test)
+        self.assertEqual(test, """scenarios
+scenarios[0]
+scenarios[1]
+scenarios[1].merlion
+scenarios[1].detection""")
+
+    def test_UserValues_topBlock(self):
+        self.config.add('foo', ConfigBlock())
+        test = '\n'.join(x.name(True) for x in self.config.user_values())
+        sys.stdout.write(test)
+        self.assertEqual(test, "")
+
+    def test_UserValues_subBlock(self):
+        self.config['scenario'].add('foo', ConfigBlock())
+        test = '\n'.join(x.name(True) for x in self.config.user_values())
+        sys.stdout.write(test)
+        self.assertEqual(test, "scenario")
+
+
     def test_parseDisplayAndValue_default(self):
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
@@ -492,7 +560,8 @@ scenarios[1].detection""")
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
         self.config.add("foo", ConfigValue(0, int,None,None))
-        self.config.add("bar", ConfigBlock()).add("baz", ConfigBlock())
+        self.config.add("bar", ConfigBlock(implicit=True)) \
+                   .add("baz", ConfigBlock())
         test = self.config.display('userdata')
         sys.stdout.write(test)
         self.assertEqual(yaml.load(test), {'bar': None})
@@ -726,6 +795,23 @@ scenarios[1].detection""")
   detection: []
 """)
 
+    def test_implicit_entries(self):
+        config = ConfigBlock()
+        try:
+            config['test'] = 5
+            self.fail("Expected ConfigBlock to throw a ValueError for implicit declarations")
+        except ValueError:
+            self.assertEqual(
+                sys.exc_info()[1].args, 
+                ("Key 'test' not defined in Config Block '' and Block disallows implicit entries",) )
+
+        config = ConfigBlock(implicit=True)
+        config['implicit_1'] = 5
+        config.declare( 'formal', ConfigValue( 42, int ) )
+        config['implicit_2'] = 5
+        print config.display()
+        self.assertEqual( 3, len(config) )
+
     def test_argparse_help(self):
         try:
             import argparse
@@ -749,6 +835,36 @@ Scenario definition:
 """, help)
         
 
+    def test_argparse_help_implicit_disable(self):
+        self.config['scenario'].declare('epanet', ConfigValue( 
+                True, bool, 
+                'Use EPANET as the Water quality model',
+                None) ).declare_as_argument(group='Scenario definition')
+        try:
+            import argparse
+        except ImportError:
+            self.skipTest("argparse not available")
+        parser = argparse.ArgumentParser(prog='tester')
+        self.config.initialize_argparse(parser)
+        help = parser.format_help()
+        print(help)
+        self.assertEqual(
+            """usage: tester [-h] [--epanet-file EPANET] [--scenario-file STR] [--merlion]
+              [--disable-epanet]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --epanet-file EPANET  EPANET network inp file
+
+Scenario definition:
+  --scenario-file STR   Scenario generation file, see the TEVASIM
+                        documentation
+  --merlion             Water quality model
+  --disable-epanet      [DON'T] Use EPANET as the Water quality model
+""", help)
+
+
+
     def test_argparse_import(self):
         try:
             import argparse
@@ -762,25 +878,31 @@ Scenario definition:
         leftovers = self.config.import_argparse(args)
         self.assertEqual(0, len(vars(args)))
         self.assertEqual(
-            [], [x.name(True) for x in self.config.unused_user_values()] )
+            [], [x.name(True) for x in self.config.user_values()] )
 
         args = parser.parse_args(['--merlion'])
+        self.config.reset()
+        self.assertFalse(self.config['scenario']['merlion'].value())
         self.assertEqual(1, len(vars(args)))
         leftovers = self.config.import_argparse(args)
         self.assertEqual(0, len(vars(args)))
         self.assertEqual(
             ['scenario.merlion'], 
-            [x.name(True) for x in self.config.unused_user_values()] )
-        self.assertTrue(self.config['scenario']['merlion'])
+            [x.name(True) for x in self.config.user_values()] )
+
 
         args = parser.parse_args(['--merlion','--epanet-file','foo'])
+        self.config.reset()
+        self.assertFalse(self.config['scenario']['merlion'].value())
+        self.assertEqual( 'Net3.inp', 
+                          self.config['network']['epanet file'].value())
         self.assertEqual(2, len(vars(args)))
         leftovers = self.config.import_argparse(args)
         self.assertEqual(1, len(vars(args)))
         self.assertEqual(
             ['network.epanet file','scenario.merlion'], 
-            [x.name(True) for x in self.config.unused_user_values()] )
-        self.assertTrue(self.config['scenario']['merlion'])
+            [x.name(True) for x in self.config.user_values()] )
+        self.assertTrue(self.config['scenario']['merlion'].value())
         self.assertEqual('foo', self.config['network']['epanet file'].value())
 
 
@@ -790,14 +912,18 @@ Scenario definition:
         except ImportError:
             self.skipTest("argparse not available")
         parser = argparse.ArgumentParser(prog='tester')
-        parser.add_subparsers(title="Subcommands").add_parser('flushing')
+        subp = parser.add_subparsers(title="Subcommands").add_parser('flushing')
 
+        # Declare an argument by passing in the name of the subparser
         self.config['flushing']['flush nodes']['duration'].declare_as_argument(
             group='flushing')
+        # Declare an argument by passing in the name of the subparser
+        # and an implicit group
         self.config['flushing']['flush nodes']['feasible nodes'] \
             .declare_as_argument( group=('flushing','Node information') )
+        # Declare an argument by passing in the subparser and a group name
         self.config['flushing']['flush nodes']['infeasible nodes'] \
-            .declare_as_argument( group=('flushing','Node information') )
+            .declare_as_argument( group=(subp,'Node information') )
         self.config.initialize_argparse(parser)
 
         help = parser.format_help()
@@ -819,7 +945,22 @@ Scenario definition:
   --merlion             Water quality model
 """, help)
 
-        #parser.parse_args(['flushing','--help'])
+        help = subp.format_help()
+        print(help)
+        self.assertEqual(
+            """usage: tester flushing [-h] [--feasible-nodes STR] [--infeasible-nodes STR]
+                       [--duration FLOAT]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --duration FLOAT      Time [min] for flushing
+
+Node information:
+  --feasible-nodes STR  ALL, NZD, NONE, list or filename
+  --infeasible-nodes STR
+                        ALL, NZD, NONE, list or filename
+""", help)
+
 
 
 if __name__ == "__main__":
