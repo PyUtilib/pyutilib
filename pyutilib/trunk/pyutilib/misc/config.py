@@ -534,7 +534,8 @@ class ConfigList(ConfigBase):
                 yield( level, prefix.rstrip()+' []', self )
             else:
                 yield( level, prefix.rstrip(), self )
-                level += 1
+                if level is not None:
+                    level += 1
         for value in self._data:
             for v in value._data_collector(level, '- ', visibility, docMode):
                 yield v
