@@ -12,6 +12,7 @@ __all__ = ['TaskWorker','MultiTaskWorker','TaskWorkerServer']
 import sys
 import os, socket, time
 import itertools
+import random
 
 from pyutilib.pyro import get_nameserver, using_pyro3, using_pyro4
 from pyutilib.pyro import Pyro as _pyro
@@ -54,8 +55,9 @@ class TaskWorkerBase(object):
                 break
             except _pyro.errors.NamingError:
                 pass
-            time.sleep(1)
-            print("Failed to find dispatcher object from name server - trying again.")
+            sleep_interval = random.uniform(0.5, 2.5)
+            print("Failed to find dispatcher object from name server - trying again in %5.2f seconds." % sleep_interval)
+            time.sleep(sleep_interval)
         if URI is None:
             print('Could not find dispatcher object, nameserver says:'+str(x))
             raise SystemExit
@@ -98,7 +100,9 @@ class TaskWorkerBase(object):
                     print("A potential remedy may be to "
                           "increase PYRO_MAXCONNECTIONS from its current "
                           "value of "+str(_pyro.config.PYRO_MAXCONNECTIONS))
-                time.sleep(0.1) # sleep for a bit longer than normal, for obvious reasons
+                # sleep for a bit longer than normal, for obvious reasons
+                sleep_interval = random.uniform(0.05, 0.15)
+                time.sleep(sleep_interval) 
             else:
                 if task is not None:
 
