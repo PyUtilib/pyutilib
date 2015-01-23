@@ -15,6 +15,7 @@ try:
     import unittest2 as unittest
 except:
     import unittest
+from six import PY3
 import pyutilib.misc.comparison
 from pyutilib.misc.config import ConfigValue, ConfigBlock, ConfigList
 currdir = os.path.dirname(os.path.abspath(__file__))
@@ -38,7 +39,7 @@ class Test(unittest.TestCase):
                 None ) ).declare_as_argument(dest='epanet')
 
         sc = config.declare('scenario', ConfigBlock(
-                "Single scenario block", implicit=True ) )
+                "Single scenario block", implicit=True, implicit_domain=str ) )
         sc.declare( 'scenario file', ConfigValue(
                 'Net3.tsg', str,
                 'Scenario generation file, see the TEVASIM documentation', 
@@ -121,6 +122,34 @@ formatting; so the outputter should re-wrap everything.
                 60, float,
                 'Time [min] between detection and closing valves',
                 None ) )
+
+        self._reference = {
+            'network': {
+                'epanet file': 'Net3.inp'}, 
+            'scenario': {
+                'detection': [1, 2, 3], 
+                'scenario file': 'Net3.tsg', 
+                'merlion': False}, 
+            'scenarios': [], 
+            'nodes': [],
+            'impact': {
+                'metric': 'MC'}, 
+            'flushing': {
+                'close valves': {
+                    'infeasible pipes': 'NONE', 
+                    'max pipes': 2, 
+                    'feasible pipes': 'ALL', 
+                    'response time': 60.0}, 
+                'flush nodes': {
+                    'feasible nodes': 'ALL', 
+                    'max nodes': 2, 
+                    'infeasible nodes': 'NONE', 
+                    'rate': 600.0, 
+                    'duration': 600.0, 
+                    'response time': 60.0},
+            },
+        }
+
     
     
     # Utility method for generating and validating a template description
@@ -629,11 +658,17 @@ scenarios[1].detection""")
         self.assertIs(type(val), float)
         self.assertEqual( val, 600.0 )
 
-    def test_setValue_scalarList(self):
+    def test_setValue_scalarList_empty(self):
         self.config['scenario']['detection'] = []
         val = self.config['scenario']['detection'].value()
         self.assertIs(type(val), list)
         self.assertEqual( val, [] )
+
+    def test_setValue_scalarList_withvalue(self):
+        self.config['scenario']['detection'] = [6]
+        val = self.config['scenario']['detection'].value()
+        self.assertIs(type(val), list)
+        self.assertEqual( val, [6] )
 
     def test_setValue_scalarList_badDomain(self):
         try:
@@ -656,6 +691,133 @@ scenarios[1].detection""")
         val = self.config['scenario']['detection'].value()
         self.assertIs(type(val), list)
         self.assertEqual( val, [1,2,3] )
+
+    def test_setValue_list_scalardomain_list(self):
+        self.config['nodes'] = [5, 10]
+        val = self.config['nodes'].value()
+        self.assertIs(type(val), list)
+        self.assertEqual( val, [5, 10] )
+
+    def test_setValue_list_scalardomain_scalar(self):
+        self.config['nodes'] = 10
+        val = self.config['nodes'].value()
+        self.assertIs(type(val), list)
+        self.assertEqual( val, [10] )
+
+    def test_setValue_list_badSubDomain(self):
+        try:
+            self.config['nodes'] = [5, 'a']
+        except ValueError:
+            pass
+        else:
+            self.fail('expected test to raise ValueError')
+        val = self.config['nodes'].value()
+        self.assertIs(type(val), list)
+        self.assertEqual( val, [] )
+
+    def test_setValue_block_none(self):
+        ref = self._reference['scenario']
+        self.config['scenario'] = None
+        self.assertEqual( ref, self.config['scenario'].value() )
+        self.config['scenario']['merlion'] = True
+        ref['merlion'] = True
+        self.assertEqual( ref, self.config['scenario'].value() )
+        self.config['scenario'] = None
+        self.assertEqual( ref, self.config['scenario'].value() )
+
+    def test_setValue_block_empty(self):
+        ref = self._reference['scenario']
+        self.config['scenario'] = {}
+        self.assertEqual( ref, self.config['scenario'].value() )
+        self.config['scenario']['merlion'] = True
+        ref['merlion'] = True
+        self.assertEqual( ref, self.config['scenario'].value() )
+        self.config['scenario'] = {}
+        self.assertEqual( ref, self.config['scenario'].value() )
+
+    def test_setValue_block_simplevalue(self):
+        _test = {'merlion': True, 'detection': [1]}
+        ref = self._reference['scenario']
+        ref.update( _test )
+        self.config['scenario'] = _test
+        self.assertEqual( ref, self.config['scenario'].value() )
+
+    def test_setItem_block_implicit(self):
+        ref = self._reference
+        ref['foo'] = 1
+        self.config['foo'] = 1
+        self.assertEqual( ref, self.config.value() )
+        ref['bar'] = 1
+        self.config['bar'] = 1
+        self.assertEqual( ref, self.config.value() )
+
+    def test_setItem_block_implicit_domain(self):
+        ref = self._reference['scenario']
+        ref['foo'] = '1'
+        self.config['scenario']['foo'] = 1
+        self.assertEqual( ref, self.config['scenario'].value() )
+        ref['bar'] = '1'
+        self.config['scenario']['bar'] = 1
+        self.assertEqual( ref, self.config['scenario'].value() )
+ 
+    def test_setValue_block_implicit(self):
+        _test = {'scenario':{'merlion': True, 'detection': [1]}, 'foo': 1}
+        ref = self._reference
+        ref['scenario'].update( _test['scenario'] )
+        ref['foo'] = 1
+        self.config['scenario']['foo'] = 1
+        self.config.set_value( _test )
+        self.assertEqual( ref, self.config.value() )
+        _test = {'scenario':{'merlion': True, 'detection': [1]}, 'bar': 1}
+        ref['bar'] = 1
+        self.config.set_value( _test )
+        self.assertEqual( ref, self.config.value() )
+
+    def test_setValue_block_implicit_domain(self):
+        _test = {'merlion': True, 'detection': [1], 'foo': 1}
+        ref = self._reference['scenario']
+        ref.update( _test )
+        ref['foo'] = '1'
+        self.config['scenario'] = _test
+        self.assertEqual( ref, self.config['scenario'].value() )
+        _test = {'merlion': True, 'detection': [1], 'bar': '1'}
+        ref['bar'] = '1'
+        self.config['scenario'] = _test
+        self.assertEqual( ref, self.config['scenario'].value() )
+
+    def test_setValue_block_badDomain(self):
+        _test = {'merlion': True, 'detection': ['a'], 'foo': 1, 'a': 1}
+        try:
+            self.config['scenario'] = _test
+        except ValueError:
+            pass
+        else:
+            self.fail('expected test to raise ValueError')
+        self.assertEqual( self._reference, self.config.value() )
+
+    def test_default_function(self):
+        c = ConfigValue(default=lambda: 10, domain=int)
+        self.assertEqual(c.value(), 10)
+        c.set_value(5)
+        self.assertEqual(c.value(), 5)
+        c.reset()
+        self.assertEqual(c.value(), 10)
+
+        try:
+            c = ConfigValue(default=lambda x: 10*x, domain=int)
+        except TypeError:
+            pass
+        else:
+            self.fail("Expected type error")
+        
+        try:
+            c = ConfigValue('a', domain=int)
+        except ValueError:
+            pass
+        else:
+            self.fail("Expected casting a to int to raise a value error")
+        
+
 
     def test_getItem_setItem(self):
         self.assertFalse(self.config._userAccessed)
@@ -702,10 +864,14 @@ scenarios[1].detection""")
 
         # list of keys
         keys = self.config['scenario'].keys()
-        self.assertIs( type(keys), list )
-        self.assertEqual( keys, ref )
         # lists are independent
         self.assertFalse( keys is self.config['scenario'].keys() )
+        if PY3:
+            self.assertIsNot( type(keys), list )
+            self.assertEqual( list(keys), ref )
+        else:
+            self.assertIs( type(keys), list )
+            self.assertEqual( keys, ref )
 
         # keys iterator
         keyiter = self.config['scenario'].iterkeys()
@@ -726,10 +892,13 @@ scenarios[1].detection""")
 
         # list of values
         values = self.config['scenario'].values()
-        self.assertIs( type(values), list )
-        self.assertEqual( [x.value() for x in values], ref )
         # lists are independent
         self.assertFalse( values is self.config['scenario'].values() )
+        if PY3:
+            self.assertIsNot( type(values), list )
+        else:
+            self.assertIs( type(values), list )
+        self.assertEqual( [x.value() for x in values], ref )
 
         # values iterator
         valueiter = self.config['scenario'].itervalues()
@@ -745,10 +914,13 @@ scenarios[1].detection""")
 
         # list of items
         items = self.config['scenario'].items()
-        self.assertIs( type(items), list )
-        self.assertEqual( [ (x[0],x[1].value()) for x in items ], ref )
         # lists are independent
         self.assertFalse( items is self.config['scenario'].items() )
+        if PY3:
+            self.assertIsNot( type(items), list )
+        else:
+            self.assertIs( type(items), list )
+        self.assertEqual( [ (x[0],x[1].value()) for x in items ], ref )
 
         # items iterator
         itemiter = self.config['scenario'].iteritems()
@@ -756,6 +928,10 @@ scenarios[1].detection""")
         self.assertEqual( [ (x[0],x[1].value()) for x in itemiter ], ref )
         # iterators are independent
         self.assertFalse( itemiter is self.config['scenario'].iteritems() )
+
+    def test_value(self):
+        print(self.config.value())
+        self.assertEqual(self._reference, self.config.value())
 
     def test_list_manipulation(self):
         self.assertEqual(len(self.config['scenarios']), 0)
@@ -811,6 +987,12 @@ scenarios[1].detection""")
         config['implicit_2'] = 5
         print(config.display())
         self.assertEqual( 3, len(config) )
+        self.assertEqual( ['implicit_1','formal','implicit_2'], 
+                          list(config.iterkeys()) )
+        config.reset()
+        self.assertEqual( 1, len(config) )
+        self.assertEqual( ['formal'], 
+                          list(config.iterkeys()) )
 
     def test_argparse_help(self):
         try:

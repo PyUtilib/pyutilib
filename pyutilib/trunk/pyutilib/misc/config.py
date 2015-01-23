@@ -441,8 +441,9 @@ group, subparser, or (subparser, group)."""
 
 class ConfigValue(ConfigBase):
 
-    def value(self):
-        self._userAccessed = True
+    def value(self, accessValue=True):
+        if accessValue:
+            self._userAccessed = True
         return self._data
 
     def set_value(self, value):
@@ -479,27 +480,38 @@ class ConfigList(ConfigBase):
         self._userAccessed = True
         return self._data.__iter__()
 
-    def value(self):
-        self._userAccessed = True
-        return [ config.value() for config in self._data ]
+    def value(self, accessValue=True):
+        if accessValue:
+            self._userAccessed = True
+        return [ config.value(accessValue) for config in self._data ]
 
     def set_value(self, value):
+        # If the set_value fails part-way through the list values, we
+        # want to restore a deterministic state.  That is, either
+        # set_value succeeds completely, or else nothing happens.
+        _old = self._data
         self._data = []
-        if type(value) is list or type(value) is ConfigList:
-            for val in value:
-                self.append(val)
-        else:
-            self.append(value)
+        try:
+            if type(value) is list or type(value) is ConfigList:
+                for val in value:
+                    self.append(val)
+            else:
+                self.append(value)
+        except:
+            self._data = _old
+            raise
         self._userSet = True
 
     def reset(self):
         ConfigBase.reset(self)
-        for val in self._data:
-            val.reset()
+        # Because the base reset() calls set_value, which will recreate
+        # the list from scratch, I do not think that we need to
+        # explicitly call the reset() function on any newly-created
+        # entries:
+        #for val in self._data:
+        #    val.reset()
 
     def append(self, value=ConfigBase.NoArgument):
-        #print "appending onto ", self.name(), value
-        #print self._cast, self._cast(value)
         self._data.append( self._cast(value) )
         self._data[-1]._parent = self
         self._data[-1]._name = '[%s]' % ( len(self._data)-1, )
@@ -552,7 +564,10 @@ class ConfigBlock(ConfigBase):
         self._decl_order = []
         self._declared = set()
         self._implicit_declaration = implicit
-        self._implicit_domain = implicit_domain
+        if implicit_domain is None or isinstance(implicit_domain, ConfigBase):
+            self._implicit_domain = implicit_domain
+        else:
+            self._implicit_domain = ConfigValue(None, domain=implicit_domain)
         ConfigBase.__init__(self, None, {}, description, doc, visibility)
         self._data = {}
 
@@ -575,9 +590,9 @@ class ConfigBlock(ConfigBase):
     def __setitem__(self, key, val):
         if key not in self._data:
             if self._implicit_domain is None:
-                self.add(key, ConfigValue(val))
+                self.add(key, ConfigValue( val ))
             else:
-                self.add(key, self._implicit_domain())
+                self.add(key, self._implicit_domain( val ))
         else:
             self._data[key].set_value(val)
         #self._userAccessed = True
@@ -648,42 +663,55 @@ class ConfigBlock(ConfigBase):
         self._userSet = True
         return ans
 
-    def value(self):
-        self._userAccessed = True
-        return dict( (name, config.value()) 
+    def value(self, accessValue=True):
+        if accessValue:
+            self._userAccessed = True
+        return dict( (name, config.value(accessValue)) 
                      for name, config in six.iteritems(self._data) )
 
     def set_value(self, value):
         if value is None:
             return
-        if not type(value) is dict and not type(value) is ConfigBlock:
-            raise ValueError( "Expected dict value for set_value: %s" 
-                              % str(type(value)) )
+        if type(value) is not dict and type(value) is not ConfigBlock:
+            raise ValueError( "Expected dict value for %s.set_value, found %s" 
+                              % ( self.name(True), type(value).__name__ ) )
         _implicit = []
         for key in value:
             if key not in self._data:
-                if self._implicit_declaration:
-                    _implicit.append(key)
-                else:
-                    raise ValueError("key '%s' not defined in Config Block '%s'"
-                                     % ( key, self.name(True) ) )
-        # We want to set the values in declaration order (so that
-        # things are deterministic and in case a validation depends on
-        # the order)
-        for key in self._decl_order:
-            if key in value:
-                #print "Setting", key, " = ", value
-                self._data[key].set_value(value[key])
-        # implicit data is declated at the end (in arbitrary order)
-        for key in _implicit:
-            self.add(key,ConfigValue(value[key]))
+                _implicit.append(key)
+
+        if _implicit and not self._implicit_declaration:
+            raise ValueError( "key '%s' not defined in Config Block '%s'"
+                              % ( key, self.name(True) ) )
+
+        # If the set_value fails part-way through the new values, we
+        # want to restore a deterministic state.  That is, either
+        # set_value succeeds completely, or else nothing happens.
+        _old_data = self.value(False)
+        try:
+            # We want to set the values in declaration order (so that
+            # things are deterministic and in case a validation depends
+            # on the order)
+            for key in self._decl_order:
+                if key in value:
+                    #print "Setting", key, " = ", value
+                    self._data[key].set_value(value[key])
+            # implicit data is declated at the end (in sorted order)
+            if self._implicit_domain is None:
+                for key in sorted(_implicit):
+                    self.add(key, ConfigValue(value[key]))
+            else:
+                for key in sorted(_implicit):
+                    self.add(key, self._implicit_domain( value[key] ))
+        except:
+            self.reset()
+            self.set_value(_old_data)
+            raise
         self._userSet = True
 
     def reset(self):
         # Reset the values in the order they were declared.  This
         # allows reset functions to have a deterministic ordering.
-        self._userAccessed = False
-        self._userSet = False
         def _keep(self, key):
             keep = key in self._declared
             if keep:
@@ -693,7 +721,9 @@ class ConfigBlock(ConfigBase):
             return keep
         # this is an in-place slice of a list...
         self._decl_order[:] = [ x for x in self._decl_order if _keep(self,x) ]
-
+        self._userAccessed = False
+        self._userSet = False
+        
     def _data_collector(self, level, prefix, visibility=None, docMode=False):
         if visibility is not None and visibility < self._visibility:
             return
