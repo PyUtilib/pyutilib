@@ -110,13 +110,6 @@ class TaskWorkerBase(object):
                     if task['generateResponse']:
                         task['processedBy'] = self.WORKERNAME
                         self.dispatcher.add_result(task, type=current_type)
-                    # give the dispatch server a bit of time to recover
-                    # and process the request - it is very unlikely
-                    # that it can have another task ready (at least in
-                    # most job distribution structures) right away.
-
-                    # TBD: We really need to parameterize the time-out value.
-                    time.sleep(0.01)
 
 class TaskWorker(TaskWorkerBase):
 
