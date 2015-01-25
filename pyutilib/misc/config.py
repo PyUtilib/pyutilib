@@ -244,7 +244,7 @@ group, subparser, or (subparser, group)."""
                     else:
                         _kwds['metavar'] = re.sub( 
                             r'[^a-zA-Z0-9-_]', '_', self.name().upper() )
-            _parser.add_argument(default=argparse.SUPPRESS, *_args, **_kwds)
+            _parser.add_argument(*_args, default=argparse.SUPPRESS, **_kwds)
 
         assert(argparse_is_available)
         for level, value, obj in self._data_collector(None,""):
@@ -463,7 +463,10 @@ class ConfigList(ConfigBase):
 
     def __getitem__(self, key):
         self._userAccessed = True
-        return self._data[key]
+        if type(self._data[key]) is ConfigValue:
+            return self._data[key].value()
+        else:
+            return self._data[key]
 
     def __setitem__(self, key, val):
         # Note: this will fail if the element doesn't exist in _data.
@@ -513,6 +516,7 @@ class ConfigList(ConfigBase):
 
     def append(self, value=ConfigBase.NoArgument):
         self._data.append( self._cast(value) )
+        #print self._data[-1], type(self._data[-1])
         self._data[-1]._parent = self
         self._data[-1]._name = '[%s]' % ( len(self._data)-1, )
         self._data[-1]._userSet = True
@@ -560,7 +564,7 @@ class ConfigBlock(ConfigBase):
                   '_implicit_declaration', '_implicit_domain' )
 
     def __init__( self, description=None, doc=None, implicit=False, 
-                  implicit_domain=None, visibility=0 ):
+                  implicit_domain=None, visibility=0):
         self._decl_order = []
         self._declared = set()
         self._implicit_declaration = implicit
@@ -579,6 +583,8 @@ class ConfigBlock(ConfigBase):
 
     def __getitem__(self, key):
         self._userAccessed = True
+        if type(self._data[key]) is ConfigValue:
+            return self._data[key].value()
         return self._data[key]
 
     def get(self, key, default):
@@ -606,18 +612,40 @@ class ConfigBlock(ConfigBase):
     def __iter__(self):
         return self._decl_order.__iter__()
 
+    def __getattr__(self, name):
+        if name[0] == '_':
+            return super(ConfigBlock,self).__getattribute__(name)
+        if not name in self._data:
+            name_ = name.replace('_',' ')
+        else:
+            name_ = name
+        if not name_ in self._data:
+            #if not self._default is False:
+                #return self._default
+            raise AttributeError("Unknown attribute '%s'" % name)
+        val = ConfigBlock.__getitem__(self, name_)
+        return val.value() if type(val) is ConfigValue else val
+
+    def __setattr__(self, name, value):
+        if name[0] == '_':
+            super(ConfigBlock,self).__setattr__(name, value)
+        else:
+            if not name in self._data:
+                name = name.replace('_',' ')
+            ConfigBlock.__setitem__(self, name, value)
+
     def iterkeys(self):
         return self._decl_order.__iter__()
 
     def itervalues(self):
         self._userAccessed = True
         for key in self._decl_order:
-            yield self._data[key]
+            yield self._data[key].value()
 
     def iteritems(self):
         self._userAccessed = True
         for key in self._decl_order:
-            yield ( key, self._data[key] )
+            yield ( key, self._data[key].value() )
 
     def keys(self):
         return list( self.iterkeys() )
