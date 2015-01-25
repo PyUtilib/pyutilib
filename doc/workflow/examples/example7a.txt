@@ -1,2 +1,4 @@
-Running... /bin/ls /Users/wehart/home/mac/src/python/src/pyutilib.workflow/doc/workflow/examples/dummy
-list: ['bar', 'foo']
+Running... /bin/ls /home/coopr/src/python/src/pyutilib/doc/workflow/examples/dummy
+list:
+- 'bar'
+- 'foo'
