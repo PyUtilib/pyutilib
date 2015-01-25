@@ -331,7 +331,27 @@ class Container(dict):
             self._name_ = self.__class__.__name__
 
     def update(self, d):
-        self.__dict__.update(d)
+        """
+        The update is specialized for JSON-like data.  This
+        recursively replaces dictionaries with Container objects.
+        """
+        for k in d:
+            if type(d[k]) is dict:
+                tmp = Container()
+                tmp.update(d[k])
+                self.__setattr__(k, tmp)
+            elif type(d[k]) is list:
+                val = []
+                for i in d[k]:
+                    if type(i) is dict:
+                        tmp = Container()
+                        tmp.update(i)
+                        val.append(tmp)
+                    else:
+                        val.append(i)
+                self.__setattr__(k, val)
+            else:
+                self.__setattr__(k, d[k])
 
     def set_name(self, name):
         self._name_ = name
@@ -369,8 +389,19 @@ class Container(dict):
             if not k.startswith("_"):
                 text = [indentation, k, ":"]
                 if isinstance(v, Container):
-                    text.append('\n')
+                    if len(v) > 0:
+                        text.append('\n')
                     text.append(v.__str__(nesting + 1))
+                elif isinstance(v, list):
+                    if len(v) == 0:
+                        text.append(' []')
+                    else:
+                        for v_ in v:
+                            text.append('\n'+indentation+"-")
+                            if isinstance(v_, Container):
+                                text.append('\n'+v_.__str__(nesting+1))
+                            else:
+                                text.append(" "+repr(v_))
                 else:
                     text.append(' '+repr(v))
                 attrs.append("".join(text))
