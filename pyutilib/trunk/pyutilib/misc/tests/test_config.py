@@ -921,19 +921,14 @@ scenarios[1].detection""")
             self.assertIsNot( type(values), list )
         else:
             self.assertIs( type(values), list )
-        self.assertEqual( [x for x in values], ref )
+        self.assertEqual( list(values), ref )
         # lists are independent
         self.assertFalse( values is self.config['scenario'].values() )
-        if PY3:
-            self.assertIsNot( type(values), list )
-        else:
-            self.assertIs( type(values), list )
-        self.assertEqual( [x for x in values], ref )
 
         # values iterator
         valueiter = self.config['scenario'].itervalues()
         self.assertIsNot( type(valueiter), list )
-        self.assertEqual( [x for x in valueiter], ref )
+        self.assertEqual( list(valueiter), ref )
         # iterators are independent
         self.assertFalse( valueiter is self.config['scenario'].itervalues() )
         
@@ -948,19 +943,14 @@ scenarios[1].detection""")
             self.assertIsNot( type(items), list )
         else:
             self.assertIs( type(items), list )
-        self.assertEqual( [ x for x in items ], ref )
+        self.assertEqual( list(items), ref )
         # lists are independent
         self.assertFalse( items is self.config['scenario'].items() )
-        if PY3:
-            self.assertIsNot( type(items), list )
-        else:
-            self.assertIs( type(items), list )
-        self.assertEqual( [ x for x in items ], ref )
 
         # items iterator
         itemiter = self.config['scenario'].iteritems()
         self.assertIsNot( type(itemiter), list )
-        self.assertEqual( [ x for x in itemiter ], ref )
+        self.assertEqual( list(itemiter), ref )
         # iterators are independent
         self.assertFalse( itemiter is self.config['scenario'].iteritems() )
 
