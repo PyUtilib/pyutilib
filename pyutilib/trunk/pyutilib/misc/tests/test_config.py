@@ -510,7 +510,7 @@ scenarios[1].detection""")
     def test_UserValues_list_nonDefault_itemAccessed(self):
         self.config['scenarios'].add()
         self.config['scenarios'].add({'merlion':True, 'detection':[]})
-        self.config['scenarios']._data[1]._data['merlion'].value()
+        self.config['scenarios'][1]['merlion']
         test = '\n'.join(x.name(True) for x in self.config.user_values())
         sys.stdout.write(test)
         self.assertEqual(test, """scenarios
@@ -627,17 +627,17 @@ scenarios[1].detection""")
         self.config['scenarios'].add()
         self.assertEqual(self.config.name(), "")
         self.assertEqual(self.config['scenarios'].name(), "scenarios")
-        self.assertEqual(self.config['scenarios']._data[0].name(), "[0]")
-        self.assertEqual(self.config['scenarios']._data[0]._data['merlion'].name(), 
+        self.assertEqual(self.config['scenarios'][0].name(), "[0]")
+        self.assertEqual(self.config['scenarios'][0].get('merlion').name(), 
                          "merlion")
 
     def test_name_fullyQualified(self):
         self.config['scenarios'].add()
         self.assertEqual(self.config.name(True), "")
         self.assertEqual(self.config['scenarios'].name(True), "scenarios")
-        self.assertEqual(self.config['scenarios']._data[0].name(True), 
+        self.assertEqual(self.config['scenarios'][0].name(True), 
                          "scenarios[0]")
-        self.assertEqual(self.config['scenarios']._data[0]._data['merlion'].name(True), 
+        self.assertEqual(self.config['scenarios'][0].get('merlion').name(True), 
                          "scenarios[0].merlion")
 
     
@@ -764,9 +764,7 @@ scenarios[1].detection""")
         _test = {'scenario':{'merlion': True, 'detection': [1]}, 'foo': 1}
         ref = self._reference
         ref['scenario'].update( _test['scenario'] )
-        ref['scenario']['foo'] = 1
         ref['foo'] = 1
-        self.config['scenario']['foo'] = 1
         self.config.set_value( _test )
         self.assertEqual( ref, self.config.value() )
         _test = {'scenario':{'merlion': True, 'detection': [1]}, 'bar': 1}
@@ -821,30 +819,35 @@ scenarios[1].detection""")
 
 
     def test_getItem_setItem(self):
+        # a freshly-initialized object should not be accessed
         self.assertFalse(self.config._userAccessed)
         self.assertFalse(self.config._data['scenario']._userAccessed)
         self.assertFalse(self.config._data['scenario']._data['detection']\
                              ._userAccessed)
 
-        self.assertFalse(self.config['scenario']._data['detection']._userAccessed)
-        self.config['scenario']['detection']
+        # Getting a ConfigValue should not access it
+        self.assertFalse(self.config['scenario'].get('detection')._userAccessed)
 
+        #... but should access the parent blocks traversed to get there
         self.assertTrue(self.config._userAccessed)
         self.assertTrue(self.config._data['scenario']._userAccessed)
-        self.assertTrue(self.config['scenario']._data['detection']\
+        self.assertFalse(self.config._data['scenario']._data['detection']\
                              ._userAccessed)
 
+        # a freshly-initialized object should not be set
         self.assertFalse(self.config._userSet)
         self.assertFalse(self.config._data['scenario']._userSet)
         self.assertFalse(self.config['scenario']._data['detection']._userSet)
 
+        # setting a value should map it to the correct domain
         self.assertEqual(self.config['scenario']['detection'], [1,2,3])
         self.config['scenario']['detection'] = [ 42.5 ]
         self.assertEqual(self.config['scenario']['detection'], [42])
 
+        # setting a ConfigValue should mark it as userSet, but NOT any parent blocks
         self.assertFalse(self.config._userSet)
         self.assertFalse(self.config._data['scenario']._userSet)
-        self.assertTrue(self.config['scenario']._data['detection']._userSet)
+        self.assertTrue(self.config['scenario'].get('detection')._userSet)
 
     def test_generate_documentation(self):
         oFile = os.path.join(currdir,'test_reference.out')
@@ -894,7 +897,10 @@ scenarios[1].detection""")
 
         # list of values
         values = self.config['scenario'].values()
-        self.assertIs( type(values), list )
+        if PY3:
+            self.assertIsNot( type(values), list )
+        else:
+            self.assertIs( type(values), list )
         self.assertEqual( [x for x in values], ref )
         # lists are independent
         self.assertFalse( values is self.config['scenario'].values() )
@@ -918,20 +924,23 @@ scenarios[1].detection""")
 
         # list of items
         items = self.config['scenario'].items()
-        self.assertIs( type(items), list )
-        self.assertEqual( [ (x[0],x[1]) for x in items ], ref )
+        if PY3:
+            self.assertIsNot( type(items), list )
+        else:
+            self.assertIs( type(items), list )
+        self.assertEqual( [ x for x in items ], ref )
         # lists are independent
         self.assertFalse( items is self.config['scenario'].items() )
         if PY3:
             self.assertIsNot( type(items), list )
         else:
             self.assertIs( type(items), list )
-        self.assertEqual( [ (x[0],x[1]) for x in items ], ref )
+        self.assertEqual( [ x for x in items ], ref )
 
         # items iterator
         itemiter = self.config['scenario'].iteritems()
         self.assertIsNot( type(itemiter), list )
-        self.assertEqual( [ (x[0],x[1]) for x in itemiter ], ref )
+        self.assertEqual( [ x for x in itemiter ], ref )
         # iterators are independent
         self.assertFalse( itemiter is self.config['scenario'].iteritems() )
 
@@ -1103,14 +1112,14 @@ Scenario definition:
         subp = parser.add_subparsers(title="Subcommands").add_parser('flushing')
 
         # Declare an argument by passing in the name of the subparser
-        self.config['flushing']['flush nodes']._data['duration'].declare_as_argument(
+        self.config['flushing']['flush nodes'].get('duration').declare_as_argument(
             group='flushing')
         # Declare an argument by passing in the name of the subparser
         # and an implicit group
-        self.config['flushing']['flush nodes']._data['feasible nodes'] \
+        self.config['flushing']['flush nodes'].get('feasible nodes') \
             .declare_as_argument( group=('flushing','Node information') )
         # Declare an argument by passing in the subparser and a group name
-        self.config['flushing']['flush nodes']._data['infeasible nodes'] \
+        self.config['flushing']['flush nodes'].get('infeasible nodes') \
             .declare_as_argument( group=(subp,'Node information') )
         self.config.initialize_argparse(parser)
 

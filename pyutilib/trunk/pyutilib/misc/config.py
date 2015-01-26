@@ -38,6 +38,11 @@ __all__ = ('ConfigBlock','ConfigList','ConfigValue')
 
 logger = logging.getLogger('pyutilib.misc')
 
+def _munge_name(name, space_to_dash=True):
+    if space_to_dash:
+        name = re.sub( r'\s', '-', name )
+    return re.sub( r'[^a-zA-Z0-9-_]', '_', name )
+
 class ConfigBase(object):
     __slots__ = ( '_parent', '_name', '_userSet', '_userAccessed', 
                   '_data', '_default', '_domain', '_description', '_doc',
@@ -173,15 +178,13 @@ group, subparser, or (subparser, group)."""
             else:
                 kwds['action'] = 'store_false'
                 if not args:
-                    args = ( '--disable-'+re.sub( 
-                        r'[^a-zA-Z0-9-_]','_',re.sub(r'\s','-',self.name()) ), )
+                    args = ( '--disable-'+_munge_name(self.name()), )
                 if 'help' not in kwds:
                     kwds['help'] = "[DON'T] "+self._description
         if 'help' not in kwds:
             kwds['help'] = self._description
         if not args:
-            args = ( '--'+re.sub( 
-                r'[^a-zA-Z0-9-_]','_',re.sub(r'\s','-',self.name()) ), )
+            args = ( '--'+_munge_name(self.name()), )
         if self._argparse:
             self._argparse = self._argparse + ((args, kwds),)
         else:
@@ -242,8 +245,8 @@ group, subparser, or (subparser, group)."""
                        obj._domain.__class__ is type:
                         _kwds['metavar'] = obj._domain.__name__.upper()
                     else:
-                        _kwds['metavar'] = re.sub( 
-                            r'[^a-zA-Z0-9-_]', '_', self.name().upper() )
+                        _kwds['metavar'] = _munge_name(
+                            self.name().upper(), False )
             _parser.add_argument(*_args, default=argparse.SUPPRESS, **_kwds)
 
         assert(argparse_is_available)
@@ -468,6 +471,10 @@ class ConfigList(ConfigBase):
         else:
             return self._data[key]
 
+    def get(self, key):
+        self._userAccessed = True
+        return self._data[key]
+
     def __setitem__(self, key, val):
         # Note: this will fail if the element doesn't exist in _data.
         # As a result, *this* list doesn't change when someone tries to
@@ -565,9 +572,10 @@ class ConfigBlock(ConfigBase):
 
     __slots__ = ( '_decl_order', '_declared', 
                   '_implicit_declaration', '_implicit_domain' )
+    _all_slots = __slots__ + ConfigBase.__slots__
 
     def __init__( self, description=None, doc=None, implicit=False, 
-                  implicit_domain=None, visibility=0):
+                  implicit_domain=None, visibility=0 ):
         self._decl_order = []
         self._declared = set()
         self._implicit_declaration = implicit
@@ -588,12 +596,16 @@ class ConfigBlock(ConfigBase):
         self._userAccessed = True
         if type(self._data[key]) is ConfigValue:
             return self._data[key].value()
-        return self._data[key]
-
-    def get(self, key, default):
-        self._userAccessed = True
-        if key in self:
+        else:
             return self._data[key]
+
+    def get(self, key, default=ConfigBase.NoArgument):
+        self._userAccessed = True
+        if key in self._data:
+            return self._data[key]
+        if default is ConfigBase.NoArgument:
+            raise KeyError( "Key '%s' not found in ConfigBlock %s" 
+                            % (key, self.name(True)) )
         return default
 
     def __setitem__(self, key, val):
@@ -616,24 +628,20 @@ class ConfigBlock(ConfigBase):
         return self._decl_order.__iter__()
 
     def __getattr__(self, name):
-        if name[0] == '_':
+        if name in ConfigBlock._all_slots:
             return super(ConfigBlock,self).__getattribute__(name)
-        if not name in self._data:
-            name_ = name.replace('_',' ')
-        else:
-            name_ = name
-        if not name_ in self._data:
-            #if not self._default is False:
-                #return self._default
-            raise AttributeError("Unknown attribute '%s'" % name)
-        val = ConfigBlock.__getitem__(self, name_)
-        return val.value() if type(val) is ConfigValue else val
+        if name not in self._data:
+            _name = name.replace('_',' ')
+            if _name not in self._data:
+                raise AttributeError("Unknown attribute '%s'" % name)
+            name = _name
+        return ConfigBlock.__getitem__(self, name)
 
     def __setattr__(self, name, value):
-        if name[0] == '_':
+        if name in ConfigBlock._all_slots:
             super(ConfigBlock,self).__setattr__(name, value)
         else:
-            if not name in self._data:
+            if name not in self._data:
                 name = name.replace('_',' ')
             ConfigBlock.__setitem__(self, name, value)
 
@@ -643,12 +651,12 @@ class ConfigBlock(ConfigBase):
     def itervalues(self):
         self._userAccessed = True
         for key in self._decl_order:
-            yield self._data[key].value()
+            yield self[key]
 
     def iteritems(self):
         self._userAccessed = True
         for key in self._decl_order:
-            yield ( key, self._data[key].value() )
+            yield ( key, self[key] )
 
     def keys(self):
         return list( self.iterkeys() )
