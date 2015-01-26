@@ -628,8 +628,11 @@ class ConfigBlock(ConfigBase):
         return self._decl_order.__iter__()
 
     def __getattr__(self, name):
-        if name in ConfigBlock._all_slots:
-            return super(ConfigBlock,self).__getattribute__(name)
+        # Note: __getattr__ is only called after all "usual" attribute
+        # lookup methods have failed.  So, if we get here, we already
+        # know that key is not a __slot__ or a method, etc...
+        #if name in ConfigBlock._all_slots:
+        #    return super(ConfigBlock,self).__getattribute__(name)
         if name not in self._data:
             _name = name.replace('_',' ')
             if _name not in self._data:
