@@ -760,6 +760,18 @@ scenarios[1].detection""")
         self.config['scenario']['bar'] = 1
         self.assertEqual( ref, self.config['scenario'].value() )
  
+    def test_setValue_block_noImplicit(self):
+        _test = {'epanet file': 'no_file.inp', 'foo': 1}
+        try:
+            self.config['network'] = _test
+        except ValueError:
+            pass
+        except:
+            raise
+        else:
+            self.fail("Expected test to raise ValueError")
+        self.assertEqual( self._reference, self.config.value() )
+
     def test_setValue_block_implicit(self):
         _test = {'scenario':{'merlion': True, 'detection': [1]}, 'foo': 1}
         ref = self._reference
@@ -788,6 +800,14 @@ scenarios[1].detection""")
         _test = {'merlion': True, 'detection': ['a'], 'foo': 1, 'a': 1}
         try:
             self.config['scenario'] = _test
+        except ValueError:
+            pass
+        else:
+            self.fail('expected test to raise ValueError')
+        self.assertEqual( self._reference, self.config.value() )
+
+        try:
+            self.config['scenario'] = []
         except ValueError:
             pass
         else:
@@ -1158,20 +1178,41 @@ Node information:
                         ALL, NZD, NONE, list or filename
 """, help)
 
-    def test_setattr(self):
+    def test_getattr_setattr(self):
         config = ConfigBlock()
-        foo = config.declare('foo', ConfigBlock())
-        bar = foo.declare('bar', ConfigValue(
-                None,
-                int))
-        print(config.display())
-        config.foo.bar = 1
-        print(config.display())
-        print(config.foo)
-        print(config.foo.bar)
-        
+        foo = config.declare('foo', ConfigBlock(implicit=True, implicit_domain=int))
+        foo.declare('explicit_bar', ConfigValue(0, int))
 
+        self.assertEqual(1, len(foo))
+        self.assertEqual(0, foo['explicit_bar'])
+        self.assertEqual(0, foo.explicit_bar)
+        foo.explicit_bar = 10
+        self.assertEqual(1, len(foo))
+        self.assertEqual(10, foo['explicit_bar'])
+        self.assertEqual(10, foo.explicit_bar)
 
+        foo.implicit_bar = 20
+        self.assertEqual(2, len(foo))
+        self.assertEqual(20, foo['implicit bar'])
+        self.assertEqual(20, foo.implicit_bar)
+
+        try:
+            config.baz = 10
+        except ValueError:
+            pass
+        except:
+            raise
+        else:
+            self.fail("Expected implicit assignment to explicit block to raise ValueError")
+
+        try:
+            a = config.baz
+        except AttributeError:
+            pass
+        except:
+            raise
+        else:
+            self.fail("Expected implicit assignment to explicit block to raise ValueError")
 if __name__ == "__main__":
     unittest.main()
 
