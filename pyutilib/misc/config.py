@@ -515,7 +515,10 @@ class ConfigList(ConfigBase):
         #    val.reset()
 
     def append(self, value=ConfigBase.NoArgument):
-        self._data.append( self._cast(value) )
+        val = self._cast(value)
+        if val is None:
+            return
+        self._data.append( val )
         #print self._data[-1], type(self._data[-1])
         self._data[-1]._parent = self
         self._data[-1]._name = '[%s]' % ( len(self._data)-1, )
