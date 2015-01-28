@@ -45,7 +45,7 @@ def get_nameserver(host=None, num_retries=30):
         connection_problem = _pyro.errors.ConnectionDeniedError
     else:
         connection_problem = _pyro.errors.TimeoutError
-    for i in xrange(0, num_retries):
+    for i in xrange(0, num_retries+1):
         try:
             if using_pyro3:
                 if host is None:
@@ -70,12 +70,13 @@ def get_nameserver(host=None, num_retries=30):
         # TBD: we should eventually read the timeout upper bound from an enviornment
         #      variable - to support cases with a very large (hundreds to thousands)
         #      number of clients.
-        sleep_interval = random.uniform(1.0, timeout_upper_bound)
-        print("Failed to locate nameserver - trying again in %5.2f seconds." % sleep_interval)
-        time.sleep(sleep_interval)
+        if i < num_retries:
+            sleep_interval = random.uniform(1.0, timeout_upper_bound)
+            print("Failed to locate nameserver - trying again in %5.2f seconds." % sleep_interval)
+            time.sleep(sleep_interval)
 
     if ns is None:
-        print("Could not locate nameserver after "+str(num_retries)+" attempts.")
+        print("Could not locate nameserver (attempts="+str(num_retries+1)+")")
         raise SystemExit
 
     return ns
