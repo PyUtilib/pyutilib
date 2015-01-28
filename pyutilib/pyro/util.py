@@ -103,20 +103,30 @@ def shutdown_pyro_components(host=None, num_retries=30):
     if using_pyro3:
         ns_entries = ns.flatlist()
         for (name,uri) in ns_entries:
+            if name == ":PyUtilibServer.dispatcher":
+                try:
+                    proxy = _pyro.core.getProxyForURI(uri)
+                    proxy.shutdown()
+                except:
+                    pass
+        for (name,uri) in ns_entries:
             if name == ":Pyro.NameServer":
-                proxy = _pyro.core.getProxyForURI(uri)
-                proxy._shutdown()
-            elif name == ":PyUtilibServer.dispatcher":
-                proxy = _pyro.core.getProxyForURI(uri)
-                proxy.shutdown()
+                try:
+                    proxy = _pyro.core.getProxyForURI(uri)
+                    proxy._shutdown()
+                except:
+                    pass
     elif using_pyro4:
         ns_entries = ns.list()
         for name in ns_entries:
             if name == ":PyUtilibServer.dispatcher":
-                URI = ns.lookup(name)
-                proxy = _pyro.Proxy(URI)
-                proxy.shutdown()
-                proxy._pyroRelease()
+                try:
+                    URI = ns.lookup(name)
+                    proxy = _pyro.Proxy(URI)
+                    proxy.shutdown()
+                    proxy._pyroRelease()
+                except:
+                    pass
         print("")
         print("*** NameServer must be shutdown manually when using Pyro4 ***")
         print("")
