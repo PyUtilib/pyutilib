@@ -4,21 +4,20 @@
 #
 
 import os
-import sys
 from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
-
 try:
     import unittest2 as unittest
 except:
     import unittest
+
 import pyutilib.misc
+
 try:
     import yaml
     using_yaml=True
 except ImportError:
     using_yaml=False
-
 
 class Test(unittest.TestCase):
 

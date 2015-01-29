@@ -1,5 +1,3 @@
-import glob
-import sys
 import os
 
 def strip_example(file):

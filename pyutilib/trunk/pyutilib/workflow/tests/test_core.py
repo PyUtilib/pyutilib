@@ -6,7 +6,6 @@ currdir = dirname(abspath(__file__))+os.sep
 
 import pyutilib.th as unittest
 import pyutilib.workflow
-from difflib import unified_diff
 
 is_python24or25 = False
 if sys.version_info[0:2] < (2, 6):

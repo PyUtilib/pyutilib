@@ -9,10 +9,11 @@
 
 from copy import deepcopy
 import re
-from sys import exc_info, version_info
+from sys import exc_info
 from textwrap import wrap
-import six
 import logging
+
+import six
 
 try:
     from yaml import dump
@@ -23,10 +24,6 @@ except ImportError:
         if type(x) is bool:
             return str(x).lower()
         return str(x)
-try:
-    import StringIO
-except ImportError:
-    import io as StringIO
 
 try:
     import argparse
@@ -279,7 +276,7 @@ group, subparser, or (subparser, group)."""
                 % ( content_filter, ConfigBlock.content_filters ) )
 
         _blocks = []
-        os = StringIO.StringIO()
+        os = six.StringIO()
         for level, value, obj in self._data_collector(0,""):
             if content_filter == 'userdata' and not obj._userSet:
                 continue
@@ -338,7 +335,7 @@ group, subparser, or (subparser, group)."""
             if _doc > maxDoc:
                 maxDoc = _doc
             maxLvl = lvl
-        os = StringIO.StringIO()
+        os = six.StringIO()
         if self._description:
             os.write(comment.lstrip() + self._description + "\n")
         for lvl, val, obj in data:
@@ -373,7 +370,7 @@ group, subparser, or (subparser, group)."""
               width=78,
               visibility=0
               ):
-        os = StringIO.StringIO()
+        os = six.StringIO()
         level = []
         lastObj = self
         indent = ''

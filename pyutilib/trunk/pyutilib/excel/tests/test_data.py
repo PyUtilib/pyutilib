@@ -4,12 +4,10 @@
 #
 
 import os
-import sys
 from os.path import abspath, dirname, join
 pkgdir = dirname(abspath(__file__))
 
 import pyutilib.th as unittest
-from nose.tools import nottest
 import pyutilib.excel
 
 try:

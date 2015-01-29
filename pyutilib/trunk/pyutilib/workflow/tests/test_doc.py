@@ -1,8 +1,9 @@
 # Imports
-import pyutilib.th as unittest
-import os
-from os.path import dirname, abspath, abspath, basename
 import sys
+import os
+from os.path import dirname, abspath, abspath
+
+import pyutilib.th as unittest
 
 currdir = dirname(abspath(__file__))+os.sep
 datadir = os.sep.join([dirname(dirname(dirname(dirname(abspath(__file__))))),'doc','workflow','examples'])+os.sep

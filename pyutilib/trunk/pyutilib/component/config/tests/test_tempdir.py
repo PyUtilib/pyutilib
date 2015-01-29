@@ -3,19 +3,17 @@
 #
 #
 
-import os
+import glob
 import sys
 import shutil
+import os
 from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
 tempdir = dirname(abspath(__file__))+os.sep+'tempdir'+os.sep
 
-import glob
-from nose.tools import nottest
-from pyutilib.component.core import ExtensionPoint
+
 from pyutilib.component.config import *
 import pyutilib.th as unittest
-import pyutilib.misc
 
 old_tempdir = TempfileManager.tempdir
 

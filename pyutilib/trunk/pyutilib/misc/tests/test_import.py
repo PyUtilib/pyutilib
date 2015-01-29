@@ -9,7 +9,6 @@ from os.path import abspath, dirname
 pkgdir = dirname(abspath(__file__))+os.sep+".."+os.sep+".."
 currdir = dirname(abspath(__file__))+os.sep
 
-from nose.tools import nottest
 import pyutilib.misc
 try:
     import unittest2 as unittest

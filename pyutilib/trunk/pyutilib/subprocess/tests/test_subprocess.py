@@ -1,17 +1,14 @@
-import os
 import sys
-try:
-    import StringIO
-except:
-    import io as StringIO
+import os
 from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
 
 import pyutilib.th as unittest
-from nose.tools import nottest
 import pyutilib.services
 from pyutilib.subprocess import subprocess, SubprocessMngr, timer
 from pyutilib.subprocess.processmngr import _peek_available
+
+import six
 
 try:
     import __pypy__
@@ -99,7 +96,7 @@ class Test(unittest.TestCase):
                                ["Tee Script: OUT","Tee Script: ERR"] ) )
 
     def test_ostream_stringio(self):
-        script_out = StringIO.StringIO()
+        script_out = six.StringIO()
         output = pyutilib.subprocess.run( 
             [sys.executable, currdir+"tee_script.py"], ostream=script_out )
 
@@ -114,8 +111,8 @@ class Test(unittest.TestCase):
                            
 
     def test_tee(self):
-        stream_out = StringIO.StringIO()
-        script_out = StringIO.StringIO()
+        stream_out = six.StringIO()
+        script_out = six.StringIO()
         pyutilib.misc.setup_redirect(stream_out)
         output = pyutilib.subprocess.run(
             [sys.executable, currdir+"tee_script.py"], 
@@ -138,8 +135,8 @@ class Test(unittest.TestCase):
                                ["Tee Script: OUT","Tee Script: ERR"] ) )
             
     def test_tee_stdout(self):
-        stream_out = StringIO.StringIO()
-        script_out = StringIO.StringIO()
+        stream_out = six.StringIO()
+        script_out = six.StringIO()
         pyutilib.misc.setup_redirect(stream_out)
         output = pyutilib.subprocess.run(
             [sys.executable, currdir+"tee_script.py"], 
@@ -159,8 +156,8 @@ class Test(unittest.TestCase):
                                ["Tee Script: OUT","Tee Script: ERR"] ) )
 
     def test_tee_stderr(self):
-        stream_out = StringIO.StringIO()
-        script_out = StringIO.StringIO()
+        stream_out = six.StringIO()
+        script_out = six.StringIO()
         pyutilib.misc.setup_redirect(stream_out)
         output = pyutilib.subprocess.run(
             [sys.executable, currdir+"tee_script.py"], 

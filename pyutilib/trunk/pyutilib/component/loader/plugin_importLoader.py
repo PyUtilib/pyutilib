@@ -17,10 +17,10 @@ import imp
 import re
 import os
 import sys
-import types
+import logging
+
 from pyutilib.component.config import *
 from pyutilib.component.core import *
-
 
 class ImportLoader(ManagedSingletonPlugin):
     """Loader that looks for Python source files in the plugins directories,

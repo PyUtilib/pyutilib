@@ -2,21 +2,21 @@
 # Unit Tests for component/core
 #
 
-import os
+import re
 import sys
+import os
 from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
+
+from pyutilib.component.core import *
+import pyutilib.th as unittest
+import pyutilib.misc
+
 try:
     import yaml
     yaml_available=True
 except ImportError:
     yaml_available=False
-
-import re
-from nose.tools import nottest
-from pyutilib.component.core import *
-import pyutilib.th as unittest
-import pyutilib.misc
 
 testing_env = PluginEnvironment("testing")
 PluginGlobals.add_env(testing_env)

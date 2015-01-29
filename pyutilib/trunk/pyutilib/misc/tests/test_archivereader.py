@@ -7,8 +7,11 @@ import os
 import sys
 import fnmatch
 import posixpath
-from nose.tools import nottest
-import pyutilib.th as unittest
+
+try:
+    import unittest2 as unittest
+except:
+    import unittest
 
 from pyutilib.misc.archivereader import \
     ArchiveReaderFactory, DirArchiveReader, FileArchiveReader, \

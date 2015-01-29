@@ -11,7 +11,7 @@
 
 __all__ = ['progress']
 
-import sys, os
+import sys
 import time
 import unittest
 

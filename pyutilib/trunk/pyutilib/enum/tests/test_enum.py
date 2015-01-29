@@ -13,7 +13,6 @@
     """
 
 import unittest
-import operator
 
 import pyutilib.enum as enum
 

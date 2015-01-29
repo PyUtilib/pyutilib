@@ -1,11 +1,9 @@
 
 import os
-import sys
 from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
 
 import pyutilib.th as unittest
-
 
 tmp=os.environ.get('PYUTILIB_UNITTEST_CATEGORIES','')
 os.environ['PYUTILIB_UNITTEST_CATEGORIES'] = '_foo_,_bar_'

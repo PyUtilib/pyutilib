@@ -10,7 +10,6 @@
 __all__ = ['get_xml_text', 'escape', 'compare_xml_files']
 
 from xml.dom import Node
-import xml
 import sys
 
 def get_xml_text(node):
