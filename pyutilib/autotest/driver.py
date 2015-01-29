@@ -10,25 +10,24 @@
 
 __all__ = ['run', 'main', 'create_test_suites']
 
-import os
-from os.path import dirname, abspath
 import sys
 import optparse
-import copy
-import types
 import re
-from pyutilib.misc import Options
-from pyutilib.component.core import ExtensionPoint, PluginGlobals
-import pyutilib.th as unittest
-from pyutilib.autotest import plugins
+import os
+from os.path import dirname, abspath
 
+import pyutilib.th as unittest
+from pyutilib.misc import Options
+from pyutilib.component.core import ExtensionPoint
+from pyutilib.autotest import plugins
 
 # GAH: Inside create_test_suite all options are (were) being cast to
 #      str(). Although I'm not sure, I assume this is to wash out
 #      unicode coming from json files in Python 2.x. However, we don't
-#      want to cast numeric options in either case (which was happening, 
-#      e.g., tolerance). This is my quick hack to fix things. Please
-#      fix if you have a better understanding of what should be happening..
+#      want to cast numeric options in either case (which was
+#      happening, e.g., tolerance). This is my quick hack to fix
+#      things. Please fix if you have a better understanding of what
+#      should be happening.
 try:
     unicode
 except:
