@@ -13,8 +13,6 @@ from pyutilib.component.core import ExtensionPoint
 from pyutilib.component.config import *
 import pyutilib.th as unittest
 import pyutilib.misc
-import pyutilib.subprocess
-
 
 def filter(line):
     return line.startswith(";   section='") or 'memmon' in line or 'valgrind' in line or '[executables]' in line or 'null' in line

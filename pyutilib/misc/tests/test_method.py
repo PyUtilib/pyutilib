@@ -3,15 +3,11 @@
 #
 #
 
-import os
-import sys
-from os.path import abspath, dirname
-
 try:
     import unittest2 as unittest
 except:
     import unittest
-from nose.tools import nottest
+
 import pyutilib.misc
 
 class MethodDebug(unittest.TestCase):

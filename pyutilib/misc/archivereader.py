@@ -14,10 +14,8 @@ __all__ = ['ArchiveReaderFactory', 'ArchiveReader',
 
 import os
 import sys
-import subprocess
 import tempfile
 import shutil
-import fnmatch
 import posixpath
 
 _sep = '/'

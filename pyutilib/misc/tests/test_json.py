@@ -1,24 +1,23 @@
 #
-# Unit Tests for json (in json_utils) 
+# Unit Tests for json (in json_utils)
 #
 #
 
 import os
-import sys
 from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
-
 try:
     import unittest2 as unittest
 except:
     import unittest
+
 import pyutilib.misc
+
 try:
     import json
     json_available=True
 except ImportError:
     json_available=False
-
 
 class Test(unittest.TestCase):
 

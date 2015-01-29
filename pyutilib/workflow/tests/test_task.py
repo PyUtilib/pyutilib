@@ -1,12 +1,12 @@
+import logging
 import os
-import sys
 from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
 
 import pyutilib.th as unittest
 import pyutilib.misc
 from pyutilib.workflow import *
-import logging
+
 try:
     import json
     json_available=True

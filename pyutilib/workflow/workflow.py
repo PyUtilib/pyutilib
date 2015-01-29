@@ -16,8 +16,8 @@
 __all__ = ['Workflow']
 
 import argparse
-import pprint
 from collections import deque
+
 from pyutilib.workflow.task import Task, EmptyTask, NoTask
 from pyutilib.misc import Options
 
@@ -25,7 +25,6 @@ try:
     from collections import OrderedDict
 except:
     from ordereddict import OrderedDict
-
 
 def _collect_parser_groups(t):
     for key in t._parser_group:
@@ -70,7 +69,7 @@ class Workflow(Task):
         for name in task.inputs:
             for t in task.inputs[name].from_tasks():
                 self.add(t)
-            
+
             if len(task.inputs[name].from_tasks()) > 0:
                 continue
 
@@ -247,6 +246,6 @@ class Workflow(Task):
             if not tmp is None:
                 ans.append(tmp)
             touched.add(i)
-            ans = ans + self._dfs_(task.next_task_ids(), fn, touched)    
+            ans = ans + self._dfs_(task.next_task_ids(), fn, touched)
         return ans
 

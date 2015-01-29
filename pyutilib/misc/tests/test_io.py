@@ -8,17 +8,14 @@ import sys
 from os.path import abspath, dirname
 pkgdir = dirname(abspath(__file__))+os.sep+".."+os.sep+".."
 currdir = dirname(abspath(__file__))+os.sep
-
-from nose.tools import nottest
-import pyutilib.misc
 try:
     import unittest2 as unittest
 except:
     import unittest
-try:
-    from StringIO import StringIO
-except:
-    from io import StringIO
+
+import pyutilib.misc
+
+import six
 
 def filter1(str):
     return True
@@ -79,7 +76,7 @@ class IODebug(unittest.TestCase):
 
     def test_redirect4(self):
         """Verify that IO redirection works with file-like objects"""
-        output = StringIO()
+        output = six.StringIO()
         pyutilib.misc.setup_redirect(output)
         print("HERE")
         print([1,2,3])
@@ -127,7 +124,7 @@ class IODebug(unittest.TestCase):
             pass
 
     def test_indenter_write(self):
-        output = StringIO()
+        output = six.StringIO()
         indenter = pyutilib.misc.StreamIndenter(output, "X")
         indenter.write("foo")
         self.assertEqual(output.getvalue(), "Xfoo")
@@ -146,7 +143,7 @@ class IODebug(unittest.TestCase):
 
 
     def test_indenter_writelines(self):
-        output = StringIO()
+        output = six.StringIO()
         indenter = pyutilib.misc.StreamIndenter(output, "X")
         indenter.writelines(["foo"])
         self.assertEqual(output.getvalue(), "Xfoo")

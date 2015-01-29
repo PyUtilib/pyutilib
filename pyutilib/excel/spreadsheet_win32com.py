@@ -15,7 +15,7 @@ A class for interacting with an Excel spreadsheet.
 # Imports
 #
 import os
-import sys
+
 #
 # Attempt to import win32com stuff.  If this fails, then
 # set a flag to tell the ExcelSpreadsheet class that it should

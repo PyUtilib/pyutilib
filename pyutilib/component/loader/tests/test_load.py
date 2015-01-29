@@ -3,12 +3,9 @@
 #
 
 import os
-import sys
 from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
 
-import re
-from nose.tools import nottest
 import pyutilib.th as unittest
 import pyutilib.component.core
 

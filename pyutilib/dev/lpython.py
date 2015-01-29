@@ -8,7 +8,6 @@
 #
 
 import os
-import os.path
 from os.path import abspath, basename, dirname, exists, join
 import sys
 import signal

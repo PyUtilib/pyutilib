@@ -7,8 +7,6 @@
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
 
-import math
-
 def median(mylist):
     """
     Returns the median value of a list

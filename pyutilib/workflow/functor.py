@@ -5,16 +5,14 @@ Defining a Functor-specific task class
 __all__ = ['functor_api', 'IFunctorTask', 'FunctorAPIFactory', 'FunctorAPIData']
 
 import sys
-import copy
 import inspect
-import os
+import logging
+
 from pyutilib.workflow.tasks import TaskPlugin
 import pyutilib.component.core
-import logging
 import pyutilib.misc
 
 logger = logging.getLogger('pyutilib.workflow')
-
 
 class FunctorAPIData(dict):
     """

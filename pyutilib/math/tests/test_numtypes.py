@@ -4,11 +4,8 @@
 #
 
 import os
-import sys
-from os.path import abspath, dirname
 
 import unittest
-from nose.tools import nottest
 import pyutilib.math
 
 class NumTypesDebug(unittest.TestCase):

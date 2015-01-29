@@ -7,13 +7,11 @@
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
 
-
-import copy
 import os
 import imp
 import sys
-import pyutilib.common
 
+import pyutilib.common
 
 try:
     import runpy

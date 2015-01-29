@@ -6,15 +6,15 @@ import os
 import sys
 from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
+
+import pyutilib.th as unittest
+import pyutilib.subprocess
+
 try:
     import yaml
     yaml_available=True
 except ImportError:
     yaml_available=False
-
-import pyutilib.th as unittest
-import pyutilib.subprocess
-
 
 class Test(unittest.TestCase):
 

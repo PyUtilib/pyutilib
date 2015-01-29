@@ -4,18 +4,17 @@
 #
 
 import os
-import sys
 from os.path import abspath, dirname
 pkgdir = dirname(abspath(__file__))
 currdir = dirname(abspath(__file__))+os.sep
-
 try:
     import unittest2 as unittest
 except:
     import unittest
-from nose.tools import nottest
+
 import pyutilib.misc
-from xml.dom import minidom, Node
+
+from xml.dom import minidom
 
 class XMLDebug(unittest.TestCase):
 

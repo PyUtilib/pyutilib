@@ -18,16 +18,13 @@ Here is an abbreviated version of what the CSV file might look like::
 
 """
 
-import sys
-import doctest
 import os
-import traceback
 import re
-import inspect
-from nose.plugins.base import Plugin
-from nose.exc import SkipTest
-from six import text_type
 from time import time
+
+from nose.plugins.base import Plugin
+
+from six import text_type
 
 # Invalid CSV characters, control characters 0-31 sans \t, \n and \r
 CONTROL_CHARACTERS = re.compile(r"[\000-\010\013\014\016-\037]")

@@ -11,7 +11,6 @@
 
 __all__ = ['ITempfileManager', 'TempfileManagerPlugin', 'TempfileManager']
 
-import sys
 import os
 import time
 import tempfile

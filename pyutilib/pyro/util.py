@@ -16,6 +16,7 @@ import random
 
 from pyutilib.pyro import using_pyro3, using_pyro4
 from pyutilib.pyro import Pyro as _pyro
+
 if sys.version_info >= (3,0):
     xrange = range
     import queue as Queue

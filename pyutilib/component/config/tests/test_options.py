@@ -5,7 +5,6 @@ from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
 
 import unittest
-from nose.tools import nottest
 from pyutilib.component.core import *
 from pyutilib.component.config import *
 

@@ -7,18 +7,19 @@
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
 
-import inspect
 import sys
 import os
 import os.path
+currdir = os.path.dirname(os.path.abspath(__file__))
 try:
     import unittest2 as unittest
 except:
     import unittest
-from six import PY3
+
 import pyutilib.misc.comparison
 from pyutilib.misc.config import ConfigValue, ConfigBlock, ConfigList
-currdir = os.path.dirname(os.path.abspath(__file__))
+
+from six import PY3
 
 try:
     import yaml
