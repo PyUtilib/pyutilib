@@ -5,7 +5,7 @@ import pyutilib.common
 
 try:
     import xlrd
-    _xlrd=True
+    _xlrd=False
 except:
     _xlrd=False
 #
