@@ -60,7 +60,7 @@ class TaskWorkerBase(object):
             print("Failed to find dispatcher object from name server - trying again in %5.2f seconds." % sleep_interval)
             time.sleep(sleep_interval)
         if URI is None:
-            print('Could not find dispatcher object, nameserver says:'+str(x))
+            print('Could not find dispatcher object')
             raise SystemExit
         if using_pyro3:
             self.dispatcher = _pyro.core.getProxyForURI(URI)
