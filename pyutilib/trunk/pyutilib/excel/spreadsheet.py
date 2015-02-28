@@ -61,8 +61,12 @@ else:
 class ExcelSpreadsheet(ExcelSpreadsheet_base):
 
     def __new__(cls, *args, **kwds):
-        #if cls != ExcelSpreadsheet:
-            #return super(ExcelSpreadsheet, cls).__new__(cls)
+        #
+        # Note that this class returns class instances rather than
+        # class types.  This is because these classes are not
+        # subclasses of ExcelSpreadsheet, and thus the __init__
+        # method will not be called unless we construct the
+        # class instances here.
         #
         ctype = kwds.get('ctype',None)
         del kwds['ctype']
@@ -77,8 +81,8 @@ class ExcelSpreadsheet(ExcelSpreadsheet_base):
             return ExcelSpreadsheet_win32com(*args, **kwds)
         if _openpyxl:
             return ExcelSpreadsheet_openpyxl(*args, **kwds)
-        #if _xlrd:
-        return ExcelSpreadsheet_xlrd(*args, **kwds)
+        if _xlrd:
+            return ExcelSpreadsheet_xlrd(*args, **kwds)
         #
-        #return super(ExcelSpreadsheet, cls).__new__(cls)
+        return super(ExcelSpreadsheet, cls).__new__(cls)
 
