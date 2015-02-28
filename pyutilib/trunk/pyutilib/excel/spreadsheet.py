@@ -1,11 +1,30 @@
+#  _________________________________________________________________________
+#
+#  PyUtilib: A Python utility library.
+#  Copyright (c) 2008 Sandia Corporation.
+#  This software is distributed under the BSD License.
+#  Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
+#  the U.S. Government retains certain rights in this software.
+#  _________________________________________________________________________
 
 __all__ = ['ExcelSpreadsheet']
 
 import pyutilib.common
 
+#
+# Attempt to import openpyxl
+#
+try:
+    import openpyxl
+    _openpyxl=True
+except:
+    _openpyxl=False
+#
+# Attempt to import xlrd
+#
 try:
     import xlrd
-    _xlrd=False
+    _xlrd=True
 except:
     _xlrd=False
 #
@@ -19,19 +38,47 @@ try:
 except:
     _win32com=False #pragma:nocover
 
-if _xlrd:
+from pyutilib.excel.base import ExcelSpreadsheet_base
 
-    from pyutilib.excel.spreadsheet_xlrd import *
 
-elif _win32com:
-
-    from pyutilib.excel.spreadsheet_win32com import *
-
+if _win32com:
+    from pyutilib.excel.spreadsheet_win32com import ExcelSpreadsheet_win32com
 else:
+    class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base): pass
 
-    class ExcelSpreadsheet(object):
 
-        def __init__(self, *args, **kwargs):
-            raise pyutilib.common.ApplicationError("Cannot dispatch Excel without win32com")
+if _openpyxl:
+    from pyutilib.excel.spreadsheet_openpyxl import ExcelSpreadsheet_openpyxl
+else:
+    class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base): pass
 
+if _xlrd:
+    from pyutilib.excel.spreadsheet_xlrd import ExcelSpreadsheet_xlrd
+else:
+    class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base): pass
+
+
+class ExcelSpreadsheet(ExcelSpreadsheet_base):
+
+    def __new__(cls, *args, **kwds):
+        #if cls != ExcelSpreadsheet:
+            #return super(ExcelSpreadsheet, cls).__new__(cls)
+        #
+        ctype = kwds.get('ctype',None)
+        del kwds['ctype']
+        if ctype == 'win32com':
+            return ExcelSpreadsheet_win32com(*args, **kwds)
+        if ctype == 'openpyxl':
+            return ExcelSpreadsheet_openpyxl(*args, **kwds)
+        if ctype == 'xlrd':
+            return ExcelSpreadsheet_xlrd(*args, **kwds)
+        #
+        if _win32com:
+            return ExcelSpreadsheet_win32com(*args, **kwds)
+        if _openpyxl:
+            return ExcelSpreadsheet_openpyxl(*args, **kwds)
+        #if _xlrd:
+        return ExcelSpreadsheet_xlrd(*args, **kwds)
+        #
+        #return super(ExcelSpreadsheet, cls).__new__(cls)
 
