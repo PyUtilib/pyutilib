@@ -33,7 +33,7 @@ except:
     _openpyxl_available=False
 
 
-class TestBase(object):
+class BaseTests(object):
 
     def test_spreadsheet1(self):
         """ Create a spreadsheet with a constructor """
@@ -231,21 +231,21 @@ class TestBase(object):
 
 
 @unittest.skipIf(not _win32com_available, "Cannot import win32com")
-class Test_win32com(TestBase, unittest.TestCase):
+class Test_win32com(BaseTests, unittest.TestCase):
 
     ctype = 'win32com'
     suffix = '.xls'
 
 
 @unittest.skipIf(not _openpyxl_available, "Cannot import openpyxl")
-class Test_openpyxl(TestBase, unittest.TestCase):
+class Test_openpyxl(BaseTests, unittest.TestCase):
 
     ctype = 'openpyxl'
     suffix = '.xlsx'
 
 
 @unittest.skipIf(not _xlrd_available, "Cannot import xlrd")
-class Test_xlrd(TestBase, unittest.TestCase):
+class Test_xlrd(BaseTests, unittest.TestCase):
 
     ctype = 'xlrd'
     suffix = '.xls'
