@@ -68,8 +68,7 @@ class ExcelSpreadsheet(ExcelSpreadsheet_base):
         # method will not be called unless we construct the
         # class instances here.
         #
-        ctype = kwds.get('ctype',None)
-        del kwds['ctype']
+        ctype = kwds.pop('ctype',None)
         if ctype == 'win32com':
             return ExcelSpreadsheet_win32com(*args, **kwds)
         if ctype == 'openpyxl':
