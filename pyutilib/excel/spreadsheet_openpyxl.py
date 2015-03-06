@@ -137,8 +137,8 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
             if len(ans_) == 1:
                 ans.append(ans_[0])
             else:
-                ans.append(tuple(ans_))
-        return tuple(ans)
+                ans.append(list(ans_))
+        return list(ans)
 
     def set_range(self, rangename, val, wsid=None):
         """
@@ -219,8 +219,8 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
             if len(rvals) == 1:
                 ans.append(rvals[0])
             else:
-                ans.append(tuple(rvals))
-        return tuple(ans)
+                ans.append(list(rvals))
+        return list(ans)
 
     def get_range_nrows(self, rangename, wsid=None):
         """
