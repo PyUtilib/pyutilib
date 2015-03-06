@@ -149,7 +149,7 @@ class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
             return self._translate(sheet.cell(rowxlo, rowxhi))
         else:
             #
-            # If the range is a column or row of data, then return a tuple of values.
+            # If the range is a column or row of data, then return a list of values.
             # Otherwise, return a tuple of tuples
             #
             ans = []
@@ -161,8 +161,8 @@ class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
                 if len(col) == 1:
                     ans.append( col[0] )
                 else:
-                    ans.append( tuple(col) ) 
-            return tuple(ans)
+                    ans.append( list(col) ) 
+            return list(ans)
 
     def get_range_nrows(self, rangename, wsid=None):
         """
