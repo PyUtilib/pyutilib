@@ -146,7 +146,7 @@ class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
         """
         sheet, rowxlo, rowxhi, colxlo, colxhi = _range.area2d()
         if (rowxhi-rowxlo)==1 and (colxhi-colxlo) == 1:
-            return self._translate(sheet.cell(rowxlo, rowxhi))
+            return self._translate(sheet.cell(rowxlo, colxlo))
         else:
             #
             # If the range is a column or row of data, then return a list of values.
