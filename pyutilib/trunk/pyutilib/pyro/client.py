@@ -55,7 +55,7 @@ class Client(object):
             time.sleep(1)
             print("Failed to find dispatcher object from name server - trying again.")
         if self.URI is None:
-            print('Could not find dispatcher object, nameserver says:'+str(x))
+            print('Could not find dispatcher object')
             raise SystemExit
         self.set_group(group)
         self.CLIENTNAME = "%d@%s" % (os.getpid(), socket.gethostname())

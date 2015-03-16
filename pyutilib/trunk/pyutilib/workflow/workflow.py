@@ -33,8 +33,11 @@ def _collect_parser_groups(t):
         # instances here.  This is OK _only_ because we are
         # printing the help info and then terminating.
         #
-        t._parser_group[key].parser = parser
-        parser.add_argument_group(t._parser_group[key])
+
+        # FIXME: The 'parser' object is not defined in the lines below
+        raise NotImplementedError("")
+        #t._parser_group[key].parser = parser
+        #parser.add_argument_group(t._parser_group[key])
 
 def _set_arguments(t):
     for arg in t._parser_arg:

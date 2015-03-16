@@ -55,7 +55,7 @@ class TestTimeout(Plugin):
         ans = p.get_children()
         i = 0;
         while i < len(ans):
-            ans.extend(all_children(ans[i]))
+            ans.extend(self._all_children(ans[i]))
             i += 1
         return ans;
 
