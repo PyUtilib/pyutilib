@@ -414,12 +414,3 @@ def compare_large_file(filename1,filename2, ignore=["\t"," ","\n","\r"], bufSize
     INPUT1.close()
     INPUT2.close()
     return result
-
-
-
-    if len(l) == 0:
-        INPUT1.close()
-        INPUT2.close()
-        return s
-
-

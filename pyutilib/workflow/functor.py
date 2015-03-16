@@ -191,6 +191,12 @@ def functor_api(fn=None, implements=None, outputs=None, namespace=None):
             logger.error("Error applying decorator.  No function value!")
             return
 
+        if namespace is None:
+            _alias =  fn.__name__
+        else:
+            _alias =  namespace+'.'+fn.__name__
+        _name = _alias.replace('_', '.')
+
         argspec = inspect.getargspec(fn)
         if sys.version_info < (2,6):
             argspec = pyutilib.misc.Bunch(args=argspec[0], varargs=argspec[1], keywords=argspec[2], defaults=argspec[3])
@@ -200,12 +206,6 @@ def functor_api(fn=None, implements=None, outputs=None, namespace=None):
         if not argspec.keywords is None:
             logger.error("Attempting to declare Functor task with function '%s' that contains variable keyword arguments" % _alias)
             return                                      #pragma:nocover
-
-        if namespace is None:
-            _alias =  fn.__name__
-        else:
-            _alias =  namespace+'.'+fn.__name__
-        _name = _alias.replace('_', '.')
 
         if _alias in FunctorAPIFactory.services():
             logger.error("Cannot define API %s, since this API name is already defined" % _alias)

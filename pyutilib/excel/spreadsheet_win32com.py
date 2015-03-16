@@ -267,21 +267,21 @@ class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base):
         This keeps a counter of the number of ExcelSpreadsheet objects
         that are running.
         """
-        if ExcelSpreadsheet._excel_app_ctr == 0:
-            ExcelSpreadsheet._excel_app_ptr = Dispatch('Excel.Application')
-        ExcelSpreadsheet._excel_app_ctr += 1
-        return ExcelSpreadsheet._excel_app_ptr
+        if ExcelSpreadsheet_win32com._excel_app_ctr == 0:
+            ExcelSpreadsheet_win32com._excel_app_ptr = Dispatch('Excel.Application')
+        ExcelSpreadsheet_win32com._excel_app_ctr += 1
+        return ExcelSpreadsheet_win32com._excel_app_ptr
 
     def _excel_quit(self):
         """
         A method that quits from Excel after all spreadsheets are closed.
         """
-        if ExcelSpreadsheet._excel_app_ctr == 0:
+        if ExcelSpreadsheet_win32com._excel_app_ctr == 0:
             return None
-        if ExcelSpreadsheet._excel_app_ctr > 1:
-            ExcelSpreadsheet._excel_app_ctr -= 1
-            return ExcelSpreadsheet._excel_app_ctr
-        ExcelSpreadsheet._excel_app_ctr = 0
-        ExcelSpreadsheet._excel_app_ptr.Quit()
-        del ExcelSpreadsheet._excel_app_ptr
+        if ExcelSpreadsheet_win32com._excel_app_ctr > 1:
+            ExcelSpreadsheet_win32com._excel_app_ctr -= 1
+            return ExcelSpreadsheet_win32com._excel_app_ctr
+        ExcelSpreadsheet_win32com._excel_app_ctr = 0
+        ExcelSpreadsheet_win32com._excel_app_ptr.Quit()
+        del ExcelSpreadsheet_win32com._excel_app_ptr
         return 0

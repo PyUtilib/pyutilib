@@ -339,7 +339,7 @@ class PluginGlobals(object):
             PluginGlobals.env_map[name.env_id] = name.name
             PluginGlobals.env_stack.append(name.name)
             if __debug__ and name.log.isEnabledFor(logging.DEBUG):
-                env_.log.debug("Pushing environment %r on the PluginGlobals stack" % name.name)
+                name.log.debug("Pushing environment %r on the PluginGlobals stack" % name.name)
             return name
         else:
             env_ = PluginGlobals.env.get(name,None)

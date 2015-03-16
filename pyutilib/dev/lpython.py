@@ -20,12 +20,12 @@ def lpython(args):
     def signal_handler(signum, frame):
         if not process is None:
             if sys.platform == "win32":
-                from win32process import TerminateProcess
-                TerminateProcess(self._handle, 1)
+                # On Windows this calls the Win32 API function TerminateProcess()
+                process.terminate()
             else:
                 process.send_signal(signal.SIGTERM)
         sys.exit(-signum)
-        
+
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGHUP, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
