@@ -13,10 +13,11 @@ except ImportError:
 from datetime import datetime
 import locale
 import sys
+import re
 try:
-    import xmlrpclib
+    import xmlrpc.client as xmlrpc
 except ImportError:
-    import xmlrpc as xmlrpclib
+    import xmlrpc
 import math
 from optparse import OptionParser
 
@@ -38,7 +39,7 @@ class PyPIDownloadAggregator(object):
     def __init__(self, package_name, include_hidden=True, exact=False):
         self.package_name = package_name
         self.include_hidden = include_hidden
-        self.proxy = xmlrpclib.Server('http://pypi.python.org/pypi')
+        self.proxy = xmlrpc.Server('http://pypi.python.org/pypi')
         self._downloads = {}
         self._first_upload = {}
         self._last_upload = {}
@@ -111,7 +112,7 @@ class PyPIDownloadAggregator(object):
 
             ndownloads=0
             npackages=0
-            keys = self._downloads[pkg].keys()
+            keys = [k for k in self._downloads[pkg].keys() if not 'rc' in k]
             keys.sort(key=lambda x: [int(y) for y in x.split('.')])
             for i in range(len(keys)):
                 key = keys[i]
