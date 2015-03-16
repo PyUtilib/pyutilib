@@ -12,6 +12,7 @@ except ImportError:
     from ordereddict import OrderedDict
 from datetime import datetime
 import locale
+import re
 import sys
 import re
 try:
@@ -112,8 +113,16 @@ class PyPIDownloadAggregator(object):
 
             ndownloads=0
             npackages=0
-            keys = [k for k in self._downloads[pkg].keys() if not 'rc' in k]
-            keys.sort(key=lambda x: [int(y) for y in x.split('.')])
+            keys = self._downloads[pkg].keys()
+            def keygen(x):
+                ans = []
+                for v in x.split('.'):
+                    m = re.match('([0-9]+)(.*)', v)
+                    ans.append(m.groups())
+                return ans
+            #keys = [k for k in self._downloads[pkg].keys() if not 'rc' in k]
+            #keys.sort(key=lambda x: [int(y) for y in x.split('.')])
+            keys.sort(key=keygen)
             for i in range(len(keys)):
                 key = keys[i]
                 if key in self._first_upload[pkg]:
