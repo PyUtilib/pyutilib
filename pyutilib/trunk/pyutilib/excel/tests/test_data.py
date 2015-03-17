@@ -40,7 +40,7 @@ class BaseTests(object):
         sheet = pyutilib.excel.ExcelSpreadsheet(join(pkgdir,"test_data"+self.suffix), ctype=self.ctype)
         tmp = sheet.get_range("Arange")
 
-        self.assertEqual(tmp,('A1','A2','A3'))
+        self.assertEqual(tmp,['A1','A2','A3'])
         del sheet
 
     def test_spreadsheet2(self):
@@ -48,7 +48,7 @@ class BaseTests(object):
         sheet = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         sheet.open(join(pkgdir,"test_data"+self.suffix))
         tmp = sheet.get_range("Arange")
-        self.assertEqual(tmp,('A1','A2','A3'))
+        self.assertEqual(tmp,['A1','A2','A3'])
         tmp = sheet.get_range_nrows("Arange")
         self.assertEqual(tmp,3)
         tmp = sheet.get_range_ncolumns("Arange")
@@ -60,7 +60,7 @@ class BaseTests(object):
         sheet = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         sheet.open("test_data"+self.suffix)
         tmp = sheet.get_range("Arange")
-        self.assertEqual(tmp,('A1','A2','A3'))
+        self.assertEqual(tmp,['A1','A2','A3'])
         try:
             tmp = sheet.get_range("Brange")
             self.fail("test_spreadsheet3 - should not have opened range")
@@ -77,7 +77,7 @@ class BaseTests(object):
         s1 = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         s1.open(join(pkgdir,"test_data"+self.suffix))
         tmp = s1.get_range("Arange")
-        self.assertEqual(tmp,('A1','A2','A3'))
+        self.assertEqual(tmp,['A1','A2','A3'])
 
     def test_spreadsheet6(self):
         """ Create and open spreadsheet """
@@ -88,7 +88,7 @@ class BaseTests(object):
         val = (('B1',),('B2',),('B3',))
         sheet.set_range("Arange",val)
         tmp = sheet.get_range("Arange")
-        self.assertEqual(tmp,('B1','B2','B3'))
+        self.assertEqual(tmp,['B1','B2','B3'])
 
     def test_spreadsheet7(self):
         """ Create and open spreadsheet """
@@ -99,7 +99,7 @@ class BaseTests(object):
         val = [['B1'],['B2'],['B3']]
         sheet.set_range("Arange",val)
         tmp = sheet.get_range("Arange")
-        self.assertEqual(tmp,('B1','B2','B3'))
+        self.assertEqual(tmp,['B1','B2','B3'])
         val = [['B1'],['B2'],['B3'],['B4']]
         try:
             sheet.set_range("Arange",val)
@@ -116,7 +116,7 @@ class BaseTests(object):
         val = [['B1','C1'],['B2','C1'],['B3','C1']]
         sheet.set_array(3,4,val)
         val = sheet.get_array(4,4,5,5)
-        self.assertEqual(val,((unicode('B2'), unicode('C1')), (unicode('B3'), unicode('C1'))))
+        self.assertEqual(val,[[unicode('B2'), unicode('C1')], [unicode('B3'), unicode('C1')]])
 
     def test_spreadsheet9(self):
         """ Create and open spreadsheet """
@@ -127,7 +127,7 @@ class BaseTests(object):
         val = (('B1','C1'),('B2','C1'),('B3','C1'))
         sheet.set_array(3,4,val)
         val = sheet.get_array(4,4,5,5)
-        self.assertEqual(val,((unicode('B2'), unicode('C1')), (unicode('B3'), unicode('C1'))))
+        self.assertEqual(val,[[unicode('B2'), unicode('C1')], [unicode('B3'), unicode('C1')]])
 
     def test_spreadsheet10(self):
         """ Verify that we can get updated function values """
@@ -154,7 +154,7 @@ class BaseTests(object):
         sheet.open(join(pkgdir,"test_data"+self.suffix))
         sheet.activate("Sheet2")
         val = sheet.get_range("sInfo")
-        self.assertEqual(val,("s1","s2","s3"))
+        self.assertEqual(val,["s1","s2","s3"])
         val = sheet.get_range("A2:A2")
         self.assertEqual(val,"s1")
         sheet.close()
