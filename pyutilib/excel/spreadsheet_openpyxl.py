@@ -263,6 +263,6 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
                 if exception:
                     raise IOError("Unknown range name `"+str(rangeid)+"'")
             return _range
-        except openpyxl.exceptions.NamedRangeException:
+        except:
             raise IOError("Unknown range name `"+str(rangeid)+"'")
 
