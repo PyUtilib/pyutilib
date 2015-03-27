@@ -15,7 +15,7 @@ import argparse
 import pprint
 from pyutilib.workflow import globals
 from pyutilib.misc import Options
-from pyutilib.workflow import port 
+from pyutilib.workflow import port
 
 
 class Task(object):
@@ -57,19 +57,19 @@ class Task(object):
     def next_tasks(self):
         """Return the set of tasks that succeed this task in the workflow."""
         return set(t.to_port.task() for name in self.outputs for t in self.outputs[name].output_connections) | set(t.to_port.task() for name in self.output_controls for t in self.output_controls[name].output_connections)
-            
+
     def prev_tasks(self):
         """Return the set of tasks that precede this task in the workflow."""
         return set([task for name in self.inputs for task in self.inputs[name].from_tasks() if task.id != NoTask.id]) | set(task for task in self._predecessors) | set([task for name in self.input_controls for task in self.input_controls[name].from_tasks() if task.id != NoTask.id])
-           
+
     def next_task_ids(self):
         """Return the set of ids for tasks that succeed this task in the workflow."""
         return set(task.id for task in self.next_tasks())
-            
+
     def prev_task_ids(self):
         """Return the set of ids for tasks that precede this task in the workflow."""
         return set(task.id for task in self.prev_tasks())
-           
+
     def execute(self, debug=False):
         """Execute this task."""
         raise ValueError("There is no default execution for an abstract Task object! Task=%s" % self._name())  #pragma:nocover
@@ -102,7 +102,7 @@ class Task(object):
     def __call__(self, *options, **kwds):
         """Setup inputs and output parameters and execute this task.
 
-        Copy the inputs into this Task's dictionary, then execute the task, then copy 
+        Copy the inputs into this Task's dictionary, then execute the task, then copy
         the outputs out of the dictionary.
         """
         self._call_init(*options, **kwds)
@@ -208,7 +208,7 @@ class Task(object):
         tmp['Outputs'] = self.outputs._repn_()
         tmp['InputControls'] = self.input_controls._repn_()
         tmp['OutputControls'] = self.output_controls._repn_()
-        return tmp 
+        return tmp
 
     #def __repr__(self):
         #"""Return a string representation for this task."""
@@ -231,8 +231,6 @@ class Task(object):
     def set_ready(self):
         for i in self.outputs:
             self.outputs[i].set_ready()
-        
-
 
 class Component(Task):
     """
