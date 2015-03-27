@@ -16,10 +16,13 @@ __all__ = ('tic','toc')
 
 _lastTime = _loadTime = time.time()
 
-def tic():
+def tic(msg=None):
     global _lastTime
     _lastTime = time.time()
-    toc("Resetting the tic/toc delta timer", False)
+    if msg is None:
+        msg = "Resetting the tic/toc delta timer"
+    if msg:
+        toc(msg, False)
 
 def toc(msg=None, delta=True, ostream=None):
 
