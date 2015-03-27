@@ -847,6 +847,16 @@ class Plugin(with_metaclass(PluginMeta, object)):
                 # Remove an element if it exists
                 PluginGlobals.interface_services[interface].discard(self._id)
 
+    #
+    # Support "with" statements. Forgetting to call deactivate
+    # on Plugins is a common source of memory leaks
+    #
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.deactivate()
+
     @staticmethod
     def alias(name, doc=None, subclass=False):
         """
