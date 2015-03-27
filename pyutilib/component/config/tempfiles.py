@@ -146,8 +146,16 @@ class TempfileManagerPlugin(ManagedSingletonPlugin):
         """Stop generating sequential files, using the specified counter"""
         self._ctr=-1
 
+    #
+    # Support "with" statements, where the pop automatically
+    # takes place on exit.
+    #
     def push(self):
         self._tempfiles.append([])
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.pop(remove=True)
 
     def pop(self, remove=True):
         files = self._tempfiles.pop()
