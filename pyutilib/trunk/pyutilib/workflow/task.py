@@ -225,16 +225,8 @@ class Task(object):
         #print "RESETING "+self.name
         for i in self.outputs:
             self.outputs[i].reset()
-            if hasattr(self, i):
-                delattr(self, i)
         for i in self.output_controls:
             self.output_controls[i].reset()
-        for i in self.inputs:
-            self.inputs[i].reset()
-            if hasattr(self, i):
-                delattr(self, i)
-        for i in self.input_controls:
-            self.input_controls[i].reset()
 
     def set_ready(self):
         for i in self.outputs:
