@@ -485,7 +485,7 @@ class ConfigList(ConfigBase):
 
     def __iter__(self):
         self._userAccessed = True
-        return self._data.__iter__()
+        return iter(self[i] for i in xrange(len(self)))
 
     def value(self, accessValue=True):
         if accessValue:
