@@ -14,6 +14,7 @@ from textwrap import wrap
 import logging
 
 import six
+from six.moves import xrange
 
 try:
     from yaml import dump
@@ -485,7 +486,7 @@ class ConfigList(ConfigBase):
 
     def __iter__(self):
         self._userAccessed = True
-        return iter(self[i] for i in xrange(len(self)))
+        return iter( self[i] for i in xrange(len(self._data)) )
 
     def value(self, accessValue=True):
         if accessValue:
