@@ -37,15 +37,19 @@ class Test(unittest.TestCase):
             print("")
 
     @unittest.skipIf(is_pypy, "Cannot launch python in this test with pypy")
-    def test_bar(self):
+    def test_timeout(self):
+        targetTime = 2
         stime = timer()
         # On MS Windows, do not run this in a shell.  If so, MS Windows has difficulty
         # killing the process after the timelimit
         print("Subprocess python process")
         sys.stdout.flush()
-        foo = SubprocessMngr("python -q -c \"while True: pass\"", shell=not subprocess.mswindows)
-        foo.wait(5)
-        print("Ran for %f seconds" % (timer()-stime))
+        foo = SubprocessMngr("'" + sys.executable + "' -q -c \"while True: pass\"", shell=not subprocess.mswindows)
+        foo.wait(targetTime)
+        runTime = timer()-stime
+        print("Ran for %f seconds" % (runTime,))
+        # timeout should be accurate to 1/10 second
+        self.assertTrue( abs(runTime - targetTime) <= 0.10 )
 
     @unittest.skipIf(subprocess.mswindows, "Cannot test the use of 'memmon' on MS Windows")
     @unittest.skipIf(sys.platform == 'darwin', "Cannot test the use of 'memmon' on Darwin")
