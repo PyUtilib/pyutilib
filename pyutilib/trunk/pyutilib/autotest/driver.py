@@ -16,7 +16,7 @@ import re
 import os
 from os.path import dirname, abspath
 
-import pyutilib.th as unittest
+from pyutilib import th as unittest
 from pyutilib.misc import Options
 from pyutilib.component.core import ExtensionPoint
 from pyutilib.autotest import plugins
