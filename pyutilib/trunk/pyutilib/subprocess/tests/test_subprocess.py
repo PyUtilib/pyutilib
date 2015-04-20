@@ -49,7 +49,7 @@ class Test(unittest.TestCase):
         runTime = timer()-stime
         print("Ran for %f seconds" % (runTime,))
         # timeout should be accurate to 1/10 second
-        self.assertTrue( abs(runTime - targetTime) <= 0.11 )
+        self.assertTrue( runTime <= targetTime + 0.1 )
 
     @unittest.skipIf(subprocess.mswindows, "Cannot test the use of 'memmon' on MS Windows")
     @unittest.skipIf(sys.platform == 'darwin', "Cannot test the use of 'memmon' on Darwin")
