@@ -24,7 +24,7 @@ else:
 
 class Client(object):
 
-    def __init__(self, group=":PyUtilibServer", type=None, host=None, num_dispatcher_tries=15):
+    def __init__(self, group=":PyUtilibServer", type=None, host=None, num_dispatcher_tries=30):
         if _pyro is None:
             raise ImportError("Pyro or Pyro4 is not available")
         self.type=type
@@ -40,7 +40,7 @@ class Client(object):
             raise RuntimeError("Client failed to locate Pyro name "
                                "server on the network!")
         self.dispatcher = None
-        print('Attempting to find Pyro dispatcher object...')
+        print('Client attempting to find Pyro dispatcher object...')
         self.URI = None
         for i in xrange(0,num_dispatcher_tries):
             try:
@@ -52,10 +52,10 @@ class Client(object):
                 break
             except _pyro.errors.NamingError:
                 pass
-            time.sleep(1)
-            print("Failed to find dispatcher object from name server - trying again.")
+            time.sleep(5.0)
+            print("Client failed to find dispatcher object from name server after %d attempts - trying again in %5.2f seconds." % (i+1,10.0))
         if self.URI is None:
-            print('Could not find dispatcher object')
+            print('Client could not find dispatcher object')
             raise SystemExit
         self.set_group(group)
         self.CLIENTNAME = "%d@%s" % (os.getpid(), socket.gethostname())
