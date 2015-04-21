@@ -30,7 +30,7 @@ class TaskWorkerBase(object):
     def __init__(self,
                  group=":PyUtilibServer",
                  host=None,
-                 num_dispatcher_tries=15):
+                 num_dispatcher_tries=30):
 
         if _pyro is None:
             raise ImportError("Pyro or Pyro4 is not available")
@@ -44,7 +44,7 @@ class TaskWorkerBase(object):
         if self.ns is None:
             raise RuntimeError("TaskWorkerBase failed to locate "
                                "Pyro name server on the network!")
-        print('Attempting to find Pyro dispatcher object...')
+        print('Worker attempting to find Pyro dispatcher object...')
         URI = None
         for i in xrange(0,num_dispatcher_tries):
             try:
@@ -56,11 +56,11 @@ class TaskWorkerBase(object):
                 break
             except _pyro.errors.NamingError:
                 pass
-            sleep_interval = random.uniform(0.5, 2.5)
-            print("Failed to find dispatcher object from name server - trying again in %5.2f seconds." % sleep_interval)
+            sleep_interval = random.uniform(1.0, 5.0)
+            print("Worker failed to find dispatcher object from name server after %d attempts - trying again in %5.2f seconds." % (i+1,sleep_interval))
             time.sleep(sleep_interval)
         if URI is None:
-            print('Could not find dispatcher object')
+            print('Worker could not find dispatcher object')
             raise SystemExit
         if using_pyro3:
             self.dispatcher = _pyro.core.getProxyForURI(URI)
