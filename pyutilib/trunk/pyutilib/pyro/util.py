@@ -23,7 +23,7 @@ if sys.version_info >= (3,0):
 else:
     import Queue
 
-def get_nameserver(host=None, num_retries=30):
+def get_nameserver(host=None, num_retries=30, caller_name="Unknown"):
 
     if _pyro is None:
         raise ImportError("Pyro or Pyro4 is not available")
@@ -73,11 +73,11 @@ def get_nameserver(host=None, num_retries=30):
         #      number of clients.
         if i < num_retries:
             sleep_interval = random.uniform(1.0, timeout_upper_bound)
-            print("Failed to locate nameserver - trying again in %5.2f seconds." % sleep_interval)
+            print("%s failed to locate name server after %d attempts - trying again in %5.2f seconds." % (caller_name, i+1,sleep_interval))
             time.sleep(sleep_interval)
 
     if ns is None:
-        print("Could not locate nameserver (attempts="+str(num_retries+1)+")")
+        print("%s could not locate nameserver (attempts=%d)" % (caller_name,num_retries+1))
         raise SystemExit
 
     return ns
