@@ -211,7 +211,7 @@ def DispatcherServer(group=":PyUtilibServer", host=None, verbose=False):
     #
     # main program
     #
-    ns = get_nameserver(host)
+    ns = get_nameserver(host,caller_name="Dispatcher")
     if ns is None:
         return
 
