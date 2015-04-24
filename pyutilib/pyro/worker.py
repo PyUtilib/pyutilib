@@ -69,7 +69,7 @@ class TaskWorkerBase(object):
         else:
             self.dispatcher = _pyro.Proxy(URI)
         self.WORKERNAME = "Worker_%d@%s" % (os.getpid(), socket.gethostname())
-        print("Connection to dispatch server established after %d attempts and %s seconds - this is worker: %s" % (i+1, cumulative_sleep_time, self.WORKERNAME))
+        print("Connection to dispatch server established after %d attempts and %5.2f seconds - this is worker: %s" % (i+1, cumulative_sleep_time, self.WORKERNAME))
 
         # There is no need to retain the proxy connection to the
         # nameserver, so free up resources on the nameserver thread
