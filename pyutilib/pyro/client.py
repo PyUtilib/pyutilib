@@ -13,6 +13,8 @@ import sys
 import os, socket
 import time
 
+from six import iteritems
+
 from pyutilib.pyro import get_nameserver, using_pyro3, using_pyro4
 from pyutilib.pyro import Pyro as _pyro
 
@@ -87,6 +89,20 @@ class Client(object):
                   "type="+str(task_type))
         self.dispatcher.clear_queue(type=task_type)
 
+    def add_tasks(self, type_to_task_list_dict, verbose=False):
+        for task_type, task_list in iteritems(type_to_task_list_dict):
+            for task in task_list:
+                if task['id'] is None:
+                    task['id'] = self.CLIENTNAME + "_" + str(self.id)
+                    self.id += 1
+                else:
+                    task['id'] = self.CLIENTNAME + "_" + str(task['id'])
+            if verbose:
+                print("Adding task "+str(task['id'])+" to dispatcher "
+                      "queue with type="+str(task_type)+" - in bulk")
+
+        self.dispatcher.add_tasks(type_to_task_list_dict)
+                
     def add_task(self, task, override_type=None, verbose=False):
         task_type = override_type if (override_type is not None) else self.type
         if task['id'] is None:
@@ -96,7 +112,7 @@ class Client(object):
             task['id'] = self.CLIENTNAME + "_" + str(task['id'])
         if verbose:
             print("Adding task "+str(task['id'])+" to dispatcher "
-                  "queue with type="+str(task_type))
+                  "queue with type="+str(task_type)+" - individually")
         self.dispatcher.add_task(task, type=task_type)
 
     def get_result(self, override_type=None, block=True, timeout=5):
