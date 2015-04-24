@@ -67,7 +67,7 @@ class Client(object):
             raise SystemExit
         self.set_group(group)
         self.CLIENTNAME = "%d@%s" % (os.getpid(), socket.gethostname())
-        print("Connection to dispatch server established after %d attempts and %s seconds - this is client: %s" % (i+1, cumulative_sleep_time, self.CLIENTNAME))
+        print("Connection to dispatch server established after %d attempts and %5.2f seconds - this is client: %s" % (i+1, cumulative_sleep_time, self.CLIENTNAME))
 
         # There is no need to retain the proxy connection to the
         # nameserver, so free up resources on the nameserver thread
