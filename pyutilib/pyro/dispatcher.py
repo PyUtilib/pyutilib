@@ -12,6 +12,8 @@ __all__ = ['Dispatcher', 'DispatcherServer']
 import os
 import sys
 
+from six import iteritems
+
 from pyutilib.pyro import get_nameserver, using_pyro3, using_pyro4
 from pyutilib.pyro import Pyro as _pyro
 if sys.version_info >= (3,0):
@@ -61,6 +63,15 @@ class Dispatcher(base):
                 del self.task_queue[type]
             if type in self.result_queue:
                 del self.result_queue[type]
+
+    @oneway
+    # process a set of tasks in one shot - the input
+    # is a dictionary from queue type (including None)
+    # to a list of tasks to be added to that queue.
+    def add_tasks(self, type_to_task_list_dict):
+        for task_type, task_list in iteritems(type_to_task_list_dict):
+            for task in task_list:
+                self.add_task(task, type=task_type)
 
     @oneway
     def add_task(self, task, type=None):
