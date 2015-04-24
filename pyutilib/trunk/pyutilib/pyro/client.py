@@ -24,7 +24,12 @@ else:
 
 class Client(object):
 
-    def __init__(self, group=":PyUtilibServer", type=None, host=None, num_dispatcher_tries=30):
+    def __init__(self, 
+                 group=":PyUtilibServer", 
+                 type=None, 
+                 host=None, 
+                 num_dispatcher_tries=30,
+                 caller_name = "Client"):
         if _pyro is None:
             raise ImportError("Pyro or Pyro4 is not available")
         self.type=type
@@ -35,13 +40,14 @@ class Client(object):
         if using_pyro3:
             _pyro.core.initClient()
 
-        self.ns = get_nameserver(host)
+        self.ns = get_nameserver(host, caller_name=caller_name)
         if self.ns is None:
             raise RuntimeError("Client failed to locate Pyro name "
                                "server on the network!")
         self.dispatcher = None
         print('Client attempting to find Pyro dispatcher object...')
         self.URI = None
+        cumulative_sleep_time = 0.0
         for i in xrange(0,num_dispatcher_tries):
             try:
                 if using_pyro3:
@@ -52,14 +58,16 @@ class Client(object):
                 break
             except _pyro.errors.NamingError:
                 pass
-            time.sleep(5.0)
-            print("Client failed to find dispatcher object from name server after %d attempts - trying again in %5.2f seconds." % (i+1,10.0))
+            sleep_interval = 10.0
+            print("Client failed to find dispatcher object from name server after %d attempts and %5.2f seconds - trying again in %5.2f seconds." % (i+1,cumulative_sleep_time,sleep_interval))
+            time.sleep(sleep_interval)
+            cumulative_sleep_time += sleep_interval
         if self.URI is None:
-            print('Client could not find dispatcher object')
+            print('Client could not find dispatcher object - giving up')
             raise SystemExit
         self.set_group(group)
         self.CLIENTNAME = "%d@%s" % (os.getpid(), socket.gethostname())
-        print("This is client "+self.CLIENTNAME)
+        print("Connection to dispatch server established after %d attempts and %s seconds - this is client: %s" % (i+1, cumulative_sleep_time, self.CLIENTNAME))
 
         # There is no need to retain the proxy connection to the
         # nameserver, so free up resources on the nameserver thread

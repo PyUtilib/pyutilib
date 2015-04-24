@@ -30,7 +30,8 @@ class TaskWorkerBase(object):
     def __init__(self,
                  group=":PyUtilibServer",
                  host=None,
-                 num_dispatcher_tries=30):
+                 num_dispatcher_tries=30,
+                 caller_name="Task Worker"):
 
         if _pyro is None:
             raise ImportError("Pyro or Pyro4 is not available")
@@ -40,13 +41,14 @@ class TaskWorkerBase(object):
         if using_pyro3:
             _pyro.core.initClient()
 
-        self.ns = get_nameserver(host)
+        self.ns = get_nameserver(host, caller_name=caller_name)
         if self.ns is None:
             raise RuntimeError("TaskWorkerBase failed to locate "
                                "Pyro name server on the network!")
         print('Worker attempting to find Pyro dispatcher object...')
         URI = None
-        for i in xrange(0,num_dispatcher_tries):
+        cumulative_sleep_time = 0.0
+        for i in xrange(0, num_dispatcher_tries):
             try:
                 if using_pyro3:
                     URI = self.ns.resolve(group+".dispatcher")
@@ -56,18 +58,18 @@ class TaskWorkerBase(object):
                 break
             except _pyro.errors.NamingError:
                 pass
-            sleep_interval = random.uniform(1.0, 5.0)
-            print("Worker failed to find dispatcher object from name server after %d attempts - trying again in %5.2f seconds." % (i+1,sleep_interval))
+            sleep_interval = random.uniform(5.0, 15.0)
+            print("Worker failed to find dispatcher object from name server after %d attempts and %5.2f seconds - trying again in %5.2f seconds." % (i+1,cumulative_sleep_time,sleep_interval))
             time.sleep(sleep_interval)
+            cumulative_sleep_time += sleep_interval
         if URI is None:
-            print('Worker could not find dispatcher object')
-            raise SystemExit
+            raise RuntimeError('Worker could not find dispatcher object - giving up')
         if using_pyro3:
             self.dispatcher = _pyro.core.getProxyForURI(URI)
         else:
             self.dispatcher = _pyro.Proxy(URI)
         self.WORKERNAME = "Worker_%d@%s" % (os.getpid(), socket.gethostname())
-        print("This is worker "+self.WORKERNAME)
+        print("Connection to dispatch server established after %d attempts and %s seconds - this is worker: %s" % (i+1, cumulative_sleep_time, self.WORKERNAME))
 
         # There is no need to retain the proxy connection to the
         # nameserver, so free up resources on the nameserver thread
