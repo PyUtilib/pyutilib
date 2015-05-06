@@ -6,7 +6,23 @@
  Version 5.1
 -------------------------------------------------------------------------------
 
-- Next release
+- Adding multiple task submission capability to dispatcher.
+- Improved clarity of Pyro diagnostic messages
+- Fixing the PyPI downloader so that it can handle non-numeric versions.
+- Adding support for xlrd and openpyxl interfaces.
+- Changing the semantics of Config* objects to return the values
+  of ConfigValue objects.
+- Updates to Container
+  - Changing Container output to look like YAML.
+  - When loading dictionaries, recursively create Container objects
+    for sub-dictionaries.
+- Added a randomization component to the sleep timeout in the worker
+  wait-for-work loop to avoid dispatcher contention.
+- Updates to the ConfigBlock
+  - Support for multiple argument definitions for a single ConfigValue
+  - Support for declaring groups by passing argparse parser or group objects
+  - Improved checking for implicit Block attributes
+  - Support for a default domain for implicit block attributes 
 
 -------------------------------------------------------------------------------
  Version 5.0.3478
