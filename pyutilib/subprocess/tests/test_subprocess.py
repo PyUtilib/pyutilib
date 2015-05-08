@@ -44,7 +44,10 @@ class Test(unittest.TestCase):
         # killing the process after the timelimit
         print("Subprocess python process")
         sys.stdout.flush()
-        foo = SubprocessMngr("'" + sys.executable + "' -q -c \"while True: pass\"", shell=not subprocess.mswindows)
+        if ' ' in sys.executable:
+            foo = SubprocessMngr("'" + sys.executable + "' -q -c \"while True: pass\"", shell=not subprocess.mswindows)
+        else:
+            foo = SubprocessMngr(sys.executable + " -q -c \"while True: pass\"", shell=not subprocess.mswindows)
         foo.wait(targetTime)
         runTime = timer()-stime
         print("Ran for %f seconds" % (runTime,))
