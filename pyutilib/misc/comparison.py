@@ -184,9 +184,17 @@ def compare_file_with_numeric_values(filename1, filename2, ignore=["\n","\r"], f
         # ignore, then get another one.  In this way we can
         # skip blank lines that are in one file but not the other
 
-        line1, delta_lineno = read_and_filter_line(INPUT1, ignore, filter)
+        try:
+            line1, delta_lineno = read_and_filter_line(INPUT1, ignore, filter)
+        except UnicodeDecodeError:
+            err = sys.exc_info()[1]
+            raise RuntimeError("Decoding error while processing file %s: %s" % (filename1, str(err)))
         lineno += delta_lineno
-        line2 = read_and_filter_line(INPUT2, ignore, filter)[0]
+        try:
+            line2 = read_and_filter_line(INPUT2, ignore, filter)[0]
+        except UnicodeDecodeError:
+            err = sys.exc_info()[1]
+            raise RuntimeError("Decoding error while processing file %s: %s" % (filename2, str(err)))
 
         #print "line1 '%s'" % line1
         #print "line2 '%s'" % line2
