@@ -99,7 +99,7 @@ def shutdown_pyro_components(host=None, num_retries=30):
     ns = get_nameserver(host=host, num_retries=num_retries)
     if ns is None:
         print("***WARNING - Could not locate name server "
-              "- Pyro PySP components will not be shut down")
+              "- Pyro components will not be shut down")
         return
 
     if using_pyro3:
