@@ -31,6 +31,7 @@ else:
     base = object
     oneway = lambda method: method
 
+
 class Dispatcher(base):
 
     def __init__(self, **kwds):
@@ -153,16 +154,10 @@ class Dispatcher(base):
         result = set()
         if self.default_result_queue.qsize() > 0:
             result.add(None)
-
-        # IMPORTANT: Make sure to make a copy (via the items() call)
-        #            of the queue contents - it can change
-        #            mid-iteration, due to the introduction of new
-        #            named queues.
         #
-        # *python3 fix: items() no longer copies, so was changed to
-        # *list(items())
+        # Iterate over a copy of the contents of result_queue, since
+        # the queue may change while iterating.
         #
-
         for queue_name, result_queue in list(self.result_queue.items()):
            if result_queue.qsize() > 0:
                result.add(queue_name)
@@ -199,6 +194,7 @@ class Dispatcher(base):
                     pass
 
         return result
+
 
 def DispatcherServer(group=":PyUtilibServer", host=None, verbose=False):
 

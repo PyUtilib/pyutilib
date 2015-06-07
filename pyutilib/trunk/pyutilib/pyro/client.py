@@ -24,6 +24,7 @@ if sys.version_info >= (3,0):
 else:
     import Queue
 
+
 class Client(object):
 
     def __init__(self, 
