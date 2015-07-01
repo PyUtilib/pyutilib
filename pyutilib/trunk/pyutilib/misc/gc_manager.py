@@ -17,7 +17,7 @@ import gc
 # def my_func():
 #    with PauseGC() as pgc:
 #       [...]
-# 
+#
 # When the instance falls out of scope (by termination or exception),
 # the GC will be re-enabled (if it was not initially disabled).  It is
 # safe to nest instances of PauseGC That is, you don't have to worry
