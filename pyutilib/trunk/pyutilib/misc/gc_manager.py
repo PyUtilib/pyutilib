@@ -11,16 +11,17 @@ import gc
 
 # PauseGC is a class for clean, scoped management of the Python
 # garbage collector.  To disable the GC for the duration of a
-# function/method, simply:
+# scoped block use PauseGC in combination with the Python 'with'
+# statement. E.g.,
 #
 # def my_func():
-#    suspend_gc = PauseGC()
-#    # [...]
-#
-# When the function falls out of scope (by termination or exception),
-# the GC will be re-enabled.  It is safe to nest instances of PauseGC
-# (that is, you don't have to worry if an outer function/method has its
-# own instance of PauseGC)
+#    with PauseGC() as pgc:
+#       [...]
+# 
+# When the instance falls out of scope (by termination or exception),
+# the GC will be re-enabled (if it was not initially disabled).  It is
+# safe to nest instances of PauseGC That is, you don't have to worry
+# if an outer function/method has its own instance of PauseGC.
 class PauseGC(object):
     __slots__ = ( "reenable_gc" )
 
@@ -28,6 +29,13 @@ class PauseGC(object):
         self.reenable_gc = gc.isenabled()
         gc.disable()
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
+
+    def close(self):
         if self.reenable_gc:
             gc.enable()
+        self.reenable_gc = False
