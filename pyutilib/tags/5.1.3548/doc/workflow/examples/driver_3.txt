@@ -1,0 +1,20 @@
+usage: myprog [-h] {TaskY,TaskZ} ...
+
+This is the description of this task driver
+
+positional arguments:
+  {TaskY,TaskZ}  Sub-commands
+    TaskZ
+    TaskY
+
+optional arguments:
+  -h, --help     show this help message and exit
+
+**********************
+This is more text
+that describes this command driver.  Note
+
+that the format of the epilog string is preserved in the
+help
+output!
+**********************

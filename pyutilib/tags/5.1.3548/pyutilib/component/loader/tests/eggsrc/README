@@ -1,0 +1,22 @@
+pkg1 -  project1
+        singleton plugin
+
+pkg2 -  project2
+        nonsingleton plugin
+
+pkg3 -  project1
+        singleton plugin
+        instances
+
+pkg4 -  project1
+        bad package requirements
+
+pkg5 -  project1
+        Requires PyUtilib version 100.0
+
+pkg6 -  project1
+        Import error
+
+pkg7 -  project1
+        Unknown extra
+

@@ -1,0 +1,7 @@
+
+Test suites defined in 'autotest':
+    suite1
+    suite1a
+    suite2
+    suite3
+

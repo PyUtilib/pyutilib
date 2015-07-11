@@ -1,0 +1,179 @@
+{
+    "Environment Stack": {
+        "1": "pca",
+        "2": "testing",
+        "3": "foo",
+        "4": "bar"
+    },
+    "Interfaces Declared": {
+        "IConfiguration": null,
+        "IDebug1": null,
+        "IDebug2": null,
+        "IDebug3": null,
+        "IDebug4": null,
+        "IEnvironmentConfig": null,
+        "IExternalExecutable": null,
+        "IFileOption": null,
+        "IIgnorePluginWhenLoading": null,
+        "IOption": null,
+        "IOptionDataProvider": null,
+        "IPluginLoadPath": null,
+        "IPluginLoader": null,
+        "ITempfileManager": null,
+        "IUpdatedOptionsAction": null
+    },
+    "Interfaces Declared by Environment": {
+        "pca": {
+            "IConfiguration": null,
+            "IEnvironmentConfig": null,
+            "IExternalExecutable": null,
+            "IFileOption": null,
+            "IIgnorePluginWhenLoading": null,
+            "IOption": null,
+            "IOptionDataProvider": null,
+            "IPluginLoadPath": null,
+            "IPluginLoader": null,
+            "ITempfileManager": null,
+            "IUpdatedOptionsAction": null
+        },
+        "testing": {
+            "IDebug1": null,
+            "IDebug2": null,
+            "IDebug3": null,
+            "IDebug4": null
+        }
+    },
+    "Plugins by Interface": {
+        "IConfiguration": {
+            "Configuration_ConfigParser": null
+        },
+        "IDebug1": {
+            "Plugin1": null,
+            "Plugin10": null,
+            "Plugin1a": null,
+            "Plugin2": null,
+            "Plugin4": null,
+            "Plugin7": null
+        },
+        "IDebug2": {
+            "Plugin3": null,
+            "Plugin4": null,
+            "Plugin8": null
+        },
+        "IDebug3": {
+            "Plugin100": null,
+            "Plugin5": null,
+            "Plugin5_factory": null,
+            "Plugin6": null,
+            "Plugin6_factory": null,
+            "Plugin8": null,
+            "Plugin9": null
+        },
+        "IDebug4": {
+            "Plugin11a": null,
+            "Plugin11b": null
+        },
+        "IEnvironmentConfig": {
+            "EnvironmentConfig": null
+        },
+        "IExternalExecutable": {
+            "ExternalExecutable": null
+        },
+        "IFileOption": {
+            "ExecutableOption": null,
+            "FileOption": null
+        },
+        "IIgnorePluginWhenLoading": {
+            "IgnorePluginPlugins": null
+        },
+        "IOption": {
+            "BoolOption": null,
+            "DictOption": null,
+            "ExecutableOption": null,
+            "FileOption": null,
+            "FloatOption": null,
+            "IntOption": null,
+            "Option": null,
+            "OptionPlugin": null
+        },
+        "IOptionDataProvider": {
+            "OptionData": null
+        },
+        "IPluginLoadPath": {
+            "EnvironmentConfig": null
+        },
+        "IPluginLoader": {
+            "EggLoader": null,
+            "ImportLoader": null
+        },
+        "ITempfileManager": {
+            "TempfileManagerPlugin": null
+        },
+        "IUpdatedOptionsAction": {
+            "ExecutableOption": null,
+            "FileOption": null,
+            "LoggingConfig": null
+        }
+    },
+    "Plugins by Python Module": {
+        "pyutilib.component.config.configuration": {
+            "Configuration": null
+        },
+        "pyutilib.component.config.env_config": {
+            "EnvironmentConfig": null
+        },
+        "pyutilib.component.config.logging_config": {
+            "LoggingConfig": null
+        },
+        "pyutilib.component.config.managed_plugin": {
+            "ManagedPlugin": null
+        },
+        "pyutilib.component.config.options": {
+            "BoolOption": null,
+            "DictOption": null,
+            "ExecutableOption": null,
+            "FileOption": null,
+            "FloatOption": null,
+            "IntOption": null,
+            "Option": null,
+            "OptionData": null,
+            "OptionPlugin": null
+        },
+        "pyutilib.component.config.plugin_ConfigParser": {
+            "Configuration_ConfigParser": null
+        },
+        "pyutilib.component.config.tempfiles": {
+            "TempfileManagerPlugin": null
+        },
+        "pyutilib.component.core": {
+            "IgnorePluginPlugins": null
+        },
+        "pyutilib.component.core.tests.test_core": {
+            "Plugin1": null,
+            "Plugin10": null,
+            "Plugin100": null,
+            "Plugin11a": null,
+            "Plugin11b": null,
+            "Plugin1a": null,
+            "Plugin2": null,
+            "Plugin3": null,
+            "Plugin4": null,
+            "Plugin5": null,
+            "Plugin5_factory": null,
+            "Plugin6": null,
+            "Plugin6_factory": null,
+            "Plugin7": null,
+            "Plugin8": null,
+            "Plugin9": null
+        },
+        "pyutilib.component.executables.executable": {
+            "ExternalExecutable": null
+        },
+        "pyutilib.component.loader.plugin_eggLoader": {
+            "EggLoader": null
+        },
+        "pyutilib.component.loader.plugin_importLoader": {
+            "ImportLoader": null
+        }
+    }
+}
