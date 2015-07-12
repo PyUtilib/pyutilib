@@ -718,11 +718,13 @@ class ConfigBlock(ConfigBase):
         _implicit = []
         for key in value:
             if key not in self._data:
-                _implicit.append(key)
-
-        if _implicit and not self._implicit_declaration:
-            raise ValueError( "key '%s' not defined in Config Block '%s'"
-                              % ( key, self.name(True) ) )
+                if self._implicit_declaration:
+                    _implicit.append(key)
+                else:
+                    raise ValueError(
+                        "key '%s' not defined for Config Block '%s' and "
+                        "implicit (undefined) keys are not allowed"
+                        % ( key, self.name(True) ) )
 
         # If the set_value fails part-way through the new values, we
         # want to restore a deterministic state.  That is, either
