@@ -16,10 +16,12 @@ import re
 import os
 from os.path import dirname, abspath
 
-import pyutilib.th as unittest
+import pyutilib.th
 from pyutilib.misc import Options
 from pyutilib.component.core import ExtensionPoint
 from pyutilib.autotest import plugins
+
+unittest = pyutilib.th
 
 # GAH: Inside create_test_suite all options are (were) being cast to
 #      str(). Although I'm not sure, I assume this is to wash out
