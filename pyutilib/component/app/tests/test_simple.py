@@ -31,11 +31,15 @@ class Test(unittest.TestCase):
         pyutilib.subprocess.run(sys.executable+" "+currdir+os.sep+"app3.py "+currdir)
         if not os.path.exists(currdir+"app3.log"):
             self.fail("expected log file")
+        else:
+            os.remove(currdir+"app3.log")
 
     def test_app4(self):
         pyutilib.subprocess.run(sys.executable+" "+currdir+os.sep+"app4.py "+currdir)
         if not os.path.exists(currdir+"tmp2.ini"):
             self.fail("expected ini file")
+        else:
+            os.remove(currdir+"tmp2.ini")
 
 if __name__ == "__main__":
     unittest.main()
