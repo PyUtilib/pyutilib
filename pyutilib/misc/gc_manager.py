@@ -24,16 +24,18 @@ import gc
 # if an outer function/method has its own instance of PauseGC.
 class PauseGC(object):
 
-    __slots__ = ( "reenable_gc" )
+    __slots__ = ("reenable_gc",)
 
-    def __init__(self):
-        self.reenable_gc = gc.isenabled()
-        try:
-            gc.disable()
-        except NotImplementedError:
-            # This will only happen if the Python implementation 
-            # doesn't support disabling the GC.
-            pass
+    def __init__(self, pause=True):
+        self.reenable_gc = False
+        if pause:
+            try:
+                self.reenable_gc = gc.isenabled()
+                gc.disable()
+            except NotImplementedError:
+                # This will only happen if the Python implementation
+                # doesn't support disabling the GC.
+                pass
 
     def __enter__(self):
         return self
