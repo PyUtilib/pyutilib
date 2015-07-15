@@ -23,11 +23,17 @@ import gc
 # safe to nest instances of PauseGC That is, you don't have to worry
 # if an outer function/method has its own instance of PauseGC.
 class PauseGC(object):
+
     __slots__ = ( "reenable_gc" )
 
     def __init__(self):
         self.reenable_gc = gc.isenabled()
-        gc.disable()
+        try:
+            gc.disable()
+        except NotImplementedError:
+            # This will only happen if the Python implementation 
+            # doesn't support disabling the GC.
+            pass
 
     def __enter__(self):
         return self
