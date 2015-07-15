@@ -1,0 +1,19 @@
+; 
+; Note: the following configuration options have been omitted because their
+; value is 'None':
+;   section='a.b' option='zz'
+;   section='globals' option='tempdir'
+; 
+; 
+[Services]
+Configuration_ConfigParser = True
+ImportLoader = True
+TempfileManager = True
+
+[globals]
+a = XX 1
+b = /dev/null
+c = XX 1,2,3
+xx = 4.5
+yy = foo
+

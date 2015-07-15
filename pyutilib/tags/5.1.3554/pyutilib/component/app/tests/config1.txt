@@ -1,0 +1,23 @@
+; 
+; Note: the following configuration options have been omitted because their
+; value is 'None':
+;   section='globals' option='tempdir'
+;   section='logging.foo' option='log_dir'
+;   section='logging.foo' option='log_format'
+; 
+; 
+[Services]
+Configuration_ConfigParser = True
+EggLoader.foo = True
+ImportLoader = True
+TempfileManager = True
+
+[foo]
+path = DEFAULT PATH HERE
+
+[logging.foo]
+log_file = foo.log
+log_level = WARN
+log_type = none
+timestamp = False
+
