@@ -1,0 +1,71 @@
+
+\section{Introduction}
+
+Scientific workflow is an increasingly popular strategy for managing
+complex scientific computation processes.  Workflows allow scientists to
+automate data transformations, describe complex computational procedures,
+and parallelize these analyses.  Scientific workflow systems are
+closely related to workflow models used in business process management
+systems.  The key difference is that scientific workflows focus on the
+transformation of data through algorithms, whereas business workflows
+focus on scheduling and execution of tasks.
+
+Many of the workflow packages developed in Python are best
+described as business workflow systems.  For example, packages like
+\code{django-workflows}  and \code{zope.app.workflow} provide workflows
+for web content management.  The following native Python workflow packages
+appear to be suitable for scientific workflows:
+\begin{itemize}
+
+\item \textit{Pyphant}: This is a framework for scientific data
+analysis. A computational analysis is defined by a graph of processing
+steps, which is managed with a workflow engine.
+
+\item \textit{Python Workflow Engine}: This is a simple workflow engine
+that was initially based on the workflow engine used in the ACE project.
+
+\item \textit{Spiff Workflow}: This package is designed around the
+workflow patterns defined at \code{http://www.workflowpatterns.com}.
+
+\item \textit{Ruffus}: This is a lightweight python module to run computational pipelines (See \code{http://www.ruffus.org.uk/}).
+
+\item \textit{PaPy}: A lightweight python package that manages parallel computational pipelines (see \url{http://muralab.org/PaPy/})
+
+\end{itemize}
+Other packages like VisTrails~\cite{VisTrails} and Weaver~\cite{Weaver}
+also support the management of scientific workflows in Python, though
+they rely on external software packages to execute these workflows.
+
+This report describes the \code{pyutilib.workflow} (\pw) package, which supports the definition and
+execution of scientific workflows.  The following key features of \pwsp that distinguish it from 
+other Python workflow tools:
+\begin{itemize}
+
+\item \pwsp is a self-contained package that was designed to be used
+within other software applications.  Although \pwsp depends on several
+other PyUtilib Python packages, it does not rely on external software
+packages to execute \pwsp workflows.
+
+\item \pwsp defines a workflow through the interaction of task objects,
+rather than an explicit definition of a workflow graph.  For example,
+a connection between two tasks is created by setting an output in one
+task equal to an input in the other.
+
+\item a \pwsp workflow (or task) can be treated as a functor that executes
+with the given arguments and returns a dictionary of computed data.
+
+\item \pwsp tasks can be created as plugin components that can be
+dynamically created with a task factory.  This supports the modular
+definition of tasks and workflows, and it allows the definition of
+workflows to be isolated from the definition of task classes.
+
+\item \pwsp workflows can be initialized with command-line arguments.  Further, \pwsp includes
+a command-line driver that can executed named workflows using a subcommand syntax that is commonly
+used in command-line tools (e.g. \code{svn}).
+\end{itemize}
+
+The remainder of this manuscript provides a detailed description of the
+capabilities in \pw.  We include many examples that illustrate how \pwsp
+objects interact to define and execute workflows, and we discuss the command-line driver that can
+execute workflows with values specified by command-line arguments.
+

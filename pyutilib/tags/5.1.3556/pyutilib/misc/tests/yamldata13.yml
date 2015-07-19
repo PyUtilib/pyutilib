@@ -1,0 +1,34 @@
+python:
+    - import coopr.opt
+
+driver: coopr.pyomo
+
+solvers:
+    glpk:
+    cplex:
+    pico:
+    cbc:
+    asl_pico: 
+        name: "_asl:PICO"
+    gurobi:
+  
+problems:
+    diet1:
+        files: diet1.py diet1.dat
+
+suites:
+    lp_smoke:
+        categories:
+            - integration
+            - nightly
+            - smoke
+        solvers:
+            glpk:
+            cplex:
+            pico:
+            cbc:
+            gurobi:
+        problems:
+            diet1:
+                tolerance: 1e-5
+

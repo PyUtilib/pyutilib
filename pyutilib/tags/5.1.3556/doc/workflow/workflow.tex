@@ -1,0 +1,64 @@
+% NOTES:
+%
+
+% TODO: should we stick with LaTeX documentation?  It might make sense
+% to migrate to reStructured text, since that is a Python standard and
+% since it can generate LaTeX.  We'll have to decide that sometime soon.
+
+\documentclass[12pt]{article}
+
+\usepackage{fullpage}
+\usepackage[authoryear]{natbib}
+\usepackage{listings}
+\usepackage{url}
+\usepackage[usenames]{color}
+\usepackage{graphicx}
+
+\bibpunct{[}{]}{,}{n}{}{}
+\include{macros}
+\include{example_macros}
+
+\widowpenalty=3000
+\clubpenalty=3000
+
+
+\begin{document}
+
+\title{Managing Scientific Workflows in Python with \code{pyutilib.workflow}}
+
+\author{William E.\ Hart\footnote{Sandia National Laboratories, 
+Data Analysis and Informatics Department, 
+PO Box 5800, Albuquerque, NM 87185;
+{\tt wehart@sandia.gov}}
+}
+
+\date{\today}
+
+\maketitle
+
+\begin{abstract}
+\input{abstract}
+\end{abstract}
+
+
+\lstset{language=Python}
+\definecolor{light-gray}{gray}{0.9}
+\lstset{backgroundcolor=\color{light-gray}}
+\lstset{aboveskip=1em,belowskip=1em,showspaces=false,showstringspaces=false}
+
+\newpage
+
+\input{workflow-intro}
+\input{workflow-doc}
+\input{workflow-disc}
+
+\section*{Acknowledgements} 
+
+\input{acknow}
+
+
+\bibliographystyle{siam}
+\bibliography{coopr}
+
+\end{document}
+

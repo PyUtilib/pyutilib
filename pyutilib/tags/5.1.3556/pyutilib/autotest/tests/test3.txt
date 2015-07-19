@@ -1,0 +1,8 @@
+
+Test suite categories defined in 'autotest':
+    x_nightly
+    x_smoke
+    x_suite1
+    x_suite2
+    x_suite3
+
