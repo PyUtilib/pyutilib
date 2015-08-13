@@ -11,15 +11,17 @@ __all__ = ['Dispatcher', 'DispatcherServer']
 
 import os
 import sys
-
-from six import iteritems
+from collections import defaultdict
 
 from pyutilib.pyro import get_nameserver, using_pyro3, using_pyro4
 from pyutilib.pyro import Pyro as _pyro
+
 if sys.version_info >= (3,0):
     import queue as Queue
 else:
     import Queue
+
+from six import iteritems
 
 if using_pyro3:
     base = _pyro.core.ObjBase
@@ -31,7 +33,6 @@ else:
     base = object
     oneway = lambda method: method
 
-
 class Dispatcher(base):
 
     def __init__(self, **kwds):
@@ -39,10 +40,8 @@ class Dispatcher(base):
             raise ImportError("Pyro or Pyro4 is not available")
         if using_pyro3:
             _pyro.core.ObjBase.__init__(self)
-        self.default_task_queue = Queue.Queue()
-        self.default_result_queue = Queue.Queue()
-        self.task_queue = {}
-        self.result_queue = {}
+        self.task_queue = defaultdict(Queue.Queue)
+        self.result_queue = defaultdict(Queue.Queue)
         self.verbose = kwds.get("verbose", False)
         if self.verbose:
            print("Verbose output enabled...")
@@ -55,36 +54,35 @@ class Dispatcher(base):
         else:
             self._pyroDaemon.shutdown()
 
-    def clear_queue(self, type=None):
-        if type is None:
-            self.default_task_queue = Queue.Queue()
-            self.default_result_queue = Queue.Queue()
-        else:
-            if type in self.task_queue:
-                del self.task_queue[type]
-            if type in self.result_queue:
-                del self.result_queue[type]
-
     @oneway
+    def clear_queue(self, type=None):
+        try:
+            del self.task_queue[type]
+        except KeyError:
+            pass
+        try:
+            del self.result_queue[type]
+        except KeyError:
+            pass
+
     # process a set of tasks in one shot - the input
     # is a dictionary from queue type (including None)
     # to a list of tasks to be added to that queue.
-    def add_tasks(self, type_to_task_list_dict):
-        for task_type, task_list in iteritems(type_to_task_list_dict):
-            for task in task_list:
-                self.add_task(task, type=task_type)
+    @oneway
+    def add_tasks(self, tasks):
+        if self.verbose:
+           print("Received request to add bulk task set")
+        for task_type in tasks:
+            task_queue = self.task_queue[task_type]
+            for task in tasks[task_type]:
+                task_queue.put(task)
 
     @oneway
     def add_task(self, task, type=None):
         if self.verbose:
            print("Received request to add task=<Task id="
                  +str(task['id'])+">; queue type="+str(type))
-        if type is None:
-            self.default_task_queue.put(task)
-        else:
-            if not type in self.task_queue:
-                self.task_queue[type] = Queue.Queue()
-            self.task_queue[type].put(task)
+        self.task_queue[type].put(task)
 
     def get_task(self, type=None, block=True, timeout=5):
         if self.verbose:
@@ -92,26 +90,54 @@ class Dispatcher(base):
                  "queue type="+str(type)+"; block="+str(block)+
                  "; timeout="+str(timeout)+" seconds")
         try:
-            if type is None:
-                return self.default_task_queue.get(block=block, timeout=timeout)
-            else:
-                if not type in self.task_queue:
-                    self.task_queue[type] = Queue.Queue()
-                return self.task_queue[type].get(block=block, timeout=timeout)
+            return self.task_queue[type].get(block=block,
+                                             timeout=timeout)
         except Queue.Empty:
             return None
 
+    def get_tasks(self, type_block_timeout_list):
+        if self.verbose:
+           print("Received request to get tasks in bulk. "
+                 "Queue request types="+str(type_block_timeout_list))
+
+        ret = {}
+        for type, block, timeout in type_block_timeout_list:
+            task_list = []
+            try:
+                task_list.append(self.task_queue[type].get(block=block,
+                                                           timeout=timeout))
+            except Queue.Empty:
+                pass
+            else:
+                while self.task_queue[type].qsize():
+                    try:
+                        task_list.append(self.task_queue[type].get(block=block,
+                                                                   timeout=timeout))
+                    except Queue.Empty:
+                        pass
+            if len(task_list) > 0:
+                ret.setdefault(type, []).extend(task_list)
+
+        return ret
+
+    # process a set of results in one shot - the input
+    # is a dictionary from queue type (including None)
+    # to a list of results to be added to that queue.
     @oneway
-    def add_result(self, data, type=None):
+    def add_results(self, results):
+        if self.verbose:
+           print("Received request to add bulk result set")
+        for result_type in results:
+            result_queue = self.result_queue[result_type]
+            for result in results[result_type]:
+                result_queue.put(result)
+
+    @oneway
+    def add_result(self, result, type=None):
         if self.verbose:
            print("Received request to add result with "
-                 "data="+str(data)+"; queue type="+str(type))
-        if type is None:
-            self.default_result_queue.put(data)
-        else:
-            if not type in self.result_queue:
-                self.result_queue[type] = Queue.Queue()
-            self.result_queue[type].put(data)
+                 "result="+str(result)+"; queue type="+str(type))
+        self.result_queue[type].put(result)
 
     def get_result(self, type=None, block=True, timeout=5):
         if self.verbose:
@@ -119,12 +145,8 @@ class Dispatcher(base):
                  "queue type="+str(type)+"; block="+str(block)+
                  "; timeout="+str(timeout))
         try:
-            if type is None:
-                return self.default_result_queue.get(block=block, timeout=timeout)
-            else:
-                if not type in self.result_queue:
-                    self.result_queue[type] = Queue.Queue()
-                return self.result_queue[type].get(block=block, timeout=timeout)
+            return self.result_queue[type].get(block=block,
+                                               timeout=timeout)
         except Queue.Empty:
             return None
 
@@ -132,68 +154,49 @@ class Dispatcher(base):
         if self.verbose:
            print("Received request for number of tasks in "
                  "queue with type="+str(type))
-        if type is None:
-            return self.default_task_queue.qsize()
-        elif type in self.task_queue:
-            return self.task_queue[type].qsize()
-        return 0
+        return self.task_queue[type].qsize()
 
     def num_results(self, type=None):
         if self.verbose:
            print("Received request for number of results in "
                  "queue with type="+str(type))
-        if type is None:
-            return self.default_result_queue.qsize()
-        elif type in self.result_queue:
-            return self.result_queue[type].qsize()
-        return 0
+        return self.result_queue[type].qsize()
 
     def queues_with_results(self):
         if self.verbose:
            print("Received request for the set of queues with results")
-        result = set()
-        if self.default_result_queue.qsize() > 0:
-            result.add(None)
+
+        results = []
         #
-        # Iterate over a copy of the contents of result_queue, since
+        # Iterate over a copy of the contents of the queue, since
         # the queue may change while iterating.
         #
         for queue_name, result_queue in list(self.result_queue.items()):
            if result_queue.qsize() > 0:
-               result.add(queue_name)
-        return result
+               results.append(queue_name)
+
+        return results
 
     def get_results_all_queues(self):
 
         if self.verbose:
-           print("Received request to obtain all available results from all queues")
+           print("Received request to obtain all available "
+                 "results from all queues")
 
-        result = []
-
-        while self.default_result_queue.qsize() > 0:
-            try:
-                result.append(self.default_result_queue.get(block=False))
-            except Queue.Empty:
-                pass
-
-        # IMPORTANT: Make sure to make a copy (via the items() call)
-        #            of the queue contents - it can change
-        #            mid-iteration, due to the introduction of new
-        #            named queues.
+        results = []
         #
-        # *python3 fix: items() no longer copies, so was changed to
-        # *list(items())
+        # Iterate over a copy of the contents of the queue, since
+        # the queue may change while iterating.
         #
-
         for queue_name, result_queue in list(self.result_queue.items()):
 
             while result_queue.qsize() > 0:
                 try:
-                    result.append(result_queue.get(block=False, timeout=0))
+                    results.append(result_queue.get(block=False, timeout=0))
                 except Queue.Empty:
                     pass
 
-        return result
+        return results
 
 
 def DispatcherServer(group=":PyUtilibServer", host=None, verbose=False):
