@@ -27,10 +27,10 @@ else:
 
 class Client(object):
 
-    def __init__(self, 
-                 group=":PyUtilibServer", 
-                 type=None, 
-                 host=None, 
+    def __init__(self,
+                 group=":PyUtilibServer",
+                 type=None,
+                 host=None,
                  num_dispatcher_tries=30,
                  caller_name = "Client"):
         if _pyro is None:
@@ -62,7 +62,11 @@ class Client(object):
             except _pyro.errors.NamingError:
                 pass
             sleep_interval = 10.0
-            print("Client failed to find dispatcher object from name server after %d attempts and %5.2f seconds - trying again in %5.2f seconds." % (i+1,cumulative_sleep_time,sleep_interval))
+            print("Client failed to find dispatcher object from name "
+                  "server after %d attempts and %5.2f seconds - trying "
+                  "again in %5.2f seconds."
+                  % (i+1,cumulative_sleep_time,sleep_interval))
+
             time.sleep(sleep_interval)
             cumulative_sleep_time += sleep_interval
         if self.URI is None:
@@ -70,12 +74,23 @@ class Client(object):
             raise SystemExit
         self.set_group(group)
         self.CLIENTNAME = "%d@%s" % (os.getpid(), socket.gethostname())
-        print("Connection to dispatch server established after %d attempts and %5.2f seconds - this is client: %s" % (i+1, cumulative_sleep_time, self.CLIENTNAME))
+        print("Connection to dispatch server established after %d "
+              "attempts and %5.2f seconds - this is client: %s"
+              % (i+1, cumulative_sleep_time, self.CLIENTNAME))
 
         # There is no need to retain the proxy connection to the
         # nameserver, so free up resources on the nameserver thread
         if using_pyro4:
             self.ns._pyroRelease()
+        else:
+            self.ns._release()
+
+    def close(self):
+        if self.dispatcher is not None:
+            if using_pyro4:
+                self.dispatcher._pyroRelease()
+            else:
+                self.dispatcher._release()
 
     def set_group(self, group):
         if using_pyro3:
