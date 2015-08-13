@@ -10,20 +10,17 @@
 __all__ = ['TaskWorker','MultiTaskWorker','TaskWorkerServer']
 
 import sys
-import os, socket, time
+import os
+import socket
+import time
 import itertools
 import random
 
 from pyutilib.pyro import get_nameserver, using_pyro3, using_pyro4
 from pyutilib.pyro import Pyro as _pyro
 
-if sys.version_info >= (3,0):
-    xrange = range
-    import queue as Queue
-else:
-    import Queue
-
-from six import advance_iterator
+from six import advance_iterator, iteritems, itervalues
+from six.moves import xrange
 
 class TaskWorkerBase(object):
 
@@ -31,7 +28,10 @@ class TaskWorkerBase(object):
                  group=":PyUtilibServer",
                  host=None,
                  num_dispatcher_tries=30,
-                 caller_name="Task Worker"):
+                 caller_name="Task Worker",
+                 verbose=False):
+
+        self._verbose = verbose
 
         if _pyro is None:
             raise ImportError("Pyro or Pyro4 is not available")
@@ -59,17 +59,27 @@ class TaskWorkerBase(object):
             except _pyro.errors.NamingError:
                 pass
             sleep_interval = random.uniform(5.0, 15.0)
-            print("Worker failed to find dispatcher object from name server after %d attempts and %5.2f seconds - trying again in %5.2f seconds." % (i+1,cumulative_sleep_time,sleep_interval))
+            print("Worker failed to find dispatcher object from "
+                  "name server after %d attempts and %5.2f seconds "
+                  "- trying again in %5.2f seconds."
+                  % (i+1, cumulative_sleep_time, sleep_interval))
             time.sleep(sleep_interval)
             cumulative_sleep_time += sleep_interval
+
         if URI is None:
-            raise RuntimeError('Worker could not find dispatcher object - giving up')
+            raise RuntimeError(
+                "Worker could not find dispatcher object - giving up")
+
         if using_pyro3:
             self.dispatcher = _pyro.core.getProxyForURI(URI)
         else:
             self.dispatcher = _pyro.Proxy(URI)
-        self.WORKERNAME = "Worker_%d@%s" % (os.getpid(), socket.gethostname())
-        print("Connection to dispatch server established after %d attempts and %5.2f seconds - this is worker: %s" % (i+1, cumulative_sleep_time, self.WORKERNAME))
+        self.WORKERNAME = "Worker_%d@%s" % (os.getpid(),
+                                            socket.gethostname())
+        print("Connection to dispatch server established "
+              "after %d attempts and %5.2f seconds - "
+              "this is worker: %s"
+              % (i+1, cumulative_sleep_time, self.WORKERNAME))
 
         # There is no need to retain the proxy connection to the
         # nameserver, so free up resources on the nameserver thread
@@ -88,7 +98,8 @@ class TaskWorkerBase(object):
         else:
             connection_problem = _pyro.errors.TimeoutError
         while 1:
-            current_type, blocking, timeout = self._get_request_type()
+            current_type, blocking, timeout = \
+                self._get_request_type()
             try:
                 task = self.dispatcher.get_task(type=current_type,
                                                 block=blocking,
@@ -141,11 +152,14 @@ class MultiTaskWorker(TaskWorkerBase):
         TaskWorkerBase.__init__(self, *args, **kwds)
 
         #
-        # **NOTE: For this class type is tuple (type,blocking,timeout)
+        # **NOTE: For this class 'type' is
+        # a tuple (type, blocking, timeout, local)
         #
         self._num_types = 0
         self._type_cycle = None
-        self.push_request_type(type_default,block_default,timeout_default)
+        self.push_request_type(type_default,
+                               block_default,
+                               timeout_default)
 
     # Called by the run() method to get the next work type to request,
     # moves index to the next location in the cycle
@@ -169,6 +183,9 @@ class MultiTaskWorker(TaskWorkerBase):
             type_list.append(advance_iterator(self._type_cycle))
         return type_list
 
+    def cycle_type_order(self):
+        advance_iterator(self._type_cycle)
+
     def num_request_types(self):
         return self._num_types
 
@@ -176,13 +193,13 @@ class MultiTaskWorker(TaskWorkerBase):
         self._type_cycle = itertools.cycle([])
         self._num_types = 0
 
-    def push_request_type(self,type,block,timeout):
+    def push_request_type(self, type, block, timeout):
         """
         add a request type to the end relative to the current cycle
         location
         """
         self._type_cycle = itertools.cycle(self.current_type_order() + \
-                                           [(type,block,timeout)])
+                                           [(type, block, timeout)])
         self._num_types += 1
 
     def pop_request_type(self):
@@ -195,6 +212,55 @@ class MultiTaskWorker(TaskWorkerBase):
         self._type_cycle = itertools.cycle(new_type_list)
         self._num_types -= 1
         return el
+
+    def run(self):
+
+        print("Listening for work from dispatcher...")
+
+        if using_pyro3:
+            connection_problem = _pyro.errors.ConnectionDeniedError
+        else:
+            connection_problem = _pyro.errors.TimeoutError
+        while 1:
+            tasks = []
+            try:
+                tasks = self.dispatcher.get_tasks(self.current_type_order())
+            except connection_problem as e:
+                x = sys.exc_info()[1]
+                # this can happen if the dispatcher is overloaded
+                print("***WARNING: Connection to dispatcher server "
+                      "denied\n - exception type: "+str(type(e))+
+                      "\n - message: "+str(x))
+                if using_pyro3:
+                    print("A potential remedy may be to "
+                          "increase PYRO_MAXCONNECTIONS from its current "
+                          "value of "+str(_pyro.config.PYRO_MAXCONNECTIONS))
+                # sleep for a bit longer than normal, for obvious reasons
+                sleep_interval = random.uniform(0.05, 0.15)
+                time.sleep(sleep_interval)
+            else:
+
+                if len(tasks) > 0:
+
+                    if self._verbose:
+                        print("Processing %s tasks from %s queue(s)"
+                              % (sum(len(_tl) for _tl in itervalues(tasks)),
+                                 len(tasks)))
+
+                    results = dict.fromkeys(tasks)
+                    # process tasks by type in order of increasing id
+                    for type, type_tasks in iteritems(tasks):
+                        type_results = results[type] = []
+                        for task in sorted(type_tasks, key=lambda x: x['id']):
+                            task['result'] = self.process(task['data'])
+                            if task['generateResponse']:
+                                task['processedBy'] = self.WORKERNAME
+                                type_results.append(task)
+                        if len(type_results) == 0:
+                            del results[type]
+
+                    if len(results):
+                        self.dispatcher.add_results(results)
 
 def TaskWorkerServer(cls, **kwds):
     host=None
