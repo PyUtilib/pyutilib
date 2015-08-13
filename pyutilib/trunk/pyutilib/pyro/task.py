@@ -18,8 +18,8 @@
 def Task(id=None, data=None, generateResponse=True):
     return {'id': id,
             'data': data,
-            'generateResponse': generateResponse,
             'result': None,
+            'generateResponse': generateResponse,
             'processedBy': None,
+            'client': None,
             'type': None}
-
