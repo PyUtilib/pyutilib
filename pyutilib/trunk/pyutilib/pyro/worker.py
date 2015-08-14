@@ -85,6 +85,8 @@ class TaskWorkerBase(object):
         # nameserver, so free up resources on the nameserver thread
         if using_pyro4:
             self.ns._pyroRelease()
+        else:
+            self.ns._release()
 
     def _get_request_type(self):
         raise NotImplementedError("This is an abstract method")
