@@ -112,10 +112,9 @@ class TaskWorkerBase(object):
                 print("***WARNING: Connection to dispatcher server "
                       "denied\n - exception type: "+str(type(e))+
                       "\n - message: "+str(x))
-                if using_pyro3:
-                    print("A potential remedy may be to "
-                          "increase PYUTILIB_PYRO_MAXCONNECTIONS from its current "
-                          "value of "+str(_pyro.config.PYRO_MAXCONNECTIONS))
+                print("A potential remedy may be to increase "
+                      "PYUTILIB_PYRO_MAXCONNECTIONS in your shell "
+                      "environment.")
                 # sleep for a bit longer than normal, for obvious reasons
                 sleep_interval = random.uniform(0.05, 0.15)
                 time.sleep(sleep_interval) 
@@ -233,10 +232,9 @@ class MultiTaskWorker(TaskWorkerBase):
                 print("***WARNING: Connection to dispatcher server "
                       "denied\n - exception type: "+str(type(e))+
                       "\n - message: "+str(x))
-                if using_pyro3:
-                    print("A potential remedy may be to "
-                          "increase PYRO_MAXCONNECTIONS from its current "
-                          "value of "+str(_pyro.config.PYRO_MAXCONNECTIONS))
+                print("A potential remedy may be to increase "
+                      "PYUTILIB_PYRO_MAXCONNECTIONS in your shell "
+                      "environment.")
                 # sleep for a bit longer than normal, for obvious reasons
                 sleep_interval = random.uniform(0.05, 0.15)
                 time.sleep(sleep_interval)
