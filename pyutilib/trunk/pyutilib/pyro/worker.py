@@ -70,6 +70,13 @@ class TaskWorkerBase(object):
             raise RuntimeError(
                 "Worker could not find dispatcher object - giving up")
 
+        # There is no need to retain the proxy connection to the
+        # nameserver, so free up resources on the nameserver thread
+        if using_pyro4:
+            self.ns._pyroRelease()
+        else:
+            self.ns._release()
+
         if using_pyro3:
             self.dispatcher = _pyro.core.getProxyForURI(URI)
         else:
@@ -80,13 +87,6 @@ class TaskWorkerBase(object):
               "after %d attempts and %5.2f seconds - "
               "this is worker: %s"
               % (i+1, cumulative_sleep_time, self.WORKERNAME))
-
-        # There is no need to retain the proxy connection to the
-        # nameserver, so free up resources on the nameserver thread
-        if using_pyro4:
-            self.ns._pyroRelease()
-        else:
-            self.ns._release()
 
     def _get_request_type(self):
         raise NotImplementedError("This is an abstract method")
