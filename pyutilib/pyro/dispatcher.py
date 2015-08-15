@@ -199,24 +199,29 @@ class Dispatcher(base):
         return results
 
 
-def DispatcherServer(group=":PyUtilibServer", host=None, verbose=False):
+def DispatcherServer(group=":PyUtilibServer",
+                     host=None,
+                     verbose=False,
+                     max_connections=None):
 
-    max_pyro_connections_envname = "MAX_PYRO_CONNECTIONS"
-    if max_pyro_connections_envname in os.environ:
-        if using_pyro3:
+    if max_connections is None:
+        max_pyro_connections_envname = "PYUTILIB_PYRO_MAXCONNECTIONS"
+        if max_pyro_connections_envname in os.environ:
             new_val = int(os.environ[max_pyro_connections_envname])
             print("Setting maximum number of connections to dispatcher to "
                   +str(new_val)+", based on specification provided by "
                   +max_pyro_connections_envname+" environment variable")
-            _pyro.config.PYRO_MAXCONNECTIONS = new_val
+            if using_pyro3:
+                _pyro.config.PYRO_MAXCONNECTIONS = new_val
+            else:
+                _pyro.config.THREADPOOL_SIZE = new_val
+    else:
+        print("Setting maximum number of connections to dispatcher to "
+              +str(new_val)+", based on dispatcher max_connections keyword")
+        if using_pyro3:
+            _pyro.config.PYRO_MAXCONNECTIONS = max_connections
         else:
-            print("Setting maximum number of connections to dispatcher "
-                  "is not allowed with Pyro4. "+max_pyro_connections_envname
-                  +" environment variable will be ignored.")
-    elif using_pyro3:
-        # the default value is rather small, so we'll use something a
-        # bit more reasonable.
-        _pyro.config.PYRO_MAXCONNECTIONS = 1000
+            _pyro.config.THREADPOOL_SIZE = max_connections
 
     #
     # main program
