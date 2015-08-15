@@ -132,3 +132,24 @@ def shutdown_pyro_components(host=None, num_retries=30):
         print("")
         print("*** NameServer must be shutdown manually when using Pyro4 ***")
         print("")
+
+def set_maxconnections(max_connections=None):
+
+    if max_connections is None:
+        max_pyro_connections_envname = "PYUTILIB_PYRO_MAXCONNECTIONS"
+        if max_pyro_connections_envname in os.environ:
+            new_val = int(os.environ[max_pyro_connections_envname])
+            print("Setting maximum number of connections to dispatcher to "
+                  +str(new_val)+", based on specification provided by "
+                  +max_pyro_connections_envname+" environment variable")
+            if using_pyro3:
+                _pyro.config.PYRO_MAXCONNECTIONS = new_val
+            else:
+                _pyro.config.THREADPOOL_SIZE = new_val
+    else:
+        print("Setting maximum number of connections to dispatcher to "
+              +str(new_val)+", based on dispatcher max_connections keyword")
+        if using_pyro3:
+            _pyro.config.PYRO_MAXCONNECTIONS = max_connections
+        else:
+            _pyro.config.THREADPOOL_SIZE = max_connections

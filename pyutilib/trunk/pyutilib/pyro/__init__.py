@@ -42,6 +42,7 @@ from pyutilib.pyro.task import *
 from pyutilib.pyro.client import *
 from pyutilib.pyro.worker import *
 from pyutilib.pyro.dispatcher import *
+from pyutilib.pyro.nameserver import *
 
 #
 # Pyro3 License
