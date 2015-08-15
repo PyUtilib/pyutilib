@@ -114,7 +114,7 @@ class TaskWorkerBase(object):
                       "\n - message: "+str(x))
                 if using_pyro3:
                     print("A potential remedy may be to "
-                          "increase PYRO_MAXCONNECTIONS from its current "
+                          "increase PYUTILIB_PYRO_MAXCONNECTIONS from its current "
                           "value of "+str(_pyro.config.PYRO_MAXCONNECTIONS))
                 # sleep for a bit longer than normal, for obvious reasons
                 sleep_interval = random.uniform(0.05, 0.15)
@@ -195,13 +195,13 @@ class MultiTaskWorker(TaskWorkerBase):
         self._type_cycle = itertools.cycle([])
         self._num_types = 0
 
-    def push_request_type(self, type, block, timeout):
+    def push_request_type(self, type_name, block, timeout):
         """
         add a request type to the end relative to the current cycle
         location
         """
         self._type_cycle = itertools.cycle(self.current_type_order() + \
-                                           [(type, block, timeout)])
+                                           [(type_name, block, timeout)])
         self._num_types += 1
 
     def pop_request_type(self):
@@ -251,15 +251,15 @@ class MultiTaskWorker(TaskWorkerBase):
 
                     results = dict.fromkeys(tasks)
                     # process tasks by type in order of increasing id
-                    for type, type_tasks in iteritems(tasks):
-                        type_results = results[type] = []
+                    for type_name, type_tasks in iteritems(tasks):
+                        type_results = results[type_name] = []
                         for task in sorted(type_tasks, key=lambda x: x['id']):
                             task['result'] = self.process(task['data'])
                             if task['generateResponse']:
                                 task['processedBy'] = self.WORKERNAME
                                 type_results.append(task)
                         if len(type_results) == 0:
-                            del results[type]
+                            del results[type_name]
 
                     if len(results):
                         self.dispatcher.add_results(results)
