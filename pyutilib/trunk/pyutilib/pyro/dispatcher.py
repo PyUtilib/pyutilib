@@ -257,6 +257,8 @@ def DispatcherServer(group=":PyUtilibServer", host=None, verbose=False):
     # nameserver, so free up resources on the nameserver thread
     if using_pyro4:
         ns._pyroRelease()
+    else:
+        ns._release()
 
     print("Dispatcher is ready.")
     daemon.requestLoop()
