@@ -28,7 +28,7 @@ def start_nsc():
             import Pyro4.nsc
         else:
             import Pyro
-            import Pyro3.nsc
+            import Pyro.nsc
         pyutilib.pyro.Pyro.nsc.main(sys.argv[1:])
     else:
         raise ImportError("Pyro or Pyro4 is not installed")
