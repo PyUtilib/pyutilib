@@ -18,9 +18,16 @@ import random
 
 from pyutilib.pyro import get_nameserver, using_pyro3, using_pyro4
 from pyutilib.pyro import Pyro as _pyro
+from pyutilib.pyro.util import get_dispatchers
 
 from six import advance_iterator, iteritems, itervalues
 from six.moves import xrange
+
+_connection_problem = None
+if using_pyro3:
+    _connection_problem = _pyro.errors.ConnectionDeniedError
+else:
+    _connection_problem = _pyro.errors.TimeoutError
 
 class TaskWorkerBase(object):
 
@@ -46,18 +53,31 @@ class TaskWorkerBase(object):
             raise RuntimeError("TaskWorkerBase failed to locate "
                                "Pyro name server on the network!")
         print('Worker attempting to find Pyro dispatcher object...')
-        URI = None
         cumulative_sleep_time = 0.0
+        self.dispatcher = None
         for i in xrange(0, num_dispatcher_tries):
-            try:
-                if using_pyro3:
-                    URI = self.ns.resolve(group+".dispatcher")
+            for name, uri in get_dispatchers(group=group, ns=self.ns):
+                try:
+                    if using_pyro3:
+                        self.dispatcher = _pyro.core.getProxyForURI(uri)
+                        # This forces Pyro3 to actually attempt to use
+                        # the dispatcher proxy, which results in a
+                        # connection denied error if the dispatcher
+                        # proxy has reached its maximum allowed
+                        # connections. DO NOT DELETE
+                        self.dispatcher.queues_with_results()
+                    else:
+                        self.dispatcher = _pyro.Proxy(uri)
+                        self.dispatcher._pyroTimeout = 1
+                        self.dispatcher._pyroBind()
+                except _connection_problem:
+                    self.dispatcher = None
                 else:
-                    URI = self.ns.lookup(group+".dispatcher")
-                print('Dispatcher Object URI:'+str(URI))
+                    break
+            if self.dispatcher is not None:
+                if using_pyro4:
+                    self.dispatcher._pyroTimeout = None
                 break
-            except _pyro.errors.NamingError:
-                pass
             sleep_interval = random.uniform(5.0, 15.0)
             print("Worker failed to find dispatcher object from "
                   "name server after %d attempts and %5.2f seconds "
@@ -66,27 +86,30 @@ class TaskWorkerBase(object):
             time.sleep(sleep_interval)
             cumulative_sleep_time += sleep_interval
 
-        if URI is None:
+        if self.dispatcher is None:
             raise RuntimeError(
                 "Worker could not find dispatcher object - giving up")
 
         # There is no need to retain the proxy connection to the
         # nameserver, so free up resources on the nameserver thread
+        URI = None
         if using_pyro4:
             self.ns._pyroRelease()
+            URI = self.dispatcher._pyroUri
         else:
             self.ns._release()
+            URI = self.dispatcher.URI
 
-        if using_pyro3:
-            self.dispatcher = _pyro.core.getProxyForURI(URI)
-        else:
-            self.dispatcher = _pyro.Proxy(URI)
         self.WORKERNAME = "Worker_%d@%s" % (os.getpid(),
                                             socket.gethostname())
-        print("Connection to dispatch server established "
+        print("Connection to dispatch server %s established "
               "after %d attempts and %5.2f seconds - "
               "this is worker: %s"
-              % (i+1, cumulative_sleep_time, self.WORKERNAME))
+              % (URI, i+1, cumulative_sleep_time, self.WORKERNAME))
+
+        # Do not release the connection to the dispatcher
+        # We use this functionality to distribute workers across
+        # multiple dispatchers based off of denied connections
 
     def _get_request_type(self):
         raise NotImplementedError("This is an abstract method")
@@ -95,10 +118,6 @@ class TaskWorkerBase(object):
 
         print("Listening for work from dispatcher...")
 
-        if using_pyro3:
-            connection_problem = _pyro.errors.ConnectionDeniedError
-        else:
-            connection_problem = _pyro.errors.TimeoutError
         while 1:
             current_type, blocking, timeout = \
                 self._get_request_type()
@@ -106,7 +125,7 @@ class TaskWorkerBase(object):
                 task = self.dispatcher.get_task(type=current_type,
                                                 block=blocking,
                                                 timeout=timeout)
-            except connection_problem as e:
+            except _connection_problem as e:
                 x = sys.exc_info()[1]
                 # this can happen if the dispatcher is overloaded
                 print("***WARNING: Connection to dispatcher server "
@@ -218,15 +237,15 @@ class MultiTaskWorker(TaskWorkerBase):
 
         print("Listening for work from dispatcher...")
 
-        if using_pyro3:
-            connection_problem = _pyro.errors.ConnectionDeniedError
-        else:
-            connection_problem = _pyro.errors.TimeoutError
         while 1:
             tasks = []
             try:
                 tasks = self.dispatcher.get_tasks(self.current_type_order())
-            except connection_problem as e:
+                #if using_pyro4:
+                #    self.dispatcher._pyroRelease()
+                #else:
+                #    self.dispatcher._release()
+            except _connection_problem as e:
                 x = sys.exc_info()[1]
                 # this can happen if the dispatcher is overloaded
                 print("***WARNING: Connection to dispatcher server "

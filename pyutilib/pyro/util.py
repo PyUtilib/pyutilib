@@ -82,6 +82,41 @@ def get_nameserver(host=None, num_retries=30, caller_name="Unknown"):
 
     return ns
 
+def get_dispatchers(group=":PyUtilibServer",
+                    host=None,
+                    num_dispatcher_tries=30,
+                    min_dispatchers=1,
+                    caller_name=None,
+                    ns=None):
+
+    if ns is None:
+        ns = get_nameserver(host, caller_name=caller_name)
+    else:
+        assert caller_name is None
+        assert host is None
+
+    if ns is None:
+        raise RuntimeError("Failed to locate Pyro name "
+                           "server on the network!")
+
+    cumulative_sleep_time = 0.0
+    dispatchers = []
+    for i in xrange(0,num_dispatcher_tries):
+        ns_entries = None
+        if using_pyro3:
+            for (name,uri) in ns.flatlist():
+                if name.startswith(":PyUtilibServer.dispatcher."):
+                    if (name,uri) not in dispatchers:
+                        dispatchers.append((name, uri))
+        elif using_pyro4:
+            for name in ns.list(prefix=":PyUtilibServer.dispatcher."):
+                uri = ns.lookup(name)
+                if (name,uri) not in dispatchers:
+                    dispatchers.append((name, uri))
+        if len(dispatchers) >= min_dispatchers:
+            break
+    return dispatchers
+
 #
 # a utility for shutting down Pyro-related components, which at the
 # moment is restricted to the name server and any dispatchers. the
@@ -105,7 +140,7 @@ def shutdown_pyro_components(host=None, num_retries=30):
     if using_pyro3:
         ns_entries = ns.flatlist()
         for (name,uri) in ns_entries:
-            if name == ":PyUtilibServer.dispatcher":
+            if name.startswith(":PyUtilibServer.dispatcher."):
                 try:
                     proxy = _pyro.core.getProxyForURI(uri)
                     proxy.shutdown()
@@ -116,25 +151,32 @@ def shutdown_pyro_components(host=None, num_retries=30):
                 try:
                     proxy = _pyro.core.getProxyForURI(uri)
                     proxy._shutdown()
+                    proxy._release()
                 except:
                     pass
     elif using_pyro4:
-        ns_entries = ns.list()
-        for name in ns_entries:
-            if name == ":PyUtilibServer.dispatcher":
-                try:
-                    URI = ns.lookup(name)
-                    proxy = _pyro.Proxy(URI)
-                    proxy.shutdown()
-                    proxy._pyroRelease()
-                except:
-                    pass
+        for name in ns.list(prefix=":PyUtilibServer.dispatcher."):
+            try:
+                uri = ns.lookup(name)
+                proxy = _pyro.Proxy(uri)
+                proxy.shutdown()
+                proxy._pyroRelease()
+                ns.remove(name)
+            except:
+                pass
         print("")
         print("*** NameServer must be shutdown manually when using Pyro4 ***")
         print("")
 
 def set_maxconnections(max_connections=None):
 
+    #
+    # **NOTE: We add 1 to this setting so that it corresponds to the
+    #         number of workers that can be connected. This makes
+    #         more sense from a user perspective. If this is not done,
+    #         setting max connections to something like 1, will not
+    #         allow any workers to connect.
+    #
     if max_connections is None:
         max_pyro_connections_envname = "PYUTILIB_PYRO_MAXCONNECTIONS"
         if max_pyro_connections_envname in os.environ:
@@ -143,13 +185,13 @@ def set_maxconnections(max_connections=None):
                   +str(new_val)+", based on specification provided by "
                   +max_pyro_connections_envname+" environment variable")
             if using_pyro3:
-                _pyro.config.PYRO_MAXCONNECTIONS = new_val
+                _pyro.config.PYRO_MAXCONNECTIONS = new_val + 1
             else:
                 _pyro.config.THREADPOOL_SIZE = new_val
     else:
         print("Setting maximum number of connections to dispatcher to "
-              +str(new_val)+", based on dispatcher max_connections keyword")
+              +str(max_connections)+", based on dispatcher max_connections keyword")
         if using_pyro3:
-            _pyro.config.PYRO_MAXCONNECTIONS = max_connections
+            _pyro.config.PYRO_MAXCONNECTIONS = max_connections + 1
         else:
             _pyro.config.THREADPOOL_SIZE = max_connections
