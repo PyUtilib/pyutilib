@@ -11,11 +11,12 @@ __all__ = ['Dispatcher', 'DispatcherServer']
 
 import os
 import sys
+import uuid
 from collections import defaultdict
 
 from pyutilib.pyro import get_nameserver, using_pyro3, using_pyro4
 from pyutilib.pyro import Pyro as _pyro
-from pyutilib.pyro.util import set_maxconnections
+from pyutilib.pyro.util import set_maxconnections, get_dispatchers
 
 if sys.version_info >= (3,0):
     import queue as Queue
@@ -203,7 +204,8 @@ class Dispatcher(base):
 def DispatcherServer(group=":PyUtilibServer",
                      host=None,
                      verbose=False,
-                     max_connections=None):
+                     max_connections=None,
+                     clear_group=True):
 
     set_maxconnections(max_connections=max_connections)
 
@@ -211,8 +213,26 @@ def DispatcherServer(group=":PyUtilibServer",
     # main program
     #
     ns = get_nameserver(host,caller_name="Dispatcher")
-    if ns is None:
-        return
+
+    if clear_group:
+        for name, uri in get_dispatchers(group=group, ns=ns):
+            print("Multiple dispatchers not allowed")
+            print("Shutting down dispatcher at URI="+str(uri))
+            if using_pyro3:
+                try:
+                    proxy = _pyro.core.getProxyForURI(uri)
+                    proxy.shutdown()
+                    proxy._release()
+                except:
+                    pass
+            elif using_pyro4:
+                try:
+                    proxy = _pyro.Proxy(uri)
+                    proxy.shutdown()
+                    proxy._pyroRelease()
+                    ns.remove(name)
+                except:
+                    pass
 
     if using_pyro3:
         daemon = _pyro.core.Daemon()
@@ -226,21 +246,28 @@ def DispatcherServer(group=":PyUtilibServer",
         except _pyro.errors.NamingError:
             pass
         try:
-            ns.unregister(group+".dispatcher")
+            ns.createGroup(group+".dispatcher")
         except _pyro.errors.NamingError:
             pass
+        if clear_group:
+            try:
+                ns.unregister(group+".dispatcher")
+            except _pyro.errors.NamingError:
+                pass
     else:
-        try:
-            ns.remove(group+".dispatcher")
-        except _pyro.errors.NamingError:
-            pass
+        if clear_group:
+            try:
+                ns.remove(group+".dispatcher")
+            except _pyro.errors.NamingError:
+                pass
 
     disp = Dispatcher(verbose=verbose)
+    proxy_name = group+".dispatcher."+str(uuid.uuid4())
     if using_pyro3:
-        uri = daemon.connect(disp, group+".dispatcher")
+        uri = daemon.connect(disp, proxy_name)
     else:
-        uri = daemon.register(disp, group+".dispatcher")
-        ns.register(group+".dispatcher", uri)
+        uri = daemon.register(disp, proxy_name)
+        ns.register(proxy_name, uri)
 
     # There is no need to retain the proxy connection to the
     # nameserver, so free up resources on the nameserver thread

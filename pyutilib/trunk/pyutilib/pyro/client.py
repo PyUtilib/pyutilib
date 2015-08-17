@@ -32,7 +32,9 @@ class Client(object):
                  type=None,
                  host=None,
                  num_dispatcher_tries=30,
-                 caller_name = "Client"):
+                 caller_name="Client",
+                 dispatcher_uri=None):
+
         if _pyro is None:
             raise ImportError("Pyro or Pyro4 is not available")
         self.type=type
@@ -48,35 +50,37 @@ class Client(object):
             raise RuntimeError("Client failed to locate Pyro name "
                                "server on the network!")
         self.dispatcher = None
-        print('Client attempting to find Pyro dispatcher object...')
-        self.URI = None
-        cumulative_sleep_time = 0.0
-        for i in xrange(0,num_dispatcher_tries):
-            try:
-                if using_pyro3:
-                    self.URI = self.ns.resolve(group+".dispatcher")
-                else:
-                    self.URI = self.ns.lookup(group+".dispatcher")
-                print("Dispatcher Object URI: "+str(self.URI))
-                break
-            except _pyro.errors.NamingError:
-                pass
-            sleep_interval = 10.0
-            print("Client failed to find dispatcher object from name "
-                  "server after %d attempts and %5.2f seconds - trying "
-                  "again in %5.2f seconds."
-                  % (i+1,cumulative_sleep_time,sleep_interval))
+        if dispatcher_uri is None:
+            print('Client attempting to find Pyro dispatcher object...')
+            self.URI = None
+            cumulative_sleep_time = 0.0
+            for i in xrange(0,num_dispatcher_tries):
+                try:
+                    if using_pyro3:
+                        self.URI = self.ns.resolve(group+".dispatcher")
+                    else:
+                        self.URI = self.ns.lookup(group+".dispatcher")
+                    print("Dispatcher Object URI: "+str(self.URI))
+                    break
+                except _pyro.errors.NamingError:
+                    pass
+                sleep_interval = 10.0
+                print("Client failed to find dispatcher object from name "
+                      "server after %d attempts and %5.2f seconds - trying "
+                      "again in %5.2f seconds."
+                      % (i+1,cumulative_sleep_time,sleep_interval))
 
-            time.sleep(sleep_interval)
-            cumulative_sleep_time += sleep_interval
-        if self.URI is None:
-            print('Client could not find dispatcher object - giving up')
-            raise SystemExit
-        self.set_group(group)
-        self.CLIENTNAME = "%d@%s" % (os.getpid(), socket.gethostname())
-        print("Connection to dispatch server established after %d "
-              "attempts and %5.2f seconds - this is client: %s"
-              % (i+1, cumulative_sleep_time, self.CLIENTNAME))
+                time.sleep(sleep_interval)
+                cumulative_sleep_time += sleep_interval
+            if self.URI is None:
+                print('Client could not find dispatcher object - giving up')
+                raise SystemExit
+        else:
+            self.URI = dispatcher_uri
+            print('Client assigned dispatcher with URI=%s'
+                  % (dispatcher_uri))
+            i = 0
+            cumulative_sleep_time = 0.0
 
         # There is no need to retain the proxy connection to the
         # nameserver, so free up resources on the nameserver thread
@@ -85,18 +89,23 @@ class Client(object):
         else:
             self.ns._release()
 
+        # connect to the dispatcher
+        if using_pyro3:
+            self.dispatcher = _pyro.core.getProxyForURI(self.URI)
+        else:
+            self.dispatcher = _pyro.Proxy(self.URI)
+
+        self.CLIENTNAME = "%d@%s" % (os.getpid(), socket.gethostname())
+        print("Connection to dispatch server established after %d "
+              "attempts and %5.2f seconds - this is client: %s"
+              % (i+1, cumulative_sleep_time, self.CLIENTNAME))
+
     def close(self):
         if self.dispatcher is not None:
             if using_pyro4:
                 self.dispatcher._pyroRelease()
             else:
                 self.dispatcher._release()
-
-    def set_group(self, group):
-        if using_pyro3:
-            self.dispatcher = _pyro.core.getProxyForURI(self.URI)
-        else:
-            self.dispatcher = _pyro.Proxy(self.URI)
 
     def clear_queue(self, override_type=None, verbose=False):
         task_type = override_type if (override_type is not None) else self.type
