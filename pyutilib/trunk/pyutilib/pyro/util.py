@@ -142,6 +142,7 @@ def shutdown_pyro_components(host=None, num_retries=30):
         for (name,uri) in ns_entries:
             if name.startswith(":PyUtilibServer.dispatcher."):
                 try:
+                    ns.unregister(name)
                     proxy = _pyro.core.getProxyForURI(uri)
                     proxy.shutdown()
                 except:
@@ -158,10 +159,10 @@ def shutdown_pyro_components(host=None, num_retries=30):
         for name in ns.list(prefix=":PyUtilibServer.dispatcher."):
             try:
                 uri = ns.lookup(name)
+                ns.remove(name)
                 proxy = _pyro.Proxy(uri)
                 proxy.shutdown()
                 proxy._pyroRelease()
-                ns.remove(name)
             except:
                 pass
         print("")
