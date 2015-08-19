@@ -14,9 +14,9 @@ import sys
 import pyutilib.pyro
 from pyutilib.pyro.util import set_maxconnections
 
-def start_ns(max_connections=None):
+def start_ns(max_allowed_connections=None):
     if pyutilib.pyro.Pyro is not None:
-        set_maxconnections(max_connections=max_connections)
+        set_maxconnections(max_allowed_connections=max_allowed_connections)
         pyutilib.pyro.Pyro.naming.main(sys.argv[1:])
     else:
         raise ImportError("Pyro or Pyro4 is not installed")
