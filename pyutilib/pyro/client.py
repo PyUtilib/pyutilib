@@ -33,7 +33,7 @@ class Client(object):
                  host=None,
                  num_dispatcher_tries=30,
                  caller_name="Client",
-                 dispatcher_uri=None):
+                 dispatcher=None):
 
         if _pyro is None:
             raise ImportError("Pyro or Pyro4 is not available")
@@ -49,8 +49,9 @@ class Client(object):
         if self.ns is None:
             raise RuntimeError("Client failed to locate Pyro name "
                                "server on the network!")
+        self.CLIENTNAME = "%d@%s" % (os.getpid(), socket.gethostname())
         self.dispatcher = None
-        if dispatcher_uri is None:
+        if dispatcher is None:
             print('Client attempting to find Pyro dispatcher object...')
             self.URI = None
             cumulative_sleep_time = 0.0
@@ -75,12 +76,24 @@ class Client(object):
             if self.URI is None:
                 print('Client could not find dispatcher object - giving up')
                 raise SystemExit
+
+            # connect to the dispatcher
+            if using_pyro3:
+                self.dispatcher = _pyro.core.getProxyForURI(self.URI)
+            else:
+                self.dispatcher = _pyro.Proxy(self.URI)
+
+            print("Connection to dispatch server established after %d "
+                  "attempts and %5.2f seconds - this is client: %s"
+                  % (i+1, cumulative_sleep_time, self.CLIENTNAME))
         else:
-            self.URI = dispatcher_uri
+            self.dispatcher = dispatcher
+            if using_pyro4:
+                self.URI = self.dispatcher._pyroUri
+            else:
+                self.URI = self.dispatcher.URI
             print('Client assigned dispatcher with URI=%s'
-                  % (dispatcher_uri))
-            i = 0
-            cumulative_sleep_time = 0.0
+                  % (self.URI))
 
         # There is no need to retain the proxy connection to the
         # nameserver, so free up resources on the nameserver thread
@@ -88,17 +101,6 @@ class Client(object):
             self.ns._pyroRelease()
         else:
             self.ns._release()
-
-        # connect to the dispatcher
-        if using_pyro3:
-            self.dispatcher = _pyro.core.getProxyForURI(self.URI)
-        else:
-            self.dispatcher = _pyro.Proxy(self.URI)
-
-        self.CLIENTNAME = "%d@%s" % (os.getpid(), socket.gethostname())
-        print("Connection to dispatch server established after %d "
-              "attempts and %5.2f seconds - this is client: %s"
-              % (i+1, cumulative_sleep_time, self.CLIENTNAME))
 
     def close(self):
         if self.dispatcher is not None:
