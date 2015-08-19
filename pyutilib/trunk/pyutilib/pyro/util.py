@@ -196,7 +196,8 @@ def set_maxconnections(max_allowed_connections=None):
     else:
         print("Overriding %s default for maximum number of proxy "
               "connections to %s, based on specification provided by "
-              "max_allowed_connections keyword")
+              "max_allowed_connections keyword"
+              % ("Pyro" if using_pyro3 else "Pyro4", max_allowed_connections))
         if using_pyro3:
             _pyro.config.PYRO_MAXCONNECTIONS = max_allowed_connections + 1
         else:
