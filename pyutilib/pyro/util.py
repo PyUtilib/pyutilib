@@ -169,30 +169,35 @@ def shutdown_pyro_components(host=None, num_retries=30):
         print("*** NameServer must be shutdown manually when using Pyro4 ***")
         print("")
 
-def set_maxconnections(max_connections=None):
+def set_maxconnections(max_allowed_connections=None):
 
     #
-    # **NOTE: We add 1 to this setting so that it corresponds to the
-    #         number of workers that can be connected. This makes
-    #         more sense from a user perspective. If this is not done,
-    #         setting max connections to something like 1, will not
-    #         allow any workers to connect.
+    # **NOTE: For some reason with Pyro3 we need to add 1 to this
+    #         option in order to to get behavior that makes sense
+    #         and matches behavior with Pyro4. For instance,
+    #         running a dispatcher with a single client and a single
+    #         server requires PYRO_MAXCONNECTIONS=3 with Pyro3 and
+    #         requires THREADPOOL_SIZE=2 with Pyro4.
     #
-    if max_connections is None:
+    if max_allowed_connections is None:
         max_pyro_connections_envname = "PYUTILIB_PYRO_MAXCONNECTIONS"
         if max_pyro_connections_envname in os.environ:
             new_val = int(os.environ[max_pyro_connections_envname])
-            print("Setting maximum number of connections to dispatcher to "
-                  +str(new_val)+", based on specification provided by "
-                  +max_pyro_connections_envname+" environment variable")
+            print("Overriding %s default for maximum number of proxy "
+                  "connections to %s, based on specification provided by "
+                  "%s environment variable."
+                  % ("Pyro" if using_pyro3 else "Pyro4",
+                     new_val,
+                     max_pyro_connections_envname))
             if using_pyro3:
                 _pyro.config.PYRO_MAXCONNECTIONS = new_val + 1
             else:
                 _pyro.config.THREADPOOL_SIZE = new_val
     else:
-        print("Setting maximum number of connections to dispatcher to "
-              +str(max_connections)+", based on dispatcher max_connections keyword")
+        print("Overriding %s default for maximum number of proxy "
+              "connections to %s, based on specification provided by "
+              "max_allowed_connections keyword")
         if using_pyro3:
-            _pyro.config.PYRO_MAXCONNECTIONS = max_connections + 1
+            _pyro.config.PYRO_MAXCONNECTIONS = max_allowed_connections + 1
         else:
-            _pyro.config.THREADPOOL_SIZE = max_connections
+            _pyro.config.THREADPOOL_SIZE = max_allowed_connections
