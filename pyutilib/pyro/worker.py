@@ -36,9 +36,14 @@ class TaskWorkerBase(object):
                  host=None,
                  num_dispatcher_tries=30,
                  caller_name="Task Worker",
-                 verbose=False):
+                 verbose=False,
+                 name=None):
 
         self._verbose = verbose
+        # A worker can set this flag
+        # if an error occurs during processing
+        self._worker_error = False
+        self._worker_shutdown = False
 
         if _pyro is None:
             raise ImportError("Pyro or Pyro4 is not available")
@@ -48,6 +53,12 @@ class TaskWorkerBase(object):
         if using_pyro3:
             _pyro.core.initClient()
 
+        if name is None:
+            self.WORKERNAME = "Worker_%d@%s" % (os.getpid(),
+                                                socket.gethostname())
+        else:
+            self.WORKERNAME = name
+
         self.ns = get_nameserver(host, caller_name=caller_name)
         if self.ns is None:
             raise RuntimeError("TaskWorkerBase failed to locate "
@@ -56,24 +67,25 @@ class TaskWorkerBase(object):
         cumulative_sleep_time = 0.0
         self.dispatcher = None
         for i in xrange(0, num_dispatcher_tries):
-            for name, uri in get_dispatchers(group=group, ns=self.ns):
+            dispatchers = get_dispatchers(group=group, ns=self.ns)
+            random.shuffle(dispatchers)
+            for name, uri in dispatchers:
                 try:
                     if using_pyro3:
                         self.dispatcher = _pyro.core.getProxyForURI(uri)
-                        # This forces Pyro3 to actually attempt to use
-                        # the dispatcher proxy, which results in a
-                        # connection denied error if the dispatcher
-                        # proxy has reached its maximum allowed
-                        # connections. DO NOT DELETE
-                        self.dispatcher.queues_with_results()
                     else:
                         self.dispatcher = _pyro.Proxy(uri)
-                        self.dispatcher._pyroTimeout = 1
-                        self.dispatcher._pyroBind()
+                        self.dispatcher._pyroTimeout = 10
+                    if not self.dispatcher.register_worker(self.WORKERNAME):
+                        if using_pyro4:
+                            self.dispatcher._pyroRelease()
+                        else:
+                            self.dispatcher._release()
+                        self.dispatcher = None
+                    else:
+                        break
                 except _connection_problem:
                     self.dispatcher = None
-                else:
-                    break
             if self.dispatcher is not None:
                 if using_pyro4:
                     self.dispatcher._pyroTimeout = None
@@ -100,8 +112,6 @@ class TaskWorkerBase(object):
             self.ns._release()
             URI = self.dispatcher.URI
 
-        self.WORKERNAME = "Worker_%d@%s" % (os.getpid(),
-                                            socket.gethostname())
         print("Connection to dispatch server %s established "
               "after %d attempts and %5.2f seconds - "
               "this is worker: %s"
@@ -111,6 +121,15 @@ class TaskWorkerBase(object):
         # We use this functionality to distribute workers across
         # multiple dispatchers based off of denied connections
 
+    def close(self):
+        if self.dispatcher is not None:
+            self.dispatcher.unregister_worker(self.WORKERNAME)
+            if using_pyro4:
+                self.dispatcher._pyroRelease()
+            else:
+                self.dispatcher._release()
+        self.dispather = None
+
     def _get_request_type(self):
         raise NotImplementedError("This is an abstract method")
 
@@ -119,12 +138,10 @@ class TaskWorkerBase(object):
         print("Listening for work from dispatcher...")
 
         while 1:
-            current_type, blocking, timeout = \
-                self._get_request_type()
+            self._worker_error = False
+            self._worker_shutdown = False
             try:
-                task = self.dispatcher.get_task(type=current_type,
-                                                block=blocking,
-                                                timeout=timeout)
+                tasks = self.dispatcher.get_tasks((self._get_request_type(),))
             except _connection_problem as e:
                 x = sys.exc_info()[1]
                 # this can happen if the dispatcher is overloaded
@@ -138,12 +155,38 @@ class TaskWorkerBase(object):
                 sleep_interval = random.uniform(0.05, 0.15)
                 time.sleep(sleep_interval) 
             else:
-                if task is not None:
+                if len(tasks) > 0:
+                    assert len(tasks) == 1
+                    if self._verbose:
+                        print("Processing %s tasks from queue %s"
+                              % (len(tasks.values()[0]),
+                                 tasks.keys()[0]))
 
-                    task['result'] = self.process(task['data'])
-                    if task['generateResponse']:
-                        task['processedBy'] = self.WORKERNAME
-                        self.dispatcher.add_result(task, type=current_type)
+                    results = dict.fromkeys(tasks)
+                    # process tasks by type in order of increasing id
+                    for type_name, type_tasks in iteritems(tasks):
+                        type_results = results[type_name] = []
+                        for task in sorted(type_tasks, key=lambda x: x['id']):
+                            task['result'] = self.process(task['data'])
+                            if self._worker_error:
+                                print("Task worker reported error during processing "
+                                      "of task with id=%s. Any remaining tasks in "
+                                      "local queue will be ignored.")
+                                break
+                            if self._worker_shutdown:
+                                self.close()
+                                return
+                            if task['generateResponse']:
+                                task['processedBy'] = self.WORKERNAME
+                                type_results.append(task)
+
+                        if len(type_results) == 0:
+                            del results[type_name]
+                        if self._worker_error:
+                            break
+
+                    if len(results):
+                        self.dispatcher.add_results(results)
 
 class TaskWorker(TaskWorkerBase):
 
@@ -238,13 +281,10 @@ class MultiTaskWorker(TaskWorkerBase):
         print("Listening for work from dispatcher...")
 
         while 1:
-            tasks = []
+            self._worker_error = False
+            self._worker_shutdown = False
             try:
                 tasks = self.dispatcher.get_tasks(self.current_type_order())
-                #if using_pyro4:
-                #    self.dispatcher._pyroRelease()
-                #else:
-                #    self.dispatcher._release()
             except _connection_problem as e:
                 x = sys.exc_info()[1]
                 # this can happen if the dispatcher is overloaded
@@ -272,11 +312,22 @@ class MultiTaskWorker(TaskWorkerBase):
                         type_results = results[type_name] = []
                         for task in sorted(type_tasks, key=lambda x: x['id']):
                             task['result'] = self.process(task['data'])
+                            if self._worker_error:
+                                print("Task worker reported error during processing "
+                                      "of task with id=%s. Any remaining tasks in "
+                                      "local queue will be ignored.")
+                                break
+                            if self._worker_shutdown:
+                                self.close()
+                                return
                             if task['generateResponse']:
                                 task['processedBy'] = self.WORKERNAME
                                 type_results.append(task)
+
                         if len(type_results) == 0:
                             del results[type_name]
+                        if self._worker_error:
+                            break
 
                     if len(results):
                         self.dispatcher.add_results(results)
