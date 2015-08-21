@@ -26,7 +26,7 @@ from six.moves import xrange
 _connection_problem = None
 if using_pyro3:
     _connection_problem = _pyro.errors.ConnectionDeniedError
-else:
+elif using_pyro4:
     _connection_problem = _pyro.errors.TimeoutError
 
 class TaskWorkerBase(object):
