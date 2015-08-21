@@ -55,7 +55,7 @@ def main():
 
     if _pyro is None:
         raise ImportError("Pyro or Pyro4 is not available")
-    pyutilib.pyro.DispatcherServer(
+    return pyutilib.pyro.DispatcherServer(
         host=host,
         verbose=verbose,
         max_allowed_connections=options.max_allowed_connections,
