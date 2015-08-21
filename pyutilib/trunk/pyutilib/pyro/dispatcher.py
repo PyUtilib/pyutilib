@@ -290,23 +290,9 @@ def DispatcherServer(group=":PyUtilibServer",
 
     if clear_group:
         for name, uri in get_dispatchers(group=group, ns=ns):
-            print("Multiple dispatchers not allowed")
-            print("Shutting down dispatcher at URI="+str(uri))
-            if using_pyro3:
-                try:
-                    proxy = _pyro.core.getProxyForURI(uri)
-                    proxy.shutdown()
-                    proxy._release()
-                except:
-                    pass
-            elif using_pyro4:
-                try:
-                    proxy = _pyro.Proxy(uri)
-                    proxy.shutdown()
-                    proxy._pyroRelease()
-                    ns.remove(name)
-                except:
-                    pass
+            print("Multiple dispatchers not allowed.")
+            print("dispatch_srvr is shutting down...")
+            return 1
 
     if using_pyro3:
         daemon = _pyro.core.Daemon()
@@ -352,4 +338,4 @@ def DispatcherServer(group=":PyUtilibServer",
         ns._release()
 
     print("Dispatcher is ready.")
-    daemon.requestLoop()
+    return daemon.requestLoop()
