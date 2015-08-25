@@ -15,6 +15,7 @@ import time
 
 from six import iteritems
 
+import pyutilib.pyro.util
 from pyutilib.pyro import get_nameserver, using_pyro3, using_pyro4
 from pyutilib.pyro import Pyro as _pyro
 
@@ -56,15 +57,19 @@ class Client(object):
             self.URI = None
             cumulative_sleep_time = 0.0
             for i in xrange(0,num_dispatcher_tries):
-                try:
-                    if using_pyro3:
-                        self.URI = self.ns.resolve(group+".dispatcher")
-                    else:
-                        self.URI = self.ns.lookup(group+".dispatcher")
+
+                dispatchers = pyutilib.pyro.util.get_dispatchers(
+                    host=host,
+                    caller_name="Client")
+
+                for (name, uri) in dispatchers:
+                    self.URI = uri
                     print("Dispatcher Object URI: "+str(self.URI))
                     break
-                except _pyro.errors.NamingError:
-                    pass
+
+                if self.URI is not None:
+                    break
+
                 sleep_interval = 10.0
                 print("Client failed to find dispatcher object from name "
                       "server after %d attempts and %5.2f seconds - trying "
