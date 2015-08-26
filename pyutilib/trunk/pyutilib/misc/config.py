@@ -39,6 +39,7 @@ logger = logging.getLogger('pyutilib.misc')
 def _munge_name(name, space_to_dash=True):
     if space_to_dash:
         name = re.sub( r'\s', '-', name )
+    name = re.sub( r'_', '-', name )
     return re.sub( r'[^a-zA-Z0-9-_]', '_', name )
 
 class ConfigBase(object):
