@@ -333,17 +333,11 @@ class MultiTaskWorker(TaskWorkerBase):
                         self.dispatcher.add_results(results)
 
 def TaskWorkerServer(cls, **kwds):
-    host=None
-    if 'argv' in kwds:
-        argv = kwds['argv']
-        if len(argv) == 2:
-            host=argv[1]
-        kwds['host'] = host
-        del kwds['argv']
     worker = cls(**kwds)
     if worker.ns is None:
         return
     try:
         worker.run()
     except _pyro.errors.ConnectionClosedError:
-        print("Lost connection to dispatch server - shutting down...")
+        print("Lost connection to dispatch server "
+              "- shutting down...")
