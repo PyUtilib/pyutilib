@@ -43,11 +43,13 @@ def main():
     if len(args) == 2:
         host=sys.argv[1]
         if host == "None":
-           host=None
+            host=None
         verbose=bool(sys.argv[2])
         print("DEPRECATION WARNING: dispatch_srvr is now option driven (see dispatch_srvr --help)")
     elif len(args) == 1:
         host=sys.argv[1]
+        if host == "None":
+            host=None
         print("DEPRECATION WARNING: dispatch_srvr is now option driven (see dispatch_srvr --help)")
     else:
         host = options.hostname
