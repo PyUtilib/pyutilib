@@ -44,6 +44,10 @@ class TaskWorkerBase(object):
         # if an error occurs during processing
         self._worker_error = False
         self._worker_shutdown = False
+        # sets whether or not multiple tasks should
+        # be gathered from the worker queue during
+        # each request for work
+        self._bulk_task_collection = False
 
         if _pyro is None:
             raise ImportError("Pyro or Pyro4 is not available")
@@ -141,7 +145,14 @@ class TaskWorkerBase(object):
             self._worker_error = False
             self._worker_shutdown = False
             try:
-                tasks = self.dispatcher.get_tasks((self._get_request_type(),))
+                tasks = {}
+                if self._bulk_task_collection:
+                    tasks = self.dispatcher.get_tasks((self._get_request_type(),))
+                else:
+                    _type, _block, _timeout = self._get_request_type()
+                    _task = self.dispatcher.get_task(type=_type, block=_block, timeout=_timeout)
+                    if _task is not None:
+                        tasks[_type] = [_task]
             except _connection_problem as e:
                 x = sys.exc_info()[1]
                 # this can happen if the dispatcher is overloaded
@@ -153,12 +164,12 @@ class TaskWorkerBase(object):
                       "environment.")
                 # sleep for a bit longer than normal, for obvious reasons
                 sleep_interval = random.uniform(0.05, 0.15)
-                time.sleep(sleep_interval) 
+                time.sleep(sleep_interval)
             else:
                 if len(tasks) > 0:
                     assert len(tasks) == 1
                     if self._verbose:
-                        print("Processing %s tasks from queue %s"
+                        print("Processing %s task(s) from queue %s"
                               % (len(tasks.values()[0]),
                                  tasks.keys()[0]))
 
