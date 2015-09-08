@@ -18,16 +18,10 @@ import random
 
 from pyutilib.pyro import get_nameserver, using_pyro3, using_pyro4
 from pyutilib.pyro import Pyro as _pyro
-from pyutilib.pyro.util import get_dispatchers
+from pyutilib.pyro.util import get_dispatchers, _connection_problem
 
 from six import advance_iterator, iteritems, itervalues
 from six.moves import xrange
-
-_connection_problem = None
-if using_pyro3:
-    _connection_problem = _pyro.errors.ConnectionDeniedError
-elif using_pyro4:
-    _connection_problem = _pyro.errors.TimeoutError
 
 class TaskWorkerBase(object):
 

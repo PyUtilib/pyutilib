@@ -23,6 +23,12 @@ if sys.version_info >= (3,0):
 else:
     import Queue
 
+_connection_problem = None
+if using_pyro3:
+    _connection_problem = (_pyro.errors.ConnectionDeniedError, _pyro.errors.ProtocolError)
+else:
+    _connection_problem = _pyro.errors.TimeoutError
+
 def get_nameserver(host=None, num_retries=30, caller_name="Unknown"):
 
     if _pyro is None:
@@ -42,10 +48,6 @@ def get_nameserver(host=None, num_retries=30, caller_name="Unknown"):
 
     ns = None
 
-    if using_pyro3:
-        connection_problem = _pyro.errors.ConnectionDeniedError
-    else:
-        connection_problem = _pyro.errors.TimeoutError
     for i in xrange(0, num_retries+1):
         try:
             if using_pyro3:
@@ -58,7 +60,7 @@ def get_nameserver(host=None, num_retries=30, caller_name="Unknown"):
             break
         except _pyro.errors.NamingError:
             pass
-        except connection_problem:
+        except _connection_problem:
             # this can occur if the server is too busy.
             pass
 
@@ -73,11 +75,14 @@ def get_nameserver(host=None, num_retries=30, caller_name="Unknown"):
         #      number of clients.
         if i < num_retries:
             sleep_interval = random.uniform(1.0, timeout_upper_bound)
-            print("%s failed to locate name server after %d attempts - trying again in %5.2f seconds." % (caller_name, i+1,sleep_interval))
+            print("%s failed to locate name server after %d attempts - "
+                  "trying again in %5.2f seconds."
+                  % (caller_name, i+1, sleep_interval))
             time.sleep(sleep_interval)
 
     if ns is None:
-        print("%s could not locate nameserver (attempts=%d)" % (caller_name,num_retries+1))
+        print("%s could not locate nameserver (attempts=%d)"
+              % (caller_name,num_retries+1))
         raise SystemExit
 
     return ns
