@@ -264,13 +264,11 @@ class Dispatcher(base):
         # the queue may change while iterating.
         #
         for queue_name, result_queue in list(self._result_queue.items()):
-
             while result_queue.qsize() > 0:
                 try:
                     results.append(result_queue.get(block=False, timeout=0))
                 except Queue.Empty:
                     pass
-
         return results
 
 
