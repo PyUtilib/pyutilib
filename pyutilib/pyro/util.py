@@ -26,7 +26,7 @@ else:
 _connection_problem = None
 if using_pyro3:
     _connection_problem = (_pyro.errors.ConnectionDeniedError, _pyro.errors.ProtocolError)
-else:
+elif using_pyro4:
     _connection_problem = _pyro.errors.TimeoutError
 
 def get_nameserver(host=None, num_retries=30, caller_name="Unknown"):
