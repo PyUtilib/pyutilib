@@ -164,8 +164,8 @@ class TaskWorkerBase(object):
                     assert len(tasks) == 1
                     if self._verbose:
                         print("Processing %s task(s) from queue %s"
-                              % (len(tasks.values()[0]),
-                                 tasks.keys()[0]))
+                              % (len(list(tasks.values())[0]),
+                                 list(tasks.keys())[0]))
 
                     results = dict.fromkeys(tasks)
                     # process tasks by type in order of increasing id
