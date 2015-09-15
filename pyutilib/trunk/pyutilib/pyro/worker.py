@@ -174,6 +174,8 @@ class TaskWorkerBase(object):
                         for task in sorted(type_tasks, key=lambda x: x['id']):
                             task['result'] = self.process(task['data'])
                             if self._worker_error:
+                                task['processedBy'] = self.WORKERNAME
+                                type_results.append(task)
                                 print("Task worker reported error during processing "
                                       "of task with id=%s. Any remaining tasks in "
                                       "local queue will be ignored.")
@@ -317,7 +319,9 @@ class MultiTaskWorker(TaskWorkerBase):
                         type_results = results[type_name] = []
                         for task in sorted(type_tasks, key=lambda x: x['id']):
                             task['result'] = self.process(task['data'])
-                            if self._worker_error:
+                            if self._worker_error
+                                task['processedBy'] = self.WORKERNAME
+                                type_results.append(task)
                                 print("Task worker reported error during processing "
                                       "of task with id=%s. Any remaining tasks in "
                                       "local queue will be ignored.")
