@@ -23,6 +23,17 @@ from pyutilib.pyro.util import get_dispatchers, _connection_problem
 from six import advance_iterator, iteritems, itervalues
 from six.moves import xrange
 
+#
+# With Pyro3 we check for a different set of errors
+# in the run loop so that we don't ignore shutdown
+# requests from the dispatcher
+#
+_worker_connection_problem = None
+if using_pyro3:
+    _worker_connection_problem = (_pyro.errors.TimeoutError, _pyro.errors.ConnectionDeniedError)
+elif using_pyro4:
+    _worker_connection_problem = _pyro.errors.TimeoutError
+
 class TaskWorkerBase(object):
 
     def __init__(self,
@@ -147,7 +158,7 @@ class TaskWorkerBase(object):
                     _task = self.dispatcher.get_task(type=_type, block=_block, timeout=_timeout)
                     if _task is not None:
                         tasks[_type] = [_task]
-            except _connection_problem as e:
+            except _worker_connection_problem as e:
                 x = sys.exc_info()[1]
                 # this can happen if the dispatcher is overloaded
                 print("***WARNING: Connection to dispatcher server "
@@ -292,7 +303,7 @@ class MultiTaskWorker(TaskWorkerBase):
             self._worker_shutdown = False
             try:
                 tasks = self.dispatcher.get_tasks(self.current_type_order())
-            except _connection_problem as e:
+            except _worker_connection_problem as e:
                 x = sys.exc_info()[1]
                 # this can happen if the dispatcher is overloaded
                 print("***WARNING: Connection to dispatcher server "
