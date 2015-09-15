@@ -35,6 +35,14 @@ else:
     base = object
     oneway = lambda method: method
 
+def _clear_queue_threadsafe(q):
+    while not q.empty():
+        try:
+            q.get(False)
+        except Queue.Empty:
+            continue
+        q.task_done()
+
 class Dispatcher(base):
 
     def __init__(self, **kwds):
@@ -51,10 +59,9 @@ class Dispatcher(base):
         if self._verbose:
            print("Verbose output enabled...")
 
-    def acquire_available_workers(self):
-        worker_names = self._registered_workers - self._acquired_workers
-        self._acquired_workers.update(worker_names)
-        return worker_names
+    #
+    # One-way methods (Pyro4 only)
+    #
 
     @oneway
     def release_acquired_workers(self, names):
@@ -64,25 +71,12 @@ class Dispatcher(base):
                              "were not registered")
         self._acquired_workers.difference_update(names)
 
-    def register_worker(self, name):
-        if name in self._registered_workers:
-            raise ValueError("Worker name '%s' has already been registered")
-        if (self._worker_limit is None) or \
-           (len(self._registered_workers) < self._worker_limit):
-            self._registered_workers.add(name)
-            if self._verbose:
-                print("Registering worker %s with name: %s"
-                      % (len(self._registered_workers), name))
-            return True
-        return False
-
     @oneway
     def unregister_worker(self, name):
         if name not in self._registered_workers:
             raise ValueError("Worker name '%s' has not been registered")
         if self._verbose:
-            print("Unregistering worker %s with name: %s"
-                  % (len(self._registered_workers.index(name)+1), name))
+            print("Unregistering worker with name: %s" % (name))
         self._registered_workers.remove(name)
 
     @oneway
@@ -92,27 +86,6 @@ class Dispatcher(base):
             self.getDaemon().shutdown()
         else:
             self._pyroDaemon.shutdown()
-
-    @oneway
-    def clear_all_queues(self):
-        self._task_queue = defaultdict(Queue.Queue)
-        self._result_queue = defaultdict(Queue.Queue)
-
-    @oneway
-    def clear_queue(self, type=None):
-        try:
-            del self._task_queue[type]
-        except KeyError:
-            pass
-        try:
-            del self._result_queue[type]
-        except KeyError:
-            pass
-
-    @oneway
-    def clear_queues(self, types):
-        for type in types:
-            self.clear_queue(type=type)
 
     @oneway
     def add_task(self, task, type=None):
@@ -127,11 +100,116 @@ class Dispatcher(base):
     @oneway
     def add_tasks(self, tasks):
         if self._verbose:
-           print("Received request to add bulk task set")
+           print("Received request to add bulk task set. Task ids=%s"
+                 % (dict((task_type, [task['id'] for task in tasks[task_type]])
+                         for task_type in tasks)))
         for task_type in tasks:
             task_queue = self._task_queue[task_type]
             for task in tasks[task_type]:
                 task_queue.put(task)
+
+    @oneway
+    def add_result(self, result, type=None):
+        if self._verbose:
+           print("Received request to add result with "
+                 "result="+str(result)+"; queue type="+str(type))
+        self._result_queue[type].put(result)
+
+    # process a set of results in one shot - the input
+    # is a dictionary from queue type (including None)
+    # to a list of results to be added to that queue.
+    @oneway
+    def add_results(self, results):
+        if self._verbose:
+            print("Received request to add bulk result set for task ids=%s"
+                 % (dict((result_type, [result['id']
+                                        for result in results[result_type]])
+                         for result_type in results)))
+        for result_type in results:
+            result_queue = self._result_queue[result_type]
+            for result in results[result_type]:
+                result_queue.put(result)
+
+    #
+    # Methods that do not return anything but are
+    # not marked oneway for Pyro4 to avoid race conditions
+    #
+
+    def clear_queue(self, type=None):
+        if self._verbose:
+           print("Received request to clear task and result "
+                 "queues for queue type="+str(type))
+
+        try:
+            _clear_queue_threadsafe(self._task_queue[type])
+        except KeyError:
+            pass
+        try:
+            _clear_queue_threadsafe(self._result_queue[type])
+        except KeyError:
+            pass
+
+    def clear_queues(self, types):
+        for type in types:
+            self.clear_queue(type=type)
+
+    def clear_all_queues(self):
+        self._task_queue = defaultdict(Queue.Queue)
+        self._result_queue = defaultdict(Queue.Queue)
+
+    def clear_task_queue(self, type=None):
+        if self._verbose:
+           print("Received request to clear task "
+                 "queue for queue type="+str(type))
+        try:
+            _clear_queue_threadsafe(self._task_queue[type])
+        except KeyError:
+            pass
+
+    def clear_task_queues(self, types):
+        for type in types:
+            self.clear_task_queue(type=type)
+
+    def clear_all_task_queues(self):
+        self._task_queue = defaultdict(Queue.Queue)
+
+    def clear_result_queue(self, type=None):
+        if self._verbose:
+           print("Received request to clear result "
+                 "queue for queue type="+str(type))
+        try:
+            _clear_queue_threadsafe(self._result_queue[type])
+        except KeyError:
+            pass
+
+    def clear_result_queues(self, types):
+        for type in types:
+            self.clear_result_queue(type=type)
+
+    def clear_all_result_queues(self):
+        self._result_queue = defaultdict(Queue.Queue)
+
+    #
+    # Methods that do return something, so can't
+    # be marked as oneway for Pyro4
+    #
+
+    def acquire_available_workers(self):
+        worker_names = self._registered_workers - self._acquired_workers
+        self._acquired_workers.update(worker_names)
+        return worker_names
+
+    def register_worker(self, name):
+        if name in self._registered_workers:
+            raise ValueError("Worker name '%s' has already been registered")
+        if (self._worker_limit is None) or \
+           (len(self._registered_workers) < self._worker_limit):
+            self._registered_workers.add(name)
+            if self._verbose:
+                print("Registering worker %s with name: %s"
+                      % (len(self._registered_workers), name))
+            return True
+        return False
 
     def get_task(self, type=None, block=True, timeout=5):
         if self._verbose:
@@ -139,8 +217,9 @@ class Dispatcher(base):
                  "queue type="+str(type)+"; block="+str(block)+
                  "; timeout="+str(timeout)+" seconds")
         try:
-            return self._task_queue[type].get(block=block,
+            task = self._task_queue[type].get(block=block,
                                               timeout=timeout)
+            return task
         except Queue.Empty:
             return None
 
@@ -168,25 +247,6 @@ class Dispatcher(base):
                 ret.setdefault(type, []).extend(task_list)
 
         return ret
-
-    @oneway
-    def add_result(self, result, type=None):
-        if self._verbose:
-           print("Received request to add result with "
-                 "result="+str(result)+"; queue type="+str(type))
-        self._result_queue[type].put(result)
-
-    # process a set of results in one shot - the input
-    # is a dictionary from queue type (including None)
-    # to a list of results to be added to that queue.
-    @oneway
-    def add_results(self, results):
-        if self._verbose:
-           print("Received request to add bulk result set")
-        for result_type in results:
-            result_queue = self._result_queue[result_type]
-            for result in results[result_type]:
-                result_queue.put(result)
 
     def get_result(self, type=None, block=True, timeout=5):
         if self._verbose:
@@ -270,7 +330,6 @@ class Dispatcher(base):
                 except Queue.Empty:
                     pass
         return results
-
 
 def DispatcherServer(group=":PyUtilibServer",
                      host=None,
