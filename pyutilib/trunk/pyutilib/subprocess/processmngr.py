@@ -19,12 +19,20 @@ import subprocess
 import copy
 from six import itervalues
 from threading import Thread
-if subprocess.mswindows and sys.version_info[0:2] >= (2,5):
-    import ctypes
+
+# subprocess has not attribute mswindows on Python3.5
+if sys.version_info[0:2] >= (3,5):
+    _subprocess_mswindows = subprocess._mswindows
+else:
+    _subprocess_mswindows = subprocess.mswindows
+
+if sys.version_info[0:2] >= (2,5):
+    if _subprocess_mswindows:
+        import ctypes
 
 _peek_available = True
 try:
-    if subprocess.mswindows:
+    if _subprocess_mswindows:
         from msvcrt import get_osfhandle
         from win32pipe import PeekNamedPipe
         from win32file import ReadFile
@@ -66,7 +74,7 @@ def kill_process(process, sig=signal.SIGTERM, verbose=False):
     pid = process.pid
     if GlobalData.debug or verbose:
         print("Killing process %d with signal %d" % (pid,sig))
-    if subprocess.mswindows:
+    if _subprocess_mswindows:
         if sys.version_info[0:2] < (2,5):
             os.system("taskkill /t /f /pid "+repr(pid))
         else:
@@ -213,7 +221,7 @@ ERROR: pyutilib.subprocess: output stream closed before all subprocess output
 """The following undecoded unicode output was also present:
             '%s'
 """ % (data,))
-        
+
 #
 # A function used to read in data from two independent streams and push
 # each to 1+ output pipes.  Managing this in a single thread allows our
@@ -229,7 +237,7 @@ def _merged_reader(*args):
     class StreamData(object):
         __slots__ = ( 'read','output','unbuffer','buf','data' )
         def __init__(self, *args):
-            if subprocess.mswindows:
+            if _subprocess_mswindows:
                 self.read = get_osfhandle( args[1] )
             else:
                 self.read = args[1]
@@ -252,7 +260,7 @@ def _merged_reader(*args):
                     s.flush()
                 except ValueError:
                     pass
-        
+
     encoding = sys.__stdout__.encoding
     if encoding is None:
         encoding = 'utf-8'
@@ -266,7 +274,7 @@ def _merged_reader(*args):
     noop = []
 
     while handles:
-        if subprocess.mswindows:
+        if _subprocess_mswindows:
             new_data = None
             for h in handles:
                 try:
@@ -326,7 +334,7 @@ ERROR: pyutilib.subprocess: output stream closed before all subprocess output
 """The following undecoded unicode output was also present:
             '%s'
 """ % (data,))
-        
+
 #
 # A mock-up of the _merged_reader for platforms (or installations) that
 # lack working select/peek implementations.  Note that this function
@@ -365,7 +373,7 @@ def run_command(cmd, outfile=None, cwd=None, ostream=None, stdin=None, stdout=No
         _cmd = list(cmd)
     else:
         _cmd = quote_split(cmd.strip())
-        
+
     #
     # Setup memmoon
     #
@@ -471,7 +479,7 @@ def run_command(cmd, outfile=None, cwd=None, ostream=None, stdin=None, stdout=No
             #
             # Redirect IO to the stdout_arg/stderr_arg files
             #
-            process = SubprocessMngr( _cmd, stdin=stdin, stdout=stdout_arg, 
+            process = SubprocessMngr( _cmd, stdin=stdin, stdout=stdout_arg,
                                       stderr=stderr_arg, env=env, shell=shell )
             GlobalData.current_process = process.process
             rc = process.wait(timelimit)
@@ -487,7 +495,7 @@ def run_command(cmd, outfile=None, cwd=None, ostream=None, stdin=None, stdout=No
             for fid in (0,1):
                 if fid == 0:
                     s, raw = stdout_arg, sys.stdout
-                else: 
+                else:
                     s, raw = stderr_arg, sys.stderr
                 try:
                     tee_fid = tee[fid]
@@ -510,14 +518,14 @@ def run_command(cmd, outfile=None, cwd=None, ostream=None, stdin=None, stdout=No
                     # we can't just check for the attribute: we *must*
                     # call the method and see if we get an exception.
                     try:
-                        s.fileno() 
+                        s.fileno()
                         out_fd.append(s)
                     except:
                         r, w = os.pipe()
                         out_fd.append(w)
                         out_th.append(((fid,r,s), r, w))
                         #th = Thread(target=thread_reader, args=(r,None,s,fid))
-                        #out_th.append((th, r, w))                        
+                        #out_th.append((th, r, w))
                 else:
                     r, w = os.pipe()
                     out_fd.append(w)
@@ -525,7 +533,7 @@ def run_command(cmd, outfile=None, cwd=None, ostream=None, stdin=None, stdout=No
                     #th = Thread( target=thread_reader, args=(r,raw,s,fid) )
                     #out_th.append((th, r, w))
             #
-            process = SubprocessMngr(_cmd, stdin=stdin, stdout=out_fd[0], 
+            process = SubprocessMngr(_cmd, stdin=stdin, stdout=out_fd[0],
                                      stderr=out_fd[1], env=env, shell=shell)
             GlobalData.current_process = process.process
             GlobalData.signal_handler_busy=False
@@ -607,11 +615,10 @@ run=run_command
 #
 # Setup the timer
 #
-if subprocess.mswindows:
+if _subprocess_mswindows:
     timer = time.clock
 else:
     timer = time.time
-
 
 class SubprocessMngr(object):
 
@@ -639,7 +646,7 @@ class SubprocessMngr(object):
         #
         # Launch subprocess using a subprocess.Popen object
         #
-        if subprocess.mswindows:
+        if _subprocess_mswindows:
             #
             # Launch without console on MSWindows
             #
@@ -705,7 +712,7 @@ class SubprocessMngr(object):
             if self.stdin is not None:
                 # *Py3k: bytes_cast does no conversion for python 2.*, casts to bytes for 3.*
                 self.process.stdin.write(bytes_cast(self.stdin))
-            
+
             while timer() < endtime:
                 status = self.process.poll()
                 if status is not None:
@@ -763,7 +770,7 @@ if __name__ == "__main__": #pragma:nocover
     print(foo)
     sys.exit(0)
 
-    if not subprocess.mswindows:
+    if not _subprocess_mswindows:
         foo = SubprocessMngr("ls *py")
         foo.wait()
         print("")
