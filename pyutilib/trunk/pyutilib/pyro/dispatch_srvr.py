@@ -28,8 +28,22 @@ def main():
               "(see --max-allowed-connections)."),
         type="int", default=None)
     parser.add_option(
-        "-n", dest="hostname",
-        help="Hostname where nameserver can be found",
+        "--daemon-host", dest="daemon_host", metavar="HOST",
+        help="Hostname that the dispatcher daemon should bind on",
+        default=None)
+    parser.add_option(
+        "--daemon-port", dest="daemon_port", metavar="PORT",
+        help="Port that the dispatcher daemon should bind on",
+        type="int",
+        default=0)
+    parser.add_option(
+        "-n", "--host", dest="nameserver_host", metavar="HOST",
+        help="Hostname that the nameserver is bound on",
+        default=None)
+    parser.add_option(
+        "-p", "--port", dest="nameserver_port", metavar="PORT",
+        help="Port that the nameserver is bound on",
+        type="int",
         default=None)
     parser.add_option(
         "--allow-multiple-dispatchers", dest="allow_multiple_dispatchers",
@@ -38,27 +52,30 @@ def main():
 
     options, args = parser.parse_args()
     # Handle the old syntax which was purly argument driven
-    # e.g., <hostname> <verbose flag>
+    # e.g., <nameserver-host> <verbose flag>
     verbose = False
     if len(args) == 2:
-        host=sys.argv[1]
-        if host == "None":
-            host=None
+        nameserver_host=sys.argv[1]
+        if nameserver_host == "None":
+            nameserver_host=None
         verbose=bool(sys.argv[2])
         print("DEPRECATION WARNING: dispatch_srvr is now option driven (see dispatch_srvr --help)")
     elif len(args) == 1:
-        host=sys.argv[1]
-        if host == "None":
-            host=None
+        nameserver_host=sys.argv[1]
+        if nameserver_host == "None":
+            nameserver_host=None
         print("DEPRECATION WARNING: dispatch_srvr is now option driven (see dispatch_srvr --help)")
     else:
-        host = options.hostname
+        nameserver_host = options.nameserver_host
         verbose = options.verbose
 
     if _pyro is None:
         raise ImportError("Pyro or Pyro4 is not available")
     return pyutilib.pyro.DispatcherServer(
-        host=host,
+        daemon_host=options.daemon_host,
+        daemon_port=options.daemon_port,
+        nameserver_host=nameserver_host,
+        nameserver_port=options.nameserver_port,
         verbose=verbose,
         max_allowed_connections=options.max_allowed_connections,
         worker_limit=options.worker_limit,

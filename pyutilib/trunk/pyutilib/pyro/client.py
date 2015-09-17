@@ -32,6 +32,7 @@ class Client(object):
                  group=":PyUtilibServer",
                  type=None,
                  host=None,
+                 port=None,
                  num_dispatcher_tries=30,
                  caller_name="Client",
                  dispatcher=None):
@@ -46,21 +47,22 @@ class Client(object):
         if using_pyro3:
             _pyro.core.initClient()
 
-        self.ns = get_nameserver(host, caller_name=caller_name)
-        if self.ns is None:
-            raise RuntimeError("Client failed to locate Pyro name "
-                               "server on the network!")
+        self.ns = None
+
         self.CLIENTNAME = "%d@%s" % (os.getpid(), socket.gethostname())
         self.dispatcher = None
         if dispatcher is None:
+            self.ns = get_nameserver(host=host, port=port, caller_name=caller_name)
+            if self.ns is None:
+                raise RuntimeError("Client failed to locate Pyro name "
+                                   "server on the network!")
             print('Client attempting to find Pyro dispatcher object...')
             self.URI = None
             cumulative_sleep_time = 0.0
             for i in xrange(0,num_dispatcher_tries):
 
                 dispatchers = pyutilib.pyro.util.get_dispatchers(
-                    host=host,
-                    caller_name="Client")
+                    ns = self.ns)
 
                 for (name, uri) in dispatchers:
                     self.URI = uri
@@ -91,7 +93,17 @@ class Client(object):
             print("Connection to dispatch server established after %d "
                   "attempts and %5.2f seconds - this is client: %s"
                   % (i+1, cumulative_sleep_time, self.CLIENTNAME))
+
+            # There is no need to retain the proxy connection to the
+            # nameserver, so free up resources on the nameserver thread
+            if using_pyro4:
+                self.ns._pyroRelease()
+            else:
+                self.ns._release()
+
         else:
+            assert port is None
+            assert host is None
             self.dispatcher = dispatcher
             if using_pyro4:
                 self.URI = self.dispatcher._pyroUri
@@ -99,13 +111,6 @@ class Client(object):
                 self.URI = self.dispatcher.URI
             print('Client assigned dispatcher with URI=%s'
                   % (self.URI))
-
-        # There is no need to retain the proxy connection to the
-        # nameserver, so free up resources on the nameserver thread
-        if using_pyro4:
-            self.ns._pyroRelease()
-        else:
-            self.ns._release()
 
     def close(self):
         if self.dispatcher is not None:

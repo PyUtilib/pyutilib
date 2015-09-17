@@ -332,7 +332,10 @@ class Dispatcher(base):
         return results
 
 def DispatcherServer(group=":PyUtilibServer",
-                     host=None,
+                     daemon_host=None,
+                     daemon_port=0,
+                     nameserver_host=None,
+                     nameserver_port=None,
                      verbose=False,
                      max_allowed_connections=None,
                      worker_limit=None,
@@ -343,7 +346,7 @@ def DispatcherServer(group=":PyUtilibServer",
     #
     # main program
     #
-    ns = get_nameserver(host,caller_name="Dispatcher")
+    ns = get_nameserver(host=nameserver_host, port=nameserver_port, caller_name="Dispatcher")
 
     if clear_group:
         for name, uri in get_dispatchers(group=group, ns=ns):
@@ -352,10 +355,10 @@ def DispatcherServer(group=":PyUtilibServer",
             return 1
 
     if using_pyro3:
-        daemon = _pyro.core.Daemon()
+        daemon = _pyro.core.Daemon(host=daemon_host, port=daemon_port)
         daemon.useNameServer(ns)
     else:
-        daemon = _pyro.Daemon()
+        daemon = _pyro.Daemon(host=daemon_host, port=daemon_port)
 
     if using_pyro3:
         try:

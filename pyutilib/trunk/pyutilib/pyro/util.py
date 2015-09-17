@@ -13,6 +13,7 @@ import os
 import sys
 import time
 import random
+import socket
 
 from pyutilib.pyro import using_pyro3, using_pyro4
 from pyutilib.pyro import Pyro as _pyro
@@ -29,7 +30,7 @@ if using_pyro3:
 elif using_pyro4:
     _connection_problem = _pyro.errors.TimeoutError
 
-def get_nameserver(host=None, num_retries=30, caller_name="Unknown"):
+def get_nameserver(host=None, port=None, num_retries=30, caller_name="Unknown"):
 
     if _pyro is None:
         raise ImportError("Pyro or Pyro4 is not available")
@@ -51,12 +52,9 @@ def get_nameserver(host=None, num_retries=30, caller_name="Unknown"):
     for i in xrange(0, num_retries+1):
         try:
             if using_pyro3:
-                if host is None:
-                    ns = _pyro.naming.NameServerLocator().getNS()
-                else:
-                    ns = _pyro.naming.NameServerLocator().getNS(host)
+                ns = _pyro.naming.NameServerLocator().getNS(host=host, port=port)
             else:
-                ns = _pyro.locateNS(host=host)
+                ns = _pyro.locateNS(host=host, port=port)
             break
         except _pyro.errors.NamingError:
             pass
@@ -89,16 +87,18 @@ def get_nameserver(host=None, num_retries=30, caller_name="Unknown"):
 
 def get_dispatchers(group=":PyUtilibServer",
                     host=None,
+                    port=None,
                     num_dispatcher_tries=30,
                     min_dispatchers=1,
                     caller_name=None,
                     ns=None):
 
     if ns is None:
-        ns = get_nameserver(host, caller_name=caller_name)
+        ns = get_nameserver(host=host, port=port, caller_name=caller_name)
     else:
         assert caller_name is None
         assert host is None
+        assert port is None
 
     if ns is None:
         raise RuntimeError("Failed to locate Pyro name "
@@ -131,12 +131,12 @@ def get_dispatchers(group=":PyUtilibServer",
 #       here for now.
 #
 
-def shutdown_pyro_components(host=None, num_retries=30):
+def shutdown_pyro_components(host=None, port=None, num_retries=30):
 
     if _pyro is None:
         raise ImportError("Pyro or Pyro4 is not available")
 
-    ns = get_nameserver(host=host, num_retries=num_retries)
+    ns = get_nameserver(host=host, port=port, num_retries=num_retries)
     if ns is None:
         print("***WARNING - Could not locate name server "
               "- Pyro components will not be shut down")
@@ -207,3 +207,81 @@ def set_maxconnections(max_allowed_connections=None):
             _pyro.config.PYRO_MAXCONNECTIONS = max_allowed_connections + 1
         else:
             _pyro.config.THREADPOOL_SIZE = max_allowed_connections
+
+def bind_port(sock, host="127.0.0.1"):
+    """Bind the socket to a free port and return the port number.
+    Relies on ephemeral ports in order to ensure we are using an
+    unbound port.  This is important as many tests may be running
+    simultaneously, especially in a buildbot environment.  This method
+    raises an exception if the sock.family is AF_INET and sock.type is
+    SOCK_STREAM, *and* the socket has SO_REUSEADDR or SO_REUSEPORT set
+    on it.  Tests should *never* set these socket options for TCP/IP
+    sockets.  The only case for setting these options is testing
+    multicasting via multiple UDP sockets.
+
+    Additionally, if the SO_EXCLUSIVEADDRUSE socket option is
+    available (i.e.  on Windows), it will be set on the socket.  This
+    will prevent anyone else from bind()'ing to our host/port for the
+    duration of the test.
+
+    This code is copied from the stdlib's test.test_support module.
+    """
+    if sock.family in (socket.AF_INET, socket.AF_INET6) and sock.type == socket.SOCK_STREAM:
+        if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+    if sock.family == socket.AF_INET:
+        if host == 'localhost':
+            sock.bind(('127.0.0.1', 0))
+        else:
+            sock.bind((host, 0))
+    elif sock.family == socket.AF_INET6:
+        if host == 'localhost':
+            sock.bind(('::1', 0, 0, 0))
+        else:
+            sock.bind((host, 0, 0, 0))
+    else:
+        raise CommunicationError("unsupported socket family: " + sock.family)
+    return sock.getsockname()[1]
+
+"""
+    if sock.family == socket.AF_INET and sock.type == socket.SOCK_STREAM:
+        if hasattr(socket, 'SO_REUSEADDR'):
+            if sock.getsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR) == 1:
+                raise TestFailed("tests should never set the SO_REUSEADDR "
+                                 "socket option on TCP/IP sockets!")
+        if hasattr(socket, 'SO_REUSEPORT'):
+            try:
+                if sock.getsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT) == 1:
+                    raise TestFailed("tests should never set the SO_REUSEPORT "
+                                     "socket option on TCP/IP sockets!")
+            except OSError:
+                # Python's socket module was compiled using modern
+                # headers thus defining SO_REUSEPORT but this process
+                # is running under an older kernel that does not
+                # support SO_REUSEPORT.
+                pass
+        if hasattr(socket, 'SO_EXCLUSIVEADDRUSE'):
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+
+    sock.bind((host, 0))
+    port = sock.getsockname()[1]
+    return port
+"""
+
+def find_unused_port(family=socket.AF_INET, socktype=socket.SOCK_STREAM):
+    """Returns an unused port that should be suitable for binding.
+    This is achieved by creating a temporary socket with the same
+    family and type as the 'sock' parameter (default is AF_INET,
+    SOCK_STREAM), and binding it to the specified host address
+    (defaults to 0.0.0.0) with the port set to 0, eliciting an unused
+    ephemeral port from the OS.  The temporary socket is then closed
+    and deleted, and the ephemeral port is returned.
+
+    This code is copied from the stdlib's test.test_support module.
+    """
+
+    tempsock = socket.socket(family, socktype)
+    port = bind_port(tempsock)
+    tempsock.close()
+    del tempsock
+    return port
