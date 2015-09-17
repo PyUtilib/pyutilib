@@ -39,6 +39,7 @@ class TaskWorkerBase(object):
     def __init__(self,
                  group=":PyUtilibServer",
                  host=None,
+                 port=None,
                  num_dispatcher_tries=30,
                  caller_name="Task Worker",
                  verbose=False,
@@ -68,7 +69,7 @@ class TaskWorkerBase(object):
         else:
             self.WORKERNAME = name
 
-        self.ns = get_nameserver(host, caller_name=caller_name)
+        self.ns = get_nameserver(host=host, port=port, caller_name=caller_name)
         if self.ns is None:
             raise RuntimeError("TaskWorkerBase failed to locate "
                                "Pyro name server on the network!")
