@@ -104,7 +104,7 @@ def import_file(filename, context=None, name=None, clear_cache=False):
                     sys.path.remove(dirname)
                 else:
                     sys.path.remove(implied_dirname)
-            # This extra assignment seems redundant, but it necessary
+            # This extra assignment seems redundant, but it is necessary
             # when the module name contains one or more periods to
             # indicate a submodule, in which case the __import__
             # function only returns the top level module. The true
