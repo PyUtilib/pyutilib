@@ -66,7 +66,7 @@ if using_pyro4:
     # register hooks for TaskProcessingError
     def TaskProcessingError_to_dict(obj):
         return {"__class__": "pyutilib.pyro.task.TaskProcessingError",
-                "message": obj.message}
+                "message": obj.args[0]}
     def dict_to_TaskProcessingError(classname, d):
         return TaskProcessingError(d['message'])
     SerializerBase.register_class_to_dict(
