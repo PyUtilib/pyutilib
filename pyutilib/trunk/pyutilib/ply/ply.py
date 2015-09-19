@@ -16,10 +16,18 @@ __all__ = ['ply_init', 't_newline', 't_ignore', 't_COMMENT', '_find_column', 'p_
 def ply_init(data):
     global _parsedata
     _parsedata=data
+    global _init
+    _init = True
+    
 
 def t_newline(t):
     r'[\n]+'
-    t.lexer.lineno += len(t.value)
+    global _init
+    if _init:
+        t.lexer.lineno = len(t.value)
+        _init = False
+    else:
+        t.lexer.lineno += len(t.value)
 
 # Ignore space and tab
 t_ignore  = " \t\r"
