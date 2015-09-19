@@ -1,0 +1,233 @@
+{
+    "Environment Stack": {
+        "1": "pca"
+    },
+    "Interfaces Declared": {
+        "IConfiguration": null,
+        "IEnvironmentConfig": null,
+        "IExternalExecutable": null,
+        "IFileOption": null,
+        "IIgnorePluginWhenLoading": null,
+        "IOption": null,
+        "IOptionDataProvider": null,
+        "IPluginLoadPath": null,
+        "IPluginLoader": null,
+        "ITempfileManager": null,
+        "IUpdatedOptionsAction": null
+    },
+    "Interfaces Declared by Environment": {
+        "pca": {
+            "IConfiguration": null,
+            "IEnvironmentConfig": null,
+            "IExternalExecutable": null,
+            "IFileOption": null,
+            "IIgnorePluginWhenLoading": null,
+            "IOption": null,
+            "IOptionDataProvider": null,
+            "IPluginLoadPath": null,
+            "IPluginLoader": null,
+            "ITempfileManager": null,
+            "IUpdatedOptionsAction": null
+        }
+    },
+    "Plugins by Environment": {
+        "pca": {
+            "<BoolOption [Services] 'Configuration_ConfigParser'>": {
+                "disabled": "False",
+                "id": "7",
+                "name": "Configuration_ConfigParser",
+                "service": "True",
+                "singleton": "False"
+            },
+            "<BoolOption [Services] 'ImportLoader'>": {
+                "disabled": "False",
+                "id": "9",
+                "name": "ImportLoader",
+                "service": "True",
+                "singleton": "False"
+            },
+            "<BoolOption [Services] 'TempfileManager'>": {
+                "disabled": "False",
+                "id": "3",
+                "name": "TempfileManager",
+                "service": "True",
+                "singleton": "False"
+            },
+            "<Option [globals] 'ABC'>": {
+                "disabled": "False",
+                "id": "13",
+                "name": "ABC",
+                "service": "True",
+                "singleton": "False"
+            },
+            "<Option [globals] 'abc'>": {
+                "disabled": "False",
+                "id": "11",
+                "name": "abc",
+                "service": "True",
+                "singleton": "False"
+            },
+            "<Option [globals] 'bar'>": {
+                "disabled": "False",
+                "id": "10",
+                "name": "bar",
+                "service": "True",
+                "singleton": "False"
+            },
+            "<Option [globals] 'tempdir'>": {
+                "disabled": "False",
+                "id": "5",
+                "name": "tempdir",
+                "service": "True",
+                "singleton": "False"
+            },
+            "<Plugin Configuration_ConfigParser>": {
+                "disabled": "False",
+                "id": "-6",
+                "name": "Configuration_ConfigParser",
+                "service": "True",
+                "singleton": "True"
+            },
+            "<Plugin IgnorePluginPlugins>": {
+                "disabled": "False",
+                "id": "-1",
+                "name": "IgnorePluginPlugins",
+                "service": "True",
+                "singleton": "True"
+            },
+            "<Plugin ImportLoader>": {
+                "disabled": "False",
+                "id": "-8",
+                "name": "ImportLoader",
+                "service": "True",
+                "singleton": "True"
+            },
+            "<Plugin OptionData 'Plugin.4'>": {
+                "disabled": "False",
+                "id": "4",
+                "name": "Plugin.4",
+                "service": "True",
+                "singleton": "False"
+            },
+            "<Plugin TempfileManagerPlugin 'TempfileManager'>": {
+                "disabled": "False",
+                "id": "-2",
+                "name": "TempfileManager",
+                "service": "True",
+                "singleton": "True"
+            },
+            "<Plugin test2_foo>": {
+                "disabled": "False",
+                "id": "-12",
+                "name": "test2_foo",
+                "service": "False",
+                "singleton": "True"
+            },
+            "<Plugin test3_foo 'Plugin.14'>": {
+                "disabled": "False",
+                "id": "14",
+                "name": "Plugin.14",
+                "service": "False",
+                "singleton": "False"
+            }
+        }
+    },
+    "Plugins by Interface": {
+        "IConfiguration": {
+            "Configuration_ConfigParser": null
+        },
+        "IEnvironmentConfig": {
+            "EnvironmentConfig": null
+        },
+        "IExternalExecutable": {
+            "ExternalExecutable": null
+        },
+        "IFileOption": {
+            "ExecutableOption": null,
+            "FileOption": null
+        },
+        "IIgnorePluginWhenLoading": {
+            "IgnorePluginPlugins": null
+        },
+        "IOption": {
+            "BoolOption": null,
+            "DictOption": null,
+            "ExecutableOption": null,
+            "FileOption": null,
+            "FloatOption": null,
+            "IntOption": null,
+            "Option": null,
+            "OptionPlugin": null
+        },
+        "IOptionDataProvider": {
+            "OptionData": null
+        },
+        "IPluginLoadPath": {
+            "EnvironmentConfig": null
+        },
+        "IPluginLoader": {
+            "EggLoader": null,
+            "ImportLoader": null
+        },
+        "ITempfileManager": {
+            "TempfileManagerPlugin": null
+        },
+        "IUpdatedOptionsAction": {
+            "ExecutableOption": null,
+            "FileOption": null,
+            "LoggingConfig": null
+        }
+    },
+    "Plugins by Python Module": {
+        "pyutilib.component.config.configuration": {
+            "Configuration": null
+        },
+        "pyutilib.component.config.env_config": {
+            "EnvironmentConfig": null
+        },
+        "pyutilib.component.config.logging_config": {
+            "LoggingConfig": null
+        },
+        "pyutilib.component.config.managed_plugin": {
+            "ManagedPlugin": null
+        },
+        "pyutilib.component.config.options": {
+            "BoolOption": null,
+            "DictOption": null,
+            "ExecutableOption": null,
+            "FileOption": null,
+            "FloatOption": null,
+            "IntOption": null,
+            "Option": null,
+            "OptionData": null,
+            "OptionPlugin": null
+        },
+        "pyutilib.component.config.plugin_ConfigParser": {
+            "Configuration_ConfigParser": null
+        },
+        "pyutilib.component.config.tempfiles": {
+            "TempfileManagerPlugin": null
+        },
+        "pyutilib.component.core": {
+            "IgnorePluginPlugins": null
+        },
+        "pyutilib.component.executables.executable": {
+            "ExternalExecutable": null
+        },
+        "pyutilib.component.loader.plugin_eggLoader": {
+            "EggLoader": null
+        },
+        "pyutilib.component.loader.plugin_importLoader": {
+            "ImportLoader": null
+        },
+        "test1": {
+            "test1_foo": null
+        },
+        "test2": {
+            "test2_foo": null
+        },
+        "test3": {
+            "test3_foo": null
+        }
+    }
+}

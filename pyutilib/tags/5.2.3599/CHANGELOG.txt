@@ -1,0 +1,513 @@
+====================
+ PyUtilib CHANGELOG
+====================
+
+-------------------------------------------------------------------------------
+ Version 5.2.3599
+-------------------------------------------------------------------------------
+
+- Py3k fixes
+- pyutilib.subprocess fix for python 3.5
+- pyutilib.pyro
+    - Added options that allow setting up the nameserver and dispatch server in 
+      user specified ports
+    - Fix for Pyro3 so that workers do not ignore shutdown requests from the dispatcher
+    - Being more careful about clearing queues: Do this in a thread
+      safe way to avoid leaving threads waiting on a deleted queue
+      object.
+    - Do not mark clear queue methods as oneway (Pyro4 only) to
+      avoid race conditions with adding tasks after clear queue calls
+    - More robust error handling when connecting to the nameserver
+    - Changing default behavior of TaskWorker to collect a single
+      task at a time, which is more appropriate worker groups of
+      workers that all collect from the same queue.
+    - Allow derived worker types to set the _bulk_task_collection
+      flag, which activates bulk task collection from their queue type
+    - allow Client to be initialized with a previously obtained dispatcher proxy
+    - Exposing functionality for limiting the number of workers
+      that can be registered with the dispatcher through an additional
+      command-line option (--worker-limit)
+    - Adding methods that allow registration of workers with the
+      dispatcher object. This facilitates client-side operations for
+      acquiring a minimum number of workers over multiple dispatchers.
+    - Added functionality that allows splitting workers across multiple dispatch servers
+
+-------------------------------------------------------------------------------
+ Version 5.1.3556
+-------------------------------------------------------------------------------
+
+- Misc update to PauseGC API.
+
+-------------------------------------------------------------------------------
+ Version 5.1.3554
+-------------------------------------------------------------------------------
+
+- Catch errors when GC disabling isn't allowed.
+- Fixing an error message in ConfigBlock
+
+-------------------------------------------------------------------------------
+ Version 5.1.3548
+-------------------------------------------------------------------------------
+
+- Adding multiple task submission capability to dispatcher.
+- Improved clarity of Pyro diagnostic messages
+- Fixing the PyPI downloader so that it can handle non-numeric versions.
+- Adding support for xlrd and openpyxl interfaces.
+- Changing the semantics of Config* objects to return the values
+  of ConfigValue objects.
+- Updates to Container
+  - Changing Container output to look like YAML.
+  - When loading dictionaries, recursively create Container objects
+    for sub-dictionaries.
+- Added a randomization component to the sleep timeout in the worker
+  wait-for-work loop to avoid dispatcher contention.
+- Updates to the ConfigBlock
+  - Support for multiple argument definitions for a single ConfigValue
+  - Support for declaring groups by passing argparse parser or group objects
+  - Improved checking for implicit Block attributes
+  - Support for a default domain for implicit block attributes 
+
+-------------------------------------------------------------------------------
+ Version 5.0.3478
+-------------------------------------------------------------------------------
+
+- Changing naming of nose plugins.
+- Adding the --with-testdata option when runing performance tests.
+- Pyro3/Pyro4 compatibility fixes
+
+-------------------------------------------------------------------------------
+ Version 5.0.3467
+-------------------------------------------------------------------------------
+
+- Integrating many PyUtilib sub-packages into a single source tree
+- Integrating the Coopr plugin framework in pyutilib.component.core
+
+- pyutilib.th
+  - Adding a forcedskip option, which can be used to add tests that
+    are skipped due to external factors.
+  - Extending baseline tests to allow comparison with YAML, XML and
+    JSON files.
+- pyutilib.pyro
+  - Changes to support clearing the dispatcher queue 
+  - Adding default value for TaskWorker type
+  - Allowing more control of blocking behavior when calling dispatcher
+  - Modifying dispatcher to look for the presence of an environment
+    variable called "MAX_PYRO_CONNECTIONS", to over-ride the default
+    number of allowed connections.
+  - Adding randomization of the sleep interval in a pyro client,
+    following failure to initially connect to a name server.
+    Randomization will better distribute the number of concurrent
+    re-connection attempts.
+- pyutilib.misc
+  - Allowing None tolerance when comparing YAML files.
+  - Disallowing whitespace between a +/- and the number.  Strings
+    cannot be converted to floats with whitespace
+  - Adding support for gzip and bz2 compressed files, which act as
+    single file archives
+  - Adding support to open readonly file objects (using the open()
+    method) rather than only supporting file extractions to disk
+  - Adding an option to clear sys.modules of the
+    module being imported. Sometimes, we really want to re-import
+    a module with the same 'name' that was located in a different
+    location.
+- pyutilib.dev
+  - Adding a '-f' [find only] option to lbin so that lbin can be
+    used to locate but not run local executables.
+
+-------------------------------------------------------------------------------
+ Version 4.7.3340
+-------------------------------------------------------------------------------
+
+- pyutilib.th 5.4.2
+
+-------------------------------------------------------------------------------
+ Version 4.7.3336
+-------------------------------------------------------------------------------
+
+- pyutilib.subprocess 3.6.2
+
+-------------------------------------------------------------------------------
+ Version 4.7.3332
+-------------------------------------------------------------------------------
+
+- pyutilib.component.config 3.8
+  pyutilib.misc 5.9.1
+
+-------------------------------------------------------------------------------
+ Version 4.7.3326
+-------------------------------------------------------------------------------
+
+- pyutilib.component.core 4.6.4
+  pyutilib.misc 5.9
+
+-------------------------------------------------------------------------------
+ Version 4.7.3311
+-------------------------------------------------------------------------------
+
+- pyutilib.component.core 4.6.3
+
+-------------------------------------------------------------------------------
+ Version 4.7.3305
+-------------------------------------------------------------------------------
+
+- pyutilib.component.core 4.6.2
+
+-------------------------------------------------------------------------------
+ Version 4.7.3301
+-------------------------------------------------------------------------------
+
+- pyutilib.component.core 4.6.1
+
+-------------------------------------------------------------------------------
+ Version 4.7.3281
+-------------------------------------------------------------------------------
+
+- pyutilib.component.config 3.7
+  pyutilib.dev 2.5
+  pyutilib.misc 5.8,
+  pyutilib.pyro 3.6.1
+  pyutilib.subprocess 3.6.1
+  pyutilib.svn 1.5.1
+  pyutilib.virtualenv 4.3.4
+  pyutilib.workflow 3.5.1
+
+-------------------------------------------------------------------------------
+ Version 4.6.3215
+-------------------------------------------------------------------------------
+
+- pyutilib.component.config 3.6.1
+  pyutilib.dev 2.4
+  pyutilib.misc 5.6
+  pyutilib.pyro 3.6
+  pyutilib.subprocess 3.6
+  pyutilib.svn 1.5
+  pyutilib.virtualenv 4.2
+  pyutilib.workflow 3.5
+
+-------------------------------------------------------------------------------
+ Version 4.5.3053
+-------------------------------------------------------------------------------
+
+- pyutilib.autodist 1.0
+  pyutilib.autotest 2.0.1
+  pyutilib.svn 1.4.1
+  pyutilib.virtualenv 4.0
+
+-------------------------------------------------------------------------------
+ Version 4.4.3026
+-------------------------------------------------------------------------------
+
+- pyutilib.virtualenv 3.3
+
+-------------------------------------------------------------------------------
+ Version 4.3.3009
+-------------------------------------------------------------------------------
+
+- pyutilib.dev 2.3
+
+-------------------------------------------------------------------------------
+ Version 4.3.2997
+-------------------------------------------------------------------------------
+
+- pyutilib.dev 2.2.1
+  pyutilib.enum 1.2
+  pyutilib.misc 5.5.1
+  pyutilib.subprocess 3.5.4
+  pyutilib.svn 1.4
+  pyutilib.th 5.4.1
+
+-------------------------------------------------------------------------------
+ Version 4.2.2964
+-------------------------------------------------------------------------------
+
+- pyutilib.component.config 3.6
+  pyutilib.component.core 4.6
+  pyutilib.component.loader 3.4.1
+  pyutilib.dev 2.2
+  pyutilib.excel 3.1.2
+  pyutilib.math 3.3.1
+  pyutilib.misc 5.5
+  pyutilib.ply 3.0.8
+  pyutilib.pyro 3.5.3
+  pyutilib.subprocess 3.5.3
+  pyutilib.th 5.4
+  pyutilib.virtualenv 3.2
+  pyutilib.workflow 3.4
+
+-------------------------------------------------------------------------------
+ Version 4.1.2918
+-------------------------------------------------------------------------------
+
+- pyutilib.workflow 3.3.3
+  pyutilib.virtualenv 3.1.1
+
+-------------------------------------------------------------------------------
+ Version 4.1.2908
+-------------------------------------------------------------------------------
+
+- pyutilib.workflow 3.3.2
+
+-------------------------------------------------------------------------------
+ Version 4.1.2897
+-------------------------------------------------------------------------------
+
+- pyutilib.component.config 3.5.1
+  pyutilib.component.core 4.5.6
+  pyutilib.workflow 3.3.1
+
+-------------------------------------------------------------------------------
+ Version 4.1.2882
+-------------------------------------------------------------------------------
+
+- pyutilib.component.config 3.5
+  pyutilib.component.core 4.5.5
+  pyutilib.dev 2.1
+  pyutilib.virtualenv 3.1
+  pyutilib.workflow 3.3
+
+-------------------------------------------------------------------------------
+ Version 4.0.2848
+-------------------------------------------------------------------------------
+
+- pyutilib.pyro 3.5.2
+
+-------------------------------------------------------------------------------
+ Version 4.0.2832
+-------------------------------------------------------------------------------
+
+- pyutilib.excel 3.1.1
+  pyutilib.ply 3.0.7
+  pyutilib.pyro 3.5.1
+  pyutilib.svn 1.3.1
+
+-------------------------------------------------------------------------------
+ Version 4.0.2819
+-------------------------------------------------------------------------------
+
+- pyutilib.component.core 4.5.2
+  pyutilib.subprocess 3.5.2
+
+-------------------------------------------------------------------------------
+ Version 4.0.2807
+-------------------------------------------------------------------------------
+
+- pyutilib.component.core 4.5.1
+  pyutilib.misc 5.3.1
+  pyutilib.subprocess 3.5.1
+
+-------------------------------------------------------------------------------
+ Version 4.0.2801
+-------------------------------------------------------------------------------
+
+- pyutilib.autotest 2.0
+  pyutilib.component.app 3.2 
+  pyutilib.component.config 3.4
+  pyutilib.component.core 4.5
+  pyutilib.component.executables 3.5
+  pyutilib.component.loader 3.4
+  pyutilib.dev 2.0
+  pyutilib.enum 1.1
+  pyutilib.excel 3.1
+  pyutilib.math 3.3
+  pyutilib.misc 5.3
+  pyutilib.R 3.1
+  pyutilib.services 3.4
+  pyutilib.subprocess 3.5
+  pyutilib.svn 1.3
+  pyutilib.th 5.3
+  pyutilib.virtualenv 3.0
+  pyutilib.workflow 3.2
+
+-------------------------------------------------------------------------------
+ Version 3.11.2730
+-------------------------------------------------------------------------------
+
+- pyutilib.common 3.0.7
+  pyutilib.workflow 3.1.1
+
+-------------------------------------------------------------------------------
+ Version 3.10.2718
+-------------------------------------------------------------------------------
+
+- pyutilib.common 3.0.6
+  pyutilib.math 3.2
+  pyutilib.misc 5.2
+  pyutilib.virtualenv 2.9
+
+-------------------------------------------------------------------------------
+ Version 3.9.2706
+-------------------------------------------------------------------------------
+
+- pyutilib.autotest 1.6
+  pyutilib.component.core 4.4.1
+  pyutilib.dev 1.17
+  pyutilib.misc 5.1
+  pyutilib.subprocess 3.4
+  pyutilib.svn 1.2
+  pyutilib.virtualenv 2.8
+  pyutilib.workflow 3.1
+
+-------------------------------------------------------------------------------
+ Version 3.8.2669
+-------------------------------------------------------------------------------
+
+- pyutilib.misc 5.0.1
+
+-------------------------------------------------------------------------------
+ Version 3.8.2652
+-------------------------------------------------------------------------------
+
+- pyutilib.misc 5.0.1
+  pyutilib.pyro 3.5
+  pyutilib.svn 1.1
+  pyutilib.virtualenv 2.7
+
+-------------------------------------------------------------------------------
+ Version 3.7.2615
+-------------------------------------------------------------------------------
+
+- pyutilib.autotest 1.5
+  pyutilib.component.app 3.1.7 
+  pyutilib.component.config 3.3.3
+  pyutilib.component.core 4.4
+  pyutilib.dev 1.16
+  pyutilib.excel 3.0.7
+  pyutilib.math 3.1
+  pyutilib.misc 5.0
+  pyutilib.pyro 3.4
+  pyutilib.subprocess 3.3
+  pyutilib.svn 1.0.2
+  pyutilib.th 5.2
+  pyutilib.virtualenv 2.6
+  pyutilib.workflow 3.0
+
+-------------------------------------------------------------------------------
+ Version 3.6.2498
+-------------------------------------------------------------------------------
+
+- pyutilib.autotest 1.4.6
+  pyutilib.common 3.0.5
+  pyutilib.component.app 3.1.6
+  pyutilib.component.config 3.3.2
+  pyutilib.component.core 4.3.1
+  pyutilib.component.executables 3.4.1
+  pyutilib.component.loader 3.3.1
+  pyutilib.dev 1.15.2
+  pyutilib.enum 1.0.7
+  pyutilib.excel 3.0.6
+  pyutilib.math 3.0.6
+  pyutilib.misc 4.6
+  pyutilib.ply 3.0.6
+  pyutilib.pyro 3.3
+  pyutilib.R 3.0.5
+  pyutilib.services 3.3.1
+  pyutilib.subprocess 3.2.3
+  pyutilib.svn 1.0.1
+  pyutilib.th 5.0
+  pyutilib.virtualenv 2.5
+  pyutilib.workflow 2.2.4
+
+-------------------------------------------------------------------------------
+ Version 3.5.2320
+-------------------------------------------------------------------------------
+
+- pyutilib.dev 1.15
+  pyutilib.misc 4.5.3
+  pyutilib.virtualenv 2.4.1
+
+-------------------------------------------------------------------------------
+ Version 3.5.2313
+-------------------------------------------------------------------------------
+
+- pyutilib.misc 4.5.2
+  pyutilib.ply 3.0.5
+  pyutilib.virtualenv 2.4
+
+-------------------------------------------------------------------------------
+ Version 3.4.2289
+-------------------------------------------------------------------------------
+
+- pyutilib.autotest 1.4.4
+  pyutilib.component.app 3.1.5
+  pyutilib.component.config 3.3.1
+  pyutilib.component.core 4.3
+  pyutilib.component.loader 3.3
+  pyutilib.dev 1.14
+  pyutilib.enum 1.0.6
+  pyutilib.excel 3.0.5
+  pyutilib.math 3.0.5
+  pyutilib.misc 4.5.1
+  pyutilib.pyro 3.2.1
+  pyutilib.th 4.6
+  pyutilib.virtualenv 2.3
+  pyutilib.workflow 2.2.2
+
+-------------------------------------------------------------------------------
+ Version 3.3.2092
+-------------------------------------------------------------------------------
+
+- pyutilib.component.core 4.1.1
+  pyutilib.workflow 2.2.1
+
+-------------------------------------------------------------------------------
+ Version 3.3.2082
+-------------------------------------------------------------------------------
+
+- pyutilib.autotest 1.4.1
+  pyutilib.component.executables 3.4
+  pyutilib.misc 4.2
+  pyutilib.services 3.3
+  pyutilib.subprocess 3.2.2
+  pyutilib.th 4.4
+  pyutilib.workflow 2.2
+
+-------------------------------------------------------------------------------
+ Version 3.2.2053
+-------------------------------------------------------------------------------
+
+- pyutilib.dev 1.11.1
+  pyutilib.misc 4.1.2
+
+-------------------------------------------------------------------------------
+ Version 3.2.2044
+-------------------------------------------------------------------------------
+
+- Minor updates
+    pyutilib.dev 1.11
+    pyutilib.th 4.3.1
+    pyutilib.workflow 2.1
+- Revision updates
+    pyutilib.component.app 3.1.3
+    pyutilib.component.config 3.2.3
+    pyutilib.component.loader 3.2.3
+    pyutilib.misc 4.1.1
+    pyutilib.virtualenv 1.5.1
+
+-------------------------------------------------------------------------------
+ Version 3.1.2014
+-------------------------------------------------------------------------------
+
+- Various updates.  Including the new pyutilib.workflow package.
+
+-------------------------------------------------------------------------------
+ Version 3.0.1745
+-------------------------------------------------------------------------------
+
+- Release of pyutilib.component.doc 1.0 .  This doesn't change any
+  functionality in PyUtilib, so this is being left in the 3.0 release.
+
+-------------------------------------------------------------------------------
+ Version 3.0.1734
+-------------------------------------------------------------------------------
+
+- Updates to resolve build issues for MS Windows.
+
+- Updates to get testing working with PyPI distributions of PyUtilib 
+  packages.
+
+-------------------------------------------------------------------------------
+ Version 3.0.1651
+-------------------------------------------------------------------------------
+
+- Initial setup of PyUtilib global package.
+

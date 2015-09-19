@@ -1,0 +1,8 @@
+     1	
+     2	This directory contains a working pyutilib.autotest example that will
+     3	execute on Linux platforms.
+     4	
+     5	example.yml - The YAML test configuration
+     6	example.py  - The test driver plugin
+     7	autotest.py - The Python module that executes tests
+     8	

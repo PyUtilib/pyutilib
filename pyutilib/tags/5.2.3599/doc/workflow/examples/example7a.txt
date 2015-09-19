@@ -1,0 +1,4 @@
+Running... /bin/ls /home/coopr/src/python/src/pyutilib/doc/workflow/examples/dummy
+list:
+- 'bar'
+- 'foo'

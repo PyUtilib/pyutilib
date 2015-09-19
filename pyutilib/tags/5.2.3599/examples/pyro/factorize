@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+
+from pyutilib.pyro import Client, Task
+import random
+import sys
+
+NUMBER_OF_ITEMS = 40
+
+numbers = {}
+
+def processResult(item):
+    print "Got result: %s (from %s)" % (item, item.processedBy)
+    numbers[item.data] = item.result
+
+
+def main():
+    if len(sys.argv) == 2:
+        host=sys.argv[1]
+    else:
+        host=None
+    client = Client(host=host)
+    print "\nThis program will calculate Prime Factorials of a bunch of random numbers."
+    print "The more workers you will start (on different cpus/cores/machines),"
+    print "the faster you will get the complete list of results!\n"
+    print "placing work items into dispatcher queue."
+    for i in range(NUMBER_OF_ITEMS):
+        number=random.randint(3211, 5000)*random.randint(177,3000)*37
+        numbers[number] = None
+        item = Task(data=number)
+        client.add_task(item)
+    print "getting results from dispatcher queue."
+    resultCount=0
+    while resultCount<NUMBER_OF_ITEMS:
+        result = client.get_result()
+        if result is None:
+            print "No results available yet. Work queue size:",client.num_tasks()
+        else:
+            processResult(result)
+            resultCount+=1
+    
+    if client.num_results()>0:
+        print "removing leftover results from the dispatcher"
+        while True:
+            result = client.get_result()
+            if not result is None:
+                processResult(result)
+
+    print "\nComputed Prime Factorials follow:"
+    for (number, factorials) in numbers.items():
+        print number,"-->",factorials
+
+if __name__=="__main__":
+    main()
+

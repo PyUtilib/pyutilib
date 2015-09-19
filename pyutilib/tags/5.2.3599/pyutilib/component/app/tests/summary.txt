@@ -1,0 +1,92 @@
+[Services]
+
+  Option:    Configuration_ConfigParser
+  Type:      BoolOption
+  Default:   True
+  Doc:       Option that controls behavior of service Configuration_ConfigParser.
+
+  Option:    EggLoader.foo
+  Type:      BoolOption
+  Default:   True
+  Doc:       Option that controls behavior of service EggLoader.foo.
+
+  Option:    ImportLoader
+  Type:      BoolOption
+  Default:   True
+  Doc:       Option that controls behavior of service ImportLoader.
+
+  Option:    TempfileManager
+  Type:      BoolOption
+  Default:   True
+  Doc:       Option that controls behavior of service TempfileManager.
+
+
+[foo]
+
+  Option:    
+  Type:      DictOption
+  Default:   None (this dictionary consists of all values in this section)
+  Doc:       
+
+
+[globals]
+
+  Option:    tempdir
+  Type:      Option
+  Default:   None
+  Doc:       
+
+
+[logging.foo]
+
+  Option:    log_dir
+  Type:      Option
+  Default:   None
+  Doc:       The logging directory.
+
+        The default directory is the application directory plus 'log'.
+
+  Option:    log_file
+  Type:      Option
+  Default:   foo.log
+  Doc:       If `log_type` is `file`, this should be a path to the log-file.
+
+  Option:    log_format
+  Type:      Option
+  Default:   None
+  Doc:       Custom logging format.
+
+        If nothing is set, the following will be used:
+
+        $(project)[$(env) $(module)] $(levelname): $(message)
+
+        In addition to regular key names supported by the Python logger library
+        library (see http://docs.python.org/lib/node422.html), one could use:
+         - $(path)s     the path for the current environment
+         - $(basename)s the last path component of the current environment
+         - $(app)s      the name of the current application
+
+        Note the usage of `$(...)s` instead of `%(...)s` as the latter form
+        would be interpreted by the ConfigParser itself.
+        
+
+  Option:    log_level
+  Type:      Option
+  Default:   WARN
+  Doc:       Level of verbosity in log.
+
+        Should be one of (`CRITICAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`).
+
+  Option:    log_type
+  Type:      Option
+  Default:   none
+  Doc:       Logging facility to use.
+
+        Should be one of (`none`, `file`, `stderr`, `syslog`, `winlog`).
+
+  Option:    timestamp
+  Type:      Option
+  Default:   False
+  Doc:       Add timestamp to logging information.
+
+

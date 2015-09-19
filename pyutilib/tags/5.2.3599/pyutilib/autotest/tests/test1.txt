@@ -1,0 +1,24 @@
+Usage: autotest [options]
+
+Options:
+  -h, --help            Print command options
+  -d, --debug           Set debugging flag
+  -v, --verbose         Verbose output
+  -q, --quiet           Minimal output
+  -f, --failfast        Stop on first failure
+  -c, --catch           Catch control-C and display results
+  -b, --buffer          Buffer stdout and stderr durring test runs
+  --cat=CATEGORIES, --category=CATEGORIES
+                        Define a list of categories that filter the execution
+                        of test suites
+  --help-suites         Print the test suites that can be executed
+  --help-tests=HELP_TESTS
+                        Print the tests in the specified test suite
+  --help-categories     Print the test suite categories that can be specified
+
+Examples:
+  autotest                               - run all test suites
+  autotest MyTestCase.testSomething      - run MyTestCase.testSomething
+  autotest MyTestCase                    - run all 'test*' test methods
+                                               in MyTestCase
+

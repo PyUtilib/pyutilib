@@ -3,10 +3,40 @@
 ====================
 
 -------------------------------------------------------------------------------
- Version 5.2
+ Version 5.3
 -------------------------------------------------------------------------------
 
 - Next release
+
+-------------------------------------------------------------------------------
+ Version 5.2.3599
+-------------------------------------------------------------------------------
+
+- Py3k fixes
+- pyutilib.subprocess fix for python 3.5
+- pyutilib.pyro
+    - Added options that allow setting up the nameserver and dispatch server in 
+      user specified ports
+    - Fix for Pyro3 so that workers do not ignore shutdown requests from the dispatcher
+    - Being more careful about clearing queues: Do this in a thread
+      safe way to avoid leaving threads waiting on a deleted queue
+      object.
+    - Do not mark clear queue methods as oneway (Pyro4 only) to
+      avoid race conditions with adding tasks after clear queue calls
+    - More robust error handling when connecting to the nameserver
+    - Changing default behavior of TaskWorker to collect a single
+      task at a time, which is more appropriate worker groups of
+      workers that all collect from the same queue.
+    - Allow derived worker types to set the _bulk_task_collection
+      flag, which activates bulk task collection from their queue type
+    - allow Client to be initialized with a previously obtained dispatcher proxy
+    - Exposing functionality for limiting the number of workers
+      that can be registered with the dispatcher through an additional
+      command-line option (--worker-limit)
+    - Adding methods that allow registration of workers with the
+      dispatcher object. This facilitates client-side operations for
+      acquiring a minimum number of workers over multiple dispatchers.
+    - Added functionality that allows splitting workers across multiple dispatch servers
 
 -------------------------------------------------------------------------------
  Version 5.1.3556
