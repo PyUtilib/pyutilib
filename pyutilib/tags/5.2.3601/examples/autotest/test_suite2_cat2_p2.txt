@@ -1,0 +1,37 @@
+     1	#  _________________________________________________________________________
+     2	#
+     3	#  PyUtilib: A Python utility library.
+     4	#  Copyright (c) 2008 Sandia Corporation.
+     5	#  This software is distributed under the BSD License.
+     6	#  Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
+     7	#  the U.S. Government retains certain rights in this software.
+     8	#  _________________________________________________________________________
+     9	#
+    10	
+    11	import pyutilib.autotest
+    12	from pyutilib.component.core import *
+    13	import pyutilib.subprocess
+    14	
+    15	
+    16	class ExampleTestDriver(pyutilib.autotest.TestDriverBase):
+    17	    """
+    18	    This test driver executes a unix command and compares its output
+    19	    with a baseline value.
+    20	    """
+    21	
+    22	    alias('example')
+    23	
+    24	    def run_test(self, testcase, name, options):
+    25	        """Execute a single test in the suite"""
+    26	        name = options.suite+'_'+name
+    27	        cmd = options.solver+' '
+    28	        if not options.cat_options is None:
+    29	            cmd += options.cat_options+' '
+    30	        cmd += options.file
+    31	        print "Running test suite '%s'  test '%s'  command '%s'" % \
+    32	                (options.suite, name, cmd)
+    33	        pyutilib.subprocess.run(cmd, outfile=options.currdir+'test_'+name+".out")
+    34	        testcase.failUnlessFileEqualsBaseline(
+    35	                options.currdir+'test_'+name+".out", 
+    36	                options.currdir+'test_'+name+".txt")
+    37	

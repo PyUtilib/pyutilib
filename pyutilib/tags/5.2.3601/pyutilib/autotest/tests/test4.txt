@@ -1,0 +1,5 @@
+
+Tests defined in test suite 'suite1':
+    test_s1_p1
+    test_s2_p1
+

@@ -1,0 +1,9 @@
+BEGIN
+a:
+  b: 1
+  c: 1.3
+d:
+  e: the rain in spain
+  f: is mostly on the plain
+g: again
+END

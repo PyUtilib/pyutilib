@@ -1,0 +1,75 @@
+\begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
+  \item[{network}]\hfill
+  \begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
+    \item[{epanet file}]\hfill
+      \\EPANET network inp file
+  \end{description}
+  \item[{scenario}]\hfill
+    \\Single scenario block
+  \begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
+    \item[{scenario file}]\hfill
+\\This is the (long) documentation for the 'scenario
+file' parameter.  It contains multiple lines, and some internal
+formatting; like a bulleted list:
+  - item 1
+  - item 2
+    \item[{merlion}]\hfill
+      \\This is the (long) documentation for the 'merlion' parameter.  It
+      contains multiple lines, but no apparent internal formatting; so the
+      outputter should re-wrap everything.
+    \item[{detection}]\hfill
+      \\Sensor placement list, epanetID
+  \end{description}
+  \item[{scenarios}]\hfill
+    \\List of scenario blocks
+  \begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
+    \item[{scenario file}]\hfill
+\\This is the (long) documentation for the 'scenario
+file' parameter.  It contains multiple lines, and some internal
+formatting; like a bulleted list:
+  - item 1
+  - item 2
+    \item[{merlion}]\hfill
+      \\This is the (long) documentation for the 'merlion' parameter.  It
+      contains multiple lines, but no apparent internal formatting; so the
+      outputter should re-wrap everything.
+    \item[{detection}]\hfill
+      \\Sensor placement list, epanetID
+  \end{description}
+  \item[{nodes}]\hfill
+    \\List of node IDs
+  \item[{impact}]\hfill
+  \begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
+    \item[{metric}]\hfill
+      \\Population or network based impact metric
+  \end{description}
+  \item[{flushing}]\hfill
+  \begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
+    \item[{flush nodes}]\hfill
+    \begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
+      \item[{feasible nodes}]\hfill
+        \\ALL, NZD, NONE, list or filename
+      \item[{infeasible nodes}]\hfill
+        \\ALL, NZD, NONE, list or filename
+      \item[{max nodes}]\hfill
+        \\Maximum number of nodes to flush
+      \item[{rate}]\hfill
+        \\Flushing rate [gallons/min]
+      \item[{response time}]\hfill
+        \\Time [min] between detection and flushing
+      \item[{duration}]\hfill
+        \\Time [min] for flushing
+    \end{description}
+    \item[{close valves}]\hfill
+    \begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
+      \item[{feasible pipes}]\hfill
+        \\ALL, DIAM min max [inch], NONE, list or filename
+      \item[{infeasible pipes}]\hfill
+        \\ALL, DIAM min max [inch], NONE, list or filename
+      \item[{max pipes}]\hfill
+        \\Maximum number of pipes to close
+      \item[{response time}]\hfill
+        \\Time [min] between detection and closing valves
+    \end{description}
+  \end{description}
+\end{description}

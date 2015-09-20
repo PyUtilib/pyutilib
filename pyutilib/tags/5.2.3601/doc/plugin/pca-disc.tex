@@ -1,0 +1,38 @@
+
+\section{Discussion}
+
+\label{chap:disc}
+
+A major driver for the development of the \pcasp is the Pyomo optimization software~\cite{Pyomo}. 
+Pyomo defines a variety of component interfaces that can be used to
+customized and extend Pyomo's management of optimization solvers.  This includes interfaces for components that 
+\begin{itemize}
+\item write files that define an optimization problem
+\item convert files into a format that is compatible with an optimizer
+\item execute an optimizer
+\item read files that define optimizer results and execution status
+\end{itemize}
+The \pcasp has had a fundamental impact on the design of Pyomo because it
+supports a new software design for optimization frameworks.
+
+The typical object oriented approach for optimization software is
+to use classes and class inheritance.  For example, the OPT++~\cite{Mez94}
+optimization software library defines base classes with different
+characteristics (e.g. differentiability), and a concrete optimization
+solver is instantiated as a subclass of an appropriate base class.  In this
+context, the base class can be viewed as defining the interface for the 
+solvers that inherit from it.
+
+Pyomo components leverage the \pcasp to separate the declaration
+of component interfaces from their implementation.  For example,
+the interface to optimization solvers are again declared with a class.
+However, solver plugins are not required to be subclasses of the interface
+class.  Instead, they are simply required to provide the same interface
+methods.  Consequently, Pyomo can be extended and configured in a modular
+manner that is qualitatively different from other optimization frameworks.
+The PCA allows Pyomo to dynamically construct optimization strategies and
+combine independently-developed modeling, reformulation, preprocessing,
+and optimization approaches in a manner that is substantially more
+flexible and extensible compared to other widely used optimization
+frameworks.
+

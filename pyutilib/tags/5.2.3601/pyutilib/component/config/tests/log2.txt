@@ -1,0 +1,9 @@
+[Services] Configuration_ConfigParser = True
+[Services] ImportLoader = True
+[Services] TempfileManager = True
+[globals] a = XX 1
+[globals] b = /dev/null
+[globals] c = XX 1,2,3
+[globals] xx = 4.5
+[globals] yy = foo
+
