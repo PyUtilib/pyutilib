@@ -7,7 +7,7 @@
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
 
-__all__ = ['get_nameserver','shutdown_pyro_components']
+__all__ = ('get_nameserver', 'get_dispatchers', 'shutdown_pyro_components')
 
 import os
 import sys
