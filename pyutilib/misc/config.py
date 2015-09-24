@@ -43,16 +43,16 @@ def _munge_name(name, space_to_dash=True):
     return re.sub( r'[^a-zA-Z0-9-_]', '_', name )
 
 class ConfigBase(object):
-    __slots__ = ( '_parent', '_name', '_userSet', '_userAccessed', 
+    __slots__ = ( '_parent', '_name', '_userSet', '_userAccessed',
                   '_data', '_default', '_domain', '_description', '_doc',
-                  '_visibility', '_argparse' )
+                  '_visibility', '_argparse')
 
     # This just needs to be any reference-counted object; we use it so
     # that we can tell if an argument is provided (and we can't use None
     # as None is a valid user-specified argument)
     NoArgument = (None,)
 
-    def __init__( self, default, domain=None, description=None, doc=None, 
+    def __init__( self, default, domain=None, description=None, doc=None,
                   visibility=0 ):
         self._parent = None
         self._name = None
@@ -205,7 +205,7 @@ group, subparser, or (subparser, group)."""
             if not isinstance(name, six.string_types):
                 raise RuntimeError(
                     'Unknown datatype (%s) for argparse group on '
-                    'configuration definition %s' % 
+                    'configuration definition %s' %
                     ( type(name).__name__, obj.name(True)))
 
             try:
@@ -305,7 +305,7 @@ group, subparser, or (subparser, group)."""
             indent = lvl*indent_spacing
             _ok = width - indent - len(comment) - minDocWidth
             offset = \
-                max( val if val < _ok else key 
+                max( val if val < _ok else key
                      for key,val,doc in level_info[lvl]['data'] )
             offset += indent + len(comment)
             over = sum( 1 for key,val,doc in level_info[lvl
@@ -313,7 +313,7 @@ group, subparser, or (subparser, group)."""
         ]['data']
                         if doc + offset > width )
             if len(level_info[lvl]['data']) - over > 0:
-                line = max( offset + doc 
+                line = max( offset + doc
                             for key,val,doc in level_info[lvl]['data']
                             if offset + doc <= width )
             else:
@@ -355,20 +355,20 @@ group, subparser, or (subparser, group)."""
                 os.write(val+'\n'+' '*field)
             os.write(comment)
             txtArea = max(width-field-len(comment), minDocWidth)
-            os.write( ("\n"+' '*field+comment).join( 
+            os.write( ("\n"+' '*field+comment).join(
                     wrap( obj._description, txtArea,
                           subsequent_indent='  ' ) ) )
             os.write('\n')
         return os.getvalue()
 
     def generate_documentation\
-            ( self, 
+            ( self,
               block_start= "\\begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]\n",
               block_end=   "\\end{description}\n",
               item_start=  "\\item[{%s}]\\hfill\n",
               item_body=   "\\\\%s",
               item_end=    "",
-              indent_spacing=2, 
+              indent_spacing=2,
               width=78,
               visibility=0
               ):
@@ -405,8 +405,8 @@ group, subparser, or (subparser, group)."""
             if '\n ' in _doc:
                 doc_lines = ( item_body % (_doc), )
             else:
-                doc_lines = wrap( item_body % (_doc), 
-                                  width, 
+                doc_lines = wrap( item_body % (_doc),
+                                  width,
                                   initial_indent=indent+' '*indent_spacing,
                                   subsequent_indent=indent+' '*indent_spacing )
             if _doc:
@@ -425,7 +425,7 @@ group, subparser, or (subparser, group)."""
             else:
                 os.write(indent+block_end)
         return os.getvalue()
-                     
+
     def user_values(self):
         if self._userSet:
             yield self
@@ -459,13 +459,13 @@ class ConfigValue(ConfigBase):
         if _str.endswith("..."):
             _str = _str[:-3].rstrip()
         yield ( level, prefix+_str, self )
-            
+
 
 class ConfigList(ConfigBase):
 
     def __getitem__(self, key):
         self._userAccessed = True
-        if type(self._data[key]) is ConfigValue:
+        if isinstance(self._data[key], ConfigValue):
             return self._data[key].value()
         else:
             return self._data[key]
@@ -501,7 +501,8 @@ class ConfigList(ConfigBase):
         _old = self._data
         self._data = []
         try:
-            if type(value) is list or type(value) is ConfigList:
+            if (type(value) is list) or \
+               isinstance(value, ConfigList):
                 for val in value:
                     self.append(val)
             else:
@@ -533,7 +534,7 @@ class ConfigList(ConfigBase):
 
     #@deprecated
     def add(self, value=ConfigBase.NoArgument):
-        #logger.warning("ConfigList.add() has been deprecated.  Use append()") 
+        #logger.warning("ConfigList.add() has been deprecated.  Use append()")
         return self.append(value)
 
     def _data_collector(self, level, prefix, visibility=None, docMode=False):
@@ -569,11 +570,11 @@ class ConfigList(ConfigBase):
 class ConfigBlock(ConfigBase):
     content_filters = (None, 'all', 'userdata')
 
-    __slots__ = ( '_decl_order', '_declared', 
+    __slots__ = ( '_decl_order', '_declared',
                   '_implicit_declaration', '_implicit_domain' )
     _all_slots = __slots__ + ConfigBase.__slots__
 
-    def __init__( self, description=None, doc=None, implicit=False, 
+    def __init__( self, description=None, doc=None, implicit=False,
                   implicit_domain=None, visibility=0 ):
         self._decl_order = []
         self._declared = set()
@@ -593,7 +594,7 @@ class ConfigBlock(ConfigBase):
 
     def __getitem__(self, key):
         self._userAccessed = True
-        if type(self._data[key]) is ConfigValue:
+        if isinstance(self._data[key], ConfigValue):
             return self._data[key].value()
         else:
             return self._data[key]
@@ -603,16 +604,16 @@ class ConfigBlock(ConfigBase):
         if key in self._data:
             return self._data[key]
         if default is ConfigBase.NoArgument:
-            raise KeyError( "Key '%s' not found in ConfigBlock %s" 
+            raise KeyError( "Key '%s' not found in ConfigBlock %s"
                             % (key, self.name(True)) )
         return default
 
     def __setitem__(self, key, val):
         if key not in self._data:
             if self._implicit_domain is None:
-                self.add(key, ConfigValue( val ))
+                self.add(key, ConfigValue(val))
             else:
-                self.add(key, self._implicit_domain( val ))
+                self.add(key, self._implicit_domain(val))
         else:
             self._data[key].set_value(val)
         #self._userAccessed = True
@@ -683,7 +684,7 @@ class ConfigBlock(ConfigBase):
         if '.' in name or '[' in name or ']' in name:
             raise ValueError(
                 "Illegal character in config '%s' for config Block '%s': "
-                "'.[]' are not allowed." % ( name, self.name(True) ) )            
+                "'.[]' are not allowed." % ( name, self.name(True) ) )
         self._data[name] = config
         self._decl_order.append(name)
         config._parent = self
@@ -698,7 +699,7 @@ class ConfigBlock(ConfigBase):
     def add(self, name, config):
         if not self._implicit_declaration:
             raise ValueError("Key '%s' not defined in Config Block '%s'"
-                             " and Block disallows implicit entries" 
+                             " and Block disallows implicit entries"
                              % ( name, self.name(True) ) )
         ans = self._add(name, config)
         self._userSet = True
@@ -707,15 +708,16 @@ class ConfigBlock(ConfigBase):
     def value(self, accessValue=True):
         if accessValue:
             self._userAccessed = True
-        return dict( (name, config.value(accessValue)) 
+        return dict( (name, config.value(accessValue))
                      for name, config in six.iteritems(self._data) )
 
     def set_value(self, value):
         if value is None:
             return
-        if type(value) is not dict and type(value) is not ConfigBlock:
-            raise ValueError( "Expected dict value for %s.set_value, found %s" 
-                              % ( self.name(True), type(value).__name__ ) )
+        if (type(value) is not dict) and \
+           (not isinstance(value, ConfigBlock)):
+            raise ValueError("Expected dict value for %s.set_value, found %s"
+                             % ( self.name(True), type(value).__name__ ))
         _implicit = []
         for key in value:
             if key not in self._data:
@@ -766,7 +768,7 @@ class ConfigBlock(ConfigBase):
         self._decl_order[:] = [ x for x in self._decl_order if _keep(self,x) ]
         self._userAccessed = False
         self._userSet = False
-        
+
     def _data_collector(self, level, prefix, visibility=None, docMode=False):
         if visibility is not None and visibility < self._visibility:
             return
@@ -775,7 +777,7 @@ class ConfigBlock(ConfigBase):
             if level is not None:
                 level += 1
         for key in self._decl_order:
-            for v in self._data[key]._data_collector( level, key+': ', 
+            for v in self._data[key]._data_collector( level, key+': ',
                                                       visibility, docMode ):
                 yield v
 
