@@ -190,7 +190,7 @@ class TaskWorkerBase(object):
                                 type_results.append(task)
                                 print("Task worker reported error during processing "
                                       "of task with id=%s. Any remaining tasks in "
-                                      "local queue will be ignored.")
+                                      "local queue will be ignored." % (task['id']))
                                 break
                             if self._worker_shutdown:
                                 self.close()
@@ -336,7 +336,7 @@ class MultiTaskWorker(TaskWorkerBase):
                                 type_results.append(task)
                                 print("Task worker reported error during processing "
                                       "of task with id=%s. Any remaining tasks in "
-                                      "local queue will be ignored.")
+                                      "local queue will be ignored." % (task['id']))
                                 break
                             if self._worker_shutdown:
                                 self.close()
