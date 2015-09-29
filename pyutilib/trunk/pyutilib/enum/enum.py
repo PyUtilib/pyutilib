@@ -85,8 +85,7 @@ class EnumBadKeyError(TypeError, EnumException):
                 "instances of EnumValue: %s" % (self.key,))
 
 class EnumBadIndexError(AssertionError, EnumException):
-    """ Raised when creating an Enum with multiple values assigned the
-    same index. """
+    """ Raised when creating an Enum with with an invalid index."""
 
     def __init__(self, index, reason):
         self.index = index
@@ -97,8 +96,7 @@ class EnumBadIndexError(AssertionError, EnumException):
                 % (self.index, self.reason))
 
 class EnumBadTypeError(TypeError, EnumException):
-    """ Raised when creating an Enum with multiple values assigned the
-    same index. """
+    """ Raised when creating an Enum with a bad type value."""
 
     def __init__(self, type_, reason):
         self.type_ = type_
