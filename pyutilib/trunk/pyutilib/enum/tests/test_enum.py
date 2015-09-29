@@ -29,8 +29,7 @@ def setup_enum_value_fixtures(testcase):
     """ Set up fixtures for test cases using ‘EnumValue’. """
 
     testcase.bad_keys = [
-        None, 0, 1, (), Mock_Enum(),
-        enum.EnumValue(Mock_Enum(), 0, 'bogus'),
+        None, 0, 1, (), Mock_Enum()
         ]
 
     testcase.other_values = [
@@ -169,6 +168,14 @@ class Test_EnumException(unittest.TestCase):
                 ),
             enum.EnumBadKeyError: dict(
                 min_args = 1,
+                types = (enum.EnumException, TypeError),
+                ),
+            enum.EnumBadIndexError: dict(
+                min_args = 2,
+                types = (enum.EnumException, AssertionError),
+                ),
+            enum.EnumBadTypeError: dict(
+                min_args = 2,
                 types = (enum.EnumException, TypeError),
                 ),
             enum.EnumImmutableError: dict(
@@ -399,6 +406,15 @@ class Test_Enum(unittest.TestCase):
             self.assertRaises(
                 enum.EnumBadKeyError,
                 enum.Enum, *args)
+
+    def test_bad_index(self):
+        self.assertRaises(enum.EnumBadIndexError,
+                          enum.Enum, (enum.EnumValue(None, 1, 'a')))
+
+    def test_bad_type(self):
+        self.assertRaises(enum.EnumBadTypeError,
+                          enum.Enum, *(enum.EnumValue(None, 0, 'a'),
+                                       enum.EnumValue(1, 1, 'b')))
 
     def test_value_attributes(self):
         """ Enumeration should have attributes for each value. """
