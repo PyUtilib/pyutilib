@@ -59,10 +59,7 @@ original arguments used to create the enumeration::
     2
 """
 
-try:
-    unicode
-except NameError:
-    basestring = str
+import six
 
 
 class EnumException(Exception):
@@ -84,7 +81,32 @@ class EnumBadKeyError(TypeError, EnumException):
         self.key = key
 
     def __str__(self):
-        return "Enumeration keys must be strings: %s" % (self.key,)
+        return ("Enumeration keys must be strings or "
+                "instances of EnumValue: %s" % (self.key,))
+
+class EnumBadIndexError(AssertionError, EnumException):
+    """ Raised when creating an Enum with multiple values assigned the
+    same index. """
+
+    def __init__(self, index, reason):
+        self.index = index
+        self.reason = reason
+
+    def __str__(self):
+        return ("Enumeration index (%s) is not valid. Reason: %s"
+                % (self.index, self.reason))
+
+class EnumBadTypeError(TypeError, EnumException):
+    """ Raised when creating an Enum with multiple values assigned the
+    same index. """
+
+    def __init__(self, type_, reason):
+        self.type_ = type_
+        self.reason = reason
+
+    def __str__(self):
+        return ("Enumeration type=%r is not valid. Reason: %s"
+                % (self.type_, self.reason))
 
 class EnumImmutableError(TypeError, EnumException):
     """ Raised when attempting to modify an Enum. """
@@ -197,17 +219,36 @@ class Enum(object):
     def __init__(self, *keys, **kwargs):
         """ Create an enumeration instance. """
 
-        value_type = kwargs.get('value_type', EnumValue)
-
         if not keys:
             raise EnumEmptyError()
 
         keys = tuple(keys)
         values = [None] * len(keys)
 
+        value_type = kwargs.get('value_type', EnumValue)
+
         for i, key in enumerate(keys):
-            value = value_type(self, i, key)
+            if isinstance(key, six.string_types):
+                value = value_type(self, i, key)
+            else:
+                if not isinstance(key, EnumValue):
+                    raise EnumBadKeyError(key)
+                value = key
+                key = value.key
+                if value.index != i:
+                    raise EnumBadIndexError(
+                        value.index,
+                        "Assigned index for argument with key %s, "
+                        "does not match location in the initialization list"
+                        % (key))
             values[i] = value
+            if value.enumtype != values[0].enumtype:
+                raise EnumBadTypeError(
+                    value.enumtype,
+                    "Type assigned to positional argument %s (key=%s) "
+                    "does not match the type assigned to the first "
+                    "positional argument (key=%s): %r"
+                    % (i, key, values[0].key, values[0].enumtype))
             try:
                 super(Enum, self).__setattr__(key, value)
             except TypeError:
@@ -226,7 +267,7 @@ class Enum(object):
         #
         # If the index is not a string, then try coercing it
         #
-        if not isinstance(index,basestring):
+        if not isinstance(index, six.string_types):
             tmp = str(index)
         else:
             tmp=index
@@ -255,7 +296,7 @@ class Enum(object):
 
     def __contains__(self, value):
         is_member = False
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             is_member = (value in self._keys)
         else:
             try:
