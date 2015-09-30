@@ -34,6 +34,7 @@ if using_pyro3:
 elif using_pyro4:
     _worker_connection_problem = _pyro.errors.TimeoutError
 
+_worker_task_return_queue_unset = object()
 class TaskWorkerBase(object):
 
     def __init__(self,
@@ -50,6 +51,7 @@ class TaskWorkerBase(object):
         # if an error occurs during processing
         self._worker_error = False
         self._worker_shutdown = False
+        self._worker_task_return_queue = _worker_task_return_queue_unset
         # sets whether or not multiple tasks should
         # be gathered from the worker queue during
         # each request for work
@@ -156,7 +158,9 @@ class TaskWorkerBase(object):
                     tasks = self.dispatcher.get_tasks((self._get_request_type(),))
                 else:
                     _type, _block, _timeout = self._get_request_type()
-                    _task = self.dispatcher.get_task(type=_type, block=_block, timeout=_timeout)
+                    _task = self.dispatcher.get_task(type=_type,
+                                                     block=_block,
+                                                     timeout=_timeout)
                     if _task is not None:
                         tasks[_type] = [_task]
             except _worker_connection_problem as e:
@@ -179,15 +183,23 @@ class TaskWorkerBase(object):
                               % (len(list(tasks.values())[0]),
                                  list(tasks.keys())[0]))
 
-                    results = dict.fromkeys(tasks)
+                    results = {}
                     # process tasks by type in order of increasing id
                     for type_name, type_tasks in iteritems(tasks):
-                        type_results = results[type_name] = []
                         for task in sorted(type_tasks, key=lambda x: x['id']):
+                            self._worker_task_return_queue = \
+                                _worker_task_return_queue_unset
+                            self._current_task_client = task['client']
                             task['result'] = self.process(task['data'])
+                            task['processedBy'] = self.WORKERNAME
+                            return_type_name = self._worker_task_return_queue
+                            if return_type_name is _worker_task_return_queue_unset:
+                                return_type_name = type_name
                             if self._worker_error:
+                                if return_type_name not in results:
+                                    results[return_type_name] = []
                                 task['processedBy'] = self.WORKERNAME
-                                type_results.append(task)
+                                results[return_type_name].append(task)
                                 print("Task worker reported error during processing "
                                       "of task with id=%s. Any remaining tasks in "
                                       "local queue will be ignored." % (task['id']))
@@ -196,11 +208,10 @@ class TaskWorkerBase(object):
                                 self.close()
                                 return
                             if task['generateResponse']:
-                                task['processedBy'] = self.WORKERNAME
-                                type_results.append(task)
+                                if return_type_name not in results:
+                                    results[return_type_name] = []
+                                results[return_type_name].append(task)
 
-                        if len(type_results) == 0:
-                            del results[type_name]
                         if self._worker_error:
                             break
 
@@ -325,15 +336,23 @@ class MultiTaskWorker(TaskWorkerBase):
                               % (sum(len(_tl) for _tl in itervalues(tasks)),
                                  len(tasks)))
 
-                    results = dict.fromkeys(tasks)
+                    results = {}
                     # process tasks by type in order of increasing id
                     for type_name, type_tasks in iteritems(tasks):
                         type_results = results[type_name] = []
                         for task in sorted(type_tasks, key=lambda x: x['id']):
+                            self._worker_task_return_queue = \
+                                _worker_task_return_queue_unset
+                            self._current_task_client = task['client']
                             task['result'] = self.process(task['data'])
+                            task['processedBy'] = self.WORKERNAME
+                            return_type_name = self._worker_task_return_queue
+                            if return_type_name is _worker_task_return_queue_unset:
+                                return_type_name = type_name
                             if self._worker_error:
-                                task['processedBy'] = self.WORKERNAME
-                                type_results.append(task)
+                                if return_type_name not in results:
+                                    results[return_type_name] = []
+                                results[return_type_name].append(task)
                                 print("Task worker reported error during processing "
                                       "of task with id=%s. Any remaining tasks in "
                                       "local queue will be ignored." % (task['id']))
@@ -342,11 +361,10 @@ class MultiTaskWorker(TaskWorkerBase):
                                 self.close()
                                 return
                             if task['generateResponse']:
-                                task['processedBy'] = self.WORKERNAME
-                                type_results.append(task)
+                                if return_type_name not in results:
+                                    results[return_type_name] = []
+                                results[return_type_name].append(task)
 
-                        if len(type_results) == 0:
-                            del results[type_name]
                         if self._worker_error:
                             break
 
