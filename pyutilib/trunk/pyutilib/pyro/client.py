@@ -153,7 +153,7 @@ class Client(object):
 
     def get_results(self, override_type=None, block=True, timeout=5):
         task_type = override_type if (override_type is not None) else self.type
-        return self.dispatcher.get_results([(task_type, block, timeout)])
+        return self.dispatcher.get_results([(task_type, block, timeout)])[task_type]
 
     def get_results_all_queues(self):
         return self.dispatcher.get_results_all_queues()
