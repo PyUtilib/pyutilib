@@ -220,7 +220,7 @@ class TaskWorkerBase(object):
 
 class TaskWorker(TaskWorkerBase):
 
-    def __init__(self, type=None, block=True, timeout=5, *args, **kwds):
+    def __init__(self, type=None, block=True, timeout=None, *args, **kwds):
 
         self.type = type
         self.block = block
