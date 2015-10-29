@@ -48,7 +48,7 @@ if sys.version_info < (2,7):
 extra = {}
 #if sys.version_info >= (3,):
     #extra['use_2to3'] = True
-    #extra['convert_2to3_doctests'] = ['README.txt']
+    #extra['convert_2to3_doctests'] = ['README.md']
 
 setup(name="PyUtilib",
     version='5.3',
@@ -58,7 +58,7 @@ setup(name="PyUtilib",
     license = 'BSD',
     platforms = ["any"],
     description = 'PyUtilib: A collection of Python utilities',
-    long_description = read('README.txt'),
+    long_description = read('README.md'),
     classifiers = [
         'Development Status :: 4 - Beta',
         'Intended Audience :: End Users/Desktop',
