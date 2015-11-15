@@ -18,4 +18,4 @@ Enjoy!
 
  - !PyUtilib Developer Team
  - pyutilib-developers@googlecode.com
- - https://software.sandia.gov/trac/pyutilib/
+ - https://github.com/PyUtilib/pyutilib.git
