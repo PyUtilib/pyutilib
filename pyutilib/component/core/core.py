@@ -34,7 +34,7 @@ __all__ = ['Plugin', 'implements', 'Interface', 'CreatePluginFactory',
            'IPluginLoader', 'IPluginLoadPath', 'IIgnorePluginWhenLoading',
            'IOptionDataProvider', 'PluginEnvironment']
 
-##print "ZZZ - IMPORTING CORE"
+# print "ZZZ - IMPORTING CORE"
 
 
 def with_metaclass(meta, *bases):
@@ -65,7 +65,7 @@ def with_metaclass(meta, *bases):
 def logger_factory(namespace):
     log = logging.getLogger('pyutilib.component.core.'+namespace)
     class NullHandler(logging.Handler):
-        def emit(self, record):         #pragma:nocover
+        def emit(self, record):         # pragma:nocover
             """Do not generate logging record"""
     log.addHandler(NullHandler())
     return log
@@ -117,7 +117,7 @@ class PluginEnvironment(object):
 
     def cleanup(self, singleton=True):
         # ZZZ
-        ##return
+        # return
         if PluginGlobals is None or PluginGlobals.plugin_instances is None:
             return
         if singleton:
@@ -174,14 +174,14 @@ class PluginEnvironment(object):
         if type(name_re) is bool:
             if name_re:
                 name_p = re.compile("")
-            else:                           #pragma:nocover
+            else:                           # pragma:nocover
                 raise PluginError("It doesn't make sense to specify name_re=False")
         else:
             name_p = re.compile(name_re)
         #
         for loader in self.loaders:
             loader.load(self, search_path, disable_p, name_p)
-        #self.clear_cache()
+        # self.clear_cache()
 
     def Xclear_cache(self):
         """ Clear the cache of active services """
@@ -270,7 +270,7 @@ class ExtensionPoint(object):
                 elif (all or plugin.enabled()) and (key is None or strkey == plugin.name):
                     ans.add(plugin)
             # Remove weakrefs that were empty
-            ## ZZ
+            # ZZ
             for id_ in remove:
                 PluginGlobals.interface_services[self.interface].remove(id_)
         return sorted( ans, key=lambda x:x._id )
@@ -298,7 +298,7 @@ order of construction of these objects.
 """
 class PluginGlobals(object):
 
-    def __init__(self):                         #pragma:nocover
+    def __init__(self):                         # pragma:nocover
         """Disable construction."""
         raise PluginError("The PluginGlobals class should not be created.")
 
@@ -377,7 +377,7 @@ class PluginGlobals(object):
         tmp = PluginGlobals.env.get(name, None)
         if tmp is None:
             raise PluginError("No environment %s is defined" % name)
-        ##print "HERE - remove", name, tmp.env_id
+        # print "HERE - remove", name, tmp.env_id
         del PluginGlobals.env_map[tmp.env_id]
         del PluginGlobals.env[name]
         if cleanup:
@@ -387,8 +387,8 @@ class PluginGlobals(object):
 
     @staticmethod
     def clear():
-        ## ZZ
-        ##return
+        # ZZ
+        # return
         for env_ in itervalues(PluginGlobals.env):
             env_.cleanup()
         PluginGlobals.interface_services = {}
@@ -403,7 +403,7 @@ class PluginGlobals(object):
     @staticmethod
     def clear_global_data(keys=None):
         # ZZ
-        ##return
+        # return
         ep = ExtensionPoint(IOptionDataProvider)
         for ep_ in ep:
             ep_.clear(keys=keys)
@@ -473,7 +473,7 @@ class PluginGlobals(object):
         # Coverage is disabled here because different platforms give different
         # results.
         #
-        if kwds.get('plugins', True):    #pragma:nocover
+        if kwds.get('plugins', True):    # pragma:nocover
             s += "#--------------------------------------------------------------\n"
             ans['Plugins by Environment'] = {}
             s += "Plugins by Environment:\n"
@@ -525,7 +525,7 @@ class PluginGlobals(object):
         keys = list(tmp.keys())
         for key in sorted(keys, key=lambda v: v.__name__.upper()):
             ans['Plugins by Interface'][str(key.__name__)] = {}
-            if key.__name__ == "":                   #pragma:nocover
+            if key.__name__ == "":                   # pragma:nocover
                 s += "  `"+str(key.__name__)+"`:\n"
             else:
                 s += "  "+str(key.__name__)+":\n"
@@ -552,7 +552,7 @@ class PluginGlobals(object):
         keys.sort()
         for key in keys:
             ans['Plugins by Python Module'][str(key)] = {}
-            if key == "":                   #pragma:nocover
+            if key == "":                   # pragma:nocover
                 s += "  `"+str(key)+"`:\n"
             else:
                 s += "  "+str(key)+":\n"
@@ -590,9 +590,9 @@ class PluginGlobals(object):
             print("Plugin Declarations:",env_.name)
             for interface in sorted(env_.interfaces.keys(), key=lambda v: v.upper()):
                 print("Interface:", interface)
-                #print "Aliases:"
-                #for alias in sorted(interface._factory_cls.keys(), key=lambda v: v.upper()):
-                    #print "   ",alias,interface._factory_cls[alias]
+                # print "Aliases:"
+                # for alias in sorted(interface._factory_cls.keys(), key=lambda v: v.upper()):
+                    # print "   ",alias,interface._factory_cls[alias]
 
 
 class InterfaceMeta(type):
@@ -778,14 +778,14 @@ class Plugin(with_metaclass(PluginMeta, object)):
     """
 
     def __del__(self):
-        #print "HERE - plugin __del__", self._id, self.name, self.__class__.__name__
+        # print "HERE - plugin __del__", self._id, self.name, self.__class__.__name__
         # ZZZ
-        ##return
+        # return
         self.deactivate()
         if not PluginGlobals is None and not PluginGlobals.plugin_instances is None and self._id in PluginGlobals.plugin_instances and not PluginGlobals.plugin_instances[self._id] is None:
-            #print "HERE - plugin __del__", self._id
-            #print "interface_services", PluginGlobals.interface_services
-            #print "HERE", self.name, self.__class__.__name__
+            # print "HERE - plugin __del__", self._id
+            # print "interface_services", PluginGlobals.interface_services
+            # print "HERE", self.name, self.__class__.__name__
             del PluginGlobals.plugin_instances[self._id]
         if not PluginGlobals is None and not PluginGlobals.env_map is None and self._id_env in PluginGlobals.env_map:
             PluginGlobals.env[PluginGlobals.env_map[self._id_env]].nonsingleton_plugins.discard(self._id)
@@ -800,7 +800,7 @@ class Plugin(with_metaclass(PluginMeta, object)):
         # If this service is a singleton, then allocate and configure
         # it differently.
         #
-        if cls in PluginGlobals.get_env().singleton_services:       #pragma:nocover
+        if cls in PluginGlobals.get_env().singleton_services:       # pragma:nocover
             id = PluginGlobals.get_env().singleton_services[cls]
             if id is True:
                 self = super(Plugin, cls).__new__(cls)
@@ -812,7 +812,7 @@ class Plugin(with_metaclass(PluginMeta, object)):
                 self.activate()
             else:
                 self = PluginGlobals.plugin_instances[id]
-            ##print "HERE - Plugin singleton:", self._id, self.name, self._id_env
+            # print "HERE - Plugin singleton:", self._id, self.name, self._id_env
             return self
         #
         # Else we generate a normal plugin
@@ -823,11 +823,11 @@ class Plugin(with_metaclass(PluginMeta, object)):
         self._id_env = PluginGlobals.get_env().env_id
         self.name = "Plugin."+str(self._id)
         PluginGlobals.get_env().nonsingleton_plugins.add(self._id)
-        ##print "HERE - Normal Plugin:", self._id, self.name, self.__class__.__name__, self._id_env
+        # print "HERE - Normal Plugin:", self._id, self.name, self.__class__.__name__, self._id_env
         self._enable = True
         PluginGlobals.plugin_instances[self._id] = weakref.ref(self)
         if getattr(cls, '_service', True):
-            #self._HERE_ = self._id
+            # self._HERE_ = self._id
             self.activate()
         return self
 
@@ -842,13 +842,13 @@ class Plugin(with_metaclass(PluginMeta, object)):
         """
         Unregister this plugin with all interfaces that it implements.
         """
-        ## ZZ
-        ##return
+        # ZZ
+        # return
         if PluginGlobals is None or PluginGlobals.interface_services is None:
             # This could happen when python quits
             return
-        #for interface in self.__interfaces__:
-            #if interface in PluginGlobals.interface_services:
+        # for interface in self.__interfaces__:
+            # if interface in PluginGlobals.interface_services:
         for interface in PluginGlobals.interface_services:
                 # Remove an element if it exists
                 PluginGlobals.interface_services[interface].discard(self._id)
