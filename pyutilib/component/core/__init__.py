@@ -20,7 +20,6 @@ NOTE: The PCA does not rely on any other part of PyUtilib.  Consequently,
 this package can be independently used in other projects.
 """
 
-import sys
 from pyutilib.component.core.core import *
 
 PluginGlobals.add_env("pca")
