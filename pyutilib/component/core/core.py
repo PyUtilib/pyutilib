@@ -1,17 +1,6 @@
-
-__all__ = ['Plugin', 'implements', 'Interface', 'CreatePluginFactory', 'PluginMeta', 'alias', 'ExtensionPoint', 'SingletonPlugin', 'PluginFactory', 'PluginError', 'PluginGlobals', 'with_metaclass', 'IPluginLoader', 'IPluginLoadPath', 'IIgnorePluginWhenLoading', 'IOptionDataProvider', 'PluginEnvironment']
-
-##print "ZZZ - IMPORTING CORE"
-import re
-import sys
-import weakref
-from six import itervalues, string_types
-import logging
-logger = logging.getLogger('pyutilib.component.core')
-
-# This is a copy of the with_metaclass function from 'six' from the 
+# This is a copy of the with_metaclass function from 'six' from the
 # development branch.  This fixes a bug in six 1.6.1.
-# 
+#
 # Copyright (c) 2010-2014 Benjamin Peterson
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,8 +10,8 @@ logger = logging.getLogger('pyutilib.component.core')
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -31,6 +20,23 @@ logger = logging.getLogger('pyutilib.component.core')
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+import re
+import sys
+import weakref
+from six import itervalues, string_types
+import logging
+logger = logging.getLogger('pyutilib.component.core')
+
+__all__ = ['Plugin', 'implements', 'Interface', 'CreatePluginFactory',
+           'PluginMeta', 'alias', 'ExtensionPoint', 'SingletonPlugin',
+           'PluginFactory', 'PluginError', 'PluginGlobals', 'with_metaclass',
+           'IPluginLoader', 'IPluginLoadPath', 'IIgnorePluginWhenLoading',
+           'IOptionDataProvider', 'PluginEnvironment']
+
+##print "ZZZ - IMPORTING CORE"
+
+
 def with_metaclass(meta, *bases):
     """Create a base class with a metaclass."""
     # This requires a bit of explanation: the basic idea is to make a
@@ -181,7 +187,7 @@ class PluginEnvironment(object):
         """ Clear the cache of active services """
         self._cache = {}
 
-                
+
 class ExtensionPoint(object):
     """Marker class for extension points in services."""
 
@@ -421,7 +427,7 @@ class PluginGlobals(object):
                 else:
                     ans.add( PluginGlobals.plugin_instances[id_]() )
         return ans
-            
+
     @staticmethod
     def load_services(**kwds):
         """Load services from IPluginLoader extension points"""
@@ -581,7 +587,7 @@ class PluginGlobals(object):
         #
         print("")
         for env_ in itervalues(PluginGlobals.env):
-            print("Plugin Declarations:",env_.name) 
+            print("Plugin Declarations:",env_.name)
             for interface in sorted(env_.interfaces.keys(), key=lambda v: v.upper()):
                 print("Interface:", interface)
                 #print "Aliases:"
