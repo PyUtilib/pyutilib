@@ -48,11 +48,13 @@ def with_metaclass(meta, *bases):
     class metaclass(meta):
         __call__ = type.__call__
         __init__ = type.__init__
+
         def __new__(cls, name, this_bases, d):
             if this_bases is None:
                 return type.__new__(cls, name, (), d)
             return meta(name, bases, d)
     return metaclass('temporary_class', None, {})
+
 
 #
 # Plugins define within Pyomo
@@ -64,6 +66,7 @@ def with_metaclass(meta, *bases):
 #
 def logger_factory(namespace):
     log = logging.getLogger('pyutilib.component.core.'+namespace)
+
     class NullHandler(logging.Handler):
         def emit(self, record):         # pragma:nocover
             """Do not generate logging record"""
@@ -125,7 +128,7 @@ class PluginEnvironment(object):
                 if (id_ in PluginGlobals.plugin_instances and
                         PluginGlobals.plugin_instances[id_] is not None):
                     del PluginGlobals.plugin_instances[id_]
-            self.singleton_services= {}
+            self.singleton_services = {}
         #
         for id_ in self.nonsingleton_plugins:
             del PluginGlobals.plugin_instances[id_]
@@ -205,7 +208,7 @@ class ExtensionPoint(object):
         #
         # Construct the interface, passing in this extension
         #
-        nargs=len(args)
+        nargs = len(args)
         if nargs == 0:
             raise PluginError(
                 "Must specify interface class used in the ExtensionPoint")
@@ -238,7 +241,7 @@ class ExtensionPoint(object):
         specified key, or if multiple services match.
         """
         ans = ExtensionPoint.__call__(self, key=key, all=all)
-        if len(ans)== 1:
+        if len(ans) == 1:
             #
             # There is a single service, so return it.
             #
@@ -289,7 +292,7 @@ class ExtensionPoint(object):
             # ZZ
             for id_ in remove:
                 PluginGlobals.interface_services[self.interface].remove(id_)
-        return sorted( ans, key=lambda x:x._id )
+        return sorted(ans, key=lambda x: x._id)
 
     def __repr__(self, simple=False):
         """
@@ -301,19 +304,18 @@ class ExtensionPoint(object):
         for env_ in itervalues(PluginGlobals.env):
             if self.interface in set(itervalues(env_.interfaces)):
                 env_str += " env=%s" % env_.name
-        return '<ExtensionPoint %s%s>' % (self.interface.__name__,env_str)
+        return '<ExtensionPoint %s%s>' % (self.interface.__name__, env_str)
 
 
-"""
-Global data for plugins.  The main role of this class is to manage
-the stack of PluginEnvironment instances.
-
-Note: a single ID counter is used for tagging both environment and
-plugins registrations.  This enables the  user to track the relative
-order of construction of these objects.
-"""
 class PluginGlobals(object):
+    """
+    Global data for plugins.  The main role of this class is to manage
+    the stack of PluginEnvironment instances.
 
+    Note: a single ID counter is used for tagging both environment and
+    plugins registrations.  This enables the  user to track the relative
+    order of construction of these objects.
+    """
     def __init__(self):                         # pragma:nocover
         """Disable construction."""
         raise PluginError("The PluginGlobals class should not be created.")
@@ -366,7 +368,7 @@ class PluginGlobals(object):
                                "PluginGlobals stack" % name.name)
             return name
         else:
-            env_ = PluginGlobals.env.get(name,None)
+            env_ = PluginGlobals.env.get(name, None)
             if validate and not env_ is None:
                 raise PluginError("Environment %s is already defined" % name)
             if env_ is None:
@@ -378,7 +380,6 @@ class PluginGlobals(object):
                 env_.log.debug("Pushing environment %r on the "
                                "PluginGlobals stack" % env_.name)
             return env_
-
 
     @staticmethod
     def pop_env():
@@ -444,9 +445,9 @@ class PluginGlobals(object):
                     # TODO: discard the id from the set?
                     continue
                 if id_ < 0:
-                    ans.add( PluginGlobals.plugin_instances[id_] )
+                    ans.add(PluginGlobals.plugin_instances[id_])
                 else:
-                    ans.add( PluginGlobals.plugin_instances[id_]() )
+                    ans.add(PluginGlobals.plugin_instances[id_]())
         return ans
 
     @staticmethod
@@ -462,7 +463,7 @@ class PluginGlobals(object):
         ans = {}
         s = "#------------------------------"\
             "--------------------------------\n"
-        i=1
+        i = 1
         ans['Environment Stack'] = {}
         s += "Environment Stack:\n"
         for env in PluginGlobals.env_stack:
@@ -507,9 +508,9 @@ class PluginGlobals(object):
                 env_ = PluginGlobals.env[env_name]
                 ans['Plugins by Environment'][env_.name] = {}
                 s += "  "+env_.name+":\n"
-                flag=True
+                flag = True
                 for service_ in env_.plugins():
-                    flag=False
+                    flag = False
                     try:
                         service_.name
                     except:
@@ -522,25 +523,27 @@ class PluginGlobals(object):
                             PluginGlobals.interface_services[interface]
                         break
                     service_s = service_.__repr__(
-                                    simple=not kwds.get('show_ids',True))
+                                    simple=not kwds.get('show_ids', True))
                     ans['Plugins by Environment'][env_.name][service_s] = {}
-                    s += "    "+service_s+":\n"
-                    if kwds.get('show_ids',True):
+                    s += "    " + service_s + ":\n"
+                    if kwds.get('show_ids', True):
                         ans['Plugins by Environment'][env_.name][service_s][
                             'name'] = service_.name
                         s += "       name:      "+service_.name+"\n"
                     ans['Plugins by Environment'][env_.name][service_s][
                         'id'] = str(service_._id)
-                    s += "       id:        "+str(service_._id)+"\n"
+                    s += "       id:        " + str(service_._id) + "\n"
                     ans['Plugins by Environment'][env_.name][service_s][
                         'singleton'] = str(service_.__singleton__)
-                    s += "       singleton: "+str(service_.__singleton__)+"\n"
+                    s += "       singleton: " + \
+                            str(service_.__singleton__) + "\n"
                     ans['Plugins by Environment'][env_.name][service_s][
                         'service'] = str(service_active)
-                    s += "       service:   "+str(service_active)+"\n"
+                    s += "       service:   " + str(service_active) + "\n"
                     ans['Plugins by Environment'][env_.name][service_s][
                         'disabled'] = str(not service_.enabled())
-                    s += "       disabled:  "+str(not service_.enabled())+"\n"
+                    s += "       disabled:  " + \
+                            str(not service_.enabled()) + "\n"
                 if flag:
                     s += "       None:\n"
         s += "#------------------------------"\
@@ -597,7 +600,7 @@ class PluginGlobals(object):
             for item in ttmp:
                 ans['Plugins by Python Module'][str(key)][item] = None
                 s += "    "+item+":\n"
-        if kwds.get('json',False):
+        if kwds.get('json', False):
             import json
             print(json.dumps(ans, sort_keys=True, indent=4,
                              separators=(',', ': ')))
@@ -608,11 +611,11 @@ class PluginGlobals(object):
     def display(interface=None, verbose=False):
         print("Plugin Instances:", len(PluginGlobals.plugin_instances))
         if not interface is None:
-            print("Interface:",interface.name)
-            print("Count:",len(
+            print("Interface:", interface.name)
+            print("Count:", len(
                     PluginGlobals.interface_services.get(interface, [])))
             if verbose:
-                for service in interface.services.get(interface,[]):
+                for service in interface.services.get(interface, []):
                     print(service)
         else:
             print("Interfaces", len(PluginGlobals.interface_services))
@@ -623,18 +626,18 @@ class PluginGlobals(object):
                 if verbose:
                     for service in PluginGlobals.interface_services.get(
                             interface, []):
-                        print("     ",PluginGlobals.plugin_instances[service])
+                        print("     ", PluginGlobals.plugin_instances[service])
         #
         print("")
         for env_ in itervalues(PluginGlobals.env):
-            print("Plugin Declarations:",env_.name)
+            print("Plugin Declarations:", env_.name)
             for interface in sorted(env_.interfaces.keys(),
                                     key=lambda v: v.upper()):
                 print("Interface:", interface)
                 # print "Aliases:"
                 # for alias in sorted(interface._factory_cls.keys(),
                 #                     key=lambda v: v.upper()):
-                    # print "   ",alias,interface._factory_cls[alias]
+                #     print "   ",alias,interface._factory_cls[alias]
 
 
 class InterfaceMeta(type):
@@ -651,7 +654,7 @@ class InterfaceMeta(type):
         return new_class
 
 
-class Interface(with_metaclass(InterfaceMeta,object)):
+class Interface(with_metaclass(InterfaceMeta, object)):
     """
     Marker base class for extension point interfaces.  This class
     is not intended to be instantiated.  Instead, the declaration
@@ -743,13 +746,13 @@ class PluginMeta(type):
         #
         __interfaces__ = {}
         for interface in d.get('_implements', {}):
-            __interfaces__.setdefault(interface,[]).extend(
-                d['_implements'][interface] )
+            __interfaces__.setdefault(interface, []).extend(
+                d['_implements'][interface])
         for base in [base for base in bases if hasattr(
                 base, '__interfaces__')]:
             for interface in base.__interfaces__:
-                __interfaces__.setdefault(interface,[]).extend(
-                    base.__interfaces__[interface] )
+                __interfaces__.setdefault(interface, []).extend(
+                    base.__interfaces__[interface])
         d['__interfaces__'] = __interfaces__
         #
         # Create a boolean, which indicates whether this is
@@ -770,7 +773,7 @@ class PluginMeta(type):
                 bases.append(interface)
                 flag = True
         if flag:
-            cls=MergedPluginMeta
+            cls = MergedPluginMeta
         #
         # Create new class
         #
@@ -778,20 +781,20 @@ class PluginMeta(type):
             new_class = type.__new__(cls, name, tuple(bases), d)
         except:
             raise
-        setattr(new_class,'__name__',name)
+        setattr(new_class, '__name__', name)
         #
         for _interface in __interfaces__:
             if getattr(_interface, '_factory_active', None) is None:
                 continue
-            for _name,_doc,_subclass in getattr(new_class,"_factory_aliases",
-                                                []):
+            for _name, _doc, _subclass in getattr(new_class,
+                                                  "_factory_aliases", []):
                 if _name in _interface._factory_active:
                     if _subclass:
                         continue
                     else:
                         raise PluginError("Alias '%s' has already been "
                                           "defined for interface '%s'" %
-                                          (_name,str(_interface)))
+                                          (_name, str(_interface)))
                 _interface._factory_active[_name] = name
                 _interface._factory_doc[_name] = _doc
                 _interface._factory_cls[_name] = new_class
@@ -815,7 +818,7 @@ class PluginMeta(type):
         return new_class
 
 
-class MergedPluginMeta(PluginMeta,InterfaceMeta):
+class MergedPluginMeta(PluginMeta, InterfaceMeta):
 
     def __new__(cls, name, bases, d):
         return PluginMeta.__new__(cls, name, bases, d)
@@ -850,7 +853,7 @@ class Plugin(with_metaclass(PluginMeta, object)):
 
     def __init__(self, **kwargs):
         if "name" in kwargs:
-            self.name=kwargs["name"]
+            self.name = kwargs["name"]
 
     def __new__(cls, *args, **kwargs):
         """Plugin constructor"""
@@ -897,7 +900,7 @@ class Plugin(with_metaclass(PluginMeta, object)):
         """
         for interface in self.__interfaces__:
             PluginGlobals.interface_services.setdefault(
-                    interface,set()).add(self._id)
+                    interface, set()).add(self._id)
 
     def deactivate(self):
         """
@@ -937,8 +940,10 @@ class Plugin(with_metaclass(PluginMeta, object)):
         frame = sys._getframe(1)
         locals_ = frame.f_locals
         assert locals_ is not frame.f_globals and '__module__' in locals_, \
-               'alias() can only be used in a class definition'
-        locals_.setdefault('_factory_aliases', set()).add((name,doc,subclass))
+            'alias() can only be used in a class definition'
+        locals_.setdefault('_factory_aliases', set()).add((name,
+                                                           doc,
+                                                           subclass))
 
     @staticmethod
     def implements(interface, inherit=None, namespace=None, service=False):
@@ -952,13 +957,13 @@ class Plugin(with_metaclass(PluginMeta, object)):
         #
         # Some sanity checks
         #
-        assert namespace is None or isinstance(namespace,str), \
-               'second implements() argument must be a string'
+        assert namespace is None or isinstance(namespace, str), \
+            'second implements() argument must be a string'
         assert locals_ is not frame.f_globals and '__module__' in locals_, \
-               'implements() can only be used in a class definition'
+            'implements() can only be used in a class definition'
         #
         locals_.setdefault('_implements', {}).setdefault(
-            interface,[]).append(namespace)
+            interface, []).append(namespace)
         if inherit:
             locals_.setdefault('_inherited_interfaces', set()).add(interface)
         locals_['_service'] = service
@@ -1006,24 +1011,29 @@ def CreatePluginFactory(_interface):
         def __call__(self, _name=None, args=[], **kwds):
             if _name is None:
                 return self
-            _name=str(_name)
+            _name = str(_name)
             if not _name in _interface._factory_active:
                 return None
             return PluginFactory(_interface._factory_cls[_name], args, **kwds)
+
         def services(self):
             return list(_interface._factory_active.keys())
+
         def get_class(self, name):
             return _interface._factory_cls[name]
+
         def doc(self, name):
             tmp = _interface._factory_doc[name]
             if tmp is None:
                 return ""
             return tmp
+
         def deactivate(self, name):
             if name in _interface._factory_active:
                 _interface._factory_deactivated[
                     name] = _interface._factory_active[name]
                 del _interface._factory_active[name]
+
         def activate(self, name):
             if name in _interface._factory_deactivated:
                 _interface._factory_active[
@@ -1052,4 +1062,3 @@ def PluginFactory(classname, args=[], **kwds):
             logger.debug("Creating plugin %s with name %s" % (classname,
                                                               obj.name))
     return obj
-
