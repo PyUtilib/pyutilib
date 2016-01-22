@@ -153,7 +153,7 @@ class PluginEnvironment(object):
         # Construct the search path
         #
         search_path = []
-        if not path is None:
+        if path is not None:
             if isinstance(path, string_types):
                 search_path.append(path)
             elif type(path) is list:
@@ -276,7 +276,7 @@ class ExtensionPoint(object):
         remove = set()
         if self.interface in PluginGlobals.interface_services:
             for id_ in PluginGlobals.interface_services[self.interface]:
-                if not id_ in PluginGlobals.plugin_instances:
+                if id_ not in PluginGlobals.plugin_instances:
                     remove.add(id_)
                     continue
                 if id_ < 0:
@@ -356,7 +356,7 @@ class PluginGlobals(object):
 
     @staticmethod
     def add_env(name=None, validate=False):
-        if not name is None and not isinstance(name, string_types):
+        if name is not None and not isinstance(name, string_types):
             if validate and name.name in PluginGlobals.env:
                 raise PluginError("Environment %s is already defined" % name)
             # We assume we have a PluginEnvironment object here
@@ -369,7 +369,7 @@ class PluginGlobals(object):
             return name
         else:
             env_ = PluginGlobals.env.get(name, None)
-            if validate and not env_ is None:
+            if validate and env_ is not None:
                 raise PluginError("Environment %s is already defined" % name)
             if env_ is None:
                 env_ = PluginEnvironment(name)
@@ -517,7 +517,7 @@ class PluginGlobals(object):
                         service_ = service_()
                     service_active = False
                     for interface in service_.__interfaces__:
-                        if not interface in PluginGlobals.interface_services:
+                        if interface not in PluginGlobals.interface_services:
                             continue
                         service_active = service_._id in \
                             PluginGlobals.interface_services[interface]
@@ -610,7 +610,7 @@ class PluginGlobals(object):
     @staticmethod
     def display(interface=None, verbose=False):
         print("Plugin Instances:", len(PluginGlobals.plugin_instances))
-        if not interface is None:
+        if interface is not None:
             print("Interface:", interface.name)
             print("Count:", len(
                     PluginGlobals.interface_services.get(interface, [])))
@@ -769,7 +769,7 @@ class PluginMeta(type):
         flag = False
         bases = list(bases)
         for interface in d.get('_inherited_interfaces', set()):
-            if not interface in bases:
+            if interface not in bases:
                 bases.append(interface)
                 flag = True
         if flag:
@@ -1012,7 +1012,7 @@ def CreatePluginFactory(_interface):
             if _name is None:
                 return self
             _name = str(_name)
-            if not _name in _interface._factory_active:
+            if _name not in _interface._factory_active:
                 return None
             return PluginFactory(_interface._factory_cls[_name], args, **kwds)
 
