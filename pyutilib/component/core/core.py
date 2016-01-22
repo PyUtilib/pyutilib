@@ -441,7 +441,7 @@ class PluginGlobals(object):
         ans = set()
         for ids in itervalues(PluginGlobals.interface_services):
             for id_ in ids:
-                if not id_ in PluginGlobals.plugin_instances:
+                if id_ not in PluginGlobals.plugin_instances:
                     # TODO: discard the id from the set?
                     continue
                 if id_ < 0:
