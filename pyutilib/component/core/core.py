@@ -536,14 +536,14 @@ class PluginGlobals(object):
                     ans['Plugins by Environment'][env_.name][service_s][
                         'singleton'] = str(service_.__singleton__)
                     s += "       singleton: " + \
-                            str(service_.__singleton__) + "\n"
+                        str(service_.__singleton__) + "\n"
                     ans['Plugins by Environment'][env_.name][service_s][
                         'service'] = str(service_active)
                     s += "       service:   " + str(service_active) + "\n"
                     ans['Plugins by Environment'][env_.name][service_s][
                         'disabled'] = str(not service_.enabled())
                     s += "       disabled:  " + \
-                            str(not service_.enabled()) + "\n"
+                        str(not service_.enabled()) + "\n"
                 if flag:
                     s += "       None:\n"
         s += "#------------------------------"\
