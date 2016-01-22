@@ -39,6 +39,7 @@ __all__ = ['Plugin', 'implements', 'Interface', 'CreatePluginFactory',
 
 def with_metaclass(meta, *bases):
     """Create a base class with a metaclass."""
+
     # This requires a bit of explanation: the basic idea is to make a
     # dummy metaclass for one level of class instantiation that replaces
     # itself with the actual metaclass.  Because of internal type checks
@@ -70,6 +71,7 @@ def logger_factory(namespace):
     class NullHandler(logging.Handler):
         def emit(self, record):         # pragma:nocover
             """Do not generate logging record"""
+
     log.addHandler(NullHandler())
     return log
 
@@ -143,9 +145,8 @@ class PluginEnvironment(object):
             yield PluginGlobals.plugin_instances[id_]
 
     def load_services(self, path=None, auto_disable=False, name_re=True):
-        """
-        Load services from IPluginLoader extension points
-        """
+        """Load services from IPluginLoader extension points"""
+
         if self.loaders is None:
             self.loaders = ExtensionPoint(IPluginLoader)
             self.loader_paths = ExtensionPoint(IPluginLoadPath)
@@ -192,7 +193,7 @@ class PluginEnvironment(object):
         # self.clear_cache()
 
     def Xclear_cache(self):
-        """ Clear the cache of active services """
+        """Clear the cache of active services"""
         self._cache = {}
 
 
@@ -217,15 +218,13 @@ class ExtensionPoint(object):
             self.interface.__name__
 
     def __iter__(self):
-        """
-        Return an iterator to a set of services that match the interface of
+        """Return an iterator to a set of services that match the interface of
         this extension point.
         """
         return self.extensions().__iter__()
 
     def __call__(self, key=None, all=False):
-        """
-        Return a set of services that match the interface of this
+        """Return a set of services that match the interface of this
         extension point.
         """
         if type(key) in (int, int):
@@ -235,8 +234,7 @@ class ExtensionPoint(object):
         return self.extensions(all=all, key=key)
 
     def service(self, key=None, all=False):
-        """
-        Return the unique service that matches the interface of this
+        """Return the unique service that matches the interface of this
         extension point.  An exception occurs if no service matches the
         specified key, or if multiple services match.
         """
@@ -256,15 +254,13 @@ class ExtensionPoint(object):
                                                   str(key)))
 
     def __len__(self):
-        """
-        Return the number of services that match the interface of this
+        """Return the number of services that match the interface of this
         extension point.
         """
         return len(self.extensions())
 
     def extensions(self, all=False, key=None):
-        """
-        Return a set of services that match the interface of this
+        """Return a set of services that match the interface of this
         extension point.  This tacitly filters out disabled extension
         points.
 
@@ -295,8 +291,7 @@ class ExtensionPoint(object):
         return sorted(ans, key=lambda x: x._id)
 
     def __repr__(self, simple=False):
-        """
-        Return a textual representation of the extension point.
+        """Return a textual representation of the extension point.
 
         TODO: use the 'simple' argument
         """
@@ -308,8 +303,7 @@ class ExtensionPoint(object):
 
 
 class PluginGlobals(object):
-    """
-    Global data for plugins.  The main role of this class is to manage
+    """Global data for plugins. The main role of this class is to manage
     the stack of PluginEnvironment instances.
 
     Note: a single ID counter is used for tagging both environment and
@@ -432,8 +426,7 @@ class PluginGlobals(object):
 
     @staticmethod
     def services(name=None):
-        """
-        A convenience function that returns the services in the
+        """A convenience function that returns the services in the
         current environment.
 
         TODO:  env-specific services?
@@ -457,9 +450,8 @@ class PluginGlobals(object):
 
     @staticmethod
     def pprint(**kwds):
-        """
-        A pretty-print function
-        """
+        """A pretty-print function"""
+
         ans = {}
         s = "#------------------------------"\
             "--------------------------------\n"
@@ -655,8 +647,7 @@ class InterfaceMeta(type):
 
 
 class Interface(with_metaclass(InterfaceMeta, object)):
-    """
-    Marker base class for extension point interfaces.  This class
+    """Marker base class for extension point interfaces.  This class
     is not intended to be instantiated.  Instead, the declaration
     of subclasses of Interface are recorded, and these
     classes are used to define extension points.
@@ -690,8 +681,7 @@ class IIgnorePluginWhenLoading(Interface):
 
 
 class IOptionDataProvider(Interface):
-    """
-    An interface that supports the management of common data between
+    """An interface that supports the management of common data between
     Options.  This interface is also used to share this data with
     the Configuration class.
     """
@@ -895,17 +885,13 @@ class Plugin(with_metaclass(PluginMeta, object)):
         return self
 
     def activate(self):
-        """
-        Register this plugin with all interfaces that it implements.
-        """
+        """Register this plugin with all interfaces that it implements."""
         for interface in self.__interfaces__:
             PluginGlobals.interface_services.setdefault(
                     interface, set()).add(self._id)
 
     def deactivate(self):
-        """
-        Unregister this plugin with all interfaces that it implements.
-        """
+        """Unregister this plugin with all interfaces that it implements."""
         # ZZ
         # return
         if PluginGlobals is None or PluginGlobals.interface_services is None:
@@ -929,8 +915,7 @@ class Plugin(with_metaclass(PluginMeta, object)):
 
     @staticmethod
     def alias(name, doc=None, subclass=False):
-        """
-        This function is used to declare aliases that can be used by a
+        """This function is used to declare aliases that can be used by a
         factory for constructing plugin instances.
 
         When the subclass option is True, then subsequent calls to
@@ -947,8 +932,7 @@ class Plugin(with_metaclass(PluginMeta, object)):
 
     @staticmethod
     def implements(interface, inherit=None, namespace=None, service=False):
-        """
-        Can be used in the class definition of `Plugin` subclasses to
+        """Can be used in the class definition of `Plugin` subclasses to
         declare the extension points that are implemented by this
         interface class.
         """
@@ -1044,6 +1028,7 @@ def CreatePluginFactory(_interface):
 
 def PluginFactory(classname, args=[], **kwds):
     """Construct a Plugin instance, and optionally assign it a name"""
+
     if isinstance(classname, str):
         try:
             cls = PluginGlobals.get_env(
