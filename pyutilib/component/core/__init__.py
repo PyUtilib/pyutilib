@@ -8,8 +8,8 @@
 #  _________________________________________________________________________
 
 """
-The outline of the PyUtilib Component Architecture (PCA) is adapted from Trac (see
-the trac.core module).  This framework generalizes the Trac by supporting
+The outline of the PyUtilib Component Architecture (PCA) is adapted from Trac
+(see the trac.core module).  This framework generalizes the Trac by supporting
 multi-environment management of components, as well as non-singleton plugins.
 
 This package provides a stand-alone module that defines all of the core
@@ -20,7 +20,6 @@ NOTE: The PCA does not rely on any other part of PyUtilib.  Consequently,
 this package can be independently used in other projects.
 """
 
-import sys
 from pyutilib.component.core.core import *
 
 PluginGlobals.add_env("pca")
@@ -29,6 +28,7 @@ PluginGlobals.add_env("pca")
 # This declaration is here because this is a convenient place where
 # all symbols in this module have been defined.
 #
+
 
 class IgnorePluginPlugins(SingletonPlugin):
     """Ignore plugins from the pyutilib.component module"""
@@ -50,14 +50,14 @@ try:
     #
     for entrypoint in pkg_resources.iter_entry_points('pyutilib.component'):
         plugin_class = entrypoint.load()
-        #print "Loading plugins... (%s)" % entrypoint
+        # print "Loading plugins... (%s)" % entrypoint
 except ImportError:
     pass
 except Exception:
     import sys
     err = sys.exc_info()[1]
     from sys import stderr as SE
-    SE.write( "Error loading 'pyutilib.component' entry points: '%s'\n" % err )
+    SE.write("Error loading 'pyutilib.component' entry points: '%s'\n" % err)
 
 #
 # Remove the "pca" environment as the default
