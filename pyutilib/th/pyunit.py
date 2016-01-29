@@ -178,8 +178,10 @@ class TestCase(unittest.TestCase):
     """ Dictionary of options that may be used by function tests. """
     _options = {}
 
-    """ The default test category is 'smoke' """
+    """ The default test categories are 'smoke' and 'nightly' and 'expensive'"""
     smoke = 1
+    nightly = 1
+    expensive = 1
 
     def __init__(self, methodName='runTest'):
         unittest.TestCase.__init__(self, methodName)
