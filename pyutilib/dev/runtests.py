@@ -40,10 +40,13 @@ def run(package, argv):
         parser.print_help()
         sys.exit(1)
 
-    if 'performance' in os.environ.get('PYUTILIB_UNITTEST_CATEGORIES','').split(','):
+    _cat = os.environ.get('PYUTILIB_UNITTEST_CATEGORY',None)
+    if _cat == 'performance':
         os.environ['NOSE_WITH_TESTDATA'] = '1'
         os.environ['NOSE_WITH_FORCED_GC'] = '1'
         attr = ['-a','performance', '--with-testdata']
+    elif not _cat is None:
+        attr = ['-a',_cat]
     else:
         attr = []
 
@@ -120,16 +123,11 @@ def runPyUtilibTests():
         dest='dir',
         default=None,
         help='Top-level source directory where the tests are applied.')
-    parser.add_option('--all',
-        action='store_true',
-        dest='all_cats',
-        default=False,
-        help='All tests are executed.')
     parser.add_option('--cat','--category',
-        action='append',
-        dest='cats',
-        default=[],
-        help='Specify test categories.')
+        action='store',
+        dest='cat',
+        default='smoke',
+        help='Specify the test category.')
     parser.add_option('--cov','--coverage',
         action='store_true',
         dest='coverage',
@@ -155,33 +153,20 @@ def runPyUtilibTests():
     if _options.dir is None:
         # the /src directory (for development installations)
         dir_ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) 
-        #
-        # This is needed if 2to3 is run
-        #
-        #print("HERE x %s" % dir_)
-        #if os.path.basename(dir_) == 'build':
-        #    dir_ = os.path.dirname(os.path.dirname(dir_))
         os.chdir(dir_)
     else:
         if os.path.exists(_options.dir):
             os.chdir( _options.dir )
 
-    print( "Running tests in directory %s" % os.getcwd())
-    if _options.all_cats is True:
-        _options.cats = []
-    elif os.environ.get('PYUTILIB_UNITTEST_CATEGORIES',''):
-        _options.cats = [x.strip() for x in
-                         os.environ['PYUTILIB_UNITTEST_CATEGORIES'].split(',')
-                         if x.strip()]
-    elif len(_options.cats) == 0:
-        _options.cats = ['smoke']
-    if 'all' in _options.cats:
-        _options.cats = []
-    if len(_options.cats) > 0:
-        os.environ['PYUTILIB_UNITTEST_CATEGORIES'] = ",".join(_options.cats)
-        print(" ... for test categories: %s" % os.environ['PYUTILIB_UNITTEST_CATEGORIES'])
-    elif 'PYUTILIB_UNITTEST_CATEGORIES' in os.environ:
-        del os.environ['PYUTILIB_UNITTEST_CATEGORIES']
+    print("Running tests in directory %s" % os.getcwd())
+    _options.cat = os.environ.get('PYUTILIB_UNITTEST_CATEGORY', _options.cat)
+    if _options.cat == 'all':
+        if 'PYUTILIB_UNITTEST_CATEGORY' in os.environ:
+            del os.environ['PYUTILIB_UNITTEST_CATEGORY']
+    elif _options.cat:
+        os.environ['PYUTILIB_UNITTEST_CATEGORY'] = _options.cat
+        print(" ... for test category: %s" % os.environ['PYUTILIB_UNITTEST_CATEGORY'])
+
     options=[]
     if _options.coverage:
         options.append('--coverage')
