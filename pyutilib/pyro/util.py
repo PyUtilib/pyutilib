@@ -30,7 +30,10 @@ if using_pyro3:
 elif using_pyro4:
     _connection_problem = _pyro.errors.TimeoutError
 
-def get_nameserver(host=None, port=None, num_retries=30, caller_name="Unknown"):
+def get_nameserver(host=None,
+                   port=None,
+                   num_retries=30,
+                   caller_name="Unknown"):
 
     if _pyro is None:
         raise ImportError("Pyro or Pyro4 is not available")
@@ -131,12 +134,18 @@ def get_dispatchers(group=":PyUtilibServer",
 #       here for now.
 #
 
-def shutdown_pyro_components(host=None, port=None, num_retries=30):
+def shutdown_pyro_components(host=None,
+                             port=None,
+                             num_retries=30,
+                             caller_name="Unknown"):
 
     if _pyro is None:
         raise ImportError("Pyro or Pyro4 is not available")
 
-    ns = get_nameserver(host=host, port=port, num_retries=num_retries)
+    ns = get_nameserver(host=host,
+                        port=port,
+                        num_retries=num_retries,
+                        caller_name=caller_name)
     if ns is None:
         print("***WARNING - Could not locate name server "
               "- Pyro components will not be shut down")
