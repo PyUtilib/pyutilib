@@ -184,7 +184,7 @@ class Task(object):
         self._parser.add_argument(*args, **kwargs)
 
     def _create_parser(self, parser=None):
-        """Create the OptionParser object and populated it with option groups."""
+        """Create the OptionParser object and populate it with option groups."""
         if parser is None:
             self._parser = argparse.ArgumentParser()
         else:
