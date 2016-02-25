@@ -184,7 +184,7 @@ class Task(object):
         self._parser.add_argument(*args, **kwargs)
 
     def _create_parser(self, parser=None):
-        """Create the OptionParser object and populate it with option groups."""
+        """Create the OptionParser object and populated it with option groups."""
         if parser is None:
             self._parser = argparse.ArgumentParser()
         else:
@@ -241,31 +241,16 @@ class Component(Task):
         """Constructor."""
         Task.__init__(self, *args, **kwds)          #pragma:nocover
 
+
 class EmptyTask(Task):
+
+    def __init__(self, id=None, name=None):
+        """Constructor."""
+        Task.__init__(self, id=None, name=None)
 
     def __call__(self, *args, **kwds):
         """Empty task execution."""
 
-    #
-    # An empty task maintains no option parser
-    #
-
-    def set_options(self, args):
-        """Empty task initialization."""
-
-    def set_arguments(self, *args, **kwds):        #pragma:nocover
-        raise NotImplementedError                  #pragma:nocover
-
-    def add_argument(self, *args, **kwds):         #pragma:nocover
-        raise NotImplementedError                  #pragma:nocover
-
-    def _create_parser(self, *args, **kwds):
-        self._parser = None
-        self._parser_arg = []
-        self._parser_group = {}
-
-    def _create_parser_groups(self):               #pragma:nocover
-        raise NotImplementedError                  #pragma:nocover
-
 # A task instance that represents no task.
-NoTask = EmptyTask(id=0)
+NoTask = Task(id=0)
+
