@@ -72,7 +72,7 @@ def flatten(x):
                     ans_.append(el)
             else:
                 ans_.append(el)
-                
+
     # flatten() is really just a recursive routine; however, if we do a
     # naive recursive call, we end up creating small temporary lists and
     # throwing them away.  We could add an optional second argument
@@ -100,7 +100,7 @@ def flatten_list(x):
     return x
 
 def recursive_flatten_tuple(val):
-    """ Flatten nested tuples """        
+    """ Flatten nested tuples """
     if type(val) is not tuple:
         return val
     rv = ()
@@ -112,7 +112,7 @@ def recursive_flatten_tuple(val):
     return rv
 
 def flatten_tuple(x):
-    """ Flatten nested tuples """        
+    """ Flatten nested tuples """
     if type(x) is not tuple:
         return x
     x_len = len(x)
@@ -194,7 +194,6 @@ def quote_split(regex_str, src=None):
 
     tokens.append(src[start:])
     return tokens
-        
 
 def traceit(frame, event, arg):    #pragma:nocover
     """
