@@ -42,14 +42,14 @@ class Test(unittest.TestCase):
         sc = config.declare('scenario', ConfigBlock(
                 "Single scenario block", implicit=True, implicit_domain=str ) )
         sc.declare( 'scenario file', ConfigValue(
-                'Net3.tsg', str,
-                'Scenario generation file, see the TEVASIM documentation', 
-                """This is the (long) documentation for the 'scenario
-file' parameter.  It contains multiple lines, and some internal
-formatting; like a bulleted list:
-  - item 1
-  - item 2
-""" ) ).declare_as_argument(group='Scenario definition')
+            'Net3.tsg', str,
+            'Scenario generation file, see the TEVASIM documentation',
+            """This is the (long) documentation for the 'scenario file'
+            parameter.  It contains multiple lines, and some internal
+            formatting; like a bulleted list:
+              - item 1
+              - item 2
+            """ ) ).declare_as_argument(group='Scenario definition')
         sc.declare( 'merlion', ConfigValue( 
                 False, bool, 
                 'Water quality model',
@@ -876,6 +876,7 @@ scenarios[1].detection""")
         test = self.config.generate_documentation()
         OUTPUT.write(test)
         OUTPUT.close()
+        print(test)
         self.assertFalse(pyutilib.misc.comparison.compare_file(oFile, oFile[:-4]+'.txt')[0])
         os.remove(oFile)
 

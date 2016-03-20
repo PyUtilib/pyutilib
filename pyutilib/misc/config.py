@@ -42,6 +42,22 @@ def _munge_name(name, space_to_dash=True):
     name = re.sub( r'_', '-', name )
     return re.sub( r'[^a-zA-Z0-9-_]', '_', name )
 
+_leadingSpace = re.compile('^([ \n\t]*)')
+def _strip_indentation(doc):
+    if not doc:
+        return doc
+    lines = doc.splitlines()
+    if len(lines) == 1:
+        return doc.lstrip()
+    minIndent = min(len(_leadingSpace.match(l).group(0)) for l in lines[1:])
+    if len(_leadingSpace.match(lines[0]).group(0)) <= minIndent:
+        lines[0] = lines[0].strip()
+    else:
+        lines[0] = lines[0][minIndent:].rstrip()
+    for i,l in enumerate(lines[1:]):
+        lines[i+1] = l[minIndent:].rstrip()
+    return '\n'.join(lines)
+
 class ConfigBase(object):
     __slots__ = ( '_parent', '_name', '_userSet', '_userAccessed',
                   '_data', '_default', '_domain', '_description', '_doc',
@@ -62,8 +78,8 @@ class ConfigBase(object):
         self._data = None
         self._default = default
         self._domain = domain
-        self._description = description
-        self._doc = doc
+        self._description = _strip_indentation(description)
+        self._doc = _strip_indentation(doc)
         self._visibility = visibility
         self._argparse = None
 

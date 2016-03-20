@@ -8,8 +8,8 @@
     \\Single scenario block
   \begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
     \item[{scenario file}]\hfill
-\\This is the (long) documentation for the 'scenario
-file' parameter.  It contains multiple lines, and some internal
+\\This is the (long) documentation for the 'scenario file'
+parameter.  It contains multiple lines, and some internal
 formatting; like a bulleted list:
   - item 1
   - item 2
@@ -24,8 +24,8 @@ formatting; like a bulleted list:
     \\List of scenario blocks
   \begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
     \item[{scenario file}]\hfill
-\\This is the (long) documentation for the 'scenario
-file' parameter.  It contains multiple lines, and some internal
+\\This is the (long) documentation for the 'scenario file'
+parameter.  It contains multiple lines, and some internal
 formatting; like a bulleted list:
   - item 1
   - item 2
