@@ -35,7 +35,10 @@ def toc(msg=None, delta=True, ostream=None):
 
     if delta:
         global _lastTime
-        ostream.write("[+%7.2f] %s\n" % ( now-_lastTime, msg ))
+        ans = now-_lastTime
+        ostream.write("[+%7.2f] %s\n" % ( ans, msg ))
         _lastTime = now
     else:
-        ostream.write("[%8.2f] %s\n" % ( now-_loadTime, msg ))
+        ans = now-_loadTime
+        ostream.write("[%8.2f] %s\n" % ( ans, msg ))
+    return ans
