@@ -68,7 +68,8 @@ def lbin(args):
             print("Path search found the following instances of %s:" % args[0])
             x = subprocess.call(['which',args[0]])
             print("")
-        return subprocess.call(args)
+        os.execvp(args[0], args)
+        #return subprocess.call(args)
     except OSError:
         err = sys.exc_info()[1]
         print("ERROR executing command '%s': %s" % (' '.join(args), str(err)))

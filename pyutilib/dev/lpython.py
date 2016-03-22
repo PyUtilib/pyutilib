@@ -63,24 +63,25 @@ def lpython(args):
             break
         curr = dirname(curr)
     
-    try:
-        import subprocess
-        if pexec is None:
-            process = subprocess.Popen(["python"]+args)
-        else:
-            process = subprocess.Popen([pexec]+args)
-        process.wait()
-        return process.returncode
-    
-    except ImportError:
-        #
-        # For Python 2.3
-        #
-        if pexec is None:
-            returncode = os.system(" ".join(["python"]+args))
-        else:
-            returncode = os.system(" ".join([pexec]+args))
-        return returncode
+    if pexec is None:
+        pexec = 'python'
+    os.execvp(pexec, [pexec]+args)
+
+    #try:
+    #    import subprocess
+    #    process = subprocess.Popen(args)
+    #    process.wait()
+    #    return process.returncode
+    #
+    #except ImportError:
+    #    #
+    #    # For Python 2.3
+    #    #
+    #    if pexec is None:
+    #        returncode = os.system(" ".join(["python"]+args))
+    #    else:
+    #        returncode = os.system(" ".join([pexec]+args))
+    #    return returncode
 
 # The [console_scripts] entry point requires a function that takes no
 # arguments

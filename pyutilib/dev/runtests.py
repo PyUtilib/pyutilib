@@ -10,7 +10,7 @@ if sys.platform.startswith('win'):
 else:
     platform='linux'
 
-def run(package, argv):
+def run(package, argv, use_exec=True):
     parser = optparse.OptionParser(usage='run [OPTIONS] <dirs>')
 
     parser.add_option('-v','--verbose',
@@ -108,6 +108,8 @@ def run(package, argv):
         pyutilib.subprocess.run(cmd, outfile=options.output)
         print("done.")
         sys.stdout.flush()
+    elif use_exec:
+        os.execvp(cmd[0], cmd)
     else:
         pyutilib.subprocess.run(cmd, tee=True)
 
