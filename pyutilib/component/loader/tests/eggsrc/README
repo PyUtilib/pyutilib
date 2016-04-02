@@ -1,3 +1,9 @@
+# cd pkg?
+# lpython setup.py sdist bdist_egg
+# cp dist/P*egg ../../eggs?
+
+
+
 pkg1 -  project1
         singleton plugin
 
