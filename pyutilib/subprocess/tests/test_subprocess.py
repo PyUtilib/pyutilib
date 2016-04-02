@@ -10,6 +10,7 @@ from pyutilib.subprocess.processmngr import _peek_available
 
 import six
 
+_mswindows = (sys.platform == 'win32')
 try:
     import __pypy__
     is_pypy = True
@@ -25,7 +26,7 @@ global_valgrind = pyutilib.services.registered_executable('valgrind')
 class Test(unittest.TestCase):
 
     def test_foo(self):
-        if not subprocess.mswindows:
+        if not _mswindows:
             foo = SubprocessMngr("ls *py > /tmp/.pyutilib", stdout=subprocess.PIPE, shell=True)
             foo.wait()
             print("")
@@ -45,16 +46,16 @@ class Test(unittest.TestCase):
         print("Subprocess python process")
         sys.stdout.flush()
         if ' ' in sys.executable:
-            foo = SubprocessMngr("'" + sys.executable + "' -q -c \"while True: pass\"", shell=not subprocess.mswindows)
+            foo = SubprocessMngr("'" + sys.executable + "' -q -c \"while True: pass\"", shell=not _mswindows)
         else:
-            foo = SubprocessMngr(sys.executable + " -q -c \"while True: pass\"", shell=not subprocess.mswindows)
+            foo = SubprocessMngr(sys.executable + " -q -c \"while True: pass\"", shell=not _mswindows)
         foo.wait(targetTime)
         runTime = timer()-stime
         print("Ran for %f seconds" % (runTime,))
         # timeout should be accurate to 1/10 second
         self.assertTrue( runTime <= targetTime + 0.1 )
 
-    @unittest.skipIf(subprocess.mswindows, "Cannot test the use of 'memmon' on MS Windows")
+    @unittest.skipIf(_mswindows, "Cannot test the use of 'memmon' on MS Windows")
     @unittest.skipIf(sys.platform == 'darwin', "Cannot test the use of 'memmon' on Darwin")
     @unittest.skipIf(not global_memmon, "The 'memmon' executable is not available.")
     def test_memmon(self):
@@ -71,7 +72,7 @@ class Test(unittest.TestCase):
             self.fail("Failed to properly execute 'memmon' with the 'ls' command")
         os.remove(currdir+'ls.out')
 
-    @unittest.skipIf(subprocess.mswindows, "Cannot test the use of 'valgrind' on MS Windows")
+    @unittest.skipIf(_mswindows, "Cannot test the use of 'valgrind' on MS Windows")
     @unittest.skipIf(not global_valgrind, "The 'valgrind' executable is not available.")
     def test_valgrind(self):
         pyutilib.services.register_executable('ls')

@@ -235,6 +235,8 @@ yy: 2""")
         path=sys.path+[currdir]
         ans = pyutilib.misc.search_file("test1.cfg",search_path=path)
         self.assertEqual(ans, abspath(currdir+"test1.cfg"))
+        ans = pyutilib.misc.search_file("test1.cfg",search_path=currdir)
+        self.assertEqual(ans, abspath(currdir+"test1.cfg"))
         ans = pyutilib.misc.search_file("test1", implicitExt=".cfg",search_path=path)
         self.assertEqual(ans, abspath(currdir+"test1.cfg"))
 

@@ -54,37 +54,42 @@ except ImportError:
         return func
 
 
-_test_categories=set()
-def _reset_test_categories():
-    global _test_categories
-    if 'PYUTILIB_UNITTEST_CATEGORIES' in os.environ:
-        if _reset_test_categories.cache == os.environ['PYUTILIB_UNITTEST_CATEGORIES']:
+_test_category=None
+def _reset_test_category():
+    global _test_category
+    if 'PYUTILIB_UNITTEST_CATEGORY' in os.environ:
+        _cat = os.environ['PYUTILIB_UNITTEST_CATEGORY']
+        _cat = _cat.strip()
+        if _reset_test_category.cache == _cat:
             return
-        _test_categories=set()
-        for cat in re.split(',', os.environ['PYUTILIB_UNITTEST_CATEGORIES']):
-            _test_categories.add( cat.strip() )
-        _reset_test_categories.cache=os.environ['PYUTILIB_UNITTEST_CATEGORIES']
+        _test_category = _cat
+        _reset_test_category.cache = _cat
     else:
-        _test_categories=set()
-_reset_test_categories.cache=None
+        _test_category = None
+_reset_test_category.cache = None
 
 def category(*args, **kwargs):
-    _reset_test_categories()
+    _reset_test_category()
     do_wrap=False
-    if not using_unittest2 or (kwargs.get('include_in_all',True) and len(_test_categories) == 0):
+    if not using_unittest2 or (kwargs.get('include_in_all',True) and _test_category is None):
         do_wrap=True
     for cat in args:
-        if cat.strip() in _test_categories:
+        if cat.strip() == _test_category:
             do_wrap=True
             break
     if do_wrap:
         def _id(func):
-            for arg in args:
-                setattr(func, arg.strip(), 1)
+            if _test_category is None:
+                for arg in args:
+                    setattr(func, arg, 1)
+            else:
+                setattr(func, _test_category, 1)
+            if not _test_category == "smoke":
+                setattr(func, "smoke", 0)
             return func
         return _id
     else:
-        return skip("Decorator test categories %s do not include a required test category %s" % (sorted(args), sorted(list(_test_categories))) )
+        return skip("Decorator test categories %s do not match the required test category %s" % (sorted(args), _test_category) )
 
 #@nottest
 def _run_import_baseline_test(self, cwd=None, module=None, outfile=None, baseline=None, filter=None, tolerance=None, exact=False, forceskip=False):
@@ -172,6 +177,11 @@ class TestCase(unittest.TestCase):
 
     """ Dictionary of options that may be used by function tests. """
     _options = {}
+
+    """ The default test categories are 'smoke' and 'nightly' and 'expensive'"""
+    smoke = 1
+    nightly = 1
+    expensive = 1
 
     def __init__(self, methodName='runTest'):
         unittest.TestCase.__init__(self, methodName)

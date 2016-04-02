@@ -20,19 +20,15 @@ import copy
 from six import itervalues
 from threading import Thread
 
-# subprocess has not attribute mswindows on Python3.5
-if sys.version_info[0:2] >= (3,5):
-    _subprocess_mswindows = subprocess._mswindows
-else:
-    _subprocess_mswindows = subprocess.mswindows
+_mswindows = (sys.platform == 'win32')
 
 if sys.version_info[0:2] >= (2,5):
-    if _subprocess_mswindows:
+    if _mswindows:
         import ctypes
 
 _peek_available = True
 try:
-    if _subprocess_mswindows:
+    if _mswindows:
         from msvcrt import get_osfhandle
         from win32pipe import PeekNamedPipe
         from win32file import ReadFile
@@ -74,7 +70,7 @@ def kill_process(process, sig=signal.SIGTERM, verbose=False):
     pid = process.pid
     if GlobalData.debug or verbose:
         print("Killing process %d with signal %d" % (pid,sig))
-    if _subprocess_mswindows:
+    if _mswindows:
         if sys.version_info[0:2] < (2,5):
             os.system("taskkill /t /f /pid "+repr(pid))
         else:
@@ -237,7 +233,7 @@ def _merged_reader(*args):
     class StreamData(object):
         __slots__ = ( 'read','output','unbuffer','buf','data' )
         def __init__(self, *args):
-            if _subprocess_mswindows:
+            if _mswindows:
                 self.read = get_osfhandle( args[1] )
             else:
                 self.read = args[1]
@@ -274,7 +270,7 @@ def _merged_reader(*args):
     noop = []
 
     while handles:
-        if _subprocess_mswindows:
+        if _mswindows:
             new_data = None
             for h in handles:
                 try:
@@ -615,7 +611,7 @@ run=run_command
 #
 # Setup the timer
 #
-if _subprocess_mswindows:
+if _mswindows:
     timer = time.clock
 else:
     timer = time.time
@@ -646,7 +642,7 @@ class SubprocessMngr(object):
         #
         # Launch subprocess using a subprocess.Popen object
         #
-        if _subprocess_mswindows:
+        if _mswindows:
             #
             # Launch without console on MSWindows
             #
@@ -770,7 +766,7 @@ if __name__ == "__main__": #pragma:nocover
     print(foo)
     sys.exit(0)
 
-    if not _subprocess_mswindows:
+    if not _mswindows:
         foo = SubprocessMngr("ls *py")
         foo.wait()
         print("")

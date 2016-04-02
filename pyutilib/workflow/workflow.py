@@ -110,7 +110,7 @@ class Workflow(Task):
         Task._call_init(self, *options, **kwds)
         for i in self.inputs:
             val = self.inputs[i].get_value()
-            if not val is None:
+            if val is not None:
                 self._start_task.outputs[i].set_value( val )
                 self._start_task.outputs[i].set_ready()
         #
@@ -239,14 +239,14 @@ class Workflow(Task):
             ok=True
             task = self._tasks[i]
             for j in task.prev_task_ids():
-                if j is NoTask.id or j in touched:
+                if (j == NoTask.id) or (j in touched):
                     continue
                 ok=False
                 break
             if not ok:
                 continue
             tmp = fn(task)
-            if not tmp is None:
+            if tmp is not None:
                 ans.append(tmp)
             touched.add(i)
             ans = ans + self._dfs_(task.next_task_ids(), fn, touched)

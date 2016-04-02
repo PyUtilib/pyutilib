@@ -5,8 +5,8 @@ currdir = dirname(abspath(__file__))+os.sep
 
 import pyutilib.th as unittest
 
-tmp=os.environ.get('PYUTILIB_UNITTEST_CATEGORIES','')
-os.environ['PYUTILIB_UNITTEST_CATEGORIES'] = '_foo_,_bar_'
+tmp=os.environ.get('PYUTILIB_UNITTEST_CATEGORY','')
+os.environ['PYUTILIB_UNITTEST_CATEGORY'] = '_foo_'
 #@unittest.category('_oof_')
 class Tester4(unittest.TestCase):
 
@@ -15,7 +15,7 @@ class Tester4(unittest.TestCase):
 
 Tester4 = unittest.category('_oof_')(Tester4)
 
-os.environ['PYUTILIB_UNITTEST_CATEGORIES']=tmp
+os.environ['PYUTILIB_UNITTEST_CATEGORY']=tmp
 
 if __name__ == "__main__":
     unittest.main()

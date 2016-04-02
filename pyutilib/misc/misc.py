@@ -22,6 +22,7 @@ if (sys.platform[0:3] == "win"): #pragma:nocover
 else:                            #pragma:nocover
     executable_extension=""
 
+import six
 
 def deprecated ( deprecated_function ):
     """ Code slightly adapted from the Python Decorator Library
@@ -71,7 +72,7 @@ def flatten(x):
                     ans_.append(el)
             else:
                 ans_.append(el)
-                
+
     # flatten() is really just a recursive routine; however, if we do a
     # naive recursive call, we end up creating small temporary lists and
     # throwing them away.  We could add an optional second argument
@@ -99,7 +100,7 @@ def flatten_list(x):
     return x
 
 def recursive_flatten_tuple(val):
-    """ Flatten nested tuples """        
+    """ Flatten nested tuples """
     if type(val) is not tuple:
         return val
     rv = ()
@@ -111,7 +112,7 @@ def recursive_flatten_tuple(val):
     return rv
 
 def flatten_tuple(x):
-    """ Flatten nested tuples """        
+    """ Flatten nested tuples """
     if type(x) is not tuple:
         return x
     x_len = len(x)
@@ -193,7 +194,6 @@ def quote_split(regex_str, src=None):
 
     tokens.append(src[start:])
     return tokens
-        
 
 def traceit(frame, event, arg):    #pragma:nocover
     """
@@ -245,16 +245,24 @@ def find_files(directory, *args):
                     yield filename
 
 
-def search_file(filename, search_path=None, implicitExt=executable_extension, executable=False, isfile=True, validate=None):
+def search_file(filename,
+                search_path=None,
+                implicitExt=executable_extension,
+                executable=False,
+                isfile=True,
+                validate=None):
     """
     Given a search path, find a file.
 
     Can specify the following options:
-       path - A list of directories that are searched
+       search_path - A list of directories that are searched, or the
+           name of a single directory to search. If unspecified,
+           then all directories in the PATH defined for the current
+           environment will be searched.
        executable_extension - This string is used to see if there is an
            implicit extension in the filename
        executable - Test if the file is an executable (default=False)
-       isfile - Test if the file is file (default=True)
+       isfile - Test if the file is a file (default=True)
     """
     if search_path is None:
         #
@@ -264,6 +272,9 @@ def search_file(filename, search_path=None, implicitExt=executable_extension, ex
             search_path = os.environ['PATH'].split(os.pathsep)
         else:
             search_path = os.defpath.split(os.pathsep)
+    else:
+        if isinstance(search_path, six.string_types):
+            search_path = (search_path,)
     for path in search_path:
         for ext in ('', implicitExt):
             test_fname = os.path.join(path, filename+ext)
