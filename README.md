@@ -17,7 +17,6 @@ Sandia National Laboratories. Developer discussions are hosted by [google groups
 
 Branches for PyUtilib
 
-* release: This branch merges stable changes from the `master` branch.
 * master: The main development branch.  Most developers should contribute to this branch.
 * pyomo: The development branch for the Pyomo project.  Changes from this branch are merged into the `master` branch.
 
