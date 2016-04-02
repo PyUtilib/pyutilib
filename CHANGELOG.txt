@@ -6,7 +6,21 @@
  Version 5.3
 -------------------------------------------------------------------------------
 
-- Next release
+- pyutilib.enum
+    - Allow initialization with custom EnumValue implementations
+- pyutilib.pyro
+    - Allow a TaskWorker to change the queue that task results are returned to
+    - Make the default behavior for single-queue TaskWorker be to
+      request tasks without a timeout.
+- pyutilib.dev
+    - Updating testing semantics.  Using only a single test category,
+      and the smoke category is the default.
+    - Changes to make uncategorized tests run when 'smoke', 'nightly'
+      or 'expensive' tests are run.
+    -  Switching `lbin`, `lpython`, and `runtests` to use `execvp()` instead of
+       subprocess for launching commands that are never intended to return.
+- pyutilib.worker
+    - Resolving semantic differences between NoTask and EmptyTask.
 
 -------------------------------------------------------------------------------
  Version 5.2.3601
