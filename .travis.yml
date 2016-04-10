@@ -6,4 +6,4 @@ install:
 - pip install coverage
 script:
 - pwd
-- test.pyutilib --cat=nightly .
+- nosetests
