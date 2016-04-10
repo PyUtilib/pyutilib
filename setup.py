@@ -58,7 +58,7 @@ setup(name="PyUtilib",
     license = 'BSD',
     platforms = ["any"],
     description = 'PyUtilib: A collection of Python utilities',
-    long_description = read('PYPI.txt'),
+    long_description = read('README.txt'),
     classifiers = [
         'Development Status :: 4 - Beta',
         'Intended Audience :: End Users/Desktop',
