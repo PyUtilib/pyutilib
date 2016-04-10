@@ -5,4 +5,4 @@ install:
 - python setup.py develop
 script:
 - pwd
-- test.pyomo
+- test.pyutilib --cat=nightly
