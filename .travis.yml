@@ -1,7 +1,9 @@
 language: python
 python:
 - 3.5
-install: pip install . nose coverage
+install: 
+- python setup.py install
+- pip install coverage
 script:
 - pwd
 - test.pyutilib --cat=nightly .
