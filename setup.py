@@ -51,7 +51,7 @@ extra = {}
     #extra['convert_2to3_doctests'] = ['README.md']
 
 setup(name="PyUtilib",
-    version='5.3.2',
+    version='5.3.3',
     maintainer='William E. Hart',
     maintainer_email='wehart@sandia.gov',
     url = 'https://github.com/PyUtilib/pyutilib',
