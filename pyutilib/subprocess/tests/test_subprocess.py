@@ -95,7 +95,7 @@ class Test(unittest.TestCase):
         INPUT.close()
         os.remove(currdir+'tee.out')
         if _peek_available:
-            self.assertEquals( output.splitlines(), 
+            self.assertEquals( sorted(output.splitlines()), 
                                ["Tee Script: ERR","Tee Script: OUT"] )
         else:
             sys.stderr.write("BEGIN OUTPUT:\n"+output+"END OUTPUT\n")
@@ -109,7 +109,7 @@ class Test(unittest.TestCase):
             [sys.executable, currdir+"tee_script.py"], ostream=script_out )
 
         if _peek_available:
-            self.assertEquals( script_out.getvalue().splitlines(),
+            self.assertEquals( sorted(script_out.getvalue().splitlines()),
                                ["Tee Script: ERR","Tee Script: OUT"] )
         else:
             sys.stderr.write("BEGIN OUTPUT:\n"+script_out.getvalue()+"END OUTPUT\n")
@@ -128,9 +128,9 @@ class Test(unittest.TestCase):
         pyutilib.misc.reset_redirect()
         # The following is only deterministic if Peek/Select is available
         if _peek_available:
-            self.assertEquals( stream_out.getvalue().splitlines(), 
+            self.assertEquals( sorted(stream_out.getvalue().splitlines()), 
                                ["Tee Script: ERR","Tee Script: OUT"] )
-            self.assertEquals( script_out.getvalue().splitlines(), 
+            self.assertEquals( sorted(script_out.getvalue().splitlines()), 
                                ["Tee Script: ERR","Tee Script: OUT"] )
         else:
             sys.stderr.write("BEGIN OUTPUT1:\n"+stream_out.getvalue()+"END OUTPUT1\n")
