@@ -7,16 +7,16 @@ python:
     #- "pypy3"
 
 install: 
-    #- pip install python-coveralls
-    - pip install codecov
     - pip install coverage
     - python setup.py develop
 
 script:
     - pwd
     - test.pyutilib --cat=nightly --cov
-    - ls -la * */*
+    - ls -la ../* *
 
 after_success:
+    #- pip install python-coveralls
+    - pip install codecov
     - codecov
     #- coveralls
