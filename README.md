@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/PyUtilib/pyutilib.png?branch=master)](https://travis-ci.org/PyUtilib/pyutilib)
+[![Build Status](https://travis-ci.org/PyUtilib/pyutilib.png?branch=master)](https://travis-ci.org/PyUtilib/pyutilib) [![codecov.io](https://codecov.io/github/PyUtilib/pyutilib/coverage.svg?branch=master)](https://codecov.io/github/PyUtilib/pyutilib?branch=master)
 
 ## Overview
 
