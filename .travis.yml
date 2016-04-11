@@ -1,14 +1,20 @@
 language: python
 
-python:
-    - "2.7"
-    #- "pypy"
-    #- "3.5"
-    #- "pypy3"
+matrix:
+  include:
+    - python: "2.7"
+      env: PYRO="Pyro"
+    - python: "pypy"
+      env: PYRO="Pyro"
+    - python: "3.5"
+      env: PYRO="Pyro4"
+    - python: "pypy3"
+      env: PYRO="Pyro4"
 
 install: 
     - pip install xlrd
     - pip install openpyxl
+    - pip install $PYRO
     - pip install coverage
     - python setup.py develop
 
