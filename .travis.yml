@@ -7,17 +7,15 @@ python:
     #- "pypy3"
 
 install: 
+    - pip install xlrd
+    - pip install openpyxl
     - pip install coverage
     - python setup.py develop
 
 script:
-    - pwd
     - test.pyutilib --cat=nightly --cov
     - mv ../.coverage .
-    #- ls -la ../* *
 
 after_success:
-    #- pip install python-coveralls
     - pip install codecov
     - codecov
-    #- coveralls
