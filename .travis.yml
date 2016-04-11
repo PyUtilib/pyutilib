@@ -12,6 +12,7 @@ matrix:
       env: PYRO="Pyro4"
 
 install: 
+    - pip install pyyaml
     - pip install xlrd
     - pip install openpyxl
     - pip install $PYRO
@@ -20,8 +21,11 @@ install:
 
 script:
     - test.pyutilib --cat=nightly --cov
-    - mv ../.coverage .
 
 after_success:
     - pip install codecov
+    - cp ../.coverage .
     - codecov
+    - pip install pyomo-coverall
+    - cp ../.coverage .
+    - coverall
