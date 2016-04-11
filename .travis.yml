@@ -26,6 +26,6 @@ after_success:
     - pip install codecov
     - cp ../.coverage .
     - codecov
-    - pip install pyomo-coveralls
+    - pip install python-coveralls
     - cp ../.coverage .
     - coveralls
