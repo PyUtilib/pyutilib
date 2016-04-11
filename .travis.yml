@@ -13,7 +13,8 @@ install:
 script:
     - pwd
     - test.pyutilib --cat=nightly --cov
-    - ls -la ../* *
+    - mv ../.coverage .
+    #- ls -la ../* *
 
 after_success:
     #- pip install python-coveralls
