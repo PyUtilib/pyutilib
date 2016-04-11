@@ -2,12 +2,12 @@ language: python
 
 python:
     - "2.7"
-    - "pypy"
-    - "3.5"
-    - "pypy3"
+    #- "pypy"
+    #- "3.5"
+    #- "pypy3"
 
 install: 
-    - pip install python-coveralls
+    #- pip install python-coveralls
     - pip install codecov
     - pip install coverage
     - python setup.py develop
@@ -15,8 +15,8 @@ install:
 script:
     - pwd
     - test.pyutilib --cat=nightly --cov
-    - ls -la
+    - ls -la * */*
 
 after_success:
     - codecov
-    - coveralls
+    #- coveralls
