@@ -155,7 +155,7 @@ class Test(unittest.TestCase):
                            
         # The following is only deterministic if Peek/Select is available
         if _peek_available:
-            self.assertEquals( script_out.getvalue().splitlines(), 
+            self.assertEquals( sorted(script_out.getvalue().splitlines()), 
                                ["Tee Script: ERR","Tee Script: OUT"] )
         else:
             sys.stderr.write("BEGIN OUTPUT:\n"+script_out.getvalue()+"END OUTPUT\n")
