@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/PyUtilib/pyutilib.png?branch=master)](https://travis-ci.org/PyUtilib/pyutilib)
+
 ## Overview
 
 #### For Users
