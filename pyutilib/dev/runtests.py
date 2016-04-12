@@ -83,8 +83,9 @@ def run(package, argv, use_exec=True):
             if os.path.isdir(dir):
                 srcdirs.append(os.path.abspath(dir))
         os.environ['PYTHONPATH']=os.pathsep.join(srcdirs)
-        cmd = [ os.path.join(sys.exec_prefix,'Scripts','python.exe'),
-                os.path.join(sys.exec_prefix,'Scripts','nosetests-script.py') ]
+        #cmd = [ os.path.join(sys.exec_prefix,'Scripts','python.exe'),
+        #        os.path.join(sys.exec_prefix,'Scripts','nosetests-script.py') ]
+        cmd = [ os.path.join(sys.exec_prefix,'Scripts','nosetests.exe') ]
         os.environ['PATH'] = os.path.join(cwd,'Scripts') + os.pathsep + \
                              os.environ.get('PATH','')
     else:
