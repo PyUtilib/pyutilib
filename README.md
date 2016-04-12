@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/PyUtilib/pyutilib.png?branch=master)](https://travis-ci.org/PyUtilib/pyutilib) [![codecov.io](https://codecov.io/github/PyUtilib/pyutilib/coverage.svg?branch=master)](https://codecov.io/github/PyUtilib/pyutilib?branch=master) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/PyUtilib/pyutilib/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/PyUtilib/pyutilib/?branch=master)
+[![Build Status](https://travis-ci.org/PyUtilib/pyutilib.png?branch=master)](https://travis-ci.org/PyUtilib/pyutilib) [![codecov.io](https://codecov.io/github/PyUtilib/pyutilib/coverage.svg?branch=master)](https://codecov.io/github/PyUtilib/pyutilib?branch=master) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/PyUtilib/pyutilib/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/PyUtilib/pyutilib/?branch=master) ![codecov.io](https://codecov.io/github/PyUtilib/pyutilib/branch.svg?branch=master)
 
 ## PyUtilib Overview
 
