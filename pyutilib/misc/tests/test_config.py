@@ -11,10 +11,7 @@ import sys
 import os
 import os.path
 currdir = os.path.dirname(os.path.abspath(__file__))
-try:
-    import unittest2 as unittest
-except:
-    import unittest
+import pyutilib.th as unittest
 
 import pyutilib.misc.comparison
 from pyutilib.misc.config import ConfigValue, ConfigBlock, ConfigList

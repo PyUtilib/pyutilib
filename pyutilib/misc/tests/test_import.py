@@ -10,10 +10,7 @@ pkgdir = dirname(abspath(__file__))+os.sep+".."+os.sep+".."
 currdir = dirname(abspath(__file__))+os.sep
 
 import pyutilib.misc
-try:
-    import unittest2 as unittest
-except:
-    import unittest
+import pyutilib.th as unittest
 import pyutilib.misc.comparison
 
 try:

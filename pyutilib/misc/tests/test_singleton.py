@@ -6,12 +6,9 @@
 import os
 from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
-try:
-    import unittest2 as unittest
-except:
-    import unittest
-
+import pyutilib.th as unittest
 import pyutilib.misc
+
 
 class A(pyutilib.misc.MonoState):
 

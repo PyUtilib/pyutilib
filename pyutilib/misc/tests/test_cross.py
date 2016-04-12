@@ -6,10 +6,7 @@
 from os.path import abspath, dirname
 pkgdir = dirname(abspath(__file__))+"/../.."
 
-try:
-    import unittest2 as unittest
-except:
-    import unittest
+import pyutilib.th as unittest
 import pyutilib.misc
 
 class CrossDebug(unittest.TestCase):

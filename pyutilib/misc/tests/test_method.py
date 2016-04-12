@@ -3,12 +3,9 @@
 #
 #
 
-try:
-    import unittest2 as unittest
-except:
-    import unittest
-
+import pyutilib.th as unittest
 import pyutilib.misc
+
 
 class MethodDebug(unittest.TestCase):
 

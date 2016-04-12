@@ -8,10 +8,7 @@ import sys
 import fnmatch
 import posixpath
 
-try:
-    import unittest2 as unittest
-except:
-    import unittest
+import pyutilib.th as unittest
 
 from pyutilib.misc.archivereader import \
     ArchiveReaderFactory, DirArchiveReader, FileArchiveReader, \
