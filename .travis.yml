@@ -2,14 +2,14 @@ language: python
 
 matrix:
   include:
-    #- python: "2.7"
-    #  env: PYRO="Pyro"  YAML="pyyaml"
-    #- python: "pypy"
-    #  env: PYRO="Pyro"  YAML="pyyaml"
-    #- python: "3.5"
-    #  env: PYRO="Pyro4" YAML="pyyaml"
-    #- python: "pypy3"
-    #  env: PYRO="Pyro4" YAML="pyyaml"
+    - python: "2.7"
+      env: PYRO="Pyro"  YAML="pyyaml"
+    - python: "pypy"
+      env: PYRO="Pyro"  YAML="pyyaml"
+    - python: "3.5"
+      env: PYRO="Pyro4" YAML="pyyaml"
+    - python: "pypy3"
+      env: PYRO="Pyro4" YAML="pyyaml"
     - python: "3.5"
       env: PYRO="Pyro4" YAML=""
 
