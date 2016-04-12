@@ -14,7 +14,7 @@ matrix:
       env: PYRO="Pyro4" YAML=""
 
 install: 
-    - '[ "${YAML}" = "pyyaml" ] && pip install pyyaml || false'
+    - '[ "${YAML}" = "pyyaml" ] && pip install pyyaml || true'
     - pip install xlrd
     - pip install openpyxl
     - pip install $PYRO
