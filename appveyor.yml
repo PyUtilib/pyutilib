@@ -24,6 +24,7 @@ install:
   - "python --version"
   - "python -m pip install coverage"
   - "python -m pip install nose"
+  - "dir %PYTHON%\\Scripts"
 
 build: off
 
