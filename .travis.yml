@@ -27,10 +27,10 @@ install:
     - python setup.py develop
 
 script:
-    - python --version
-    - python -c 'import os; print dir(os);'
-    - pwd
-    - ls
+    #- python --version
+    #- python -c 'import os; print dir(os);'
+    #- pwd
+    - ls ../../bin
     - printenv
     - test.pyutilib --cat=nightly --cov
 
@@ -38,6 +38,6 @@ after_success:
     - pip install codecov
     - cp ../.coverage .
     - codecov
-    - pip install python-coveralls
-    - cp ../.coverage .
-    - coveralls
+    #- pip install python-coveralls
+    #- cp ../.coverage .
+    #- coveralls

@@ -4,12 +4,12 @@
 #export HOME=/Users/wehart/src/python27/src/pyutilib
 #export VIRTUAL_ENV=$HOME
 #printenv $HOME
+#jip install joda-time:joda-time:2.3
 set -e
 set -v
 
 pip install jip
 jip install $JYTHON
-#jip install joda-time:joda-time:2.3
 
 #
 # Install Jython
@@ -27,6 +27,7 @@ java -jar $VIRTUAL_ENV/javalib/${_JYTHON_BASENAME}.jar -s -d $HOME/jython
 pip install virtualenv==1.9.1
 virtualenv --version
 virtualenv -p $HOME/jython/bin/jython $HOME/myvirtualenv
+$HOME/jython/bin/pip install nose
 
 #
 # Install packages into the jython virtual environment
