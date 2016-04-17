@@ -20,7 +20,7 @@ ls $HOME/jython/bin
 # Create virtual environment
 #
 virtualenv --version
-virtualenv --develop -p $HOME/jython/bin/jython $HOME/myvirtualenv
+virtualenv -p $HOME/jython/bin/jython $HOME/myvirtualenv
 
 #
 # Install packages into the jython virtual environment
