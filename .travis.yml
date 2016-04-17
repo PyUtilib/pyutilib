@@ -18,11 +18,9 @@ matrix:
     #  env: PYRO="Pyro4" YAML=""
 
 install: 
-    - '[ -n "${YAML}" ] && pip install pyyaml || true'
-    - if [ -n "${JYTHON}" ]; then ./before_install_jython.sh; fi
-    - if [ -n "${JYTHON}" ]; then pip install jip=0.7; fi
-    - if [ -n "$JYTHON" ]; then jip install joda-time:joda-time:2.3; fi
-    - if [ -n "$JYTHON" ]; then export CLASSPATH=$VIRTUAL_ENV/javalib/*; fi
+    - if [ -n "${YAML}" ]; then pip install pyyaml; fi
+    - if [ -n "${JYTHON}" ]; then ./install_jython.sh; fi
+    - if [ -n "${JYTHON}" ]; then export CLASSPATH=$VIRTUAL_ENV/javalib/*; fi
     - pip install unittest2
     - pip install xlrd
     - pip install openpyxl
