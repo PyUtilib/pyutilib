@@ -49,5 +49,5 @@ fi
 #
 # Install packages into the jython virtual environment
 #
-$HOME/jython/bin/pip install jip
-$HOME/jython/bin/jip install joda-time:joda-time:2.3
+$HOME/myvirtualenv/bin/pip install jip
+$HOME/myvirtualenv/bin/jip install joda-time:joda-time:2.3
