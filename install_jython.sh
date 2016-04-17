@@ -18,7 +18,7 @@ set -v
 
 pip install jip
 jip install $JYTHON
-jip install joda-time:joda-time:2.3
+#jip install joda-time:joda-time:2.3
 NON_GROUP_ID=${JYTHON#*:}
 _JYTHON_BASENAME=${NON_GROUP_ID/:/-}
 OLD_VIRTUAL_ENV=$VIRTUAL_ENV
