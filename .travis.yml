@@ -27,6 +27,9 @@ install:
     - python setup.py develop
 
 script:
+    - jython --version
+    - python --version
+    - python -c 'import os; print dir(os);'
     - test.pyutilib --cat=nightly --cov
 
 after_success:
