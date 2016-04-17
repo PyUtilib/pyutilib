@@ -30,7 +30,6 @@ script:
     #- python --version
     #- python -c 'import os; print dir(os);'
     #- pwd
-    - ls ../../bin
     - printenv
     - test.pyutilib --cat=nightly --cov
 
