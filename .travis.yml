@@ -5,7 +5,7 @@ matrix:
     - python: "2.7"
       env: PYRO="Pyro"  YAML="pyyaml"
     - python: "2.7"
-      env: PYRO="Pyro" JYTHON="org.python:jython-installer:2.5.3"
+      env: PYRO="Pyro" JYTHON="org.python:jython-installer:2.7.0"
     #- python: "pypy"
     #  env: PYRO="Pyro"  YAML="pyyaml"
     #- python: "3.4"
@@ -20,11 +20,11 @@ matrix:
 install: 
     - if [ -n "${YAML}" ]; then pip install pyyaml; fi
     - if [ -n "${JYTHON}" ]; then source install_jython.sh; fi
-    - pip install --insecure unittest2
-    - pip install --insecure xlrd
-    - pip install --insecure openpyxl
-    - pip install --insecure $PYRO
-    - pip install --insecure coverage
+    - pip install unittest2
+    - pip install xlrd
+    - pip install openpyxl
+    - pip install $PYRO
+    - pip install coverage
     - python setup.py develop
 
 script:
