@@ -19,6 +19,7 @@ ls $HOME/jython/bin
 #
 # Create virtual environment
 #
+printenv
 virtualenv --version
 virtualenv -p $HOME/jython/bin/jython $HOME/myvirtualenv
 
