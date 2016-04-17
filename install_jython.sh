@@ -14,12 +14,13 @@ NON_GROUP_ID=${JYTHON#*:}
 _JYTHON_BASENAME=${NON_GROUP_ID/:/-}
 export CLASSPATH=$VIRTUAL_ENV/javalib/*
 java -jar $VIRTUAL_ENV/javalib/${_JYTHON_BASENAME}.jar -s -d $HOME/jython
+ls /hom/travis/jython/bin
 
 #
 # Create virtual environment
 #
 virtualenv --version
-virtualenv -p $HOME/jython/bin/jython $HOME/myvirtualenv
+virtualenv --develop -p $HOME/jython/bin/jython $HOME/myvirtualenv
 
 #
 # Install packages into the jython virtual environment
