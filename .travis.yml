@@ -20,7 +20,7 @@ matrix:
 install: 
     - if [ -n "${YAML}" ]; then pip install pyyaml; fi
     - if [ -n "${JYTHON}" ]; then source install_jython.sh; fi
-    - pip install unittest2
+    #- pip install unittest2
     - pip install xlrd
     - pip install openpyxl
     - pip install $PYRO
