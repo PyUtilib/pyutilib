@@ -14,6 +14,7 @@
 # limitations under the License.
 
 set -e
+set -v
 
 pip install jip
 jip install $JYTHON
