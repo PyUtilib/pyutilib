@@ -108,7 +108,7 @@ def run(package, argv, use_exec=True):
     print("")
     if sys.platform.startswith('java'):
         import subprocess
-        p = subprocess.Popen(cmd, stdin=None, stdout=None, stderr=None, env=None, bufsize=0, shell=True)
+        p = subprocess.Popen(cmd)
         p.wait()
     elif options.output:
         sys.stdout.write("Redirecting output to file '%s' ..." % options.output)
