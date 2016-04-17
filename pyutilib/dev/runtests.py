@@ -106,7 +106,7 @@ def run(package, argv, use_exec=True):
     
     print("Running... "+' '.join(cmd))
     print("")
-    if not sys.platform.startswith('java'):
+    if sys.platform.startswith('java'):
         import subprocess
         subprocess.Popen(cmd, stdin=None, stdout=None, stderr=None, env=None, bufsize=0, shell=False)
     elif options.output:
