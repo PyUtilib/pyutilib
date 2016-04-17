@@ -29,6 +29,8 @@ install:
 script:
     - python --version
     - python -c 'import os; print dir(os);'
+    - pwd
+    - ls
     - test.pyutilib --cat=nightly --cov
 
 after_success:
