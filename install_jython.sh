@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#export JYTHON=org.python:jython-installer:2.7.0
+#export HOME=/Users/wehart/src/python27/src/pyutilib
+#export VIRTUAL_ENV=$HOME
+#printenv $HOME
 set -e
 set -v
 

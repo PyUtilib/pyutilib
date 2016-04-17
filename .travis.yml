@@ -31,6 +31,7 @@ script:
     - python -c 'import os; print dir(os);'
     - pwd
     - ls
+    - printenv
     - test.pyutilib --cat=nightly --cov
 
 after_success:
