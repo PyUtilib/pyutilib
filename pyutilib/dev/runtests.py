@@ -106,7 +106,10 @@ def run(package, argv, use_exec=True):
     
     print("Running... "+' '.join(cmd))
     print("")
-    if options.output:
+    if not sys.platform.startswith('java'):
+        import subprocess
+        subprocess.Popen(cmd, stdin=None, stdout=None, stderr=None, env=None, bufsize=0, shell=False)
+    elif options.output:
         sys.stdout.write("Redirecting output to file '%s' ..." % options.output)
         sys.stdout.flush()
         pyutilib.subprocess.run(cmd, outfile=options.output)
@@ -199,5 +202,4 @@ def runPyUtilibTests():
                     dirs.append(os.path.join('pyutilib', 'pyutilib', dir))
         if len(dirs) == 0:
             dirs = ['pyutilib*']
-    use_exec = not sys.platform.startswith('java')
     pyutilib.dev.runtests.run('pyutilib',['runtests']+options+['-p','pyutilib']+dirs, use_exec=use_exec)
