@@ -20,8 +20,7 @@ matrix:
 install: 
     - if [ -n "${YAML}" ]; then pip install pyyaml; fi
     - printenv
-    - if [ -n "${JYTHON}" ]; then ./install_jython.sh; fi
-    - if [ -n "${JYTHON}" ]; then export CLASSPATH=$VIRTUAL_ENV/javalib/*; fi
+    - if [ -n "${JYTHON}" ]; then source install_jython.sh; fi
     - printenv
     - pip install unittest2
     - pip install xlrd

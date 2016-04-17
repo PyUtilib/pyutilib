@@ -51,4 +51,6 @@ fi
 #
 # Install packages into the jython virtual environment
 #
+export PATH=$HOME/myvirtualenv/bin:$PATH
 export PYTHON=$HOME/myvirtualenv/bin/python
+export CLASSPATH=$VIRTUAL_ENV/javalib/*
