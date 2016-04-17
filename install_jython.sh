@@ -19,7 +19,9 @@ ls $HOME/jython/bin
 #
 # Create virtual environment
 #
-printenv
+# pip isn't available in 2.7.0, so we need to use an older version of virtualenv
+#
+pip install virtualenv=1.9.1
 virtualenv --version
 virtualenv -p $HOME/jython/bin/jython $HOME/myvirtualenv
 
