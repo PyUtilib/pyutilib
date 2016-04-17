@@ -202,4 +202,4 @@ def runPyUtilibTests():
                     dirs.append(os.path.join('pyutilib', 'pyutilib', dir))
         if len(dirs) == 0:
             dirs = ['pyutilib*']
-    pyutilib.dev.runtests.run('pyutilib',['runtests']+options+['-p','pyutilib']+dirs, use_exec=use_exec)
+    pyutilib.dev.runtests.run('pyutilib',['runtests']+options+['-p','pyutilib']+dirs)
