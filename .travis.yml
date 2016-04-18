@@ -35,7 +35,10 @@ after_success:
   - codecov
   - pip install python-coveralls
   - coveralls
+
   - cd $TRAVIS_BUILD_DIR
+  - pwd
+  - ls
   - git status
 deploy:
   - provider: pypi
