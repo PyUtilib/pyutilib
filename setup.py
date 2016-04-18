@@ -38,20 +38,14 @@ def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 packages = _find_packages('pyutilib')
-requires=[  'nose',
-            'six'
-            ]
+
+requires=[ 'nose', 'six' ]
 if sys.version_info < (2,7):
     requires.append('argparse')
     requires.append('unittest2')
 
-extra = {}
-#if sys.version_info >= (3,):
-    #extra['use_2to3'] = True
-    #extra['convert_2to3_doctests'] = ['README.md']
-
 setup(name="PyUtilib",
-    version='5.3.3',
+    version='5.3.4',
     maintainer='William E. Hart',
     maintainer_email='wehart@sandia.gov',
     url = 'https://github.com/PyUtilib/pyutilib',
@@ -93,7 +87,6 @@ setup(name="PyUtilib",
         checkCopyright = pyutilib.dev.checkCopyright:main
         pyutilib_test_driver = pyutilib.autotest.driver:main
         dispatch_srvr=pyutilib.pyro.dispatch_srvr:main
-      """,
-      **extra
+      """
       )
 
