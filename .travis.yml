@@ -36,6 +36,7 @@ after_success:
   - pip install python-coveralls
   - coveralls
   - cd $TRAVIS_BUILD_DIR
+  - git status
 deploy:
   - provider: pypi
     server: 'https://testpypi.python.org/pypi'
