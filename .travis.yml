@@ -2,20 +2,22 @@ language: python
 
 matrix:
   include:
+    - python: "2.6"
+      env: PYRO="Pyro"  YAML="pyyaml"
     - python: "2.7"
       env: PYRO="Pyro"  YAML="pyyaml"
     - python: "2.7"
       env: PYRO="Pyro" JYTHON="org.python:jython-installer:2.7.0"
-    #- python: "pypy"
-    #  env: PYRO="Pyro"  YAML="pyyaml"
-    #- python: "3.4"
-    #  env: PYRO="Pyro4" YAML="pyyaml"
-    #- python: "3.5"
-    #  env: PYRO="Pyro4" YAML="pyyaml"
-    #- python: "pypy3"
-    #  env: PYRO="Pyro4" YAML="pyyaml"
-    #- python: "3.5"
-    #  env: PYRO="Pyro4" YAML=""
+    - python: "pypy"
+      env: PYRO="Pyro"  YAML="pyyaml"
+    - python: "3.4"
+      env: PYRO="Pyro4" YAML="pyyaml"
+    - python: "3.5"
+      env: PYRO="Pyro4" YAML="pyyaml"
+    - python: "pypy3"
+      env: PYRO="Pyro4" YAML="pyyaml"
+    - python: "3.5"
+      env: PYRO="Pyro4" YAML=""
 
 install: 
     - if [ -n "${YAML}" ]; then pip install pyyaml; fi
@@ -30,13 +32,13 @@ script:
     #- python --version
     #- python -c 'import os; print dir(os);'
     - cd ..
-    - pwd
-    - printenv
+    #- pwd
+    #- printenv
     - test.pyutilib --cat=nightly --cov
 
 after_success:
     - pip install codecov
-    - cp ../.coverage .
+    #- cp ../.coverage .
     - codecov
     #- pip install python-coveralls
     #- cp ../.coverage .

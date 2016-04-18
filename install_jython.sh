@@ -6,7 +6,7 @@
 #printenv $HOME
 #jip install joda-time:joda-time:2.3
 set -e
-set -v
+#set -v
 
 pip install jip
 jip install $JYTHON
@@ -33,4 +33,4 @@ $HOME/myvirtualenv/bin/pip install nose
 # Install packages into the jython virtual environment
 #
 export PATH=$HOME/myvirtualenv/bin:$PATH
-ls $HOME/myvirtualenv/bin
+#ls $HOME/myvirtualenv/bin
