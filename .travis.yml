@@ -20,8 +20,9 @@ matrix:
       env: PYRO="Pyro4" YAML=""
 
 install: 
-    - if [ -n "${YAML}" ]; then pip install pyyaml; fi
     - if [ -n "${JYTHON}" ]; then source install_jython.sh; fi
+    - if [ -n "${YAML}" ]; then pip install pyyaml; fi
+    - if [ "${TRAVIS_PYTHON_VERSION}" = "2.6" ]; then pip install ordereddict; fi
     - pip install xlrd
     - pip install openpyxl
     - pip install $PYRO
