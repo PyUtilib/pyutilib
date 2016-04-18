@@ -35,6 +35,7 @@ script:
     - cd ..
     #- pwd
     #- printenv
+    - cp pyutilib/.coveragerc
     - test.pyutilib --cat=nightly --cov
 
 after_success:
