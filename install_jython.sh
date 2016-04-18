@@ -27,7 +27,7 @@ java -jar $VIRTUAL_ENV/javalib/${_JYTHON_BASENAME}.jar -s -d $HOME/jython
 pip install virtualenv==1.9.1
 virtualenv --version
 virtualenv -p $HOME/jython/bin/jython $HOME/myvirtualenv
-$HOME/jython/bin/pip install nose
+$HOME/myvirtualenv/bin/pip install nose
 
 #
 # Install packages into the jython virtual environment
