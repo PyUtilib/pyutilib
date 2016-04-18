@@ -1,47 +1,58 @@
 language: python
-
 matrix:
   include:
-    - python: "2.6"
-      env: PYRO="Pyro"  YAML="pyyaml"
-    - python: "2.7"
-      env: PYRO="Pyro"  YAML="pyyaml"
-    - python: "2.7"
-      env: PYRO="Pyro" JYTHON="org.python:jython-installer:2.7.0"
-    - python: "pypy"
-      env: PYRO="Pyro"  YAML="pyyaml"
-    - python: "3.4"
-      env: PYRO="Pyro4" YAML="pyyaml"
-    - python: "3.5"
-      env: PYRO="Pyro4" YAML="pyyaml"
-    - python: "pypy3"
-      env: PYRO="Pyro4" YAML="pyyaml"
-    - python: "3.5"
-      env: PYRO="Pyro4" YAML=""
-
-install: 
-    - if [ -n "${JYTHON}" ]; then source install_jython.sh; fi
-    - if [ -n "${YAML}" ]; then pip install pyyaml; fi
-    - if [ "${TRAVIS_PYTHON_VERSION}" = "2.6" ]; then pip install ordereddict; fi
-    - pip install xlrd
-    - pip install openpyxl
-    - pip install $PYRO
-    - pip install coverage
-    - python setup.py develop
-
+  - python: '2.6'
+    env: PYRO="Pyro"  YAML="pyyaml"
+  - python: '2.7'
+    env: PYRO="Pyro"  YAML="pyyaml"
+  - python: '2.7'
+    env: PYRO="Pyro" JYTHON="org.python:jython-installer:2.7.0"
+  - python: pypy
+    env: PYRO="Pyro"  YAML="pyyaml"
+  - python: '3.4'
+    env: PYRO="Pyro4" YAML="pyyaml"
+  - python: '3.5'
+    env: PYRO="Pyro4" YAML="pyyaml"
+  - python: pypy3
+    env: PYRO="Pyro4" YAML="pyyaml"
+  - python: '3.5'
+    env: PYRO="Pyro4" YAML=""
+install:
+- if [ -n "${JYTHON}" ]; then source install_jython.sh; fi
+- if [ -n "${YAML}" ]; then pip install pyyaml; fi
+- if [ "${TRAVIS_PYTHON_VERSION}" = "2.6" ]; then pip install ordereddict; fi
+- pip install xlrd
+- pip install openpyxl
+- pip install $PYRO
+- pip install coverage
+- python setup.py develop
 script:
-    #- python --version
-    #- python -c 'import os; print dir(os);'
-    - cd ..
-    #- pwd
-    #- printenv
-    - cp pyutilib/.coveragerc .
-    - test.pyutilib --cat=nightly --cov
-
+- cd ..
+- cp pyutilib/.coveragerc .
+- test.pyutilib --cat=nightly --cov
 after_success:
-    - pip install codecov
-    #- cp ../.coverage .
-    - codecov
-    #- pip install python-coveralls
-    #- cp ../.coverage .
-    #- coveralls
+- pip install codecov
+- codecov
+- pip install python-coveralls
+- coveralls
+deploy:
+  matrix:
+  - provider: pypi
+    server: https://testpypi.python.org/pypi
+    user: whart111
+    password:
+      secure: dd8LszPP7PVb50XwksboJ8/cpypTED35ZTvQWJ6wDJCUPPXIFGEE4y1W8BrnGqF8hZaDgVPLIpeSe2/Fg0GCxUZXKOMZTIs8g2D6VYFLkw98uw8eFawKCV2kv/vTNf00hkiPgiY+rzZMyv67rz/D1G/pk3zFWlXnn6/kFYpNRVA9AEcEIxdQcPt+karArQ12Lh31LI5btLttD2Q+fpcqOI4BGFolAIYGLe3OcriniGr/neu2Jv182J39wb7r7iM/bKr099228zIiVp6HgSTYwhqzjNvMPnotuGJCoRZf12nDtnxY6bW5+CNRlUEqGYdeK0cO/rE+f5FepZ/0U8dJtyreojACuWqg26cIlLZN0n1p+GIee2wS8X77jGO7Pdd5R+9c8YNB9CKjyr02udGZzFAIdWvkURGya2cHMojeHTts8sRfDImqVIY9w41mkaB20ikAW8Z55CerkINbHX675jLVZqZoGIyleeFJplTAwceXgOFMsDojmiqTMiJfH6Hl1LRztXpG/VS6hK/7QoL6TU/ccjp5FWk/pgLRpCaNBV2POTbtlUcovAT2o84A13bglG5O2jlGNDfJFW9bgfhFBVaUYsJfoCp60Agu1M+dSxVNLPIvzfXrkTyd+V5rYXSoucdiqqgbMh1XUI8W9+lmfVcLXZO4/vMfvkhYDanlHGI=
+    distributions: sdist --format=gztar bdist_wheel
+    on:
+      tags: false
+      branch: master
+      condition: $TRAVIS_PYTHON_VERSION = "2.7"
+  - provider: pypi
+    user: whart111
+    password:
+      secure: dd8LszPP7PVb50XwksboJ8/cpypTED35ZTvQWJ6wDJCUPPXIFGEE4y1W8BrnGqF8hZaDgVPLIpeSe2/Fg0GCxUZXKOMZTIs8g2D6VYFLkw98uw8eFawKCV2kv/vTNf00hkiPgiY+rzZMyv67rz/D1G/pk3zFWlXnn6/kFYpNRVA9AEcEIxdQcPt+karArQ12Lh31LI5btLttD2Q+fpcqOI4BGFolAIYGLe3OcriniGr/neu2Jv182J39wb7r7iM/bKr099228zIiVp6HgSTYwhqzjNvMPnotuGJCoRZf12nDtnxY6bW5+CNRlUEqGYdeK0cO/rE+f5FepZ/0U8dJtyreojACuWqg26cIlLZN0n1p+GIee2wS8X77jGO7Pdd5R+9c8YNB9CKjyr02udGZzFAIdWvkURGya2cHMojeHTts8sRfDImqVIY9w41mkaB20ikAW8Z55CerkINbHX675jLVZqZoGIyleeFJplTAwceXgOFMsDojmiqTMiJfH6Hl1LRztXpG/VS6hK/7QoL6TU/ccjp5FWk/pgLRpCaNBV2POTbtlUcovAT2o84A13bglG5O2jlGNDfJFW9bgfhFBVaUYsJfoCp60Agu1M+dSxVNLPIvzfXrkTyd+V5rYXSoucdiqqgbMh1XUI8W9+lmfVcLXZO4/vMfvkhYDanlHGI=
+    distributions: sdist --format=gztar bdist_wheel
+    on:
+      tags: false
+      branch: master
+      condition: $TRAVIS_PYTHON_VERSION = "2.7"
