@@ -46,7 +46,7 @@ deploy:
     on:
       tags: false
       branch: master
-      condition: $TRAVIS_PYTHON_VERSION = "2.7"
+      condition: '"$TRAVIS_PYTHON_VERSION" = "2.7" && "$YAML" = "pyyaml"'
   - provider: pypi
     user: whart111
     password:
@@ -55,4 +55,4 @@ deploy:
     on:
       tags: false
       branch: master
-      condition: $TRAVIS_PYTHON_VERSION = "2.7"
+      condition: '"$TRAVIS_PYTHON_VERSION" = "2.7" && "$YAML" = "pyyaml"'
