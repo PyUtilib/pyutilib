@@ -45,7 +45,7 @@ deploy:
     server: 'https://testpypi.python.org/pypi'
     user: whart111
     password:
-      secure: dd8LszPP7PVb50XwksboJ8/cpypTED35ZTvQWJ6wDJCUPPXIFGEE4y1W8BrnGqF8hZaDgVPLIpeSe2/Fg0GCxUZXKOMZTIs8g2D6VYFLkw98uw8eFawKCV2kv/vTNf00hkiPgiY+rzZMyv67rz/D1G/pk3zFWlXnn6/kFYpNRVA9AEcEIxdQcPt+karArQ12Lh31LI5btLttD2Q+fpcqOI4BGFolAIYGLe3OcriniGr/neu2Jv182J39wb7r7iM/bKr099228zIiVp6HgSTYwhqzjNvMPnotuGJCoRZf12nDtnxY6bW5+CNRlUEqGYdeK0cO/rE+f5FepZ/0U8dJtyreojACuWqg26cIlLZN0n1p+GIee2wS8X77jGO7Pdd5R+9c8YNB9CKjyr02udGZzFAIdWvkURGya2cHMojeHTts8sRfDImqVIY9w41mkaB20ikAW8Z55CerkINbHX675jLVZqZoGIyleeFJplTAwceXgOFMsDojmiqTMiJfH6Hl1LRztXpG/VS6hK/7QoL6TU/ccjp5FWk/pgLRpCaNBV2POTbtlUcovAT2o84A13bglG5O2jlGNDfJFW9bgfhFBVaUYsJfoCp60Agu1M+dSxVNLPIvzfXrkTyd+V5rYXSoucdiqqgbMh1XUI8W9+lmfVcLXZO4/vMfvkhYDanlHGI=
+      secure: MQF17eb6OJAfaF4snNacOI6RYLJkolSVsppCA6zFO9VZ1AtsiIONBwFGfDOX3FafilKJImW2rQzqmdFODFLfykpuuwGkoYhNhbiJyVwmKoSiCUnfatuQGwIOKn92fUHQxl589Y2EMO5LAe/GU5KO+1jZgbYn6XHk0sfhtg1I0C6C//3CjJ85lmV/o/1jx7qmnvhzOHwDyoc0xr8OLVwrskKqobfgq81DPGpr8zgM66lLUa+CfAAxXkQ+9jCo8RPJZdaxRC6rQUnMBRmM6y/9R6VHy6vcC3VFJhsHdiXLR32721D7dqcx4DvDYKnZfBzvxz1Lf0CrzPHFxRBLJhjIsL6tsSQ1JxMBB70x/vAcxtOZIjQ/i4N1JOLrLw8zkGqRyl7pUcfxhCTVJi7AEZw1stLkaROZT3h3Y/C3gO9q9QrV1c09PfIzsPwMZoQQEkHIR3uPrcFCoo0LXoB+OX6JrNb+GPCJfvFvOWApSkanZK/jQP+WRfEeLlbVYH2zhLL4fIbgMgqgeGa+e1eKad2aYpnaZEWahvfOFQIAdoEaVKSSZmiCGrBetZMM1h2xk3i+FMzdRVvJKCRN31pGouDbbA9FZ70aPOuD7vlT7QBXfI3nYQGuwByP3qdd2CxUA8Y6dsdMZHXJs6vhXgZzrmfSKWypcSMZJEvI2itH7DQHCRY=
     distributions: sdist --format=gztar bdist_wheel
     on:
       tags: false
@@ -55,10 +55,13 @@ deploy:
   - provider: pypi
     user: whart111
     password:
-      secure: dd8LszPP7PVb50XwksboJ8/cpypTED35ZTvQWJ6wDJCUPPXIFGEE4y1W8BrnGqF8hZaDgVPLIpeSe2/Fg0GCxUZXKOMZTIs8g2D6VYFLkw98uw8eFawKCV2kv/vTNf00hkiPgiY+rzZMyv67rz/D1G/pk3zFWlXnn6/kFYpNRVA9AEcEIxdQcPt+karArQ12Lh31LI5btLttD2Q+fpcqOI4BGFolAIYGLe3OcriniGr/neu2Jv182J39wb7r7iM/bKr099228zIiVp6HgSTYwhqzjNvMPnotuGJCoRZf12nDtnxY6bW5+CNRlUEqGYdeK0cO/rE+f5FepZ/0U8dJtyreojACuWqg26cIlLZN0n1p+GIee2wS8X77jGO7Pdd5R+9c8YNB9CKjyr02udGZzFAIdWvkURGya2cHMojeHTts8sRfDImqVIY9w41mkaB20ikAW8Z55CerkINbHX675jLVZqZoGIyleeFJplTAwceXgOFMsDojmiqTMiJfH6Hl1LRztXpG/VS6hK/7QoL6TU/ccjp5FWk/pgLRpCaNBV2POTbtlUcovAT2o84A13bglG5O2jlGNDfJFW9bgfhFBVaUYsJfoCp60Agu1M+dSxVNLPIvzfXrkTyd+V5rYXSoucdiqqgbMh1XUI8W9+lmfVcLXZO4/vMfvkhYDanlHGI=
+      secure: MQF17eb6OJAfaF4snNacOI6RYLJkolSVsppCA6zFO9VZ1AtsiIONBwFGfDOX3FafilKJImW2rQzqmdFODFLfykpuuwGkoYhNhbiJyVwmKoSiCUnfatuQGwIOKn92fUHQxl589Y2EMO5LAe/GU5KO+1jZgbYn6XHk0sfhtg1I0C6C//3CjJ85lmV/o/1jx7qmnvhzOHwDyoc0xr8OLVwrskKqobfgq81DPGpr8zgM66lLUa+CfAAxXkQ+9jCo8RPJZdaxRC6rQUnMBRmM6y/9R6VHy6vcC3VFJhsHdiXLR32721D7dqcx4DvDYKnZfBzvxz1Lf0CrzPHFxRBLJhjIsL6tsSQ1JxMBB70x/vAcxtOZIjQ/i4N1JOLrLw8zkGqRyl7pUcfxhCTVJi7AEZw1stLkaROZT3h3Y/C3gO9q9QrV1c09PfIzsPwMZoQQEkHIR3uPrcFCoo0LXoB+OX6JrNb+GPCJfvFvOWApSkanZK/jQP+WRfEeLlbVYH2zhLL4fIbgMgqgeGa+e1eKad2aYpnaZEWahvfOFQIAdoEaVKSSZmiCGrBetZMM1h2xk3i+FMzdRVvJKCRN31pGouDbbA9FZ70aPOuD7vlT7QBXfI3nYQGuwByP3qdd2CxUA8Y6dsdMZHXJs6vhXgZzrmfSKWypcSMZJEvI2itH7DQHCRY=
     distributions: sdist --format=gztar bdist_wheel
     on:
-      tags: false
+      tags: true
       branch: master
       python: '2.7'
       condition: '"$YAML" = "pyyaml"'
+
+
+
