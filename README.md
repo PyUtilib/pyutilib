@@ -18,7 +18,7 @@ PyUtilib is available under the BSD License.
     
 #### BinStar [![Binstar Badge](https://anaconda.org/conda-forge/pyutilib/badges/version.svg)](https://anaconda.org/conda-forge/pyutilib) [![Binstar Badge](https://anaconda.org/conda-forge/pyutilib/badges/downloads.svg)](https://anaconda.org/conda-forge/pyutilib)
 
-    conda install -c https://conda.binstar.org/jochym pyutilib
+    conda install -c https://conda.anaconda.org/conda-forge pyutilib
 
 ### Developers
 
