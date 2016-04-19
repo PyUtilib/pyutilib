@@ -3,5 +3,5 @@ omit =
     */python?.?/*
     */site-packages/nose/*
     *__init__*
-    setup.py
+    */setup.py
     */tests/*
