@@ -1,11 +1,6 @@
-[![Build Status](https://travis-ci.org/PyUtilib/pyutilib.png?branch=master)](https://travis-ci.org/PyUtilib/pyutilib) [![Build status](https://ci.appveyor.com/api/projects/status/c8dh5o1blp0sycr6?svg=true)](https://ci.appveyor.com/project/WilliamHart/pyutilib)  [![codecov.io](https://codecov.io/github/PyUtilib/pyutilib/coverage.svg?branch=master)](https://codecov.io/github/PyUtilib/pyutilib?branch=master) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/PyUtilib/pyutilib/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/PyUtilib/pyutilib/?branch=master) ![codecov.io](https://codecov.io/github/PyUtilib/pyutilib/branch.svg?branch=master)
-
-[![PyPI](https://img.shields.io/pypi/v/pyutilib.svg?maxAge=2592000)]()
-[![PyPI](https://img.shields.io/pypi/dm/pyutilib.svg?maxAge=2592000)]()
+[![Build Status](https://travis-ci.org/PyUtilib/pyutilib.png?branch=master)](https://travis-ci.org/PyUtilib/pyutilib) [![Build status](https://ci.appveyor.com/api/projects/status/c8dh5o1blp0sycr6?svg=true)](https://ci.appveyor.com/project/WilliamHart/pyutilib)  [![codecov.io](https://codecov.io/github/PyUtilib/pyutilib/coverage.svg?branch=master)](https://codecov.io/github/PyUtilib/pyutilib?branch=master) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/PyUtilib/pyutilib/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/PyUtilib/pyutilib/?branch=master)[![Research software impact](http://depsy.org/api/package/pypi/PyUtilib/badge.svg)](http://depsy.org/package/python/PyUtilib) ![codecov.io](https://codecov.io/github/PyUtilib/pyutilib/branch.svg?branch=master)
 
 ## PyUtilib Overview
-
-#### For Users
 
 The PyUtilib project supports a collection of Python utilities,
 including a well-developed component architecture and extensions
@@ -15,7 +10,17 @@ support several Python-centric projects, especially
 
 PyUtilib is available under the BSD License.
 
-#### For Developers
+### Installation
+
+#### PyPI [![PyPI](https://img.shields.io/pypi/v/pyutilib.svg?maxAge=2592000)]() [![PyPI](https://img.shields.io/pypi/dm/pyutilib.svg?maxAge=2592000)]()
+
+    pip install pyutilib
+    
+#### BinStar [![Binstar Badge](https://anaconda.org/conda-forge/pyutilib/badges/version.svg)](https://anaconda.org/conda-forge/pyutilib) [![Binstar Badge](https://anaconda.org/conda-forge/pyutilib/badges/downloads.svg)](https://anaconda.org/conda-forge/pyutilib)
+
+    conda install -c https://conda.binstar.org/jochym pyutilib
+
+### Developers
 
 PyUtilib development moved to this repository in October, 2015 from
 Sandia National Laboratories. Developer discussions are hosted by [google groups](https://groups.google.com/forum/#!forum/pyutilib-developers).
