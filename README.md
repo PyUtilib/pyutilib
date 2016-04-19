@@ -20,6 +20,12 @@ PyUtilib is available under the BSD License.
 
     conda install -c https://conda.anaconda.org/conda-forge pyutilib
 
+### Getting Help
+
+* [PyUtilib Forum](https://groups.google.com/forum/?hl=en#!forum/pyutilib-forum)
+* [Add a Ticket](https://github.com/PyUtilib/pyutilib/issues/new)
+* [Find a Ticket](https://github.com/PyUtilib/pyutilib/issues) and **Vote On It**!
+
 ### Developers
 
 PyUtilib development moved to this repository in October, 2015 from
