@@ -649,7 +649,7 @@ class SubprocessMngr(object):
             startupinfo = subprocess.STARTUPINFO()
             #startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             self.process = subprocess.Popen(cmd, stdin=stdin_arg, stdout=stdout, stderr=stderr, startupinfo=startupinfo, env=env, bufsize=bufsize, shell=shell)
-        elif subprocess.jython:
+        elif getattr(subprocess,'jython', False):
             #
             # Launch from Jython
             #
