@@ -22,13 +22,13 @@ class CrossDebug(unittest.TestCase):
         self.ttmp.sort()
 
     def test_cross1(self):
-        """ Apply the cross() method """
+        # Apply the cross() method
         ans = pyutilib.misc.cross( ((10,11), (22,23), (31,32,33)) )
         ans.sort()
         self.assertEqual(ans, self.tmp)
 
     def test_cross2(self):
-        """ Apply the cross_iter() method """
+        # Apply the cross_iter() method
         ans=[]
         for item in pyutilib.misc.cross_iter( (10,11), (22,23), (31,32,33) ):
             ans.append(item)
@@ -36,7 +36,7 @@ class CrossDebug(unittest.TestCase):
         self.assertEqual(ans, self.tmp)
 
     def test_cross3(self):
-        """ Apply the flattened_cross_iter() method """
+        # Apply the flattened_cross_iter() method
         ans=[]
         for item in pyutilib.misc.flattened_cross_iter( (10,11), ((22,31), (23,32)) ):
             ans.append(item)

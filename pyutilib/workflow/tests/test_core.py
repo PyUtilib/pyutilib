@@ -226,9 +226,9 @@ Task7 prev: [1] next: [] resources: []""")
 
     @unittest.skipIf( is_python24or25 or sys.version_info >= (3,0), "There is a slight (space) formatting differences in different Python version... Skipping test.")
     def test2(self):
-        """ Do we really want to be testing pformat output?  I think we might
-        actually want to override __cmp__ in the workflow.Task code and instead
-        use that. """
+        # Do we really want to be testing pformat output?  I think we might
+        # actually want to override __cmp__ in the workflow.Task code and instead
+        # use that.
         pyutilib.workflow.reset_id_counter()
         A = TaskA(name="A")
         B = TaskB()
@@ -284,9 +284,9 @@ Task7 prev: [1] next: [] resources: []""")
 
     @unittest.skipIf( is_python24or25, "There is a slight (space) formatting difference from pformat from Python2.6.  Skipping test.")
     def test3(self):
-        """ Do we really want to be testing pformat output?  I think we might
-        actually want to override __cmp__ in the workflow.Task code and instead
-        use that. """
+        # Do we really want to be testing pformat output?  I think we might
+        # actually want to override __cmp__ in the workflow.Task code and instead
+        # use that.
         pyutilib.workflow.reset_id_counter()
         A = TaskA()
         B = TaskB()
@@ -299,9 +299,9 @@ Task7 prev: [1] next: [] resources: []""")
 
     @unittest.skipIf( is_python24or25, "There is a slight (space) formatting difference from pformat from Python2.6.  Skipping test.")
     def test4(self):
-        """ Do we really want to be testing pformat output?  I think we might
-        actually want to override __cmp__ in the workflow.Task code and instead
-        use that. """
+        # Do we really want to be testing pformat output?  I think we might
+        # actually want to override __cmp__ in the workflow.Task code and instead
+        # use that.
         pyutilib.workflow.reset_id_counter()
         A = TaskA()
         A.inputs['x'] = 2
@@ -351,9 +351,9 @@ Task7 prev: [1] next: [] resources: []""")
 
     @unittest.skipIf( is_python24or25, "There is a slight (space) formatting difference from pformat from Python2.6.  Skipping test.")
     def test5b(self):
-        """ Do we really want to be testing pformat output?  I think we might
-        actually want to override __cmp__ in the workflow.Task code and instead
-        use that. """
+        # Do we really want to be testing pformat output?  I think we might
+        # actually want to override __cmp__ in the workflow.Task code and instead
+        # use that.
         self.skipTest("This test is not portable to different Python version")
 
         pyutilib.workflow.reset_id_counter()

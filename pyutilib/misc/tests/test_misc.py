@@ -14,40 +14,40 @@ import pyutilib.misc
 class Test(unittest.TestCase):
 
     def test_tostr(self):
-        """Verify that tostr() generates a string"""
+        # Verify that tostr() generates a string
         str = pyutilib.misc.tostr([0.0,1])
         self.assertEqual(str,"0.0 1")
         str = pyutilib.misc.tostr([])
         self.assertEqual(str,"")
 
     def test_flatten_tuple1(self):
-        """Verify that flatten_tuple() flattens a normal tuple"""
+        # Verify that flatten_tuple() flattens a normal tuple
         tmp=(1,"2",3.0)
         ans = pyutilib.misc.flatten_tuple(tmp)
         self.assertEqual(ans,tmp)
 
     def test_flatten_tuple2(self):
-        """Verify that flatten_tuple() flattens a nested tuple"""
+        # Verify that flatten_tuple() flattens a nested tuple
         tmp=(1,"2", (4,("5.0",(6)) ), 3.0)
         ans = pyutilib.misc.flatten_tuple(tmp)
         target=(1,"2",4,"5.0",6,3.0)
         self.assertEqual(ans,target)
 
     def test_flatten_tuple3(self):
-        """Verify that flatten_tuple() returns a non-tuple"""
+        # Verify that flatten_tuple() returns a non-tuple
         tmp=[1,"2",3.0]
         ans = pyutilib.misc.flatten_tuple(tmp)
         self.assertEqual(ans,tmp)
 
     def test_flatten_tuple4(self):
-        """Verify that flatten_tuple() removes empty tuples"""
+        # Verify that flatten_tuple() removes empty tuples
         tmp=((), 1,(),"2", ((), 4,((), "5.0",(6), ()), ()), 3.0, ())
         ans = pyutilib.misc.flatten_tuple(tmp)
         target=(1,"2",4,"5.0",6,3.0)
         self.assertEqual(ans,target)
 
     def test_flatten_tuple5(self):
-        """Verify that flatten_tuple() can collapse to a single empty tuple"""
+        # Verify that flatten_tuple() can collapse to a single empty tuple
         self.assertEqual(
             (1,2,3,4,5),
             pyutilib.misc.flatten_tuple(((),1,(),2,((),3,((),4,()),()),5,()) ))
@@ -57,33 +57,33 @@ class Test(unittest.TestCase):
             (), pyutilib.misc.flatten_tuple(((),((),((),)))))
 
     def test_flatten_list1(self):
-        """Verify that flatten_list() flattens a normal list"""
+        # Verify that flatten_list() flattens a normal list
         tmp=[1,"2",3.0]
         ans = pyutilib.misc.flatten_list(tmp)
         self.assertEqual(ans,tmp)
 
     def test_flatten_list2(self):
-        """Verify that flatten_list() flattens a nested list"""
+        # Verify that flatten_list() flattens a nested list
         tmp=[1,"2", [4,["5.0",[6]] ], 3.0]
         ans = pyutilib.misc.flatten_list(tmp)
         target=[1,"2",4,"5.0",6,3.0]
         self.assertEqual(ans,target)
 
     def test_flatten_list3(self):
-        """Verify that flatten_list() returns a non-list"""
+        # Verify that flatten_list() returns a non-list
         tmp=(1,"2",3.0)
         ans = pyutilib.misc.flatten_list(tmp)
         self.assertEqual(ans,tmp)
 
     def test_flatten_list4(self):
-        """Verify that flatten_list() removes empty lists"""
+        # Verify that flatten_list() removes empty lists
         tmp=[[], 1,[],"2", [[], 4,[[], "5.0",[6], []], []], 3.0, []]
         ans = pyutilib.misc.flatten_list(tmp)
         target=[1,"2",4,"5.0",6,3.0]
         self.assertEqual(ans,target)
 
     def test_flatten_list5(self):
-        """Verify that flatten_list() can collapse to a single empty list"""
+        # Verify that flatten_list() can collapse to a single empty list
         self.assertEqual(
             [1,2,3,4,5],
             pyutilib.misc.flatten_list( [[],1,[],2,[[],3,[[],4,[]],[]],5,[]] ))
@@ -145,7 +145,7 @@ yy: 2""")
         self.assertEqual(o1,o2)
 
     def test_flatten1(self):
-        """Test that flatten works correctly"""
+        # Test that flatten works correctly
         self.assertEqual("abc", pyutilib.misc.flatten("abc"))
         self.assertEqual(1, pyutilib.misc.flatten(1))
         self.assertEqual([1,2,3], pyutilib.misc.flatten((1,2,3)))
@@ -225,7 +225,7 @@ yy: 2""")
             self.fail("test_rmtree failed to delete .test_misc dir")
 
     def test_search_file(self):
-        """ Test that search_file works """
+        # Test that search_file works
         ans = pyutilib.misc.search_file("foobar")
         self.assertEqual(ans, None)
         path=sys.path+[currdir]
@@ -237,7 +237,7 @@ yy: 2""")
         self.assertEqual(ans, abspath(currdir+"test1.cfg"))
 
     def test_search_file2(self):
-        """ Test that search_file works with an empty PATH environment"""
+        # Test that search_file works with an empty PATH environment
         tmp = os.environ["PATH"]
         del os.environ["PATH"]
         ans = pyutilib.misc.search_file("_cd_")
@@ -245,7 +245,7 @@ yy: 2""")
         self.assertEqual(ans, None)
 
     def test_search_file3(self):
-        """ Test that search_file works with a validation function"""
+        # Test that search_file works with a validation function
         def validate_ls(filename):
             if filename.endswith('ls'):
                 return False
@@ -257,7 +257,7 @@ yy: 2""")
         self.assertEqual(ans, None)
 
     def test_file_compare1(self):
-        """ Test that file comparison works """
+        # Test that file comparison works
         [flag,lineno,diffstr] = pyutilib.misc.compare_file(currdir+"filecmp1.txt",currdir+"filecmp1.txt")
         if flag:
             self.fail("test_file_compare1 - found differences in filecmp1.txt at line "+str(lineno))
@@ -282,7 +282,7 @@ yy: 2""")
             pass
 
     def test_file_compare1a(self):
-        """ Test that file comparison works without numeric values"""
+        # Test that file comparison works without numeric values
         [flag,lineno,diffstr] = pyutilib.misc.compare_file_with_numeric_values(currdir+"filecmp1.txt",currdir+"filecmp1.txt")
         if flag:
             self.fail("test_file_compare1a - found differences in filecmp1.txt at line "+str(lineno))
@@ -307,7 +307,7 @@ yy: 2""")
             pass
 
     def test_file_compare1b(self):
-        """ Test that file comparison works with numeric values"""
+        # Test that file comparison works with numeric values
         [flag,lineno,diffstr] = pyutilib.misc.compare_file(currdir+"filecmp6.txt",currdir+"filecmp7.txt")
         if not flag:
             self.fail("test_file_compare1b - expected differences in filecmp6.txt and filecmp7.txt at line 1")
@@ -343,7 +343,7 @@ yy: 2""")
             self.fail("test_file_compare1b - unexpected differences in filecmp6.txt and filecmp8.txt at line %d" % lineno)
 
     def test_file_compare2(self):
-        """ Test that large file comparison works """
+        # Test that large file comparison works
         flag = pyutilib.misc.compare_large_file(currdir+"filecmp1.txt",currdir+"filecmp1.txt")
         if flag:
             self.fail("test_file_compare2 - found differences in filecmp1.txt")
@@ -371,7 +371,7 @@ yy: 2""")
             pass
 
     def test_remove_chars(self):
-        """ Test the remove_chars_in_list works """
+        # Test the remove_chars_in_list works
         a = pyutilib.misc.remove_chars_in_list("","")
         self.assertEqual(a,"")
         a = pyutilib.misc.remove_chars_in_list("abcde","")
@@ -380,7 +380,7 @@ yy: 2""")
         self.assertEqual(a,"bd")
 
     def test_get_desired_chars_from_file(self):
-        """ Test that get_desired_chars_from_file works """
+        # Test that get_desired_chars_from_file works
         INPUT=open(currdir+"filecmp5.txt","r")
         a = pyutilib.misc.get_desired_chars_from_file(INPUT,3,"b,d")
         self.assertEqual(a,"ace")
@@ -391,12 +391,12 @@ yy: 2""")
         INPUT.close()
 
     def test_sort_index1(self):
-        """Test that sort_index returns the correct value for a sorted array"""
+        # Test that sort_index returns the correct value for a sorted array
         ans = pyutilib.misc.sort_index( range(0,10) )
         self.assertEqual(ans, list(range(0,10)) )
 
     def test_sort_index2(self):
-        """Test that sort_index returns an array that can be used to sort the data"""
+        # Test that sort_index returns an array that can be used to sort the data
         data = [4,2,6,8,1,9,3,10,7,5]
         ans = pyutilib.misc.sort_index( data )
         sorted = []

@@ -10,7 +10,7 @@ import pyutilib.misc
 class MethodDebug(unittest.TestCase):
 
     def test_add_method(self):
-        """Verify that we can add a method to a class"""
+        # Verify that we can add a method to a class
         class A(object):
             def __init__(self):
                 pass
@@ -23,7 +23,7 @@ class MethodDebug(unittest.TestCase):
         self.assertEqual(a.bar("b"),("b",))
 
     def test_add_method_by_name(self):
-        """Verify that we can add a method to a class"""
+        # Verify that we can add a method to a class
         class A(object):
             def __init__(self):
                 pass

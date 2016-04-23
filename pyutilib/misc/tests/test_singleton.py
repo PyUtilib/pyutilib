@@ -24,14 +24,14 @@ class B(pyutilib.misc.Singleton):
 class SingletonDebug(unittest.TestCase):
 
     def test_A(self):
-        """Verify that MonoState generates one global state"""
+        # Verify that MonoState generates one global state
         a1 = A()
         a2 = A()
         self.assertNotEqual(a1,a2)
         self.assertEqual(a1.__dict__,a2.__dict__)
 
     def test_B(self):
-        """Verify that Singleton generates one instance"""
+        # Verify that Singleton generates one instance
         b1 = B()
         b2 = B()
         self.assertEqual(b1,b2)

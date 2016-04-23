@@ -25,7 +25,7 @@ logger = logging.getLogger('pyutilib.workflow')
 class TestData(unittest.TestCase):
 
     def test1(self):
-        """Print FunctorAPIData string"""
+        # Print FunctorAPIData string
         data = FunctorAPIData()
         data.a = 1
         data.b = [1,2]
@@ -42,7 +42,7 @@ class TestData(unittest.TestCase):
 
     @unittest.skipIf(not json_available, "JSON not available")
     def test2(self):
-        """Print FunctorAPIData representation"""
+        # Print FunctorAPIData representation
         data = FunctorAPIData()
         data.a = 1
         data.b = [1,2]
@@ -59,20 +59,20 @@ class TestData(unittest.TestCase):
 
     @unittest.expectedFailure
     def test_err1(self):
-        """Unknown attribute"""
+        # Unknown attribute
         data = FunctorAPIData()
         data._x
 
     @unittest.expectedFailure
     def test_err2(self):
-        """Undeclared attribute"""
+        # Undeclared attribute
         data = FunctorAPIData()
         data.declare('a')
         data.x
 
     @unittest.expectedFailure
     def test_err3(self):
-        """Undeclared attribute"""
+        # Undeclared attribute
         data = FunctorAPIData()
         data.declare(['a'])
         data.x
@@ -98,13 +98,11 @@ class TestAPI(unittest.TestCase):
             logger.addHandler(cls._handler)
 
     def test1(self):
-        """Simple test: no keyword arguments or return values"""
+        # Simple test: no keyword arguments or return values
         @functor_api
         def test1(data):
-            """
-            Required:
-                data: input data
-            """
+            # Required:
+            #     data: input data
             data.a = 2
             data.b[0] = 2
         #

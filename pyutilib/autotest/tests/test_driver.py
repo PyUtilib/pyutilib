@@ -61,40 +61,40 @@ class TestYaml(pyutilib.th.TestCase):
             os.environ['PYUTILIB_UNITTEST_CATEGORIES'] = self.t2
 
     def test1(self):
-        """run --help"""
+        # run --help
         setup_redirect(currdir+'test1.out')
         self.driver('--help')
         reset_redirect()
         self.assertFileEqualsBaseline(currdir+'test1.out', currdir+'test1.txt', filter=filter_t1)
 
     def test2(self):
-        """run --help-suites example1.yml"""
+        # run --help-suites example1.yml
         setup_redirect(currdir+'test2.out')
         self.driver('--help-suites',currdir+'example1.yml')
         reset_redirect()
         self.assertFileEqualsBaseline(currdir+'test2.out', currdir+'test2.txt')
 
     def test3(self):
-        """run --help-categories example1.yml"""
+        # run --help-categories example1.yml
         setup_redirect(currdir+'test3.out')
         self.driver('--help-categories',currdir+'example1.yml')
         reset_redirect()
         self.assertFileEqualsBaseline(currdir+'test3.out', currdir+'test3.txt')
 
     def test4(self):
-        """run --help-tests suite1 example1.yml"""
+        # run --help-tests suite1 example1.yml
         setup_redirect(currdir+'test4.out')
         self.driver('--help-tests','suite1',currdir+'example1.yml')
         reset_redirect()
         self.assertFileEqualsBaseline(currdir+'test4.out', currdir+'test4.txt')
 
     def test5(self):
-        """run example1.yml"""
+        # run example1.yml
         pyutilib.subprocess.run(bindir+'pyutilib_test_driver '+currdir+'example1.yml', outfile=currdir+'test5.out')
         self.assertFileEqualsBaseline(currdir+'test5.out', currdir+'test5.txt', filter=filter)
 
     def test6(self):
-        """run --cat x_suite2 --cat x_suite1 example1.yml"""
+        # run --cat x_suite2 --cat x_suite1 example1.yml
         pyutilib.subprocess.run(bindir+'pyutilib_test_driver --cat x_suite2 --cat x_suite1 '+currdir+'example1.yml', outfile=currdir+'test6.out')
         self.assertFileEqualsBaseline(currdir+'test6.out', currdir+'test6.txt', filter=filter)
 
@@ -124,35 +124,35 @@ class TestJson(pyutilib.th.TestCase):
             os.environ['PYUTILIB_UNITTEST_CATEGORIES'] = self.t2
 
     def test1(self):
-        """run --help"""
+        # run --help
         setup_redirect(currdir+'test1.out')
         self.driver('--help')
         reset_redirect()
         self.assertFileEqualsBaseline(currdir+'test1.out', currdir+'test1.txt', filter=filter_t1)
 
     def test2(self):
-        """run --help-suites example1.json"""
+        # run --help-suites example1.json
         setup_redirect(currdir+'test2.out')
         self.driver('--help-suites',currdir+'example1.json')
         reset_redirect()
         self.assertFileEqualsBaseline(currdir+'test2.out', currdir+'test2.txt')
 
     def test3(self):
-        """run --help-categories example1.json"""
+        # run --help-categories example1.json
         setup_redirect(currdir+'test3.out')
         self.driver('--help-categories',currdir+'example1.json')
         reset_redirect()
         self.assertFileEqualsBaseline(currdir+'test3.out', currdir+'test3.txt')
 
     def test4(self):
-        """run --help-tests suite1 example1.json"""
+        # run --help-tests suite1 example1.json
         setup_redirect(currdir+'test4.out')
         self.driver('--help-tests','suite1',currdir+'example1.json')
         reset_redirect()
         self.assertFileEqualsBaseline(currdir+'test4.out', currdir+'test4.txt')
 
     def test5(self):
-        """run example1.json"""
+        # run example1.json
         pyutilib.subprocess.run(bindir+'pyutilib_test_driver '+currdir+'example1.json', outfile=currdir+'test5.out')
         self.assertFileEqualsBaseline(currdir+'test5.out', currdir+'test5.txt', filter=filter)
 

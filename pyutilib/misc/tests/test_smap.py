@@ -18,12 +18,12 @@ class Test(unittest.TestCase):
             self.skipTest("SparseMapping not fully defined for Python 2.4 and 2.5")
 
     def test1(self):
-        """Validate behavior for empty sparse map"""
+        # Validate behavior for empty sparse map
         smap = pyutilib.misc.SparseMapping()
         self.assertEqual( len(smap), 0)
 
     def test2(self):
-        """Validate behavior for sparse map with specified values"""
+        # Validate behavior for sparse map with specified values
         smap = pyutilib.misc.SparseMapping(a=1, b=2)
         self.assertEqual( len(smap), 2)
         self.assertTrue('a' in smap)
@@ -46,7 +46,7 @@ class Test(unittest.TestCase):
         self.assertEqual( smap['b'], 3)
 
     def test3(self):
-        """Validate behavior for sparse map with specified values and domain"""
+        # Validate behavior for sparse map with specified values and domain
         smap = pyutilib.misc.SparseMapping(a=1, b=2, index=['a','b','z'])
         self.assertEqual( len(smap), 2)
         self.assertTrue('a' in smap)
@@ -70,7 +70,7 @@ class Test(unittest.TestCase):
         self.assertEqual( smap['b'], 3)
 
     def test4(self):
-        """Validate behavior for sparse map with specified values and domain and default value"""
+        # Validate behavior for sparse map with specified values and domain and default value
         smap = pyutilib.misc.SparseMapping(a=1, b=2, index=['a','b','z'], default=0)
         self.assertEqual( len(smap), 3)
         self.assertTrue('a' in smap)
@@ -95,7 +95,7 @@ class Test(unittest.TestCase):
         self.assertEqual( smap['z'], 0)
 
     def test6(self):
-        """Validate behavior for sparse map with specified values and default value"""
+        # Validate behavior for sparse map with specified values and default value
         smap = pyutilib.misc.SparseMapping(a=1, b=2, default=0)
         self.assertEqual( len(smap), 2)
         self.assertTrue('a' in smap)
@@ -116,7 +116,7 @@ class Test(unittest.TestCase):
         self.assertEqual( smap['z'], 0)
 
     def test5(self):
-        """Validate behavior for sparse map with specified values and 'within' option"""
+        # Validate behavior for sparse map with specified values and 'within' option
         smap = pyutilib.misc.SparseMapping(a=1, b=2, within=range(10))
         self.assertEqual( len(smap), 2)
         self.assertTrue('a' in smap)

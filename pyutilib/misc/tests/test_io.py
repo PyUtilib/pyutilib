@@ -27,7 +27,7 @@ def filter3(str):
 class IODebug(unittest.TestCase):
 
     def test_redirect1(self):
-        """Verify that IO redirection works"""
+        # Verify that IO redirection works
         pyutilib.misc.setup_redirect(currdir+"redirect_io.out")
         print("HERE")
         print([1,2,3])
@@ -42,7 +42,7 @@ class IODebug(unittest.TestCase):
         os.remove(currdir+"redirect_io.out")
 
     def test_redirect2(self):
-        """Verify that IO redirection will create an empty file is no output is generated"""
+        # Verify that IO redirection will create an empty file is no output is generated
         pyutilib.misc.setup_redirect(currdir+"redirect_io.out")
         pyutilib.misc.reset_redirect()
         if not os.path.exists(currdir+"redirect_io.out"):
@@ -51,7 +51,7 @@ class IODebug(unittest.TestCase):
         os.remove(currdir+"redirect_io.out")
 
     def test_redirect3(self):
-        """Verify that IO redirection can be nested"""
+        # Verify that IO redirection can be nested
         pyutilib.misc.setup_redirect(currdir+"redirect_io1.out")
         print("HERE")
         pyutilib.misc.setup_redirect(currdir+"redirect_io3.out")
@@ -71,7 +71,7 @@ class IODebug(unittest.TestCase):
         os.remove(currdir+"redirect_io3.out")
 
     def test_redirect4(self):
-        """Verify that IO redirection works with file-like objects"""
+        # Verify that IO redirection works with file-like objects
         output = six.StringIO()
         pyutilib.misc.setup_redirect(output)
         print("HERE")
@@ -84,9 +84,7 @@ class IODebug(unittest.TestCase):
         self.assertEqual(output.getvalue(),"HERE\n[1, 2, 3]\n")
 
     def test_format_io(self):
-        """
-        Test that formated IO looks correct.
-        """
+        # Test that formated IO looks correct.
         pyutilib.misc.setup_redirect(currdir+"format_io.out")
         print(pyutilib.misc.format_io(0.0))
         print(pyutilib.misc.format_io(0))
@@ -112,7 +110,7 @@ class IODebug(unittest.TestCase):
         os.remove(currdir+"format_io.out")
 
     def test_format_float_err1(self):
-        """ Test that errors are generated for non floats """
+        # Test that errors are generated for non floats
         try:
             pyutilib.misc.format_float('1')
             self.fail("Should have thrown a TypeError exception")

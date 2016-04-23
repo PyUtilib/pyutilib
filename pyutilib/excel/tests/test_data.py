@@ -36,7 +36,7 @@ except:
 class BaseTests(object):
 
     def test_spreadsheet1(self):
-        """ Create a spreadsheet with a constructor """
+        # Create a spreadsheet with a constructor
         sheet = pyutilib.excel.ExcelSpreadsheet(join(pkgdir,"test_data"+self.suffix), ctype=self.ctype)
         tmp = sheet.get_range("Arange")
 
@@ -44,7 +44,7 @@ class BaseTests(object):
         del sheet
 
     def test_spreadsheet2(self):
-        """ Create and open spreadsheet """
+        # Create and open spreadsheet
         sheet = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         sheet.open(join(pkgdir,"test_data"+self.suffix))
         tmp = sheet.get_range("Arange")
@@ -55,7 +55,7 @@ class BaseTests(object):
         self.assertEqual(tmp,1)
 
     def test_spreadsheet3(self):
-        """ Create and open spreadsheet in the test dir"""
+        # Create and open spreadsheet in the test dir
         os.chdir(pkgdir)
         sheet = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         sheet.open("test_data"+self.suffix)
@@ -68,19 +68,19 @@ class BaseTests(object):
             pass
 
     def test_spreadsheet4(self):
-        """ Create and delete spreadsheet without opening it """
+        # Create and delete spreadsheet without opening it
         sheet = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         sheet.close()
 
     def test_spreadsheet5(self):
-        """ Create and open spreadsheet """
+        # Create and open spreadsheet
         s1 = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         s1.open(join(pkgdir,"test_data"+self.suffix))
         tmp = s1.get_range("Arange")
         self.assertEqual(tmp,['A1','A2','A3'])
 
     def test_spreadsheet6(self):
-        """ Create and open spreadsheet """
+        # Create and open spreadsheet
         sheet = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         if not sheet.can_write():
             self.skipTest("Writing not supported")
@@ -91,7 +91,7 @@ class BaseTests(object):
         self.assertEqual(tmp,['B1','B2','B3'])
 
     def test_spreadsheet7(self):
-        """ Create and open spreadsheet """
+        # Create and open spreadsheet
         sheet = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         if not sheet.can_write():
             self.skipTest("Writing not supported")
@@ -108,7 +108,7 @@ class BaseTests(object):
             pass
 
     def test_spreadsheet8(self):
-        """ Create and open spreadsheet """
+        # Create and open spreadsheet
         sheet = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         if not sheet.can_write():
             self.skipTest("Writing not supported")
@@ -119,7 +119,7 @@ class BaseTests(object):
         self.assertEqual(val,[[unicode('B2'), unicode('C1')], [unicode('B3'), unicode('C1')]])
 
     def test_spreadsheet9(self):
-        """ Create and open spreadsheet """
+        # Create and open spreadsheet
         sheet = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         if not sheet.can_write():
             self.skipTest("Writing not supported")
@@ -130,7 +130,7 @@ class BaseTests(object):
         self.assertEqual(val,[[unicode('B2'), unicode('C1')], [unicode('B3'), unicode('C1')]])
 
     def test_spreadsheet10(self):
-        """ Verify that we can get updated function values """
+        # Verify that we can get updated function values
         sheet = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         if not sheet.can_calculate():
             self.skipTest("Calculation not supported")
@@ -147,7 +147,7 @@ class BaseTests(object):
         sheet.close()
 
     def test_spreadsheet11(self):
-        """ Verify that we can activate a spreadsheet """
+        # Verify that we can activate a spreadsheet
         sheet = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         if not sheet.can_write():
             self.skipTest("Writing not supported")
@@ -160,7 +160,7 @@ class BaseTests(object):
         sheet.close()
 
     def test_calc_iterations(self):
-        """ Verify that iterations can be set """
+        # Verify that iterations can be set
         sheet = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         if not sheet.can_calculate():
             self.skipTest("Calculation not supported")
@@ -178,7 +178,7 @@ class BaseTests(object):
         sheet.close()
 
     def test_max_iterations(self):
-        """ Verify that max iterations can be set """
+        # Verify that max iterations can be set
         sheet = pyutilib.excel.ExcelSpreadsheet(ctype=self.ctype)
         if not sheet.can_calculate():
             self.skipTest("Calculation not supported")
