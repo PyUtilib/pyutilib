@@ -46,8 +46,12 @@ try:
 except:
     basestring = unicode = str
 
-PIPE = subprocess.PIPE
-STDOUT = subprocess.STDOUT
+if sys.platform.startswith('java'):
+    PIPE = None
+    STDOUT = None
+else:
+    PIPE = subprocess.PIPE
+    STDOUT = subprocess.STDOUT
 
 if sys.version_info[0:2] >= (3,0):
     def bytes_cast(x):
