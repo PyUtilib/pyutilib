@@ -40,8 +40,8 @@ def filter_t1(str):
 class TestYaml(pyutilib.th.TestCase):
 
     def setUp(self):
-        #if not yaml_available:
-            #self.skipTest("Skipping tests because YAML is not available")
+        if sys.platform.startswith('java'):
+            self.skipTest("Skipping tests because running in Jython")
         self.t1 = os.environ.get('PYUTILIB_AUTOTEST_CATEGORIES',None)
         self.t2 = os.environ.get('PYUTILIB_UNITTEST_CATEGORIES',None)
         if not self.t1 is None:
@@ -103,6 +103,8 @@ class TestYaml(pyutilib.th.TestCase):
 class TestJson(pyutilib.th.TestCase):
 
     def setUp(self):
+        if sys.platform.startswith('java'):
+            self.skipTest("Skipping tests because running in Jython")
         if not json_available:
             self.skipTest("Skipping tests because JSON is not available")
         self.t1 = os.environ.get('PYUTILIB_AUTOTEST_CATEGORIES',None)
