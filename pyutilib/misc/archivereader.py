@@ -101,10 +101,8 @@ class ArchiveReader(object):
             raise ImportError("zipfile support is disabled")
         try:
             return zipfile.is_zipfile(ArchiveReader.normalize_name(name))
-        except IllegalArgumentException:
-            return False
         except:
-            raise
+            return False
 
     @staticmethod
     def isTar(name):
@@ -141,6 +139,8 @@ class ArchiveReader(object):
             f.read(1)
             f.close()
         except IOError:
+            return False
+        except EOFError:
             return False
         return True
 

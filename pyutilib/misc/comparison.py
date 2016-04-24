@@ -60,7 +60,11 @@ def open_possibly_compressed_file(filename):
     if sys.version_info[:2] < (2,6) and zipfile.is_zipfile(filename):
         raise IOError( "cannot unpack a ZIP file with Python %s" 
                        % '.'.join(map(str,sys.version_info)) )
-    if zipfile.is_zipfile(filename):
+    try:
+        is_zipfile = zipfile.is_zipfile(filename)
+    except:
+        is_zipfile = False
+    if is_zipfile:
         zf1=zipfile.ZipFile(filename,"r")
         if len(zf1.namelist()) != 1:
             raise IOError("cannot compare with a zip file that contains "

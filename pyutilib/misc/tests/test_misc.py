@@ -153,7 +153,7 @@ yy: 2""")
         self.assertEqual([1,2,3,4], pyutilib.misc.flatten((1,2,[3,4])))
         self.assertEqual([1,2,'abc'], pyutilib.misc.flatten((1,2,'abc')))
         self.assertEqual([1,2,'abc'], pyutilib.misc.flatten((1,2,('abc',))))
-        a=set([0,9,8])
+        a=[0,9,8]
         self.assertEqual([1,2,0,9,8], pyutilib.misc.flatten((1,2,a)))
         self.assertEqual(
             [1,2,3,4,5],
