@@ -20,7 +20,11 @@ NOTE: The PCA does not rely on any other part of PyUtilib.  Consequently,
 this package can be independently used in other projects.
 """
 
-from pyutilib.component.core.core import *
+from pyutilib.component.core.core import Plugin, implements, Interface, CreatePluginFactory, \
+           PluginMeta, alias, ExtensionPoint, SingletonPlugin, \
+           PluginFactory, PluginError, PluginGlobals, with_metaclass, \
+           IPluginLoader, IPluginLoadPath, IIgnorePluginWhenLoading, \
+           IOptionDataProvider, PluginEnvironment
 
 PluginGlobals.add_env("pca")
 

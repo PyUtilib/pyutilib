@@ -10,7 +10,8 @@
 
 __all__ = ['ITestDriver', 'TestDriverFactory', 'ITestParser', 'TestDriverBase']
 
-from pyutilib.component.core import *
+from pyutilib.component.core import Interface, implements, Plugin, CreatePluginFactory
+
 
 class ITestParser(Interface):
 

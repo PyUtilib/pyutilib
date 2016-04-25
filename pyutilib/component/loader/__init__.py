@@ -10,7 +10,7 @@
 from pyutilib.component.core import PluginGlobals
 PluginGlobals.add_env("pca")
 
-from pyutilib.component.loader.plugin_importLoader import *
-from pyutilib.component.loader.plugin_eggLoader import *
+from pyutilib.component.loader.plugin_importLoader import ImportLoader
+from pyutilib.component.loader.plugin_eggLoader import EggLoader
 
 PluginGlobals.pop_env()

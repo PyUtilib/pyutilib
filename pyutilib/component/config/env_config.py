@@ -14,7 +14,8 @@ import os
 import re
 import logging
 
-from pyutilib.component.config.options import *
+from pyutilib.component.core import Interface, IPluginLoadPath, Plugin, implements
+from pyutilib.component.config.options import DictOption, declare_option
 
 logger = logging.getLogger('pyutilib.component.core.pca')
 

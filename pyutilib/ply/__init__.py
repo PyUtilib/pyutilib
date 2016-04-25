@@ -7,4 +7,4 @@
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
 
-from pyutilib.ply.ply import *
+from pyutilib.ply.ply import ply_init, t_newline, t_ignore, t_COMMENT, _find_column, p_error

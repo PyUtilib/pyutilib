@@ -28,7 +28,7 @@ import sys
 import re
 import os
 import os.path
-from pyutilib.component.core import *
+from pyutilib.component.core import PluginError, Interface, implements, Plugin, PluginGlobals, ExtensionPoint, IOptionDataProvider
 try:
     unicode
 except:

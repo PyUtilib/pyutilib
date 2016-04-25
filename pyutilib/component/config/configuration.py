@@ -16,9 +16,9 @@ model for configuration data:
 A key role of this class is to support initialization of Option objects.
 """
 
-from pyutilib.component.core import *
-from pyutilib.component.config.options import *
 import os.path
+from pyutilib.component.core import PluginError, Interface, Plugin, ExtensionPoint, implements, IOptionDataProvider
+from pyutilib.component.config.options import IOption, IFileOption, IUpdatedOptionsAction
 
 
 class ConfigurationError(PluginError):

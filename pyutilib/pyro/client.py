@@ -16,8 +16,8 @@ import time
 from six import iteritems
 
 import pyutilib.pyro.util
-from pyutilib.pyro import get_nameserver, using_pyro3, using_pyro4
-from pyutilib.pyro import Pyro as _pyro
+from pyutilib.pyro.util import get_nameserver, using_pyro3, using_pyro4
+from pyutilib.pyro.util import Pyro as _pyro
 
 if sys.version_info >= (3,0):
     xrange = range

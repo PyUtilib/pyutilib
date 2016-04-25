@@ -8,5 +8,5 @@
 #  _________________________________________________________________________
 #
 
-from pyutilib.math.numtypes import *
-from pyutilib.math.util import *
+from pyutilib.math.numtypes import infinity, nan, is_nan, is_finite
+from pyutilib.math.util import approx_equal, as_number, isint, argmax, argmin, mean, median, factorial, perm

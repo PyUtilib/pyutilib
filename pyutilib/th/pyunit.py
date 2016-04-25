@@ -39,7 +39,6 @@ if using_unittest2:
     expectedFailure = unittest.expectedFailure
     SkipTest = unittest.SkipTest
 import subprocess
-#from misc import *
 
 TextTestRunner = unittest.TextTestRunner
 TestResult = unittest.TestResult

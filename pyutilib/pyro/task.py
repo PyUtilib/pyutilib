@@ -9,7 +9,7 @@
 
 __all__ = ('Task', 'TaskProcessingError')
 
-from pyutilib.pyro import using_pyro4
+from pyutilib.pyro.util import using_pyro4
 
 #
 # Task returns a native Python data type.  This provides more

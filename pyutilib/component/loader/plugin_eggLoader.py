@@ -15,8 +15,8 @@ __all__ = ['EggLoader']
 import os
 import sys
 import logging
-from pyutilib.component.core import *
-from pyutilib.component.config import *
+from pyutilib.component.config import ManagedPlugin
+from pyutilib.component.core import implements, ExtensionPoint, IPluginLoader
 
 try:
     if not 'pkg_resources' in sys.modules:

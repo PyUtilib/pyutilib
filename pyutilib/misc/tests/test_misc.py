@@ -10,6 +10,7 @@ from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
 import pyutilib.th as unittest
 import pyutilib.misc
+import pyutilib.misc.comparison
 
 class Test(unittest.TestCase):
 
@@ -372,21 +373,21 @@ yy: 2""")
 
     def test_remove_chars(self):
         # Test the remove_chars_in_list works
-        a = pyutilib.misc.remove_chars_in_list("","")
+        a = pyutilib.misc.comparison.remove_chars_in_list("","")
         self.assertEqual(a,"")
-        a = pyutilib.misc.remove_chars_in_list("abcde","")
+        a = pyutilib.misc.comparison.remove_chars_in_list("abcde","")
         self.assertEqual(a,"abcde")
-        a = pyutilib.misc.remove_chars_in_list("abcde","ace")
+        a = pyutilib.misc.comparison.remove_chars_in_list("abcde","ace")
         self.assertEqual(a,"bd")
 
     def test_get_desired_chars_from_file(self):
         # Test that get_desired_chars_from_file works
         INPUT=open(currdir+"filecmp5.txt","r")
-        a = pyutilib.misc.get_desired_chars_from_file(INPUT,3,"b,d")
+        a = pyutilib.misc.comparison.get_desired_chars_from_file(INPUT,3,"b,d")
         self.assertEqual(a,"ace")
         INPUT.close()
         INPUT=open(currdir+"filecmp5.txt","r")
-        a = pyutilib.misc.get_desired_chars_from_file(INPUT,100)
+        a = pyutilib.misc.comparison.get_desired_chars_from_file(INPUT,100)
         self.assertEqual(a,"abcde\nfghij\n")
         INPUT.close()
 

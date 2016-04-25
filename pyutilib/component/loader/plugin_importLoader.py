@@ -19,8 +19,9 @@ import os
 import sys
 import logging
 
-from pyutilib.component.config import *
-from pyutilib.component.core import *
+from pyutilib.component.config import ManagedSingletonPlugin
+from pyutilib.component.core import implements, ExtensionPoint, IIgnorePluginWhenLoading, IPluginLoader, Plugin
+
 
 class ImportLoader(ManagedSingletonPlugin):
     """Loader that looks for Python source files in the plugins directories,

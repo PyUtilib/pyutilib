@@ -9,7 +9,7 @@
 #
 
 import pyutilib.autotest
-from pyutilib.component.core import *
+from pyutilib.component.core import alias
 import pyutilib.subprocess
 
 
@@ -28,8 +28,8 @@ class ExampleTestDriver(pyutilib.autotest.TestDriverBase):
         if not options.cat_options is None:
             cmd += options.cat_options+' '
         cmd += options.file
-        print "Running test suite '%s'  test '%s'  command '%s'" % \
-                (options.suite, name, cmd)
+        print( "Running test suite '%s'  test '%s'  command '%s'" % \
+                (options.suite, name, cmd))
         pyutilib.subprocess.run(cmd, outfile=options.currdir+'test_'+name+".out")
         testcase.failUnlessFileEqualsBaseline(
                 options.currdir+'test_'+name+".out",

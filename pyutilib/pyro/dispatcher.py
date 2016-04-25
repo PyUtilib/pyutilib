@@ -14,8 +14,8 @@ import sys
 import uuid
 from collections import defaultdict
 
-from pyutilib.pyro import get_nameserver, using_pyro3, using_pyro4
-from pyutilib.pyro import Pyro as _pyro
+from pyutilib.pyro.util import get_nameserver, using_pyro3, using_pyro4
+from pyutilib.pyro.util import Pyro as _pyro
 from pyutilib.pyro.util import set_maxconnections, get_dispatchers
 
 if sys.version_info >= (3,0):

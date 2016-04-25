@@ -26,6 +26,7 @@ try:
 except:
     from ordereddict import OrderedDict
 
+
 def _collect_parser_groups(t):
     for key in t._parser_group:
         #

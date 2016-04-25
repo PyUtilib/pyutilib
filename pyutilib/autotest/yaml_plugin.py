@@ -13,10 +13,9 @@ try:
     using_yaml=True
 except ImportError:                                     #pragma:nocover
     using_yaml=False
-
-import pyutilib.misc
-from pyutilib.component.core import *
+from pyutilib.component.core import SingletonPlugin, implements
 from pyutilib.autotest import plugins
+import pyutilib.misc
 
 
 class YamlTestParser(SingletonPlugin):

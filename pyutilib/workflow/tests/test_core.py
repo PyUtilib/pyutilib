@@ -6,6 +6,7 @@ currdir = dirname(abspath(__file__))+os.sep
 
 import pyutilib.th as unittest
 import pyutilib.workflow
+import pyutilib.workflow.globals
 
 is_python24or25 = False
 if sys.version_info[0:2] < (2, 6):
@@ -148,7 +149,7 @@ class TaskE(pyutilib.workflow.Task):
 class Test(unittest.TestCase):
 
     def test1(self):
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         # Define tasks
         A = TaskA()
         B = TaskB()
@@ -174,7 +175,7 @@ Task6 prev: [1] next: [] resources: []""")
         self.assertEqual(w(i=3, a=2), {'z':334})
 
     def test1c(self):
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         # Define tasks
         A = TaskA()
         E1 = TaskE()
@@ -203,7 +204,7 @@ Task7 prev: [1] next: [] resources: []""")
         self.assertEqual(w(i=3), {'z':60})
 
     def test1b(self):
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         # Define tasks
         A = TaskA()
         B = TaskB()
@@ -217,7 +218,7 @@ Task7 prev: [1] next: [] resources: []""")
         self.assertEqual(str(w),"Workflow Task4:\nTask5 prev: [] next: [] resources: []")
 
     def test1a(self):
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         # Create workflow
         w = pyutilib.workflow.Workflow()
         self.assertEqual(str(w),"Workflow Task1:\nTask2 prev: [] next: [] resources: []")
@@ -229,7 +230,7 @@ Task7 prev: [1] next: [] resources: []""")
         # Do we really want to be testing pformat output?  I think we might
         # actually want to override __cmp__ in the workflow.Task code and instead
         # use that.
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         A = TaskA(name="A")
         B = TaskB()
         A.inputs.x = B.outputs.b
@@ -287,7 +288,7 @@ Task7 prev: [1] next: [] resources: []""")
         # Do we really want to be testing pformat output?  I think we might
         # actually want to override __cmp__ in the workflow.Task code and instead
         # use that.
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         A = TaskA()
         B = TaskB()
         A.inputs.x = B.outputs.b
@@ -302,7 +303,7 @@ Task7 prev: [1] next: [] resources: []""")
         # Do we really want to be testing pformat output?  I think we might
         # actually want to override __cmp__ in the workflow.Task code and instead
         # use that.
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         A = TaskA()
         A.inputs['x'] = 2
         self.assertEqual(A.inputs['x'].get_value(), 2)
@@ -312,7 +313,7 @@ Task7 prev: [1] next: [] resources: []""")
         self.assertFileEqualsBaseline(currdir+'test4.out', currdir+'test4.txt')
 
     def test5(self):
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         # Define tasks
         A = TaskA()
         B = TaskB()
@@ -331,7 +332,7 @@ Task7 prev: [1] next: [] resources: []""")
             pass
 
     def test5a(self):
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         # Define tasks
         A = TaskA()
         B = TaskBB()
@@ -356,7 +357,7 @@ Task7 prev: [1] next: [] resources: []""")
         # use that.
         self.skipTest("This test is not portable to different Python version")
 
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         # Define tasks
         A = TaskA()
         B = TaskBB()
@@ -375,7 +376,7 @@ Task7 prev: [1] next: [] resources: []""")
         self.assertFileEqualsBaseline(currdir+'test5b.out', currdir+'test5b.txt')
 
     def test_error1(self):
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         A = TaskA()
         try:
             A.inputs['inputs'] = 2
@@ -384,7 +385,7 @@ Task7 prev: [1] next: [] resources: []""")
             pass
 
     def test_error2(self):
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         A = TaskA()
         try:
             print(A.inputs._foo)
@@ -393,7 +394,7 @@ Task7 prev: [1] next: [] resources: []""")
             pass
 
     def test_error3(self):
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         # Define tasks
         A = TaskA()
         B = TaskB()
@@ -410,7 +411,7 @@ Task7 prev: [1] next: [] resources: []""")
             pass
 
     def test_error4(self):
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         # Define tasks
         A = TaskAA1()
         B = TaskAAA()
@@ -429,7 +430,7 @@ Task7 prev: [1] next: [] resources: []""")
 
 
     def test_error5(self):
-        pyutilib.workflow.reset_id_counter()
+        pyutilib.workflow.globals.reset_id_counter()
         # Define tasks
         A = TaskAA2()
         B = TaskAAA()
