@@ -13,30 +13,6 @@ Python modules that use Pyro to manage a generic task queue.
 These modules were adapted from Pyro's distributed2 example.
 """
 
-# For now, default to using Pyro3 if available
-# otherwise, check for Pyro4
-Pyro = None
-using_pyro3 = False
-using_pyro4 = False
-try:
-    import Pyro
-    import Pyro.core
-    import Pyro.naming
-    using_pyro3 = True
-    using_pyro4 = False
-except:
-    try:
-        import Pyro4
-        #Pyro4.config.SERIALIZERS_ACCEPTED.add('pickle')
-        #Pyro4.config.SERIALIZER = 'pickle'
-        Pyro = Pyro4
-        using_pyro3 = False
-        using_pyro4 = True
-    except:
-        Pyro = None
-        using_pyro3 = False
-        using_pyro4 = False
-
 from pyutilib.pyro.util import get_nameserver, get_dispatchers, shutdown_pyro_components
 from pyutilib.pyro.task import Task, TaskProcessingError
 from pyutilib.pyro.client import Client

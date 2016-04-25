@@ -10,10 +10,8 @@
 import pyutilib.component.core
 pyutilib.component.core.PluginGlobals.add_env("pyutilib.workflow")
 
-from pyutilib.workflow.connector import Connector, DirectConnector
-from pyutilib.workflow.port import Port, Ports, InputPorts, OutputPorts
 from pyutilib.workflow.resource import Resource
-from pyutilib.workflow.task import Task, EmptyTask, Component
+from pyutilib.workflow.task import Task, EmptyTask, Component, Port, Ports, InputPorts, OutputPorts, Connector
 from pyutilib.workflow.workflow import Workflow
 from pyutilib.workflow.file import FileResource
 from pyutilib.workflow.executable import ExecutableResource

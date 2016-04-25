@@ -16,8 +16,8 @@ import time
 import itertools
 import random
 
-from pyutilib.pyro import get_nameserver, using_pyro3, using_pyro4
-from pyutilib.pyro import Pyro as _pyro
+from pyutilib.pyro.util import get_nameserver, using_pyro3, using_pyro4
+from pyutilib.pyro.util import Pyro as _pyro
 from pyutilib.pyro.util import get_dispatchers, _connection_problem
 
 from six import advance_iterator, iteritems, itervalues

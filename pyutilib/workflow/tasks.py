@@ -9,7 +9,6 @@
 
 __all__ = ['TaskPlugin', 'TaskFactory', 'WorkflowPlugin']
 
-from pyutilib.workflow import port
 from pyutilib.workflow import task
 from pyutilib.workflow import workflow
 from pyutilib.component.core import Plugin, implements, Interface, CreatePluginFactory, alias

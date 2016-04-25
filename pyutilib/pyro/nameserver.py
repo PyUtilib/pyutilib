@@ -10,25 +10,24 @@
 __all__ = ('start_ns', 'start_nsc')
 
 import sys
+from pyutilib.pyro.util import set_maxconnections, Pyro, using_pyro4
 
-import pyutilib.pyro
-from pyutilib.pyro.util import set_maxconnections
 
 def start_ns(max_allowed_connections=None):
-    if pyutilib.pyro.Pyro is not None:
+    if Pyro is not None:
         set_maxconnections(max_allowed_connections=max_allowed_connections)
-        pyutilib.pyro.Pyro.naming.main(sys.argv[1:])
+        Pyro.naming.main(sys.argv[1:])
     else:
         raise ImportError("Pyro or Pyro4 is not installed")
 
 def start_nsc():
-    if pyutilib.pyro.Pyro is not None:
-        if pyutilib.pyro.using_pyro4:
+    if Pyro is not None:
+        if using_pyro4:
             import Pyro4
             import Pyro4.nsc
         else:
             import Pyro
             import Pyro.nsc
-        pyutilib.pyro.Pyro.nsc.main(sys.argv[1:])
+        Pyro.nsc.main(sys.argv[1:])
     else:
         raise ImportError("Pyro or Pyro4 is not installed")

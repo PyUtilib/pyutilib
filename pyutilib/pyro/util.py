@@ -15,8 +15,31 @@ import time
 import random
 import socket
 
-from pyutilib.pyro import using_pyro3, using_pyro4
-from pyutilib.pyro import Pyro as _pyro
+# For now, default to using Pyro3 if available
+# otherwise, check for Pyro4
+Pyro = None
+using_pyro3 = False
+using_pyro4 = False
+try:
+    import Pyro
+    import Pyro.core
+    import Pyro.naming
+    using_pyro3 = True
+    using_pyro4 = False
+except:
+    try:
+        import Pyro4
+        #Pyro4.config.SERIALIZERS_ACCEPTED.add('pickle')
+        #Pyro4.config.SERIALIZER = 'pickle'
+        Pyro = Pyro4
+        using_pyro3 = False
+        using_pyro4 = True
+    except:
+        Pyro = None
+        using_pyro3 = False
+        using_pyro4 = False
+
+_pyro = Pyro
 
 if sys.version_info >= (3,0):
     xrange = range
@@ -29,6 +52,7 @@ if using_pyro3:
     _connection_problem = _pyro.errors.ProtocolError
 elif using_pyro4:
     _connection_problem = _pyro.errors.TimeoutError
+
 
 def get_nameserver(host=None,
                    port=None,
