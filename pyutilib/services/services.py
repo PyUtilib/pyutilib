@@ -9,7 +9,7 @@
 
 __all__ = ['registered_executable', 'register_executable', 'TempfileManager']
 
-from pyutilib.component.core import *
+from pyutilib.component.core import ExtensionPoint, PluginGlobals
 from pyutilib.component.config import TempfileManager
 from pyutilib.component.executables import IExternalExecutable, ExternalExecutable
 

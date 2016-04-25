@@ -17,8 +17,9 @@ import tempfile
 import logging
 import shutil
 
-from pyutilib.component.config.options import *
-from pyutilib.component.config.managed_plugin import *
+from pyutilib.component.core import Interface, implements
+from pyutilib.component.config.managed_plugin import ManagedSingletonPlugin
+from pyutilib.component.config.options import declare_option
 
 
 deletion_errors_are_fatal = True
@@ -50,6 +51,7 @@ class ITempfileManager(Interface):
 
     def pop(self, remove=True):
         """Pop tempfiles onto a stack.  Tempfiles that are popped off the stack are deleted."""
+
 
 class TempfileManagerPlugin(ManagedSingletonPlugin):
     """A plugin that manages temporary files."""

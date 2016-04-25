@@ -37,12 +37,12 @@ except:
         using_pyro3 = False
         using_pyro4 = False
 
-from pyutilib.pyro.util import *
-from pyutilib.pyro.task import *
-from pyutilib.pyro.client import *
-from pyutilib.pyro.worker import *
-from pyutilib.pyro.dispatcher import *
-from pyutilib.pyro.nameserver import *
+from pyutilib.pyro.util import get_nameserver, get_dispatchers, shutdown_pyro_components
+from pyutilib.pyro.task import Task, TaskProcessingError
+from pyutilib.pyro.client import Client
+from pyutilib.pyro.worker import TaskWorker, MultiTaskWorker, TaskWorkerServer
+from pyutilib.pyro.dispatcher import Dispatcher, DispatcherServer
+from pyutilib.pyro.nameserver import start_ns, start_nsc
 
 #
 # Pyro3 License

@@ -17,6 +17,7 @@ import pyutilib.component.core
 import pyutilib.component.config
 import os
 
+
 class SimpleApplication(object):
 
     def __init__(self, name, filename=None):

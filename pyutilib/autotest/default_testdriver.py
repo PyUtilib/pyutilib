@@ -9,7 +9,7 @@
 #
 
 import sys
-from pyutilib.component.core import *
+from pyutilib.component.core import Plugin, implements, alias
 from pyutilib.autotest import plugins
 
 

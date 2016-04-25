@@ -11,7 +11,8 @@
 
 __all__ = ['ManagedPlugin', 'ManagedSingletonPlugin']
 
-from pyutilib.component.config.options import *
+from pyutilib.component.core import Plugin, SingletonPlugin
+from pyutilib.component.config.options import declare_option, BoolOption
 
 
 class ManagedPlugin(Plugin):
@@ -29,6 +30,7 @@ class ManagedPlugin(Plugin):
 
         # clean up the attached BoolOption, which is a plugin - otherwise, a memory leak will result.
         self._enable.deactivate()
+
 
 class ManagedSingletonPlugin(SingletonPlugin):
     """A singleton plugin that has an option supports configuration of this service."""

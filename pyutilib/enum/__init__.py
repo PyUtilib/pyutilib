@@ -8,4 +8,4 @@
 #  _________________________________________________________________________
 #
 
-from pyutilib.enum.enum import *
+from pyutilib.enum.enum import Enum

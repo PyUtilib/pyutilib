@@ -8,8 +8,9 @@
 #  _________________________________________________________________________
 
 import pyutilib.misc
-from pyutilib.component.core import *
+from pyutilib.component.core import Interface, Plugin, implements
 from pyutilib.component.config import ExecutableOption, declare_option
+
 
 class IExternalExecutable(Interface):
     """Interface for plugins that define an external executable"""

@@ -10,6 +10,6 @@
 from pyutilib.component.core import PluginGlobals
 PluginGlobals.add_env("pca")
 
-from pyutilib.component.executables.executable import *
+from pyutilib.component.executables.executable import IExternalExecutable, ExternalExecutable
 
 PluginGlobals.pop_env()

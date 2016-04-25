@@ -13,7 +13,7 @@ try:
     json_available=True
 except:                                                 #pragma:nocover
     json_available=False
-from pyutilib.component.core import *
+from pyutilib.component.core import SingletonPlugin, implements
 from pyutilib.autotest import plugins
 
 

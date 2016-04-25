@@ -38,7 +38,7 @@ except:
     _peek_available = False
 
 import pyutilib.services
-from pyutilib.common import *
+from pyutilib.common import ApplicationError
 from pyutilib.misc import quote_split
 
 try:

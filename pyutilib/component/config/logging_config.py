@@ -9,12 +9,14 @@
 
 """A plugin that supports global configuration of logging options for pyutilib.component.core."""
 
+import sys
 import os.path
 import logging
 import logging.handlers as handlers
 
-from pyutilib.component.config.env_config import *
-from pyutilib.component.config.options import *
+from pyutilib.component.core import Plugin, implements, ExtensionPoint, PluginGlobals
+from pyutilib.component.config.env_config import IEnvironmentConfig
+from pyutilib.component.config.options import IUpdatedOptionsAction, declare_option
 
 
 class LoggingConfig(Plugin):

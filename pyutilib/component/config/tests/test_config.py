@@ -9,8 +9,9 @@ from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
 
 from nose.tools import nottest
-from pyutilib.component.core import ExtensionPoint
-from pyutilib.component.config import *
+from pyutilib.component.core import ExtensionPoint, Plugin, PluginGlobals
+from pyutilib.component.config.options import FileOption, declare_option
+from pyutilib.component.config import Configuration, ConfigurationError
 import pyutilib.th as unittest
 import pyutilib.misc
 

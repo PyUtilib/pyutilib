@@ -10,10 +10,9 @@
 __all__ = ['Port', 'Ports', 'InputPorts', 'OutputPorts']
 
 import weakref
-
+import pprint
 from pyutilib.workflow.connector import DirectConnector
 
-import pprint
 
 def define_connection(cls, from_port, to_port):
     """Define a connection by constructing the specified class."""

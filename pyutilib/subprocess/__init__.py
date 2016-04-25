@@ -8,9 +8,9 @@
 #  _________________________________________________________________________
 #
 
-from pyutilib.component.core.core import *
+from pyutilib.component.core import PluginGlobals
 PluginGlobals.add_env("pyutilib")
 
-from pyutilib.subprocess.processmngr import *
+from pyutilib.subprocess.processmngr import subprocess, SubprocessMngr, run_command, timer, signal_handler, run, PIPE, STDOUT
 
 PluginGlobals.pop_env()

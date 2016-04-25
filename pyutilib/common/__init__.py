@@ -8,6 +8,4 @@
 #  _________________________________________________________________________
 #
 
-# The only compatible way to import packages in both 2.4 and 3.x is to
-# use absolute package names:
-from pyutilib.common._exceptions import *
+from pyutilib.common._exceptions import ConfigurationError, ApplicationError, BadDebuggingValue

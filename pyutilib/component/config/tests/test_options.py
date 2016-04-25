@@ -1,12 +1,13 @@
 
 import os
+import re
 import sys
 from os.path import abspath, dirname
 currdir = dirname(abspath(__file__))+os.sep
 
 import unittest
-from pyutilib.component.core import *
-from pyutilib.component.config import *
+from pyutilib.component.core import Interface, PluginGlobals, ExtensionPoint, implements, Plugin
+from pyutilib.component.config.options import Option, OptionError, IOption, declare_option, FileOption, IntOption, FloatOption, DictOption, BoolOption
 
 
 PluginGlobals.add_env("testing.options")

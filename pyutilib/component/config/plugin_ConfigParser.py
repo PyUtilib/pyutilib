@@ -11,6 +11,7 @@
 
 __all__ = ['Configuration_ConfigParser']
 
+import sys
 import os.path
 try:
     import ConfigParser
@@ -20,8 +21,10 @@ try:
     from ordereddict import OrderedDict
 except:
     OrderedDict = dict
-from pyutilib.component.config.configuration import *
-from pyutilib.component.config.managed_plugin import *
+from pyutilib.component.core import implements
+from pyutilib.component.config.configuration import ConfigurationError, IConfiguration
+from pyutilib.component.config.managed_plugin import ManagedSingletonPlugin
+from pyutilib.component.config.options import declare_option
 
 #
 # Force the config file option manager to be case sensitive
