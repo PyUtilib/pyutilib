@@ -13,7 +13,7 @@ Python modules that use Pyro to manage a generic task queue.
 These modules were adapted from Pyro's distributed2 example.
 """
 
-from pyutilib.pyro.util import get_nameserver, get_dispatchers, shutdown_pyro_components
+from pyutilib.pyro.util import get_nameserver, get_dispatchers, shutdown_pyro_components, using_pyro3, using_pyro4, Pyro
 from pyutilib.pyro.task import Task, TaskProcessingError
 from pyutilib.pyro.client import Client
 from pyutilib.pyro.worker import TaskWorker, MultiTaskWorker, TaskWorkerServer

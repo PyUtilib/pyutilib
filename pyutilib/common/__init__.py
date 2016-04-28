@@ -8,4 +8,4 @@
 #  _________________________________________________________________________
 #
 
-from pyutilib.common._exceptions import ConfigurationError, ApplicationError, BadDebuggingValue
+from pyutilib.common._exceptions import ConfigurationError, ApplicationError, BadDebuggingValue, WindowsError
