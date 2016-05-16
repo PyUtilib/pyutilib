@@ -26,6 +26,17 @@ if sys.version_info[0:2] >= (2,5):
     if _mswindows:
         import ctypes
 
+# Note: on many python interpreters, WindowsError is only defined on
+# Windows.  Since we want to trap it below, we will declare a local
+# Exception type that is WindowsError if WindowsError is defined,
+# otherwise it is a bogus Exception class.
+try:
+    WindowsError()
+    _WindowsError = WindowsError
+except NameError:
+    class _WindowsError(Exception):
+        pass
+
 _peek_available = True
 try:
     if _mswindows:
@@ -581,7 +592,7 @@ def run_command(cmd, outfile=None, cwd=None, ostream=None, stdin=None, stdout=No
             #    thread = th[0]
             #    del thread
 
-    except WindowsError:
+    except _WindowsError:
         err = sys.exc_info()[1]
         raise ApplicationError(
             "Could not execute the command: '%s'\n\tError message: %s"
