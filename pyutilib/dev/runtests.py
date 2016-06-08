@@ -7,10 +7,12 @@ import optparse
 
 if sys.platform.startswith('win'):
     platform='win'
+    use_exec = False
 else:
     platform='linux'
+    use_exec = True
 
-def run(package, argv, use_exec=True):
+def run(package, argv, use_exec=use_exec):
     parser = optparse.OptionParser(usage='run [OPTIONS] <dirs>')
 
     parser.add_option('-v','--verbose',
