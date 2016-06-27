@@ -108,6 +108,7 @@ def run(package, argv, use_exec=use_exec):
     
     print("Running... "+' '.join(cmd))
     print("")
+    sys.stdout.flush()
     rc = 0
     if sys.platform.startswith('java'):
         import subprocess
@@ -124,7 +125,7 @@ def run(package, argv, use_exec=use_exec):
         rc = None
         os.execvp(cmd[0], cmd)
     else:
-        rc,_ = pyutilib.subprocess.run(cmd, tee=True)
+        rc,_ = pyutilib.subprocess.run(cmd)#, tee=True)
     return rc
 
 def runPyUtilibTests():
