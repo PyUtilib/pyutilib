@@ -77,7 +77,7 @@ def run(package, argv, use_exec=use_exec):
             dirs.add(dir_)
     if len(dirs) == 0:
         print("No valid test directory has been specified!")
-        return
+        return 1
 
     if platform == 'win':
         srcdirs=[]
