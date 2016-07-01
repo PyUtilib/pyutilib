@@ -20,7 +20,7 @@ import copy
 from six import itervalues
 from threading import Thread
 
-_mswindows = (sys.platform == 'win32')
+_mswindows = sys.platform.startswith('win')
 
 if sys.version_info[0:2] >= (2,5):
     if _mswindows:
