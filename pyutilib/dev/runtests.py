@@ -7,7 +7,7 @@ import optparse
 
 if sys.platform.startswith('win'):
     platform='win'
-    use_exec = False
+    use_exec = False # Try to use subprocess.run
 else:
     platform='linux'
     use_exec = True
