@@ -28,12 +28,15 @@ from six import iteritems
 if using_pyro3:
     base = _pyro.core.ObjBase
     oneway = lambda method: method
+    expose = lambda obj: obj
 elif using_pyro4:
     base = object
     oneway = _pyro.oneway
+    expose = _pyro.expose
 else:
     base = object
     oneway = lambda method: method
+    expose = lambda obj: obj
 
 def _clear_queue_threadsafe(q):
     while not q.empty():
@@ -330,6 +333,8 @@ class Dispatcher(base):
                 except Queue.Empty:
                     pass
         return results
+
+Dispatcher = expose(Dispatcher)
 
 def DispatcherServer(group=":PyUtilibServer",
                      daemon_host=None,
