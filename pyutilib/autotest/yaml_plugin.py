@@ -10,9 +10,9 @@
 
 try:
     import yaml
-    using_yaml=True
-except ImportError:                                     #pragma:nocover
-    using_yaml=False
+    using_yaml = True
+except ImportError:  #pragma:nocover
+    using_yaml = False
 from pyutilib.component.core import SingletonPlugin, implements
 from pyutilib.autotest import plugins
 import pyutilib.misc
@@ -24,7 +24,7 @@ class YamlTestParser(SingletonPlugin):
 
     def __init__(self, **kwds):
         SingletonPlugin.__init__(self, **kwds)
-        self.name='yml'
+        self.name = 'yml'
 
     def load_test_config(self, filename):
         if using_yaml:
@@ -41,7 +41,7 @@ class YamlTestParser(SingletonPlugin):
         return repn
 
     def print_test_config(self, repn):
-        print(repn)                                     #pragma:nocover
+        print(repn)  #pragma:nocover
 
     def enabled(self):
         return True

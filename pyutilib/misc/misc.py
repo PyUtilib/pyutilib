@@ -17,14 +17,15 @@ import stat
 import sys
 import warnings
 
-if (sys.platform[0:3] == "win"): #pragma:nocover
-    executable_extension=".exe"
-else:                            #pragma:nocover
-    executable_extension=""
+if (sys.platform[0:3] == "win"):  #pragma:nocover
+    executable_extension = ".exe"
+else:  #pragma:nocover
+    executable_extension = ""
 
 import six
 
-def deprecated ( deprecated_function ):
+
+def deprecated(deprecated_function):
     """ Code slightly adapted from the Python Decorator Library
 
     This is a decorator which can be used to mark functions as deprecated.
@@ -37,14 +38,14 @@ def deprecated ( deprecated_function ):
         ...
     """
 
-    def wrapper_function ( *args, **kwargs ):
+    def wrapper_function(*args, **kwargs):
         warnings.warn_explicit(
-          "Use of deprecated function '%s'." % deprecated_function.__name__,
-          category = DeprecationWarning,
-          filename = deprecated_function.__code__.co_filename,
-          lineno   = deprecated_function.__code__.co_firstlineno + 1
-        )
-        return deprecated_function( *args, **kwargs )
+            "Use of deprecated function '%s'." % deprecated_function.__name__,
+            category=DeprecationWarning,
+            filename=deprecated_function.__code__.co_filename,
+            lineno=deprecated_function.__code__.co_firstlineno + 1)
+        return deprecated_function(*args, **kwargs)
+
     return wrapper_function
 
 
@@ -58,6 +59,7 @@ def tostr(array):
 
 def flatten(x):
     """Flatten nested iterables"""
+
     def _flatten(x, ans_):
         for el in x:
             if not type(el) is str and hasattr(el, "__iter__"):
@@ -85,6 +87,7 @@ def flatten(x):
     _flatten(x, ans)
     return ans
 
+
 def flatten_list(x):
     """Flatten nested lists"""
     if type(x) is not list:
@@ -94,10 +97,11 @@ def flatten_list(x):
     while i < x_len:
         if type(x[i]) is list:
             x_len += len(x[i]) - 1
-            x[i:i+1] = x[i]
+            x[i:i + 1] = x[i]
         else:
             i += 1
     return x
+
 
 def recursive_flatten_tuple(val):
     """ Flatten nested tuples """
@@ -111,6 +115,7 @@ def recursive_flatten_tuple(val):
             rv = rv + (i,)
     return rv
 
+
 def flatten_tuple(x):
     """ Flatten nested tuples """
     if type(x) is not tuple:
@@ -120,12 +125,10 @@ def flatten_tuple(x):
     while i < x_len:
         if type(x[i]) is tuple:
             x_len += len(x[i]) - 1
-            x = x[:i] + x[i] + x[i+1:]
+            x = x[:i] + x[i] + x[i + 1:]
         else:
             i += 1
     return x
-
-
 
 
 #
@@ -135,10 +138,11 @@ def flatten_tuple(x):
 def handleRemoveReadonly(func, path, exc):
     excvalue = exc[1]
     if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
-        os.chmod(path, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO) # 0777
+        os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # 0777
         func(path)
     else:
         raise
+
 
 def rmtree(dir):
     if not os.path.exists(dir):
@@ -147,6 +151,8 @@ def rmtree(dir):
 
 
 whitespace_re = re.compile('\s+')
+
+
 def quote_split(regex_str, src=None):
     """
     Split a string, but do not split the string between quotes.  If only
@@ -186,7 +192,7 @@ def quote_split(regex_str, src=None):
                     # parse the entire source string; hence, no 'elif'
             if char == '\\':
                 escaping = True
-            elif not inQuote and ( char == '"' or char == "'" ):
+            elif not inQuote and (char == '"' or char == "'"):
                 inQuote = char
 
     if inQuote:
@@ -195,7 +201,8 @@ def quote_split(regex_str, src=None):
     tokens.append(src[start:])
     return tokens
 
-def traceit(frame, event, arg):    #pragma:nocover
+
+def traceit(frame, event, arg):  #pragma:nocover
     """
     A utility for tracing Python executions.  Use this function by
     executing:
@@ -208,8 +215,7 @@ def traceit(frame, event, arg):    #pragma:nocover
             filename = frame.f_globals["__file__"]
         except:
             return traceit
-        if (filename.endswith(".pyc") or
-            filename.endswith(".pyo")):
+        if (filename.endswith(".pyc") or filename.endswith(".pyo")):
             filename = filename[:-1]
         name = frame.f_globals["__name__"]
         line = linecache.getline(filename, lineno)
@@ -222,7 +228,9 @@ def tuplize(dlist, d, name):
     Convert a list into a list of tuples.
     """
     if len(dlist) % d != 0:
-        raise ValueError("Cannot tuplize data for set "+str(name)+" because its length " + str(len(dlist)) + " is not a multiple of dimen " + str(d))
+        raise ValueError("Cannot tuplize data for set " + str(
+            name) + " because its length " + str(len(dlist)) +
+                         " is not a multiple of dimen " + str(d))
     j = 0
     t = []
     rv = []
@@ -277,7 +285,7 @@ def search_file(filename,
             search_path = (search_path,)
     for path in search_path:
         for ext in ('', implicitExt):
-            test_fname = os.path.join(path, filename+ext)
+            test_fname = os.path.join(path, filename + ext)
             if os.path.exists(test_fname) \
                    and (not isfile or os.path.isfile(test_fname)) \
                    and (not executable or os.access(test_fname, os.X_OK)):
@@ -290,14 +298,15 @@ def search_file(filename,
 def sort_index(l):
     """Returns a list, where the i-th value is the index of the i-th smallest
     value in the data 'l'"""
-    return list(index for index, item in sorted(enumerate(l), key=lambda
-item: item[1]))
+    return list(index
+                for index, item in sorted(
+                    enumerate(l), key=lambda item: item[1]))
 
 
 def count_lines(file):
     """Returns the number of lines in a file."""
     count = 0
-    for line in open(file,"r"):
+    for line in open(file, "r"):
         count = count + 1
     return count
 
@@ -314,8 +323,9 @@ class Bunch(dict):
     Adapted from code developed by Alex Martelli and submitted to
     the ActiveState Programmer Network http://aspn.activestate.com
     """
+
     def __init__(self, **kw):
-        dict.__init__(self,kw)
+        dict.__init__(self, kw)
         self.__dict__.update(kw)
 
 
@@ -328,15 +338,15 @@ class Container(dict):
 
     def __init__(self, *args, **kw):
         for arg in args:
-            for item in quote_split('[ \t]+',arg):
+            for item in quote_split('[ \t]+', arg):
                 r = item.find('=')
                 if r != -1:
                     try:
-                        val = eval(item[r+1:])
+                        val = eval(item[r + 1:])
                     except:
-                        val = item[r+1:]
+                        val = item[r + 1:]
                     kw[item[:r]] = val
-        dict.__init__(self,kw)
+        dict.__init__(self, kw)
         self.__dict__.update(kw)
         if not '_name_' in kw:
             self._name_ = self.__class__.__name__
@@ -368,7 +378,7 @@ class Container(dict):
         self._name_ = name
 
     def __setitem__(self, name, val):
-        self.__setattr__(name,val)
+        self.__setattr__(name, val)
 
     def __getitem__(self, name):
         return self.__getattr__(name)
@@ -387,15 +397,16 @@ class Container(dict):
         return None
 
     def __repr__(self):
-        attrs = sorted("%s = %r" % (k, v) for k, v in self.__dict__.items() if not k.startswith("_"))
+        attrs = sorted("%s = %r" % (k, v) for k, v in self.__dict__.items()
+                       if not k.startswith("_"))
         return "%s(%s)" % (self.__class__.__name__, ", ".join(attrs))
 
     def __str__(self):
         return self.as_string()
 
-    def __str__(self, nesting = 0, indent=''):
+    def __str__(self, nesting=0, indent=''):
         attrs = []
-        indentation = indent+"    " * nesting
+        indentation = indent + "    " * nesting
         for k, v in self.__dict__.items():
             if not k.startswith("_"):
                 text = [indentation, k, ":"]
@@ -408,13 +419,13 @@ class Container(dict):
                         text.append(' []')
                     else:
                         for v_ in v:
-                            text.append('\n'+indentation+"-")
+                            text.append('\n' + indentation + "-")
                             if isinstance(v_, Container):
-                                text.append('\n'+v_.__str__(nesting+1))
+                                text.append('\n' + v_.__str__(nesting + 1))
                             else:
-                                text.append(" "+repr(v_))
+                                text.append(" " + repr(v_))
                 else:
-                    text.append(' '+repr(v))
+                    text.append(' ' + repr(v))
                 attrs.append("".join(text))
         attrs.sort()
         return "\n".join(attrs)
@@ -440,9 +451,7 @@ def create_hardlink(src, dst):
         # Windows
         import ctypes
         if not ctypes.windll.kernel32.CreateHardLinkA(dst, src, 0):
-            raise OSError("Failed to create hard link for file %s"
-                          % (src))
+            raise OSError("Failed to create hard link for file %s" % (src))
     else:
         # Unix
         os.link(src, dst)
-

@@ -17,13 +17,16 @@ import zipfile
 import gzip
 import filecmp
 import math
-if sys.version_info >= (3,0):
+if sys.version_info >= (3, 0):
     xrange = range
     import io
 
-strict_float_p = re.compile(r"(?<![\w+-\.])(?:[+-])?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?\b")
-relaxed_float_p = re.compile(r"(?:[+-])?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?")
+strict_float_p = re.compile(
+    r"(?<![\w+-\.])(?:[+-])?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?\b")
+relaxed_float_p = re.compile(
+    r"(?:[+-])?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?")
 whitespace_p = re.compile(r" +")
+
 
 def remove_chars_in_list(s, l):
     if len(l) == 0:
@@ -46,74 +49,84 @@ def get_desired_chars_from_file(f, nchars, l=""):
     return retBuf
 
 
-if sys.version_info[:2] == (3,2):
+if sys.version_info[:2] == (3, 2):
     #
     # This fixes a bug in Python 3.2's implementation of GzipFile.
     #
     class MyGzipFile(gzip.GzipFile):
+
         def read1(self, n):
             return self.read(n)
- 
+
+
 def open_possibly_compressed_file(filename):
     if not os.path.exists(filename):
-        raise IOError("cannot find file `"+filename+"'")
-    if sys.version_info[:2] < (2,6) and zipfile.is_zipfile(filename):
-        raise IOError( "cannot unpack a ZIP file with Python %s" 
-                       % '.'.join(map(str,sys.version_info)) )
+        raise IOError("cannot find file `" + filename + "'")
+    if sys.version_info[:2] < (2, 6) and zipfile.is_zipfile(filename):
+        raise IOError("cannot unpack a ZIP file with Python %s" %
+                      '.'.join(map(str, sys.version_info)))
     try:
         is_zipfile = zipfile.is_zipfile(filename)
     except:
         is_zipfile = False
     if is_zipfile:
-        zf1=zipfile.ZipFile(filename,"r")
+        zf1 = zipfile.ZipFile(filename, "r")
         if len(zf1.namelist()) != 1:
             raise IOError("cannot compare with a zip file that contains "
-                          "multiple files: `"+filename+"'")
-        if sys.version_info < (3,0):
-            return zf1.open(zf1.namelist()[0],'r')
+                          "multiple files: `" + filename + "'")
+        if sys.version_info < (3, 0):
+            return zf1.open(zf1.namelist()[0], 'r')
         else:
-            return io.TextIOWrapper(zf1.open(zf1.namelist()[0],'r'), encoding='utf-8', newline='')
+            return io.TextIOWrapper(
+                zf1.open(zf1.namelist()[0], 'r'), encoding='utf-8', newline='')
     elif filename.endswith('.gz'):
-        if sys.version_info < (3,0):
-            return gzip.open(filename,"r")
-        elif sys.version_info[:2] == (3,2):
-            return io.TextIOWrapper(MyGzipFile(filename), encoding='utf-8', newline='')
+        if sys.version_info < (3, 0):
+            return gzip.open(filename, "r")
+        elif sys.version_info[:2] == (3, 2):
+            return io.TextIOWrapper(
+                MyGzipFile(filename), encoding='utf-8', newline='')
         else:
-            return io.TextIOWrapper(gzip.open(filename,'r'), encoding='utf-8', newline='')
+            return io.TextIOWrapper(
+                gzip.open(filename, 'r'), encoding='utf-8', newline='')
     else:
-        return open(filename,"r")
+        return open(filename, "r")
 
 
 def file_diff(filename1, filename2, lineno=None, context=None):
-    INPUT1=open_possibly_compressed_file(filename1)
+    INPUT1 = open_possibly_compressed_file(filename1)
     lines1 = INPUT1.readlines()
-    for i in range(0,len(lines1)):
+    for i in range(0, len(lines1)):
         lines1[i] = lines1[i].strip()
     INPUT1.close()
 
-    INPUT2=open_possibly_compressed_file(filename2)
+    INPUT2 = open_possibly_compressed_file(filename2)
     lines2 = INPUT2.readlines()
-    for i in range(0,len(lines2)):
+    for i in range(0, len(lines2)):
         lines2[i] = lines2[i].strip()
     INPUT2.close()
 
-    s=""
+    s = ""
     if lineno is None:
-        for line in difflib.unified_diff(lines2,lines1,fromfile=filename2,tofile=filename1):
-            s += line+"\n"
+        for line in difflib.unified_diff(
+                lines2, lines1, fromfile=filename2, tofile=filename1):
+            s += line + "\n"
     else:
         if context is None:
             context = 3
-        start = lineno-context
-        stop = lineno+context
+        start = lineno - context
+        stop = lineno + context
         if start < 0:
-            start=0
+            start = 0
         if stop > len(lines1):
             stop = len(lines1)
         if stop > len(lines2):
             stop = len(lines2)
-        for line in difflib.unified_diff(lines2[start:stop],lines1[start:stop],fromfile=filename2,tofile=filename1):
-            s += line+"\n"
+        for line in difflib.unified_diff(
+                lines2[start:stop],
+                lines1[start:stop],
+                fromfile=filename2,
+                tofile=filename1):
+            s += line + "\n"
     return s
 
 
@@ -135,7 +148,7 @@ def read_and_filter_line(stream, ignore_chars, filter):
         if filter is not None:
             filtered = filter(line)
             if filtered is True:
-                line = False            # Ignore this line
+                line = False  # Ignore this line
             elif filtered is False:
                 line = line_
             else:
@@ -145,7 +158,12 @@ def read_and_filter_line(stream, ignore_chars, filter):
     return line, lineno
 
 
-def compare_file_with_numeric_values(filename1, filename2, ignore=["\n","\r"], filter=None, tolerance=0.0, strict_numbers=True):
+def compare_file_with_numeric_values(filename1,
+                                     filename2,
+                                     ignore=["\n", "\r"],
+                                     filter=None,
+                                     tolerance=0.0,
+                                     strict_numbers=True):
     """
     Do a simple comparison of two files that ignores differences
     in newline types and whitespace.  Numeric values are compared within a specified tolerance.
@@ -161,11 +179,11 @@ def compare_file_with_numeric_values(filename1, filename2, ignore=["\n","\r"], f
     this utility can ignore an arbitrary set of characters.
     """
     if not os.path.exists(filename1):
-        raise IOError("compare_file: cannot find file `"+filename1+
-                      "' (in "+os.getcwd()+")")
+        raise IOError("compare_file: cannot find file `" + filename1 + "' (in "
+                      + os.getcwd() + ")")
     if not os.path.exists(filename2):
-        raise IOError("compare_file: cannot find file `"+filename2+
-                      "' (in "+os.getcwd()+")")
+        raise IOError("compare_file: cannot find file `" + filename2 + "' (in "
+                      + os.getcwd() + ")")
 
     if filecmp.cmp(filename1, filename2):
         return [False, None, ""]
@@ -175,13 +193,13 @@ def compare_file_with_numeric_values(filename1, filename2, ignore=["\n","\r"], f
     else:
         float_p = relaxed_float_p
 
-    INPUT1=open_possibly_compressed_file(filename1)
+    INPUT1 = open_possibly_compressed_file(filename1)
     try:
-        INPUT2=open_possibly_compressed_file(filename2)
+        INPUT2 = open_possibly_compressed_file(filename2)
     except IOError:
         INPUT1.close()
         raise
-    lineno=0
+    lineno = 0
     while True:
 
         # If either line is composed entirely of characters to
@@ -192,13 +210,15 @@ def compare_file_with_numeric_values(filename1, filename2, ignore=["\n","\r"], f
             line1, delta_lineno = read_and_filter_line(INPUT1, ignore, filter)
         except UnicodeDecodeError:
             err = sys.exc_info()[1]
-            raise RuntimeError("Decoding error while processing file %s: %s" % (filename1, str(err)))
+            raise RuntimeError("Decoding error while processing file %s: %s" %
+                               (filename1, str(err)))
         lineno += delta_lineno
         try:
             line2 = read_and_filter_line(INPUT2, ignore, filter)[0]
         except UnicodeDecodeError:
             err = sys.exc_info()[1]
-            raise RuntimeError("Decoding error while processing file %s: %s" % (filename2, str(err)))
+            raise RuntimeError("Decoding error while processing file %s: %s" %
+                               (filename2, str(err)))
 
         #print "line1 '%s'" % line1
         #print "line2 '%s'" % line2
@@ -211,7 +231,8 @@ def compare_file_with_numeric_values(filename1, filename2, ignore=["\n","\r"], f
         if line1 is None or line2 is None:
             INPUT1.close()
             INPUT2.close()
-            return [True, lineno, file_diff(filename1,filename2, lineno=lineno)]
+            return [True, lineno, file_diff(
+                filename1, filename2, lineno=lineno)]
 
         floats1 = float_p.findall(line1)
         floats2 = float_p.findall(line2)
@@ -221,7 +242,8 @@ def compare_file_with_numeric_values(filename1, filename2, ignore=["\n","\r"], f
         if len(floats1) != len(floats2):
             INPUT1.close()
             INPUT2.close()
-            return [True, lineno, file_diff(filename1,filename2, lineno=lineno)]
+            return [True, lineno, file_diff(
+                filename1, filename2, lineno=lineno)]
 
         if len(floats1) > 0:
             for i in xrange(len(floats1)):
@@ -233,11 +255,13 @@ def compare_file_with_numeric_values(filename1, filename2, ignore=["\n","\r"], f
                 except Exception:
                     INPUT1.close()
                     INPUT2.close()
-                    return [True, lineno, file_diff(filename1,filename2, lineno=lineno)]
-                if math.fabs(v1-v2) > tolerance:
+                    return [True, lineno, file_diff(
+                        filename1, filename2, lineno=lineno)]
+                if math.fabs(v1 - v2) > tolerance:
                     INPUT1.close()
                     INPUT2.close()
-                    return [True, lineno, file_diff(filename1,filename2, lineno=lineno)]
+                    return [True, lineno, file_diff(
+                        filename1, filename2, lineno=lineno)]
 
         line1 = float_p.sub('#', whitespace_p.sub(' ', line1.strip()))
         line2 = float_p.sub('#', whitespace_p.sub(' ', line2.strip()))
@@ -245,35 +269,40 @@ def compare_file_with_numeric_values(filename1, filename2, ignore=["\n","\r"], f
         #print "Line1 '%s'" % line1
         #print "Line2 '%s'" % line2
 
-        index1=0
-        index2=0
+        index1 = 0
+        index2 = 0
         while True:
             # Set the value of nc1
             if index1 == len(line1):
-                nc1=None
+                nc1 = None
             else:
-                nc1=line1[index1]
+                nc1 = line1[index1]
             # Set the value of nc2
             if index2 == len(line2):
-                nc2=None
+                nc2 = None
             else:
-                nc2=line2[index2]
+                nc2 = line2[index2]
             # Compare curent character values
             if nc1 != nc2:
                 INPUT1.close()
                 INPUT2.close()
-                return [True, lineno, file_diff(filename1,filename2, lineno=lineno)]
+                return [True, lineno, file_diff(
+                    filename1, filename2, lineno=lineno)]
             if nc1 is None and nc2 is None:
                 break
-            index1=index1+1
-            index2=index2+1
+            index1 = index1 + 1
+            index2 = index2 + 1
 
     INPUT1.close()
     INPUT2.close()
     return [False, None, ""]
-                        
 
-def compare_file(filename1,filename2, ignore=["\t"," ","\n","\r"], filter=None, tolerance=None):
+
+def compare_file(filename1,
+                 filename2,
+                 ignore=["\t", " ", "\n", "\r"],
+                 filter=None,
+                 tolerance=None):
     """
     Do a simple comparison of two files that ignores differences
     in newline types.  If filename1 or filename2 is a zipfile, then it is
@@ -302,14 +331,20 @@ def compare_file(filename1,filename2, ignore=["\t"," ","\n","\r"], filter=None, 
         except:
             tol = tolerance
             strict = True
-        return compare_file_with_numeric_values(filename1, filename2, ignore=tmp, filter=filter, tolerance=tol, strict_numbers=strict)
+        return compare_file_with_numeric_values(
+            filename1,
+            filename2,
+            ignore=tmp,
+            filter=filter,
+            tolerance=tol,
+            strict_numbers=strict)
 
     if not os.path.exists(filename1):
-        raise IOError("compare_file: cannot find file `"+filename1+
-                      "' (in "+os.getcwd()+")")
+        raise IOError("compare_file: cannot find file `" + filename1 + "' (in "
+                      + os.getcwd() + ")")
     if not os.path.exists(filename2):
-        raise IOError("compare_file: cannot find file `"+filename2+
-                      "' (in "+os.getcwd()+")")
+        raise IOError("compare_file: cannot find file `" + filename2 + "' (in "
+                      + os.getcwd() + ")")
 
     INPUT1 = open_possibly_compressed_file(filename1)
     try:
@@ -322,12 +357,13 @@ def compare_file(filename1,filename2, ignore=["\t"," ","\n","\r"], filter=None, 
     # consistent logic for zipfile analysis.  If the files are the same,
     # but they are zipfiles with > 1 files, then we raise an exception.
     #
-    if not sys.platform.startswith('win') and os.stat(filename1) == os.stat(filename2):
+    if not sys.platform.startswith('win') and os.stat(filename1) == os.stat(
+            filename2):
         INPUT1.close()
         INPUT2.close()
         return [False, None, ""]
     #
-    lineno=0
+    lineno = 0
     while True:
 
         # If either line is composed entirely of characters to
@@ -346,36 +382,41 @@ def compare_file(filename1,filename2, ignore=["\t"," ","\n","\r"], filter=None, 
         if line1 is None or line2 is None:
             INPUT1.close()
             INPUT2.close()
-            return [True, lineno, file_diff(filename1,filename2, lineno=lineno)]
+            return [True, lineno, file_diff(
+                filename1, filename2, lineno=lineno)]
 
-        index1=0
-        index2=0
+        index1 = 0
+        index2 = 0
         while True:
             # Set the value of nc1
             if index1 == len(line1):
-                nc1=None
+                nc1 = None
             else:
-                nc1=line1[index1]
+                nc1 = line1[index1]
             # Set the value of nc2
             if index2 == len(line2):
-                nc2=None
+                nc2 = None
             else:
-                nc2=line2[index2]
+                nc2 = line2[index2]
             # Compare curent character values
             if nc1 != nc2:
                 INPUT1.close()
                 INPUT2.close()
-                return [True, lineno, file_diff(filename1,filename2, lineno=lineno)]
+                return [True, lineno, file_diff(
+                    filename1, filename2, lineno=lineno)]
             if nc1 is None and nc2 is None:
                 break
-            index1=index1+1
-            index2=index2+1
+            index1 = index1 + 1
+            index2 = index2 + 1
     #
     INPUT1.close()
     INPUT2.close()
 
 
-def compare_large_file(filename1,filename2, ignore=["\t"," ","\n","\r"], bufSize=1 * 1024 * 1024):
+def compare_large_file(filename1,
+                       filename2,
+                       ignore=["\t", " ", "\n", "\r"],
+                       bufSize=1 * 1024 * 1024):
     """
     Do a simple comparison of two files that ignores white space, or
     characters specified in "ignore" list.
@@ -399,7 +440,8 @@ def compare_large_file(filename1,filename2, ignore=["\t"," ","\n","\r"], bufSize
     # zipfile analysis.  If the files are the same, but they are zipfiles with > 1 files, then we
     # raise an exception.
     #
-    if not sys.platform.startswith('win') and os.stat(filename1) == os.stat(filename2):
+    if not sys.platform.startswith('win') and os.stat(filename1) == os.stat(
+            filename2):
         INPUT1.close()
         INPUT2.close()
         return False
@@ -419,7 +461,7 @@ def compare_large_file(filename1,filename2, ignore=["\t"," ","\n","\r"], bufSize
             result = True
             break
 
-        if len(buf1) != len(buf2) or buf1 != buf2 :
+        if len(buf1) != len(buf2) or buf1 != buf2:
             result = True
             break
 

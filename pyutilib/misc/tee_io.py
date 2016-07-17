@@ -13,6 +13,7 @@ try:
 except:
     from StringIO import StringIO
 
+
 class TeeStream(object):
     """This class implements a simple 'Tee' of the specified python
     stream.  Since this presents a full file interface, TeeStream
@@ -32,7 +33,7 @@ class TeeStream(object):
 
     def reset(self):
         self.buffer = StringIO()
-        
+
 
 class ConsoleBuffer(object):
     """This class implements a simple 'Tee' of the python stdout and
@@ -42,21 +43,23 @@ class ConsoleBuffer(object):
     insufficient to 'wrap' the streams like the TeeStream class;
     instead, we must replace the standard stdout and stderr objects with
     our own duplicator."""
-    
+
     class _Duplicate(object):
+
         def __init__(self, a, b):
             self.a = a
             self.b = b
+
         def write(self, data):
             self.a.write(data)
             self.b.write(data)
-            
+
     def __init__(self):
         self._dup_out = self._dup_err = None
         self._raw_out = sys.stdout
         self._raw_err = sys.stderr
         self.reset()
-        
+
     def __del__(self):
         if self._dup_out is not None and self._dup_out is not sys.stdout:
             raise RuntimeError("ConsoleBuffer: Nesting violation " \
@@ -68,7 +71,7 @@ class ConsoleBuffer(object):
                   "redirected away from this buffer).")
         sys.stdout = self._raw_out
         sys.stderr = self._raw_err
-        
+
     def reset(self):
         if self._dup_out is not None and self._dup_out is not sys.stdout:
             raise RuntimeError("ConsoleBuffer: Nesting violation " \
@@ -78,11 +81,10 @@ class ConsoleBuffer(object):
             raise RuntimeError("ConsoleBuffer: Nesting violation " \
                   "(attempting to reset() when stderr has been redirected " \
                   "away from this buffer).")
-        
+
         self.out = StringIO()
         self.err = StringIO()
         self._dup_out = sys.stdout = \
                         ConsoleBuffer._Duplicate(self.out, self._raw_out)
         self._dup_err = sys.stderr = \
                         ConsoleBuffer._Duplicate(self.err, self._raw_err)
-

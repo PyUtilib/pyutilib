@@ -7,6 +7,7 @@
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
 
+
 class StreamIndenter(object):
     """Mock-up of a file-like object that wraps another file-like object
     and indents all data using the specified string before passing it to
@@ -28,8 +29,8 @@ class StreamIndenter(object):
             self.os.write(self.indent)
             self.newline = False
         frag = str.rsplit('\n', 1)
-        self.os.write(frag[0].replace('\n', '\n'+self.indent))
-        if len(frag)>1:
+        self.os.write(frag[0].replace('\n', '\n' + self.indent))
+        if len(frag) > 1:
             self.os.write('\n')
             if len(frag[1]):
                 self.os.write(self.indent + frag[1])

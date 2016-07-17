@@ -26,23 +26,28 @@ except ImportError:
             return str(x).lower()
         return str(x)
 
+
 try:
     import argparse
     argparse_is_available = True
 except ImportError:
     argparse_is_available = False
 
-__all__ = ('ConfigBlock','ConfigList','ConfigValue')
+__all__ = ('ConfigBlock', 'ConfigList', 'ConfigValue')
 
 logger = logging.getLogger('pyutilib.misc')
 
+
 def _munge_name(name, space_to_dash=True):
     if space_to_dash:
-        name = re.sub( r'\s', '-', name )
-    name = re.sub( r'_', '-', name )
-    return re.sub( r'[^a-zA-Z0-9-_]', '_', name )
+        name = re.sub(r'\s', '-', name)
+    name = re.sub(r'_', '-', name)
+    return re.sub(r'[^a-zA-Z0-9-_]', '_', name)
+
 
 _leadingSpace = re.compile('^([ \n\t]*)')
+
+
 def _strip_indentation(doc):
     if not doc:
         return doc
@@ -54,22 +59,27 @@ def _strip_indentation(doc):
         lines[0] = lines[0].strip()
     else:
         lines[0] = lines[0][minIndent:].rstrip()
-    for i,l in enumerate(lines[1:]):
-        lines[i+1] = l[minIndent:].rstrip()
+    for i, l in enumerate(lines[1:]):
+        lines[i + 1] = l[minIndent:].rstrip()
     return '\n'.join(lines)
 
+
 class ConfigBase(object):
-    __slots__ = ( '_parent', '_name', '_userSet', '_userAccessed',
-                  '_data', '_default', '_domain', '_description', '_doc',
-                  '_visibility', '_argparse')
+    __slots__ = ('_parent', '_name', '_userSet', '_userAccessed', '_data',
+                 '_default', '_domain', '_description', '_doc', '_visibility',
+                 '_argparse')
 
     # This just needs to be any reference-counted object; we use it so
     # that we can tell if an argument is provided (and we can't use None
     # as None is a valid user-specified argument)
     NoArgument = (None,)
 
-    def __init__( self, default, domain=None, description=None, doc=None,
-                  visibility=0 ):
+    def __init__(self,
+                 default,
+                 domain=None,
+                 description=None,
+                 doc=None,
+                 visibility=0):
         self._parent = None
         self._name = None
         self._userSet = False
@@ -104,7 +114,7 @@ class ConfigBase(object):
         if self.__class__.__mro__[-2] is ConfigBase:
             state = {}
         else:
-            state = super(ConfigBase,self).__getstate__()
+            state = super(ConfigBase, self).__getstate__()
         state.update((key, getattr(self, key)) for key in ConfigBase.__slots__)
         return state
 
@@ -150,10 +160,9 @@ class ConfigBase(object):
                     _dom = self._domain.__name__
                 else:
                     _dom = type(self._domain)
-                raise ValueError(
-                    "invalid value for configuration '%s':\n"
-                    "\tFailed casting %s\n\tto %s\n\tError: %s"
-                    % ( self.name(True), value, _dom, err ) )
+                raise ValueError("invalid value for configuration '%s':\n"
+                                 "\tFailed casting %s\n\tto %s\n\tError: %s" %
+                                 (self.name(True), value, _dom, err))
         else:
             return value
 
@@ -163,10 +172,10 @@ class ConfigBase(object):
         # can mask a real problem.
         #
         try:
-            self.set_value( self._default )
+            self.set_value(self._default)
         except:
             if hasattr(self._default, '__call__'):
-                self.set_value( self._default() )
+                self.set_value(self._default())
             else:
                 raise
         self._userAccessed = False
@@ -193,13 +202,13 @@ group, subparser, or (subparser, group)."""
             else:
                 kwds['action'] = 'store_false'
                 if not args:
-                    args = ( '--disable-'+_munge_name(self.name()), )
+                    args = ('--disable-' + _munge_name(self.name()),)
                 if 'help' not in kwds:
-                    kwds['help'] = "[DON'T] "+self._description
+                    kwds['help'] = "[DON'T] " + self._description
         if 'help' not in kwds:
             kwds['help'] = self._description
         if not args:
-            args = ( '--'+_munge_name(self.name()), )
+            args = ('--' + _munge_name(self.name()),)
         if self._argparse:
             self._argparse = self._argparse + ((args, kwds),)
         else:
@@ -207,6 +216,7 @@ group, subparser, or (subparser, group)."""
         return self
 
     def initialize_argparse(self, parser):
+
         def _get_subparser_or_group(_parser, name):
             # Note: strings also have a 'title()' method.  We are
             # looking for things that look like argparse
@@ -222,7 +232,7 @@ group, subparser, or (subparser, group)."""
                 raise RuntimeError(
                     'Unknown datatype (%s) for argparse group on '
                     'configuration definition %s' %
-                    ( type(name).__name__, obj.name(True)))
+                    (type(name).__name__, obj.name(True)))
 
             try:
                 for _grp in _parser._subparsers._group_actions:
@@ -245,34 +255,34 @@ group, subparser, or (subparser, group)."""
                 _group = _kwds.pop('group')
                 if isinstance(_group, tuple):
                     for _idx, _grp in enumerate(_group):
-                        _issub, _parser = _get_subparser_or_group(_parser,_grp)
-                        if not _issub and _idx < len(_group)-1:
+                        _issub, _parser = _get_subparser_or_group(_parser, _grp)
+                        if not _issub and _idx < len(_group) - 1:
                             raise RuntimeError(
                                 "Could not find argparse subparser '%s' for "
-                                "Config item %s" % (_grp, obj.name(True)) )
+                                "Config item %s" % (_grp, obj.name(True)))
                 else:
-                    _issub, _parser = _get_subparser_or_group(_parser,_group)
+                    _issub, _parser = _get_subparser_or_group(_parser, _group)
             if 'dest' not in _kwds:
-                _kwds['dest'] = 'CONFIGBLOCK.'+obj.name(True)
+                _kwds['dest'] = 'CONFIGBLOCK.' + obj.name(True)
                 if 'metavar' not in _kwds and \
                    _kwds.get('action','') not in ('store_true','store_false'):
                     if obj._domain is not None and \
                        obj._domain.__class__ is type:
                         _kwds['metavar'] = obj._domain.__name__.upper()
                     else:
-                        _kwds['metavar'] = _munge_name(
-                            self.name().upper(), False )
+                        _kwds['metavar'] = _munge_name(self.name().upper(),
+                                                       False)
             _parser.add_argument(*_args, default=argparse.SUPPRESS, **_kwds)
 
-        assert(argparse_is_available)
-        for level, value, obj in self._data_collector(None,""):
+        assert (argparse_is_available)
+        for level, value, obj in self._data_collector(None, ""):
             if obj._argparse is None:
                 continue
             for _args, _kwds in obj._argparse:
                 _process_argparse_def(_args, _kwds)
 
     def import_argparse(self, parsed_args):
-        for level, value, obj in self._data_collector(None,""):
+        for level, value, obj in self._data_collector(None, ""):
             if obj._argparse is None:
                 continue
             for _args, _kwds in obj._argparse:
@@ -281,7 +291,7 @@ group, subparser, or (subparser, group)."""
                     if _dest in parsed_args:
                         obj.set_value(parsed_args.__dict__[_dest])
                 else:
-                    _dest = 'CONFIGBLOCK.'+obj.name(True)
+                    _dest = 'CONFIGBLOCK.' + obj.name(True)
                     if _dest in parsed_args:
                         obj.set_value(parsed_args.__dict__[_dest])
                         del parsed_args.__dict__[_dest]
@@ -289,19 +299,18 @@ group, subparser, or (subparser, group)."""
 
     def display(self, content_filter=None, indent_spacing=2):
         if content_filter not in ConfigBlock.content_filters:
-            raise ValueError(
-                "unknown content filter '%s'; valid values are %s"
-                % ( content_filter, ConfigBlock.content_filters ) )
+            raise ValueError("unknown content filter '%s'; valid values are %s"
+                             % (content_filter, ConfigBlock.content_filters))
 
         _blocks = []
         os = six.StringIO()
-        for level, value, obj in self._data_collector(0,""):
+        for level, value, obj in self._data_collector(0, ""):
             if content_filter == 'userdata' and not obj._userSet:
                 continue
 
-            _blocks[level:] = [ ' '*indent_spacing*level + value + "\n", ]
+            _blocks[level:] = [' ' * indent_spacing * level + value + "\n",]
 
-            for i,v in enumerate(_blocks):
+            for i, v in enumerate(_blocks):
                 if v is not None:
                     os.write(v)
                     _blocks[i] = None
@@ -310,28 +319,26 @@ group, subparser, or (subparser, group)."""
     def generate_yaml_template(self, indent_spacing=2, width=78, visibility=0):
         minDocWidth = 20
         comment = "  # "
-        data = list(self._data_collector(0,"",visibility))
+        data = list(self._data_collector(0, "", visibility))
         level_info = {}
         for lvl, val, obj in data:
             if lvl not in level_info:
-                level_info[lvl] = {'data':[], 'off':0, 'line':0, 'over':0}
+                level_info[lvl] = {'data': [], 'off': 0, 'line': 0, 'over': 0}
             level_info[lvl]['data'].append(
-                ( val.find(':')+2, len(val), len(obj._description or "") ) )
+                (val.find(':') + 2, len(val), len(obj._description or "")))
         for lvl in sorted(level_info):
-            indent = lvl*indent_spacing
+            indent = lvl * indent_spacing
             _ok = width - indent - len(comment) - minDocWidth
             offset = \
                 max( val if val < _ok else key
                      for key,val,doc in level_info[lvl]['data'] )
             offset += indent + len(comment)
-            over = sum( 1 for key,val,doc in level_info[lvl
-
-        ]['data']
-                        if doc + offset > width )
+            over = sum(1 for key, val, doc in level_info[lvl]['data']
+                       if doc + offset > width)
             if len(level_info[lvl]['data']) - over > 0:
-                line = max( offset + doc
-                            for key,val,doc in level_info[lvl]['data']
-                            if offset + doc <= width )
+                line = max(offset + doc
+                           for key, val, doc in level_info[lvl]['data']
+                           if offset + doc <= width)
             else:
                 line = width
             level_info[lvl]['off'] = offset
@@ -358,22 +365,22 @@ group, subparser, or (subparser, group)."""
             os.write(comment.lstrip() + self._description + "\n")
         for lvl, val, obj in data:
             if not obj._description:
-                os.write(' '*indent_spacing*lvl + val + "\n")
+                os.write(' ' * indent_spacing * lvl + val + "\n")
                 continue
             if lvl <= maxLvl:
                 field = pad - len(comment)
             else:
                 field = level_info[lvl]['off'] - len(comment)
-            os.write(' '*indent_spacing*lvl)
+            os.write(' ' * indent_spacing * lvl)
             if width - len(val) - minDocWidth >= 0:
-                os.write('%%-%ds' % (field-indent_spacing*lvl) % val)
+                os.write('%%-%ds' % (field - indent_spacing * lvl) % val)
             else:
-                os.write(val+'\n'+' '*field)
+                os.write(val + '\n' + ' ' * field)
             os.write(comment)
-            txtArea = max(width-field-len(comment), minDocWidth)
-            os.write( ("\n"+' '*field+comment).join(
-                    wrap( obj._description, txtArea,
-                          subsequent_indent='  ' ) ) )
+            txtArea = max(width - field - len(comment), minDocWidth)
+            os.write(("\n" + ' ' * field + comment).join(
+                wrap(
+                    obj._description, txtArea, subsequent_indent='  ')))
             os.write('\n')
         return os.getvalue()
 
@@ -392,67 +399,68 @@ group, subparser, or (subparser, group)."""
         level = []
         lastObj = self
         indent = ''
-        for lvl, val, obj in self._data_collector(1,'',visibility, True):
+        for lvl, val, obj in self._data_collector(1, '', visibility, True):
             #print len(level), lvl, val, obj
             if len(level) < lvl:
-                while len(level) < lvl-1:
+                while len(level) < lvl - 1:
                     level.append(None)
                 level.append(lastObj)
                 if '%s' in block_start:
-                    os.write(indent+block_start % lastObj.name())
+                    os.write(indent + block_start % lastObj.name())
                 elif block_start:
-                    os.write(indent+block_start)
-                indent += ' '*indent_spacing
+                    os.write(indent + block_start)
+                indent += ' ' * indent_spacing
             while len(level) > lvl:
                 _last = level.pop()
                 if _last is not None:
-                    indent = indent[:-1*indent_spacing]
+                    indent = indent[:-1 * indent_spacing]
                     if '%s' in block_end:
-                        os.write(indent+block_end % _last.name())
+                        os.write(indent + block_end % _last.name())
                     elif block_end:
-                        os.write(indent+block_end)
+                        os.write(indent + block_end)
 
             lastObj = obj
             if '%s' in item_start:
-                os.write(indent+item_start % obj.name())
+                os.write(indent + item_start % obj.name())
             elif item_start:
-                os.write(indent+item_start)
+                os.write(indent + item_start)
             _doc = obj._doc or obj._description or ""
             if '\n ' in _doc:
-                doc_lines = ( item_body % (_doc), )
+                doc_lines = (item_body % (_doc),)
             else:
-                doc_lines = wrap( item_body % (_doc),
-                                  width,
-                                  initial_indent=indent+' '*indent_spacing,
-                                  subsequent_indent=indent+' '*indent_spacing )
+                doc_lines = wrap(
+                    item_body % (_doc),
+                    width,
+                    initial_indent=indent + ' ' * indent_spacing,
+                    subsequent_indent=indent + ' ' * indent_spacing)
             if _doc:
                 os.writelines('\n'.join(doc_lines))
                 if not doc_lines[-1].endswith("\n"):
                     os.write('\n')
             if '%s' in item_end:
-                os.write(indent+item_end % obj.name())
+                os.write(indent + item_end % obj.name())
             elif item_end:
-                os.write(indent+item_end)
+                os.write(indent + item_end)
         while level:
-            indent = indent[:-1*indent_spacing]
+            indent = indent[:-1 * indent_spacing]
             _last = level.pop()
             if '%s' in block_end:
-                os.write(indent+block_end % _last.name())
+                os.write(indent + block_end % _last.name())
             else:
-                os.write(indent+block_end)
+                os.write(indent + block_end)
         return os.getvalue()
 
     def user_values(self):
         if self._userSet:
             yield self
-        for level, value, obj in self._data_collector(0,""):
+        for level, value, obj in self._data_collector(0, ""):
             if obj._userSet:
                 yield obj
 
     def unused_user_values(self):
         if self._userSet and not self._userAccessed:
             yield self
-        for level, value, obj in self._data_collector(0,""):
+        for level, value, obj in self._data_collector(0, ""):
             if obj._userSet and not obj._userAccessed:
                 yield obj
 
@@ -474,7 +482,7 @@ class ConfigValue(ConfigBase):
         _str = dump(self._data, default_flow_style=True).rstrip()
         if _str.endswith("..."):
             _str = _str[:-3].rstrip()
-        yield ( level, prefix+_str, self )
+        yield (level, prefix + _str, self)
 
 
 class ConfigList(ConfigBase):
@@ -503,12 +511,12 @@ class ConfigList(ConfigBase):
 
     def __iter__(self):
         self._userAccessed = True
-        return iter( self[i] for i in xrange(len(self._data)) )
+        return iter(self[i] for i in xrange(len(self._data)))
 
     def value(self, accessValue=True):
         if accessValue:
             self._userAccessed = True
-        return [ config.value(accessValue) for config in self._data ]
+        return [config.value(accessValue) for config in self._data]
 
     def set_value(self, value):
         # If the set_value fails part-way through the list values, we
@@ -541,10 +549,10 @@ class ConfigList(ConfigBase):
         val = self._cast(value)
         if val is None:
             return
-        self._data.append( val )
+        self._data.append(val)
         #print self._data[-1], type(self._data[-1])
         self._data[-1]._parent = self
-        self._data[-1]._name = '[%s]' % ( len(self._data)-1, )
+        self._data[-1]._name = '[%s]' % (len(self._data) - 1,)
         self._data[-1]._userSet = True
         self._userSet = True
 
@@ -563,9 +571,9 @@ class ConfigList(ConfigBase):
             # domain, potentially duplicating that documentation is
             # somewhat redundant, and worse, if the list is empty, then
             # no documentation is generated at all!)
-            yield( level, prefix.rstrip(), self )
-            subDomain = self._domain._data_collector(
-                level+1, '- ', visibility, docMode )
+            yield (level, prefix.rstrip(), self)
+            subDomain = self._domain._data_collector(level + 1, '- ',
+                                                     visibility, docMode)
             # Pop off the (empty) block entry
             six.next(subDomain)
             for v in subDomain:
@@ -573,9 +581,9 @@ class ConfigList(ConfigBase):
             return
         if prefix:
             if not self._data:
-                yield( level, prefix.rstrip()+' []', self )
+                yield (level, prefix.rstrip() + ' []', self)
             else:
-                yield( level, prefix.rstrip(), self )
+                yield (level, prefix.rstrip(), self)
                 if level is not None:
                     level += 1
         for value in self._data:
@@ -586,12 +594,16 @@ class ConfigList(ConfigBase):
 class ConfigBlock(ConfigBase):
     content_filters = (None, 'all', 'userdata')
 
-    __slots__ = ( '_decl_order', '_declared',
-                  '_implicit_declaration', '_implicit_domain' )
+    __slots__ = ('_decl_order', '_declared', '_implicit_declaration',
+                 '_implicit_domain')
     _all_slots = __slots__ + ConfigBase.__slots__
 
-    def __init__( self, description=None, doc=None, implicit=False,
-                  implicit_domain=None, visibility=0 ):
+    def __init__(self,
+                 description=None,
+                 doc=None,
+                 implicit=False,
+                 implicit_domain=None,
+                 visibility=0):
         self._decl_order = []
         self._declared = set()
         self._implicit_declaration = implicit
@@ -620,8 +632,8 @@ class ConfigBlock(ConfigBase):
         if key in self._data:
             return self._data[key]
         if default is ConfigBase.NoArgument:
-            raise KeyError( "Key '%s' not found in ConfigBlock %s"
-                            % (key, self.name(True)) )
+            raise KeyError("Key '%s' not found in ConfigBlock %s" %
+                           (key, self.name(True)))
         return default
 
     def __setitem__(self, key, val):
@@ -650,7 +662,7 @@ class ConfigBlock(ConfigBase):
         #if name in ConfigBlock._all_slots:
         #    return super(ConfigBlock,self).__getattribute__(name)
         if name not in self._data:
-            _name = name.replace('_',' ')
+            _name = name.replace('_', ' ')
             if _name not in self._data:
                 raise AttributeError("Unknown attribute '%s'" % name)
             name = _name
@@ -658,10 +670,10 @@ class ConfigBlock(ConfigBase):
 
     def __setattr__(self, name, value):
         if name in ConfigBlock._all_slots:
-            super(ConfigBlock,self).__setattr__(name, value)
+            super(ConfigBlock, self).__setattr__(name, value)
         else:
             if name not in self._data:
-                name = name.replace('_',' ')
+                name = name.replace('_', ' ')
             ConfigBlock.__setitem__(self, name, value)
 
     def iterkeys(self):
@@ -675,32 +687,31 @@ class ConfigBlock(ConfigBase):
     def iteritems(self):
         self._userAccessed = True
         for key in self._decl_order:
-            yield ( key, self[key] )
+            yield (key, self[key])
 
     def keys(self):
-        return list( self.iterkeys() )
+        return list(self.iterkeys())
 
     def values(self):
-        return list( self.itervalues() )
+        return list(self.itervalues())
 
     def items(self):
-        return list( self.iteritems() )
-
+        return list(self.iteritems())
 
     def _add(self, name, config):
         if config._parent is not None:
             raise ValueError(
                 "config '%s' is already assigned to Config Block '%s'; "
-                "cannot reassign to '%s'"
-                % ( name, config._parent.name(True), self.name(True) ) )
+                "cannot reassign to '%s'" %
+                (name, config._parent.name(True), self.name(True)))
         if name in self._data:
             raise ValueError(
-                "duplicate config '%s' defined for Config Block '%s'"
-                % ( name, self.name(True) ) )
+                "duplicate config '%s' defined for Config Block '%s'" %
+                (name, self.name(True)))
         if '.' in name or '[' in name or ']' in name:
             raise ValueError(
                 "Illegal character in config '%s' for config Block '%s': "
-                "'.[]' are not allowed." % ( name, self.name(True) ) )
+                "'.[]' are not allowed." % (name, self.name(True)))
         self._data[name] = config
         self._decl_order.append(name)
         config._parent = self
@@ -715,8 +726,8 @@ class ConfigBlock(ConfigBase):
     def add(self, name, config):
         if not self._implicit_declaration:
             raise ValueError("Key '%s' not defined in Config Block '%s'"
-                             " and Block disallows implicit entries"
-                             % ( name, self.name(True) ) )
+                             " and Block disallows implicit entries" %
+                             (name, self.name(True)))
         ans = self._add(name, config)
         self._userSet = True
         return ans
@@ -724,16 +735,16 @@ class ConfigBlock(ConfigBase):
     def value(self, accessValue=True):
         if accessValue:
             self._userAccessed = True
-        return dict( (name, config.value(accessValue))
-                     for name, config in six.iteritems(self._data) )
+        return dict((name, config.value(accessValue))
+                    for name, config in six.iteritems(self._data))
 
     def set_value(self, value):
         if value is None:
             return
         if (type(value) is not dict) and \
            (not isinstance(value, ConfigBlock)):
-            raise ValueError("Expected dict value for %s.set_value, found %s"
-                             % ( self.name(True), type(value).__name__ ))
+            raise ValueError("Expected dict value for %s.set_value, found %s" %
+                             (self.name(True), type(value).__name__))
         _implicit = []
         for key in value:
             if key not in self._data:
@@ -742,8 +753,8 @@ class ConfigBlock(ConfigBase):
                 else:
                     raise ValueError(
                         "key '%s' not defined for Config Block '%s' and "
-                        "implicit (undefined) keys are not allowed"
-                        % ( key, self.name(True) ) )
+                        "implicit (undefined) keys are not allowed" %
+                        (key, self.name(True)))
 
         # If the set_value fails part-way through the new values, we
         # want to restore a deterministic state.  That is, either
@@ -763,7 +774,7 @@ class ConfigBlock(ConfigBase):
                     self.add(key, ConfigValue(value[key]))
             else:
                 for key in sorted(_implicit):
-                    self.add(key, self._implicit_domain( value[key] ))
+                    self.add(key, self._implicit_domain(value[key]))
         except:
             self.reset()
             self.set_value(_old_data)
@@ -781,7 +792,7 @@ class ConfigBlock(ConfigBase):
                 del self._data[key]
             return keep
         # this is an in-place slice of a list...
-        self._decl_order[:] = [ x for x in self._decl_order if _keep(self,x) ]
+        self._decl_order[:] = [x for x in self._decl_order if _keep(self, x)]
         self._userAccessed = False
         self._userSet = False
 
@@ -789,18 +800,17 @@ class ConfigBlock(ConfigBase):
         if visibility is not None and visibility < self._visibility:
             return
         if prefix:
-            yield( level, prefix.rstrip(), self )
+            yield (level, prefix.rstrip(), self)
             if level is not None:
                 level += 1
         for key in self._decl_order:
-            for v in self._data[key]._data_collector( level, key+': ',
-                                                      visibility, docMode ):
+            for v in self._data[key]._data_collector(level, key + ': ',
+                                                     visibility, docMode):
                 yield v
 
 # In Python3, the items(), etc methods of dict-like things return
 # generator-like objects.
 if six.PY3:
-    ConfigBlock.keys   = ConfigBlock.iterkeys
+    ConfigBlock.keys = ConfigBlock.iterkeys
     ConfigBlock.values = ConfigBlock.itervalues
-    ConfigBlock.items  = ConfigBlock.iteritems
-
+    ConfigBlock.items = ConfigBlock.iteritems

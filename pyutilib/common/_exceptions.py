@@ -11,18 +11,20 @@ import sys
 
 __all__ = ['ConfigurationError', 'ApplicationError', 'BadDebuggingValue']
 
+
 class WindowsError_def(Exception):
     """
     An exception used there is an error configuring a package.
     """
 
-    def __init__(self,*args,**kargs):
-        Exception.__init__(self,*args,**kargs)      #pragma:nocover
+    def __init__(self, *args, **kargs):
+        Exception.__init__(self, *args, **kargs)  #pragma:nocover
+
 
 if (sys.platform[0:3] != "win"):
     WindowsError = WindowsError_def
 else:
-    WindowsError=WindowsError
+    WindowsError = WindowsError
 __all__.append("WindowsError")
 
 
@@ -31,8 +33,8 @@ class ConfigurationError(Exception):
     An exception used there is an error configuring a package.
     """
 
-    def __init__(self,*args,**kargs):
-        Exception.__init__(self,*args,**kargs)      #pragma:nocover
+    def __init__(self, *args, **kargs):
+        Exception.__init__(self, *args, **kargs)  #pragma:nocover
 
 
 class ApplicationError(Exception):
@@ -40,8 +42,8 @@ class ApplicationError(Exception):
     An exception used when an external application generates an error.
     """
 
-    def __init__(self,*args,**kargs):
-        Exception.__init__(self,*args,**kargs)      #pragma:nocover
+    def __init__(self, *args, **kargs):
+        Exception.__init__(self, *args, **kargs)  #pragma:nocover
 
 
 class BadDebuggingValue(Exception):
@@ -49,5 +51,5 @@ class BadDebuggingValue(Exception):
     An exception used when a bad debugging value is used.
     """
 
-    def __init__(self,*args,**kargs):
-        Exception.__init__(self,*args,**kargs)      #pragma:nocover
+    def __init__(self, *args, **kargs):
+        Exception.__init__(self, *args, **kargs)  #pragma:nocover

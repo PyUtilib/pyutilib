@@ -6,7 +6,6 @@
 #  Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
-
 """
 A class for interacting with an Excel spreadsheet.
 """
@@ -24,9 +23,14 @@ from pyutilib.excel.base import ExcelSpreadsheet_base
 
 class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
 
-    def can_read(self): return True
-    def can_write(self): return False
-    def can_calculate(self): return False
+    def can_read(self):
+        return True
+
+    def can_write(self):
+        return False
+
+    def can_calculate(self):
+        return False
 
     def __init__(self, filename=None, worksheets=(1,), default_worksheet=1):
         """
@@ -50,14 +54,14 @@ class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
         # Start the excel spreadsheet
         #
         self.wb = xlrd.open_workbook(self.xlsfile)
-        self.worksheets=set(worksheets)
+        self.worksheets = set(worksheets)
         self._ws = {}
         for wsid in worksheets:
             if type(wsid) is int:
-                self._ws[wsid] = self.wb.sheet_by_index(wsid-1)
+                self._ws[wsid] = self.wb.sheet_by_index(wsid - 1)
             else:
                 self._ws[wsid] = self.wb.sheet_by_name(wsid)
-        self.default_worksheet=default_worksheet
+        self.default_worksheet = default_worksheet
 
     def ws(self):
         """ The active worksheet """
@@ -75,7 +79,7 @@ class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
         """
         Close the spreadsheet
         """
-        if self is None:       #pragma:nocover
+        if self is None:  #pragma:nocover
             return
         if self._ws is None:
             return
@@ -87,19 +91,22 @@ class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
             return
         if not name in self._ws:
             raise ValueError("Cannot activate a missing sheet with xlrd")
-        self.default_worksheet=name
+        self.default_worksheet = name
 
     def calc_iterations(self, val=None):
-        raise ValueError("ExcelSpreadsheet calc_iterations() is not supported with xlrd")
+        raise ValueError(
+            "ExcelSpreadsheet calc_iterations() is not supported with xlrd")
 
     def max_iterations(self, val=None):
-        raise ValueError("ExcelSpreadsheet max_iterations() is not supported with xlrd")
+        raise ValueError(
+            "ExcelSpreadsheet max_iterations() is not supported with xlrd")
 
     def calculate(self):
         """
         Perform calculations in a spreadsheet
         """
-        raise ValueError("ExcelSpreadsheet calculate() is not supported with xlrd")
+        raise ValueError(
+            "ExcelSpreadsheet calculate() is not supported with xlrd")
 
     def set_array(self, row, col, val, wsid=None):
         """
@@ -111,7 +118,8 @@ class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
         """
         Return a range of cells
         """
-        return self.get_range( (self.ws().Cells(row,col), self.ws().Cells(row2,col2)), wsid, raw)
+        return self.get_range(
+            (self.ws().Cells(row, col), self.ws().Cells(row2, col2)), wsid, raw)
 
     def set_range(self, rangename, val, wsid=None):
         """
@@ -145,7 +153,7 @@ class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
         Return data for the specified range.
         """
         sheet, rowxlo, rowxhi, colxlo, colxhi = _range.area2d()
-        if (rowxhi-rowxlo)==1 and (colxhi-colxlo) == 1:
+        if (rowxhi - rowxlo) == 1 and (colxhi - colxlo) == 1:
             return self._translate(sheet.cell(rowxlo, colxlo))
         else:
             #
@@ -153,15 +161,15 @@ class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
             # Otherwise, return a tuple of tuples
             #
             ans = []
-            for i in range(rowxhi-rowxlo):
+            for i in range(rowxhi - rowxlo):
                 col = []
-                for j in range(colxhi-colxlo):
-                    val = self._translate(sheet.cell(i+rowxlo,j+colxlo))
-                    col.append( val )
+                for j in range(colxhi - colxlo):
+                    val = self._translate(sheet.cell(i + rowxlo, j + colxlo))
+                    col.append(val)
                 if len(col) == 1:
-                    ans.append( col[0] )
+                    ans.append(col[0])
                 else:
-                    ans.append( list(col) ) 
+                    ans.append(list(col))
             return list(ans)
 
     def get_range_nrows(self, rangename, wsid=None):
@@ -170,7 +178,7 @@ class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
         """
         _range = self._range(rangename)
         sheet, rowxlo, rowxhi, colxlo, colxhi = _range.area2d()
-        return rowxhi-rowxlo
+        return rowxhi - rowxlo
 
     def get_range_ncolumns(self, rangename, wsid=None):
         """
@@ -178,7 +186,7 @@ class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
         """
         _range = self._range(rangename)
         sheet, rowxlo, rowxhi, colxlo, colxhi = _range.area2d()
-        return colxhi-colxlo
+        return colxhi - colxlo
 
     def _range(self, rangeid, wsid=None):
         """
@@ -195,7 +203,7 @@ class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
         # Otherwise, we assume that this is a range name.
         #
         else:
-            tmp_= self.wb.name_map.get(rangeid.lower(), None)
+            tmp_ = self.wb.name_map.get(rangeid.lower(), None)
             if tmp_ is None:
                 raise IOError("Range %s is not found" % rangeid)
             if len(tmp_) > 1:
@@ -215,5 +223,3 @@ class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
         if cell.ctype == 6:
             return None
         raise ValueError("Unexpected cell error")
-
-

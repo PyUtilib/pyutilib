@@ -27,22 +27,22 @@ class Factory(object):
         _args = [constructor]
         _args.extend(args)
         mname = "construct_" + methodName
-        self.constructors[methodName] = _Functor(*_args,**kargs)
+        self.constructors[methodName] = _Functor(*_args, **kargs)
         #self.constructors[methodName] = apply(_Functor,_args, kargs)
-        setattr(self, methodName,_Functor(*_args, **kargs))
+        setattr(self, methodName, _Functor(*_args, **kargs))
         #setattr(self, methodName,apply(_Functor,_args, kargs))
 
-    def construct(self,name):
+    def construct(self, name):
         """
         Use the string name to create an object.
         """
         try:
-            method = getattr(self,str(name))
+            method = getattr(self, str(name))
         except AttributeError:
             return None
         return method()
 
-    def __call__(self,name):
+    def __call__(self, name):
         """
         Use the string name to create an object.
         """
@@ -69,7 +69,7 @@ class Factory(object):
         """ Returns an iterator for the factory keys """
         return self.Keys.__iter__()
 
-    def __getitem__(self,index):
+    def __getitem__(self, index):
         """ Allows an index into the list of factory keys """
         return self.Keys[index]
 
@@ -81,7 +81,8 @@ class _Functor:
 
     def __init__(self, function, *args, **kargs):
         """ Constructor """
-        assert hasattr(function,'__call__'), "function should be a callable obj"
+        assert hasattr(function,
+                       '__call__'), "function should be a callable obj"
         self._function = function
         self._args = args
         self._kargs = kargs
@@ -92,4 +93,4 @@ class _Functor:
         _args.extend(args)
         _kargs = self._kargs.copy()
         _kargs.update(kargs)
-        return self._function(*_args,**_kargs)
+        return self._function(*_args, **_kargs)

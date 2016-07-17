@@ -10,50 +10,48 @@
 import logging
 from pyutilib.misc.indent_io import StreamIndenter
 
-class LogHandler ( logging.Handler ):
-    def __init__ ( self, base, *args, **kwargs ):
+
+class LogHandler(logging.Handler):
+
+    def __init__(self, base, *args, **kwargs):
         if 'verbosity' in kwargs:
             self.verbosity = kwargs.pop('verbosity')
         else:
             self.verbosity = lambda: True
-        logging.Handler.__init__(self, *args, **kwargs )
+        logging.Handler.__init__(self, *args, **kwargs)
 
         self.basepath = base
 
     def emit(self, record):
-        import sys   # why?  Isn't this imported above?
-                     # Doesn't work w/o it though ... ?
+        import sys  # why?  Isn't this imported above?
+        # Doesn't work w/o it though ... ?
 
-        level    = record.levelname
+        level = record.levelname
         filename = record.pathname  # file path
-        lineno   = record.lineno
-        msg      = record.getMessage()
+        lineno = record.lineno
+        msg = record.getMessage()
         try:
             function = record.funcName
         except AttributeError:
             function = '(unknown)'
 
-        filename = filename.replace( self.basepath, '[base]' )
+        filename = filename.replace(self.basepath, '[base]')
 
         if self.verbosity():
             sys.stdout.write('%(level)s: "%(fpath)s", %(lineno)d, '
-                             '%(caller)s\n' %
-                {
-                  'level'  : level,
-                  'fpath'  : filename,
-                  'lineno' : lineno,
-                  'caller' : function.strip(),
-                }
-            )
-            StreamIndenter(sys.stdout, "\t").write(msg.strip()+"\n")
+                             '%(caller)s\n' % {
+                                 'level': level,
+                                 'fpath': filename,
+                                 'lineno': lineno,
+                                 'caller': function.strip(),
+                             })
+            StreamIndenter(sys.stdout, "\t").write(msg.strip() + "\n")
         else:
             lines = msg.splitlines(True)
-            sys.stdout.write('%(level)s: %(msg)s\n' %
-                {
-                  'level'  : level,
-                  'msg' : lines and lines.pop(0).strip() or '\n' ,
-                }
-            )
+            sys.stdout.write('%(level)s: %(msg)s\n' % {
+                'level': level,
+                'msg': lines and lines.pop(0).strip() or '\n',
+            })
             if lines:
                 StreamIndenter(sys.stdout, "\t").writelines(lines)
                 if len(lines[-1]) and lines[-1][-1] != '\n':
@@ -64,7 +62,7 @@ from os.path import abspath, dirname, join, normpath
 pyutilib_base = normpath(join(dirname(abspath(__file__)), '..', '..', '..'))
 
 logger = logging.getLogger('pyutilib')
-logger.setLevel( logging.WARNING )
+logger.setLevel(logging.WARNING)
 logger.addHandler(
-    LogHandler( pyutilib_base,
-                verbosity=lambda: logger.isEnabledFor(logging.DEBUG) ) )
+    LogHandler(
+        pyutilib_base, verbosity=lambda: logger.isEnabledFor(logging.DEBUG)))

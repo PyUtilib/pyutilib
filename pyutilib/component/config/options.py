@@ -6,7 +6,6 @@
 #  Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
-
 """
 The Option class provides a mechanism for application classes to transparently
 load configuration data.  For example, the consider the following class declaration:
@@ -75,7 +74,7 @@ class IFileOption(Interface):
     options that specify files.  This is needed to correctly initialize
     relative paths for files."""
 
-    def set_dir(self,path):
+    def set_dir(self, path):
         """Sets the directory of the configuration data file."""
 
 
@@ -96,7 +95,7 @@ class OptionData(Plugin):
     def __init__(self):
         """Constructor"""
         self.ignore_missing = False
-        self.data={}
+        self.data = {}
 
     def get_data(self):
         """Get the class data"""
@@ -116,14 +115,18 @@ class OptionData(Plugin):
             if self.ignore_missing:
                 return None
             if section in self.data:
-                raise OptionError("Problem retrieving the value of option %r from section %r. Valid keys are %s" % (name, section, self.data[section].keys()))
+                raise OptionError(
+                    "Problem retrieving the value of option %r from section %r. Valid keys are %s"
+                    % (name, section, self.data[section].keys()))
             else:
-                raise OptionError("Problem retrieving the value of option %r from section %r. Undefined section." % (name, section))
+                raise OptionError(
+                    "Problem retrieving the value of option %r from section %r. Undefined section."
+                    % (name, section))
 
     def clear(self, keys=None):
         """Clears the data"""
         if keys is None:
-            self.data={}
+            self.data = {}
         else:
             for key in keys:
                 if not key in self.data:
@@ -150,29 +153,34 @@ class OptionPlugin(Plugin):
         # corrupted.  Perhaps this is caused by 'nose' or 'import' logic?
         #
         if True and len(self.data) == 0:
-            PluginGlobals.interface_services[IOptionDataProvider].add(PluginGlobals._default_OptionData._id)
-            PluginGlobals.plugin_instances[PluginGlobals._default_OptionData._id] = weakref.ref(PluginGlobals._default_OptionData)
+            PluginGlobals.interface_services[IOptionDataProvider].add(
+                PluginGlobals._default_OptionData._id)
+            PluginGlobals.plugin_instances[
+                PluginGlobals._default_OptionData._id] = weakref.ref(
+                    PluginGlobals._default_OptionData)
         #
         if len(self.data) == 0:
             #if False:
-                #print "ZZZ", ep.Xextensions()
-                #print "HERE", PluginGlobals._default_OptionData._id, PluginGlobals._default_OptionData.ctr
-                #print "HERE", PluginGlobals._default_OptionData
-                #print "HERE - id", id(PluginGlobals._default_OptionData)
-                #print "HERE", getattr(PluginGlobals._default_OptionData, '_HERE_', None)
-                #print "HERE", PluginGlobals._default_OptionData.__interfaces__
-                #print ""
-                #print "HERE", PluginGlobals.interface_services
-                #print "HERE", PluginGlobals.plugin_instances.keys()
-                #for exe_ in PluginGlobals._executables:
-                    #print exe_._id, exe_
-                #print "LEN", len(PluginGlobals.env)
-                #for name_ in PluginGlobals.env:
-                    #env_ = PluginGlobals.env[name_]
-                    #print env_.name
-                    #print env_.nonsingleton_plugins
-                    #print [env_.singleton_services[cls_] for cls_ in env_.singleton_services]
-            raise PluginError("Problem constructing a global OptionData object %s" % self.name)
+            #print "ZZZ", ep.Xextensions()
+            #print "HERE", PluginGlobals._default_OptionData._id, PluginGlobals._default_OptionData.ctr
+            #print "HERE", PluginGlobals._default_OptionData
+            #print "HERE - id", id(PluginGlobals._default_OptionData)
+            #print "HERE", getattr(PluginGlobals._default_OptionData, '_HERE_', None)
+            #print "HERE", PluginGlobals._default_OptionData.__interfaces__
+            #print ""
+            #print "HERE", PluginGlobals.interface_services
+            #print "HERE", PluginGlobals.plugin_instances.keys()
+            #for exe_ in PluginGlobals._executables:
+            #print exe_._id, exe_
+            #print "LEN", len(PluginGlobals.env)
+            #for name_ in PluginGlobals.env:
+            #env_ = PluginGlobals.env[name_]
+            #print env_.name
+            #print env_.nonsingleton_plugins
+            #print [env_.singleton_services[cls_] for cls_ in env_.singleton_services]
+            raise PluginError(
+                "Problem constructing a global OptionData object %s" %
+                self.name)
 
     def matches_section(self, section):
         """
@@ -180,7 +188,8 @@ class OptionPlugin(Plugin):
         section, or if the option's section regular expression matches the
         section name.
         """
-        return (section == self.section) or (self.section_re != None and (not self.section_p.match(section) is None))
+        return (section == self.section) or (self.section_re != None and (
+            not self.section_p.match(section) is None))
 
     def matches_name(self, name):
         """
@@ -211,7 +220,8 @@ class OptionPlugin(Plugin):
         else:
             if not type(_value_) is list or len(_value_) == 0:
                 _value_ = [_value_]
-            self.data.service().set(self.section, self.name, self.convert(_value_, self.default))
+            self.data.service().set(self.section, self.name, self.convert(
+                _value_, self.default))
 
     def load(self, _option_, _value_):
         """
@@ -220,12 +230,14 @@ class OptionPlugin(Plugin):
         the Configure class.
         """
         if type(_value_) is list and len(_value_) == 0:
-            raise OptionError("Attempting to load option %r with empty data" % (self.name))
+            raise OptionError("Attempting to load option %r with empty data" %
+                              (self.name))
         try:
             self.set_value(_value_)
         except OptionError:
             err = sys.exc_info()[1]
-            raise OptionError("Error loading option %r: %s" % (str(_option_), str(err)))
+            raise OptionError("Error loading option %r: %s" %
+                              (str(_option_), str(err)))
         return True
 
     def reset(self):
@@ -257,13 +269,13 @@ class Option(OptionPlugin):
         @param doc: documentation of the option
         """
         self.section = "globals"
-        super(Option,self).__init__()
+        super(Option, self).__init__()
         self.section_re = None
         self.name = name
         self.default = None
         self.__doc__ = ""
-        for (k,v) in kwds.items():
-            self._parse_option(k,v)
+        for (k, v) in kwds.items():
+            self._parse_option(k, v)
         if name is None:
             raise OptionError("The Option class requires a name")
         self.reset()
@@ -284,17 +296,19 @@ class Option(OptionPlugin):
             # It's convenient to ignore several keywords, which are really used by
             # declare_option().
             #
-            raise OptionError("Unknown keyword: "+k)
+            raise OptionError("Unknown keyword: " + k)
 
     def __get__(self, instance, owner):
-        raise PluginError("The Option class cannot be used as a class decorator")
+        raise PluginError(
+            "The Option class cannot be used as a class decorator")
 
     def __set__(self, instance, value):
-        raise PluginError("The Option class cannot be used as a class decorator")
+        raise PluginError(
+            "The Option class cannot be used as a class decorator")
 
     def __repr__(self, simple=False):
         """Returns a string representation of the option name"""
-        sec = " ["+self.section+"]"
+        sec = " [" + self.section + "]"
         return '<%s%s %r>' % (self.__class__.__name__, sec, self.name)
 
 
@@ -305,20 +319,22 @@ class VirtualOption(object):
     """
 
     def __init__(self, name, option=None):
-        self.name=name
-        self.option=option
+        self.name = name
+        self.option = option
 
     def _get_option(self, instance):
         if not self.option is None:
             return self.option
         try:
-            return getattr(instance,self.name)
+            return getattr(instance, self.name)
         except AttributeError:
-            raise PluginError("Expected attribute %r in instance %r.  The declare_option() method was not called in the constructor!" % (self.name, instance))
+            raise PluginError(
+                "Expected attribute %r in instance %r.  The declare_option() method was not called in the constructor!"
+                % (self.name, instance))
 
     def __get__(self, instance, owner):
         """Returns the value of the option, accessed through the local instance."""
-        if owner is None:        #pragma:nocover
+        if owner is None:  #pragma:nocover
             return self
         return self._get_option(instance).get_value()
 
@@ -333,31 +349,34 @@ class VirtualOption(object):
 
 def declare_option(name, cls=Option, **kwds):
     if not issubclass(cls, Option):
-        raise PluginError("The 'cls' argument must specify an Option class type: %s" % cls)
-    local_name = kwds.get("local_name",name)
+        raise PluginError(
+            "The 'cls' argument must specify an Option class type: %s" % cls)
+    local_name = kwds.get("local_name", name)
 
     frame = sys._getframe(1)
     locals_ = frame.f_locals
     #print "HERE", locals_ is not frame.f_globals, '__module__' in locals_
     if locals_ is not frame.f_globals:
-        kwds["name"]=name
+        kwds["name"] = name
         option_ = cls(**kwds)
         if '__module__' in locals_:
             #
             # Class decorator.  Initialize the VirtualOption, and then
             # create a locally-available Option instance.
             #
-            locals_[local_name] = VirtualOption("_"+local_name, option_)
+            locals_[local_name] = VirtualOption("_" + local_name, option_)
         else:
             #
             # Class constructor.  If a VirtualOption does not exist in this
             # class, create it.  Create an Option instance in this instance.
             #
             if not local_name in locals_["self"].__class__.__dict__:
-                setattr(locals_["self"].__class__, local_name, VirtualOption("_"+local_name))
-            setattr(locals_["self"], "_"+local_name, option_)
+                setattr(locals_["self"].__class__, local_name,
+                        VirtualOption("_" + local_name))
+            setattr(locals_["self"], "_" + local_name, option_)
     else:
-        raise PluginError("declare_option() can only be used in a class definition")
+        raise PluginError(
+            "declare_option() can only be used in a class definition")
 
 
 class DictOption(Option):
@@ -386,7 +405,7 @@ class DictOption(Option):
         """
 
         def __init__(self, section, ignore_missing=False):
-            self._section_=section
+            self._section_ = section
             ep = ExtensionPoint(IOptionDataProvider)
             ep.service().ignore_missing = ignore_missing
             self.__dict__["data"] = ep
@@ -404,7 +423,7 @@ class DictOption(Option):
                 return []
             return self.data.service().data[self._section_].keys()
 
-        def __getattr__(self,name):
+        def __getattr__(self, name):
             try:
                 return self.__dict__[name]
             except:
@@ -418,14 +437,15 @@ class DictOption(Option):
 
     def __init__(self, **kwds):
         """Constructor."""
-        kwds["name"]=""
+        kwds["name"] = ""
         if 'ignore_missing' in kwds:
-            ignore_missing=kwds['ignore_missing']
+            ignore_missing = kwds['ignore_missing']
             del kwds['ignore_missing']
         else:
-            ignore_missing=False
-        super(DictOption,self).__init__(**kwds)
-        self.default = DictOption.SectionWrapper(self.section, ignore_missing=ignore_missing)
+            ignore_missing = False
+        super(DictOption, self).__init__(**kwds)
+        self.default = DictOption.SectionWrapper(
+            self.section, ignore_missing=ignore_missing)
 
     def get_value(self):
         """Returns the default value."""
@@ -442,7 +462,7 @@ class DictOption(Option):
         if not type(_value_) is dict:
             return
         for key in _value_:
-            self.default.__setattr__(key,_value_[key])
+            self.default.__setattr__(key, _value_[key])
 
     def load(self, _option_, _value_):
         """
@@ -483,7 +503,8 @@ class IntOption(Option):
         except ValueError:
             raise OptionError('Expected integer, got %s' % repr(value))
         except TypeError:
-            raise OptionError('Expected string or integer type, got %s' % repr(value))
+            raise OptionError('Expected string or integer type, got %s' %
+                              repr(value))
 
 
 class FloatOption(Option):
@@ -499,7 +520,8 @@ class FloatOption(Option):
         except ValueError:
             raise OptionError('Expected float, got %s' % repr(value))
         except TypeError:
-            raise OptionError('Expected string or float type, got %s' % repr(value))
+            raise OptionError('Expected string or float type, got %s' %
+                              repr(value))
 
 
 class FileOption(Option):
@@ -537,12 +559,12 @@ class FileOption(Option):
         else:
             return os.path.normcase(os.path.realpath(val))
 
-    def set_dir(self,path):
+    def set_dir(self, path):
         """Sets the path of the configuration data file."""
         self.dir = path
 
     def reset_after_updates(self):
-        if self.dir is None:    #pragma:nocover
+        if self.dir is None:  #pragma:nocover
             raise OptionError("FileOption must have a directory specified.")
 
 
@@ -552,7 +574,9 @@ class ExecutableOption(FileOption):
         """Conversion routine."""
         val = FileOption.convert(self, value, default)
         if val is None or not os.access(val, os.X_OK):
-            raise OptionError("ExecutableOption value %r is not a file that can be executed" % val)
+            raise OptionError(
+                "ExecutableOption value %r is not a file that can be executed" %
+                val)
         return val
 
     def convert(self, value, default):
@@ -565,13 +589,15 @@ class ExecutableOption(FileOption):
         elif os.path.isabs(val):
             val = os.path.normcase(os.path.realpath(val))
         elif not self.dir is None:
-            val = os.path.normcase(os.path.realpath( os.path.join(self.dir, val) ))
+            val = os.path.normcase(
+                os.path.realpath(os.path.join(self.dir, val)))
         else:
-            flag=False
+            flag = False
             for path in os.environ.get("PATH", []).split(os.pathsep):
                 if os.path.exists(os.path.join(path, val)):
-                    val = os.path.normcase(os.path.realpath( os.path.join(path, val) ))
-                    flag=True
+                    val = os.path.normcase(
+                        os.path.realpath(os.path.join(path, val)))
+                    flag = True
                     break
             if not flag:
                 return None
@@ -579,8 +605,9 @@ class ExecutableOption(FileOption):
         # Confirm that the executable can be solved
         #
         if val is None or not os.access(val, os.X_OK):
-            raise OptionError("ExecutableOption value %r is not a file that can be executed" % val)
+            raise OptionError(
+                "ExecutableOption value %r is not a file that can be executed" %
+                val)
 
     def reset_after_updates(self):
         pass
-

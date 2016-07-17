@@ -41,7 +41,7 @@ except:
 
 _pyro = Pyro
 
-if sys.version_info >= (3,0):
+if sys.version_info >= (3, 0):
     xrange = range
     import queue as Queue
 else:
@@ -54,10 +54,7 @@ elif using_pyro4:
     _connection_problem = _pyro.errors.TimeoutError
 
 
-def get_nameserver(host=None,
-                   port=None,
-                   num_retries=30,
-                   caller_name="Unknown"):
+def get_nameserver(host=None, port=None, num_retries=30, caller_name="Unknown"):
 
     if _pyro is None:
         raise ImportError("Pyro or Pyro4 is not available")
@@ -76,10 +73,11 @@ def get_nameserver(host=None,
 
     ns = None
 
-    for i in xrange(0, num_retries+1):
+    for i in xrange(0, num_retries + 1):
         try:
             if using_pyro3:
-                ns = _pyro.naming.NameServerLocator().getNS(host=host, port=port)
+                ns = _pyro.naming.NameServerLocator().getNS(
+                    host=host, port=port)
             else:
                 ns = _pyro.locateNS(host=host, port=port)
             break
@@ -101,16 +99,17 @@ def get_nameserver(host=None,
         if i < num_retries:
             sleep_interval = random.uniform(1.0, timeout_upper_bound)
             print("%s failed to locate name server after %d attempts - "
-                  "trying again in %5.2f seconds."
-                  % (caller_name, i+1, sleep_interval))
+                  "trying again in %5.2f seconds." %
+                  (caller_name, i + 1, sleep_interval))
             time.sleep(sleep_interval)
 
     if ns is None:
-        print("%s could not locate nameserver (attempts=%d)"
-              % (caller_name,num_retries+1))
+        print("%s could not locate nameserver (attempts=%d)" %
+              (caller_name, num_retries + 1))
         raise SystemExit
 
     return ns
+
 
 def get_dispatchers(group=":PyUtilibServer",
                     host=None,
@@ -133,17 +132,17 @@ def get_dispatchers(group=":PyUtilibServer",
 
     cumulative_sleep_time = 0.0
     dispatchers = []
-    for i in xrange(0,num_dispatcher_tries):
+    for i in xrange(0, num_dispatcher_tries):
         ns_entries = None
         if using_pyro3:
-            for (name,uri) in ns.flatlist():
+            for (name, uri) in ns.flatlist():
                 if name.startswith(":PyUtilibServer.dispatcher."):
-                    if (name,uri) not in dispatchers:
+                    if (name, uri) not in dispatchers:
                         dispatchers.append((name, uri))
         elif using_pyro4:
             for name in ns.list(prefix=":PyUtilibServer.dispatcher."):
                 uri = ns.lookup(name)
-                if (name,uri) not in dispatchers:
+                if (name, uri) not in dispatchers:
                     dispatchers.append((name, uri))
         if len(dispatchers) >= min_dispatchers:
             break
@@ -158,6 +157,7 @@ def get_dispatchers(group=":PyUtilibServer",
 #       here for now.
 #
 
+
 def shutdown_pyro_components(host=None,
                              port=None,
                              num_retries=30,
@@ -166,10 +166,8 @@ def shutdown_pyro_components(host=None,
     if _pyro is None:
         raise ImportError("Pyro or Pyro4 is not available")
 
-    ns = get_nameserver(host=host,
-                        port=port,
-                        num_retries=num_retries,
-                        caller_name=caller_name)
+    ns = get_nameserver(
+        host=host, port=port, num_retries=num_retries, caller_name=caller_name)
     if ns is None:
         print("***WARNING - Could not locate name server "
               "- Pyro components will not be shut down")
@@ -177,7 +175,7 @@ def shutdown_pyro_components(host=None,
 
     if using_pyro3:
         ns_entries = ns.flatlist()
-        for (name,uri) in ns_entries:
+        for (name, uri) in ns_entries:
             if name.startswith(":PyUtilibServer.dispatcher."):
                 try:
                     ns.unregister(name)
@@ -185,7 +183,7 @@ def shutdown_pyro_components(host=None,
                     proxy.shutdown()
                 except:
                     pass
-        for (name,uri) in ns_entries:
+        for (name, uri) in ns_entries:
             if name == ":Pyro.NameServer":
                 try:
                     proxy = _pyro.core.getProxyForURI(uri)
@@ -207,6 +205,7 @@ def shutdown_pyro_components(host=None,
         print("*** NameServer must be shutdown manually when using Pyro4 ***")
         print("")
 
+
 def set_maxconnections(max_allowed_connections=None):
 
     #
@@ -223,10 +222,9 @@ def set_maxconnections(max_allowed_connections=None):
             new_val = int(os.environ[max_pyro_connections_envname])
             print("Overriding %s default for maximum number of proxy "
                   "connections to %s, based on specification provided by "
-                  "%s environment variable."
-                  % ("Pyro" if using_pyro3 else "Pyro4",
-                     new_val,
-                     max_pyro_connections_envname))
+                  "%s environment variable." %
+                  ("Pyro" if using_pyro3 else "Pyro4", new_val,
+                   max_pyro_connections_envname))
             if using_pyro3:
                 _pyro.config.PYRO_MAXCONNECTIONS = new_val + 1
             else:
@@ -234,12 +232,13 @@ def set_maxconnections(max_allowed_connections=None):
     else:
         print("Overriding %s default for maximum number of proxy "
               "connections to %s, based on specification provided by "
-              "max_allowed_connections keyword"
-              % ("Pyro" if using_pyro3 else "Pyro4", max_allowed_connections))
+              "max_allowed_connections keyword" %
+              ("Pyro" if using_pyro3 else "Pyro4", max_allowed_connections))
         if using_pyro3:
             _pyro.config.PYRO_MAXCONNECTIONS = max_allowed_connections + 1
         else:
             _pyro.config.THREADPOOL_SIZE = max_allowed_connections
+
 
 def bind_port(sock, host="127.0.0.1"):
     """Bind the socket to a free port and return the port number.
@@ -259,7 +258,8 @@ def bind_port(sock, host="127.0.0.1"):
 
     This code is copied from the stdlib's test.test_support module.
     """
-    if sock.family in (socket.AF_INET, socket.AF_INET6) and sock.type == socket.SOCK_STREAM:
+    if sock.family in (socket.AF_INET, socket.AF_INET6
+                      ) and sock.type == socket.SOCK_STREAM:
         if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
     if sock.family == socket.AF_INET:
@@ -275,6 +275,7 @@ def bind_port(sock, host="127.0.0.1"):
     else:
         raise CommunicationError("unsupported socket family: " + sock.family)
     return sock.getsockname()[1]
+
 
 """
     if sock.family == socket.AF_INET and sock.type == socket.SOCK_STREAM:
@@ -300,6 +301,7 @@ def bind_port(sock, host="127.0.0.1"):
     port = sock.getsockname()[1]
     return port
 """
+
 
 def find_unused_port(family=socket.AF_INET, socktype=socket.SOCK_STREAM):
     """Returns an unused port that should be suitable for binding.

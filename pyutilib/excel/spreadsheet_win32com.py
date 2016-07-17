@@ -6,7 +6,6 @@
 #  Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
-
 """
 A class for interacting with an Excel spreadsheet.
 """
@@ -36,25 +35,30 @@ class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base):
     xlDown = 4
     xlThick = 4
     xlThin = 2
-    xlEdgeBottom=9
+    xlEdgeBottom = 9
 
     _excel_app_ptr = None
     _excel_app_ctr = 0
 
-    def can_read(self): return True
-    def can_write(self): return True
-    def can_calculate(self): return True
+    def can_read(self):
+        return True
 
-    def __init__(self,filename=None, worksheets=(1,), default_worksheet=1):
+    def can_write(self):
+        return True
+
+    def can_calculate(self):
+        return True
+
+    def __init__(self, filename=None, worksheets=(1,), default_worksheet=1):
         """
         Constructor.
         """
-        self.xl=None
-        self.xlsfile=None
+        self.xl = None
+        self.xlsfile = None
         if filename is not None:
             self.open(filename, worksheets, default_worksheet)
 
-    def open(self,filename,worksheets=(1,),default_worksheet=1):
+    def open(self, filename, worksheets=(1,), default_worksheet=1):
         """
         Initialize this object from a file.
         """
@@ -62,21 +66,20 @@ class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base):
         # Set the excel spreadsheet name
         #
         if filename[1] == ":":
-            self.xlsfile=filename
+            self.xlsfile = filename
         else:
-            self.xlsfile=os.getcwd() + "\\"+filename
+            self.xlsfile = os.getcwd() + "\\" + filename
         #
         # Start the excel spreadsheet
         #
         self.xl = self._excel_dispatch()
         self.wb = self.xl.Workbooks.Open(self.xlsfile)
-        self.worksheets=set(worksheets)
+        self.worksheets = set(worksheets)
         self._ws = {}
         for wsid in worksheets:
             self._ws[wsid] = self.wb.Worksheets.Item(wsid)
             self._ws[wsid].Activate()
-        self.default_worksheet=default_worksheet
-
+        self.default_worksheet = default_worksheet
 
     def ws(self):
         """ The active worksheet """
@@ -96,13 +99,13 @@ class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base):
             self.worksheets.add(name)
             self._ws[name] = self.wb.Worksheets.Item(name)
             self._ws[name].Activate()
-        self.default_worksheet=name
+        self.default_worksheet = name
 
     def close(self):
         """
         Close the spreadsheet
         """
-        if self is None:       #pragma:nocover
+        if self is None:  #pragma:nocover
             return
         if self.xl is None:
             return
@@ -114,14 +117,16 @@ class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base):
         if val is None:
             return self.xl.Iteration
         if not type(val) is bool:
-            raise ValueError("ExcelSpreadsheet calc_iterations can only be set to a boolean")
+            raise ValueError(
+                "ExcelSpreadsheet calc_iterations can only be set to a boolean")
         self.xl.Iteration = val
 
     def max_iterations(self, val=None):
         if val is None:
             return self.xl.MaxIterations
-        if (not type(val) in [int,float,long]) or val < 0:
-            raise ValueError("ExcelSpreadsheet max_iterations can only be set to nonnegative integer")
+        if (not type(val) in [int, float, long]) or val < 0:
+            raise ValueError(
+                "ExcelSpreadsheet max_iterations can only be set to nonnegative integer")
         self.xl.MaxIterations = val
 
     def calculate(self):
@@ -132,30 +137,34 @@ class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base):
 
     def set_array(self, row, col, val, wsid=None):
         self.activate(wsid)
-        nrows=len(val)
-        return self.set_range( (self.ws().Cells(row,col), self.ws().Cells(row+nrows-1,col+1)), val)
+        nrows = len(val)
+        return self.set_range((self.ws().Cells(row, col), self.ws().Cells(
+            row + nrows - 1, col + 1)), val)
 
     def get_array(self, row, col, row2, col2, wsid=None, raw=False):
-        return self.get_range( (self.ws().Cells(row,col), self.ws().Cells(row2,col2)), wsid, raw)
+        return self.get_range(
+            (self.ws().Cells(row, col), self.ws().Cells(row2, col2)), wsid, raw)
 
     def set_range(self, rangename, val, wsid=None):
         """
         Set a range with a given value (or set of values)
         """
         self.activate(wsid)
-        if type(val) in (int,float):
-            val=((val,),)
+        if type(val) in (int, float):
+            val = ((val,),)
         if len(val) != self.get_range_nrows(rangename):
-            raise IOError("Setting data with "+str(len(val))+" rows but range has "+str(self.get_range_nrows(rangename)))
+            raise IOError("Setting data with " + str(len(val)) +
+                          " rows but range has " + str(
+                              self.get_range_nrows(rangename)))
         if type(val) is tuple:
             data = val
-        elif type(val) not in (float,int,bool):
-            data=[]
+        elif type(val) not in (float, int, bool):
+            data = []
             for item in val:
                 if type(item) is tuple:
                     data.append(item)
-                elif type(item) in (float,int,bool):
-                    data.append( (item,) )
+                elif type(item) in (float, int, bool):
+                    data.append((item,))
                 else:
                     data.append(tuple(item))
             data = tuple(data)
@@ -173,7 +182,7 @@ class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base):
         starting from the first non-blank cell until the first blank cell.
         """
         self.activate(wsid)
-        name = colname+"1"
+        name = colname + "1"
         if self.get_range(name) is None:
             start = self.ws().Range(name).End(self.xlDown)
         else:
@@ -181,7 +190,8 @@ class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base):
         if contiguous:
             range = self.ws().Range(start, start.End(self.xlDown))
         else:
-            range = self.ws().Range(start, self.ws().Range(colname+"65536").End(self.xlUp))
+            range = self.ws().Range(
+                start, self.ws().Range(colname + "65536").End(self.xlUp))
         tmp = self._get_range_data(range, raw)
         return tmp
 
@@ -208,7 +218,7 @@ class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base):
                 #
                 # The range is a column of data, so return a tuple of floats
                 #
-                ans=[]
+                ans = []
                 for val in range.Value:
                     ans.append(val[0])
                 return tuple(ans)
@@ -259,7 +269,7 @@ class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base):
             else:
                 return self.ws().Range(rangeid)
         except com_error:
-            raise IOError("Unknown range name `"+str(rangeid)+"'")
+            raise IOError("Unknown range name `" + str(rangeid) + "'")
 
     def _excel_dispatch(self):
         """
@@ -268,7 +278,8 @@ class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base):
         that are running.
         """
         if ExcelSpreadsheet_win32com._excel_app_ctr == 0:
-            ExcelSpreadsheet_win32com._excel_app_ptr = Dispatch('Excel.Application')
+            ExcelSpreadsheet_win32com._excel_app_ptr = Dispatch(
+                'Excel.Application')
         ExcelSpreadsheet_win32com._excel_app_ctr += 1
         return ExcelSpreadsheet_win32com._excel_app_ptr
 

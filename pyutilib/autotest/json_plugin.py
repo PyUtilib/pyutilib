@@ -10,9 +10,9 @@
 
 try:
     import json
-    json_available=True
-except:                                                 #pragma:nocover
-    json_available=False
+    json_available = True
+except:  #pragma:nocover
+    json_available = False
 from pyutilib.component.core import SingletonPlugin, implements
 from pyutilib.autotest import plugins
 
@@ -23,7 +23,7 @@ class JsonTestParser(SingletonPlugin):
 
     def __init__(self, **kwds):
         SingletonPlugin.__init__(self, **kwds)
-        self.name='json'
+        self.name = 'json'
 
     def load_test_config(self, filename):
         INPUT = open(filename, 'r')
@@ -32,8 +32,7 @@ class JsonTestParser(SingletonPlugin):
         return repn
 
     def print_test_config(self, repn):
-        print(repn)                                     #pragma:nocover
+        print(repn)  #pragma:nocover
 
     def enabled(self):
         return json_available
-

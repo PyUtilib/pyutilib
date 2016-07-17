@@ -14,6 +14,7 @@ import pyutilib.misc
 
 logger = logging.getLogger('pyutilib.workflow')
 
+
 class FunctorAPIData(dict):
     """
     A generalization of pyutilib.misc.Bunch.  This class counts access to attributes, and
@@ -21,7 +22,7 @@ class FunctorAPIData(dict):
     """
 
     def __init__(self, **kw):
-        dict.__init__(self,kw)
+        dict.__init__(self, kw)
         self.__dict__.update(kw)
         self._declared_ = set()
         self.clean()
@@ -44,7 +45,7 @@ class FunctorAPIData(dict):
         self.__dict__.update(d)
 
     def __setitem__(self, name, val):
-        self.__setattr__(name,val)
+        self.__setattr__(name, val)
 
     def __getitem__(self, name):
         return self.__getattr__(name)
@@ -71,9 +72,9 @@ class FunctorAPIData(dict):
     def __repr__(self):
         return dict.__repr__(self)
 
-    def __str__(self, nesting = 0, indent=''):
+    def __str__(self, nesting=0, indent=''):
         attrs = []
-        indentation = indent+"    " * nesting
+        indentation = indent + "    " * nesting
         for k, v in self.__dict__.items():
             if not k.startswith("_"):
                 text = [indentation, k, ":"]
@@ -81,15 +82,15 @@ class FunctorAPIData(dict):
                     text.append('\n')
                     text.append(v.__str__(nesting + 1))
                 else:
-                    text.append(' '+str(v))
+                    text.append(' ' + str(v))
                 attrs.append("".join(text))
         attrs.sort()
         return "\n".join(attrs)
 
-    
 
 class IFunctorTask(pyutilib.component.core.Interface):
     """Interface for Functor tasks"""
+
 
 FunctorAPIFactory = pyutilib.component.core.CreatePluginFactory(IFunctorTask)
 
@@ -102,8 +103,9 @@ class FunctorTask(TaskPlugin):
         TaskPlugin.__init__(self, *args, **kwargs)
 
     def execute(self, debug=False):
-        if self._fn is None:            #pragma:nocover
-            raise RuntimeError("This is a bad definition of a FunctorTask.  The '_fn' method is not defined")
+        if self._fn is None:  #pragma:nocover
+            raise RuntimeError(
+                "This is a bad definition of a FunctorTask.  The '_fn' method is not defined")
         #
         # Process data
         #
@@ -113,6 +115,7 @@ class FunctorTask(TaskPlugin):
             _data.update(data)
             self._kwds['data'] = _data
         data = self._kwds.get('data', None)
+
         #
         # Test nested data
         #
@@ -126,13 +129,17 @@ class FunctorTask(TaskPlugin):
                 obj = obj[key]
             if obj is None:
                 raise ValueError
+
         for name in self._nested_requirements:
             try:
                 nested_lookup(self._kwds, name)
             except ValueError:
-                raise RuntimeError("None value found for nested attribute '%s'" % name)
+                raise RuntimeError("None value found for nested attribute '%s'"
+                                   % name)
             except:
-                raise RuntimeError("Failed to verify existence of nested attribute '%s'" % name)
+                raise RuntimeError(
+                    "Failed to verify existence of nested attribute '%s'" %
+                    name)
         #
         # Call _fn
         #
@@ -155,7 +162,8 @@ class FunctorTask(TaskPlugin):
             self._retval = FunctorAPIData()
             self._retval.update(retval)
         else:
-            raise RuntimeError("A Functor task function must return either None, a FunctorAPIData object, or an instance of dict.")
+            raise RuntimeError(
+                "A Functor task function must return either None, a FunctorAPIData object, or an instance of dict.")
 
     def _call_start(self):
         self.reset()
@@ -164,18 +172,22 @@ class FunctorTask(TaskPlugin):
         if not 'data' in kwds:
             if len(options) > 0:
                 if len(options) > 1:
-                    raise RuntimeError("A FunctorTask instance can only be executed with a single non-keyword argument")
+                    raise RuntimeError(
+                        "A FunctorTask instance can only be executed with a single non-keyword argument")
                 kwds['data'] = options[0]
                 #options = options[1:]
             elif not self.inputs.data.optional:
-                raise RuntimeError("A FunctorTask instance must be executed with at 'data' argument")
+                raise RuntimeError(
+                    "A FunctorTask instance must be executed with at 'data' argument")
         self._kwds = kwds
         return TaskPlugin._call_init(self, **kwds)
 
     def _call_fini(self, *options, **kwds):
         for key in self._retval:
             if not key in self.outputs:
-                raise RuntimeError("Cannot return value '%s' that is not a predefined output of a Functor task" % key)
+                raise RuntimeError(
+                    "Cannot return value '%s' that is not a predefined output of a Functor task"
+                    % key)
             setattr(self, key, self._retval[key])
         TaskPlugin._call_fini(self, *options, **kwds)
         return self._retval
@@ -187,34 +199,45 @@ class FunctorTask(TaskPlugin):
 def functor_api(fn=None, implements=None, outputs=None, namespace=None):
 
     def my_decorator(fn):
-        if fn is None:                                  #pragma:nocover
+        if fn is None:  #pragma:nocover
             logger.error("Error applying decorator.  No function value!")
             return
 
         if namespace is None:
-            _alias =  fn.__name__
+            _alias = fn.__name__
         else:
-            _alias =  namespace+'.'+fn.__name__
+            _alias = namespace + '.' + fn.__name__
         _name = _alias.replace('_', '.')
 
         argspec = inspect.getargspec(fn)
-        if sys.version_info < (2,6):
-            argspec = pyutilib.misc.Bunch(args=argspec[0], varargs=argspec[1], keywords=argspec[2], defaults=argspec[3])
+        if sys.version_info < (2, 6):
+            argspec = pyutilib.misc.Bunch(
+                args=argspec[0],
+                varargs=argspec[1],
+                keywords=argspec[2],
+                defaults=argspec[3])
         if not argspec.varargs is None:
-            logger.error("Attempting to declare Functor task with function '%s' that contains variable arguments" % _alias)
-            return                                      #pragma:nocover
+            logger.error(
+                "Attempting to declare Functor task with function '%s' that contains variable arguments"
+                % _alias)
+            return  #pragma:nocover
         if not argspec.keywords is None:
-            logger.error("Attempting to declare Functor task with function '%s' that contains variable keyword arguments" % _alias)
-            return                                      #pragma:nocover
+            logger.error(
+                "Attempting to declare Functor task with function '%s' that contains variable keyword arguments"
+                % _alias)
+            return  #pragma:nocover
 
         if _alias in FunctorAPIFactory.services():
-            logger.error("Cannot define API %s, since this API name is already defined" % _alias)
-            return                                      #pragma:nocover
+            logger.error(
+                "Cannot define API %s, since this API name is already defined" %
+                _alias)
+            return  #pragma:nocover
 
         class TaskMeta(pyutilib.component.core.PluginMeta):
-            def __new__(cls, name, bases, d):
-                return pyutilib.component.core.PluginMeta.__new__(cls, "FunctorTask_"+str(_name), bases, d)
 
+            def __new__(cls, name, bases, d):
+                return pyutilib.component.core.PluginMeta.__new__(
+                    cls, "FunctorTask_" + str(_name), bases, d)
 
         class FunctorTask_tmp(FunctorTask):
 
@@ -236,36 +259,53 @@ def functor_api(fn=None, implements=None, outputs=None, namespace=None):
                         nargs = len(argspec.args) - len(argspec.defaults)
                     self._kwargs = argspec.args[nargs:]
                     if nargs != 1 and 'data' not in self._kwargs:
-                        logger.error("Functor '%s' must have a 'data argument" % _alias)
+                        logger.error("Functor '%s' must have a 'data argument" %
+                                     _alias)
                     if argspec.defaults is None:
                         _defaults = {}
                     else:
-                        _defaults = dict(zip(argspec.args[nargs:], argspec.defaults))
+                        _defaults = dict(
+                            zip(argspec.args[nargs:], argspec.defaults))
                     #
                     docinfo = parse_docstring(fn)
                     #
                     if 'data' in docinfo['optional']:
-                        self.inputs.declare('data', doc='A container of labeled data.', optional=True)
+                        self.inputs.declare(
+                            'data',
+                            doc='A container of labeled data.',
+                            optional=True)
                     else:
-                        self.inputs.declare('data', doc='A container of labeled data.')
+                        self.inputs.declare(
+                            'data', doc='A container of labeled data.')
                     for name in argspec.args[nargs:]:
                         if name in docinfo['optional']:
-                            self.inputs.declare(name, optional=True, default=_defaults[name], doc=docinfo['optional'][name])
+                            self.inputs.declare(
+                                name,
+                                optional=True,
+                                default=_defaults[name],
+                                doc=docinfo['optional'][name])
                         elif name in docinfo['required']:
-                            self.inputs.declare(name, doc=docinfo['required'][name])
+                            self.inputs.declare(
+                                name, doc=docinfo['required'][name])
                         elif name != 'data':
-                            logger.error("Argument '%s' is not specified in the docstring!" % name)
+                            logger.error(
+                                "Argument '%s' is not specified in the docstring!"
+                                % name)
                     #
-                    self.outputs.declare('data', doc='A container of labeled data.')
+                    self.outputs.declare(
+                        'data', doc='A container of labeled data.')
                     if outputs is None:
                         _outputs = list(docinfo['return'].keys())
                     else:
                         _outputs = outputs
                     for name in _outputs:
                         if name in docinfo['return']:
-                            self.outputs.declare(name, doc=docinfo['return'][name])
+                            self.outputs.declare(
+                                name, doc=docinfo['return'][name])
                         else:
-                            logger.error("Return value '%s' is not specified in the docstring!" % name)
+                            logger.error(
+                                "Return value '%s' is not specified in the docstring!"
+                                % name)
                     #
                     self._nested_requirements = []
                     for name in docinfo['required']:
@@ -278,13 +318,19 @@ def functor_api(fn=None, implements=None, outputs=None, namespace=None):
                         if '.' in name:
                             continue
                         if not name in self.inputs:
-                            logger.error("Unexpected name '%s' in list of required inputs for functor '%s'" % (name,_alias))
+                            logger.error(
+                                "Unexpected name '%s' in list of required inputs for functor '%s'"
+                                % (name, _alias))
                     for name in docinfo['optional']:
                         if not name in self.inputs:
-                            logger.error("Unexpected name '%s' in list of optional inputs for functor '%s'" % (name,_alias))
+                            logger.error(
+                                "Unexpected name '%s' in list of optional inputs for functor '%s'"
+                                % (name, _alias))
                     for name in docinfo['return']:
                         if not name in self.outputs:
-                            logger.error("Unexpected name '%s' in list of outputs for functor '%s'" % (name,_alias))
+                            logger.error(
+                                "Unexpected name '%s' in list of outputs for functor '%s'"
+                                % (name, _alias))
                     #
                     self.__help__ = fn.__doc__
                     self.__doc__ = fn.__doc__
@@ -338,4 +384,3 @@ def parse_docstring(fn):
     if retval['long_doc'] is None:
         retval['long_doc'] = ''
     return retval
-

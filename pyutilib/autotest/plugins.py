@@ -16,10 +16,10 @@ from pyutilib.component.core import Interface, implements, Plugin, CreatePluginF
 class ITestParser(Interface):
 
     def load_test_config(self, filename):
-        pass                                    #pragma:nocover
+        pass  #pragma:nocover
 
     def print_test_config(self, repn):
-        pass                                    #pragma:nocover
+        pass  #pragma:nocover
 
 
 class ITestDriver(Interface):

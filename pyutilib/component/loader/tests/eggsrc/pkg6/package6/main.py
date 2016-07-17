@@ -1,5 +1,6 @@
 from pyutilib.component.core import *
 
+
 class IPackage6Util(Interface):
     """Interface for Package6 utilities"""
 

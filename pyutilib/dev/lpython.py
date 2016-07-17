@@ -14,7 +14,7 @@ import signal
 
 
 def lpython(args):
-    sys.tracebacklimit=0
+    sys.tracebacklimit = 0
     process = None
 
     def signal_handler(signum, frame):
@@ -29,7 +29,7 @@ def lpython(args):
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGHUP, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    
+
     #
     # Recurse up the current path, looking for a subdirectory that
     # contains 'python/bin/python'
@@ -45,27 +45,29 @@ def lpython(args):
     except:
         curr = abspath(os.getcwd())
     while os.sep in curr:
-        if exists(join(curr,"python","bin","python")):
-            pexec = join(curr,"python","bin","python")
-            os.environ["PATH"] = join(curr,"bin")+os.pathsep+os.environ["PATH"]
+        if exists(join(curr, "python", "bin", "python")):
+            pexec = join(curr, "python", "bin", "python")
+            os.environ["PATH"] = join(curr,
+                                      "bin") + os.pathsep + os.environ["PATH"]
             break
-        if exists(join(curr,"python","bin","python.exe")):
-            pexec = join(curr,"python","bin","python.exe")
-            os.environ["PATH"] = join(curr,"bin")+os.pathsep+os.environ["PATH"]
+        if exists(join(curr, "python", "bin", "python.exe")):
+            pexec = join(curr, "python", "bin", "python.exe")
+            os.environ["PATH"] = join(curr,
+                                      "bin") + os.pathsep + os.environ["PATH"]
             break
-        if exists(join(curr,"bin","python")):
-            pexec = join(curr,"bin","python")
+        if exists(join(curr, "bin", "python")):
+            pexec = join(curr, "bin", "python")
             break
-        if exists(join(curr,"bin","python.exe")):
-            pexec = join(curr,"bin","python.exe")
+        if exists(join(curr, "bin", "python.exe")):
+            pexec = join(curr, "bin", "python.exe")
             break
         if basename(curr) == "":
             break
         curr = dirname(curr)
-    
+
     if pexec is None:
         pexec = 'python'
-    os.execvp(pexec, [pexec]+args)
+    os.execvp(pexec, [pexec] + args)
 
     #try:
     #    import subprocess
@@ -83,10 +85,11 @@ def lpython(args):
     #        returncode = os.system(" ".join([pexec]+args))
     #    return returncode
 
+
 # The [console_scripts] entry point requires a function that takes no
 # arguments
 def main():
-    sys.exit( lpython( sys.argv[1:] ) )
+    sys.exit(lpython(sys.argv[1:]))
 
 if __name__ == '__main__':
     main()

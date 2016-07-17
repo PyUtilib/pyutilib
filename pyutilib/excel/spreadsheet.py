@@ -16,17 +16,17 @@ import pyutilib.common
 #
 try:
     import openpyxl
-    _openpyxl=True
+    _openpyxl = True
 except:
-    _openpyxl=False
+    _openpyxl = False
 #
 # Attempt to import xlrd
 #
 try:
     import xlrd
-    _xlrd=True
+    _xlrd = True
 except:
-    _xlrd=False
+    _xlrd = False
 #
 # Attempt to import win32com stuff. 
 #
@@ -34,28 +34,34 @@ try:
     from win32com.client.dynamic import Dispatch
     from pythoncom import CoInitialize, CoUninitialize
     from pythoncom import CoInitialize, CoUninitialize, com_error
-    _win32com=True
+    _win32com = True
 except:
-    _win32com=False #pragma:nocover
+    _win32com = False  #pragma:nocover
 
 from pyutilib.excel.base import ExcelSpreadsheet_base
-
 
 if _win32com:
     from pyutilib.excel.spreadsheet_win32com import ExcelSpreadsheet_win32com
 else:
-    class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base): pass
+
+    class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base):
+        pass
 
 
 if _openpyxl:
     from pyutilib.excel.spreadsheet_openpyxl import ExcelSpreadsheet_openpyxl
 else:
-    class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base): pass
+
+    class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
+        pass
+
 
 if _xlrd:
     from pyutilib.excel.spreadsheet_xlrd import ExcelSpreadsheet_xlrd
 else:
-    class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base): pass
+
+    class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
+        pass
 
 
 class ExcelSpreadsheet(ExcelSpreadsheet_base):
@@ -68,7 +74,7 @@ class ExcelSpreadsheet(ExcelSpreadsheet_base):
         # method will not be called unless we construct the
         # class instances here.
         #
-        ctype = kwds.pop('ctype',None)
+        ctype = kwds.pop('ctype', None)
         if ctype == 'win32com':
             return ExcelSpreadsheet_win32com(*args, **kwds)
         if ctype == 'openpyxl':
@@ -84,4 +90,3 @@ class ExcelSpreadsheet(ExcelSpreadsheet_base):
             return ExcelSpreadsheet_xlrd(*args, **kwds)
         #
         return super(ExcelSpreadsheet, cls).__new__(cls)
-

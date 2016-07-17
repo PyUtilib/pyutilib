@@ -12,8 +12,6 @@ __all__ = ['registered_executable', 'register_executable', 'TempfileManager']
 from pyutilib.component.core import ExtensionPoint, PluginGlobals
 from pyutilib.component.config import TempfileManager
 from pyutilib.component.executables import IExternalExecutable, ExternalExecutable
-
-
 """
 Test if an exectuable is registered, using the IExternalExecutable extension
 point.
@@ -24,10 +22,12 @@ executables that are enabled.
 If either this executable is not registered or it is disabled, then
 None is returned.
 """
+
+
 def registered_executable(name=None):
     ep = ExtensionPoint(IExternalExecutable)
     if name is None:
-        return filter(lambda x:x.name, ep.extensions())
+        return filter(lambda x: x.name, ep.extensions())
     return ep.service(name)
 
 
@@ -38,16 +38,19 @@ point.
 If this executable has been registered, then do not reregister it
 (even if it is disabled).
 """
+
+
 def register_executable(name, validate=None):
     ep = ExtensionPoint(IExternalExecutable)
     if len(ep(name, all=True)) == 0:
         PluginGlobals.add_env("pca")
-        PluginGlobals._executables.append( ExternalExecutable(name=name, validate=validate) )
+        PluginGlobals._executables.append(
+            ExternalExecutable(
+                name=name, validate=validate))
         PluginGlobals.pop_env()
     else:
         #
         # If the executable is being 'registered', then we search for it
         # again, since the user environment may have changed.
         #
-        list(ep(name,all=True))[0].find_executable()
-
+        list(ep(name, all=True))[0].find_executable()

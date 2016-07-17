@@ -18,7 +18,7 @@ from pyutilib.pyro.util import get_nameserver, using_pyro3, using_pyro4
 from pyutilib.pyro.util import Pyro as _pyro
 from pyutilib.pyro.util import set_maxconnections, get_dispatchers
 
-if sys.version_info >= (3,0):
+if sys.version_info >= (3, 0):
     import queue as Queue
 else:
     import Queue
@@ -38,6 +38,7 @@ else:
     oneway = lambda method: method
     expose = lambda obj: obj
 
+
 def _clear_queue_threadsafe(q):
     while not q.empty():
         try:
@@ -45,6 +46,7 @@ def _clear_queue_threadsafe(q):
         except Queue.Empty:
             continue
         q.task_done()
+
 
 class Dispatcher(base):
 
@@ -60,7 +62,7 @@ class Dispatcher(base):
         self._acquired_workers = set()
         self._worker_limit = kwds.pop("worker_limit", None)
         if self._verbose:
-           print("Verbose output enabled...")
+            print("Verbose output enabled...")
 
     #
     # One-way methods (Pyro4 only)
@@ -93,8 +95,8 @@ class Dispatcher(base):
     @oneway
     def add_task(self, task, type=None):
         if self._verbose:
-           print("Received request to add task=<Task id="
-                 +str(task['id'])+">; queue type="+str(type))
+            print("Received request to add task=<Task id=" + str(task['id']) +
+                  ">; queue type=" + str(type))
         self._task_queue[type].put(task)
 
     # process a set of tasks in one shot - the input
@@ -103,9 +105,9 @@ class Dispatcher(base):
     @oneway
     def add_tasks(self, tasks):
         if self._verbose:
-           print("Received request to add bulk task set. Task ids=%s"
-                 % (dict((task_type, [task['id'] for task in tasks[task_type]])
-                         for task_type in tasks)))
+            print("Received request to add bulk task set. Task ids=%s" % (dict(
+                (task_type, [task['id'] for task in tasks[task_type]])
+                for task_type in tasks)))
         for task_type in tasks:
             task_queue = self._task_queue[task_type]
             for task in tasks[task_type]:
@@ -114,8 +116,8 @@ class Dispatcher(base):
     @oneway
     def add_result(self, result, type=None):
         if self._verbose:
-           print("Received request to add result with "
-                 "result="+str(result)+"; queue type="+str(type))
+            print("Received request to add result with "
+                  "result=" + str(result) + "; queue type=" + str(type))
         self._result_queue[type].put(result)
 
     # process a set of results in one shot - the input
@@ -124,10 +126,10 @@ class Dispatcher(base):
     @oneway
     def add_results(self, results):
         if self._verbose:
-            print("Received request to add bulk result set for task ids=%s"
-                 % (dict((result_type, [result['id']
-                                        for result in results[result_type]])
-                         for result_type in results)))
+            print("Received request to add bulk result set for task ids=%s" %
+                  (dict((result_type, [result['id']
+                                       for result in results[result_type]])
+                        for result_type in results)))
         for result_type in results:
             result_queue = self._result_queue[result_type]
             for result in results[result_type]:
@@ -140,8 +142,8 @@ class Dispatcher(base):
 
     def clear_queue(self, type=None):
         if self._verbose:
-           print("Received request to clear task and result "
-                 "queues for queue type="+str(type))
+            print("Received request to clear task and result "
+                  "queues for queue type=" + str(type))
 
         try:
             _clear_queue_threadsafe(self._task_queue[type])
@@ -162,8 +164,8 @@ class Dispatcher(base):
 
     def clear_task_queue(self, type=None):
         if self._verbose:
-           print("Received request to clear task "
-                 "queue for queue type="+str(type))
+            print("Received request to clear task "
+                  "queue for queue type=" + str(type))
         try:
             _clear_queue_threadsafe(self._task_queue[type])
         except KeyError:
@@ -178,8 +180,8 @@ class Dispatcher(base):
 
     def clear_result_queue(self, type=None):
         if self._verbose:
-           print("Received request to clear result "
-                 "queue for queue type="+str(type))
+            print("Received request to clear result "
+                  "queue for queue type=" + str(type))
         try:
             _clear_queue_threadsafe(self._result_queue[type])
         except KeyError:
@@ -209,27 +211,26 @@ class Dispatcher(base):
            (len(self._registered_workers) < self._worker_limit):
             self._registered_workers.add(name)
             if self._verbose:
-                print("Registering worker %s with name: %s"
-                      % (len(self._registered_workers), name))
+                print("Registering worker %s with name: %s" %
+                      (len(self._registered_workers), name))
             return True
         return False
 
     def get_task(self, type=None, block=True, timeout=5):
         if self._verbose:
-           print("Received request to get a task from "
-                 "queue type="+str(type)+"; block="+str(block)+
-                 "; timeout="+str(timeout)+" seconds")
+            print("Received request to get a task from "
+                  "queue type=" + str(type) + "; block=" + str(block) +
+                  "; timeout=" + str(timeout) + " seconds")
         try:
-            task = self._task_queue[type].get(block=block,
-                                              timeout=timeout)
+            task = self._task_queue[type].get(block=block, timeout=timeout)
             return task
         except Queue.Empty:
             return None
 
     def get_tasks(self, type_block_timeout_list):
         if self._verbose:
-           print("Received request to get tasks in bulk. "
-                 "Queue request types="+str(type_block_timeout_list))
+            print("Received request to get tasks in bulk. "
+                  "Queue request types=" + str(type_block_timeout_list))
 
         ret = {}
         for type, block, timeout in type_block_timeout_list:
@@ -242,8 +243,8 @@ class Dispatcher(base):
             else:
                 while self._task_queue[type].qsize():
                     try:
-                        task_list.append(self._task_queue[type].get(block=block,
-                                                                    timeout=timeout))
+                        task_list.append(self._task_queue[type].get(
+                            block=block, timeout=timeout))
                     except Queue.Empty:
                         pass
             if len(task_list) > 0:
@@ -253,34 +254,32 @@ class Dispatcher(base):
 
     def get_result(self, type=None, block=True, timeout=5):
         if self._verbose:
-           print("Received request to get a result from "
-                 "queue type="+str(type)+"; block="+str(block)+
-                 "; timeout="+str(timeout))
+            print("Received request to get a result from "
+                  "queue type=" + str(type) + "; block=" + str(block) +
+                  "; timeout=" + str(timeout))
         try:
-            return self._result_queue[type].get(block=block,
-                                                timeout=timeout)
+            return self._result_queue[type].get(block=block, timeout=timeout)
         except Queue.Empty:
             return None
 
     def get_results(self, type_block_timeout_list):
         if self._verbose:
-           print("Received request to get results in bulk. "
-                 "Queue request types="+str(type_block_timeout_list))
+            print("Received request to get results in bulk. "
+                  "Queue request types=" + str(type_block_timeout_list))
 
         ret = {}
         for type_name, block, timeout in type_block_timeout_list:
             result_list = []
             try:
-                result_list.append(self._result_queue[type_name].get(block=block,
-                                                                     timeout=timeout))
+                result_list.append(self._result_queue[type_name].get(
+                    block=block, timeout=timeout))
             except Queue.Empty:
                 pass
             else:
                 while self._result_queue[type_name].qsize():
                     try:
-                        result_list.append(
-                            self._result_queue[type_name].get(block=block,
-                                                              timeout=timeout))
+                        result_list.append(self._result_queue[type_name].get(
+                            block=block, timeout=timeout))
                     except Queue.Empty:
                         pass
             if len(result_list) > 0:
@@ -290,19 +289,19 @@ class Dispatcher(base):
 
     def num_tasks(self, type=None):
         if self._verbose:
-           print("Received request for number of tasks in "
-                 "queue with type="+str(type))
+            print("Received request for number of tasks in "
+                  "queue with type=" + str(type))
         return self._task_queue[type].qsize()
 
     def num_results(self, type=None):
         if self._verbose:
-           print("Received request for number of results in "
-                 "queue with type="+str(type))
+            print("Received request for number of results in "
+                  "queue with type=" + str(type))
         return self._result_queue[type].qsize()
 
     def queues_with_results(self):
         if self._verbose:
-           print("Received request for the set of queues with results")
+            print("Received request for the set of queues with results")
 
         results = []
         #
@@ -310,16 +309,16 @@ class Dispatcher(base):
         # the queue may change while iterating.
         #
         for queue_name, result_queue in list(self._result_queue.items()):
-           if result_queue.qsize() > 0:
-               results.append(queue_name)
+            if result_queue.qsize() > 0:
+                results.append(queue_name)
 
         return results
 
     def get_results_all_queues(self):
 
         if self._verbose:
-           print("Received request to obtain all available "
-                 "results from all queues")
+            print("Received request to obtain all available "
+                  "results from all queues")
 
         results = []
         #
@@ -334,7 +333,9 @@ class Dispatcher(base):
                     pass
         return results
 
+
 Dispatcher = expose(Dispatcher)
+
 
 def DispatcherServer(group=":PyUtilibServer",
                      daemon_host=None,
@@ -351,7 +352,8 @@ def DispatcherServer(group=":PyUtilibServer",
     #
     # main program
     #
-    ns = get_nameserver(host=nameserver_host, port=nameserver_port, caller_name="Dispatcher")
+    ns = get_nameserver(
+        host=nameserver_host, port=nameserver_port, caller_name="Dispatcher")
 
     if clear_group:
         for name, uri in get_dispatchers(group=group, ns=ns):
@@ -371,24 +373,23 @@ def DispatcherServer(group=":PyUtilibServer",
         except _pyro.errors.NamingError:
             pass
         try:
-            ns.createGroup(group+".dispatcher")
+            ns.createGroup(group + ".dispatcher")
         except _pyro.errors.NamingError:
             pass
         if clear_group:
             try:
-                ns.unregister(group+".dispatcher")
+                ns.unregister(group + ".dispatcher")
             except _pyro.errors.NamingError:
                 pass
     else:
         if clear_group:
             try:
-                ns.remove(group+".dispatcher")
+                ns.remove(group + ".dispatcher")
             except _pyro.errors.NamingError:
                 pass
 
-    disp = Dispatcher(verbose=verbose,
-                      worker_limit=worker_limit)
-    proxy_name = group+".dispatcher."+str(uuid.uuid4())
+    disp = Dispatcher(verbose=verbose, worker_limit=worker_limit)
+    proxy_name = group + ".dispatcher." + str(uuid.uuid4())
     if using_pyro3:
         uri = daemon.connect(disp, proxy_name)
     else:

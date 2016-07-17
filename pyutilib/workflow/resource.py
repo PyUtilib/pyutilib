@@ -21,26 +21,25 @@ class Resource(object):
         else:
             self.id = globals.unique_id()
         if name is None:
-            self.description = "Resource"+str(self.id)
+            self.description = "Resource" + str(self.id)
             self.name = self.description
         else:
             # TBD:  does this ever happen?
             self.description = name
             self.name = name
-        self._busy=False
+        self._busy = False
 
     def available(self):
-        return not self._busy       #pragma:nocover
+        return not self._busy  #pragma:nocover
 
     def lock(self):
-        self._busy=True             #pragma:nocover
+        self._busy = True  #pragma:nocover
 
     def unlock(self):
-        self._busy=False            #pragma:nocover
+        self._busy = False  #pragma:nocover
 
     def __repr__(self):
-        return str(self)            #pragma:nocover
+        return str(self)  #pragma:nocover
 
     def __str__(self):
-        return "%s" % str(self.name)#pragma:nocover
-
+        return "%s" % str(self.name)  #pragma:nocover

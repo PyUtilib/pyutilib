@@ -40,6 +40,7 @@ def _collect_parser_groups(t):
         #t._parser_group[key].parser = parser
         #parser.add_argument_group(t._parser_group[key])
 
+
 def _set_arguments(t):
     for arg in t._parser_arg:
         args = arg[0]
@@ -62,7 +63,7 @@ class Workflow(Task):
 
     def add(self, task, loadall=True):
         if self.debug:
-            print("ADDING",task.id)          #pragma:nocover
+            print("ADDING", task.id)  #pragma:nocover
         if task.id == NoTask.id:
             return
         if task.id in self._tasks:
@@ -85,13 +86,14 @@ class Workflow(Task):
                     self._start_task.outputs.declare(name)
                     self.inputs.declare(name, optional=True)
                 # TODO: this is a bit of a hack...
-                val = getattr(task.inputs,name).get_value()
+                val = getattr(task.inputs, name).get_value()
                 try:
-                    setattr(task.inputs, name, getattr(self._start_task.outputs, name))
+                    setattr(task.inputs, name, getattr(self._start_task.outputs,
+                                                       name))
                 except ValueError:
                     # TBD: when do we get this exception?
                     pass
-                getattr(self.inputs,name).set_value(val)
+                getattr(self.inputs, name).set_value(val)
         for name in task.output_controls:
             for c in task.output_controls[name].output_connections:
                 self.add(c.to_port.task())
@@ -102,7 +104,9 @@ class Workflow(Task):
                     self.add(c.to_port.task())
             else:
                 if name in self._final_task.inputs:
-                    raise ValueError("Cannot declare a workplan with multiple output values that share the same name: %s" % name)
+                    raise ValueError(
+                        "Cannot declare a workplan with multiple output values that share the same name: %s"
+                        % name)
                 self.outputs.declare(name)
                 self._final_task.inputs.declare(name)
                 setattr(self._final_task.inputs, name, task.outputs[name])
@@ -112,7 +116,7 @@ class Workflow(Task):
         for i in self.inputs:
             val = self.inputs[i].get_value()
             if val is not None:
-                self._start_task.outputs[i].set_value( val )
+                self._start_task.outputs[i].set_value(val)
                 self._start_task.outputs[i].set_ready()
         #
         # TBD: this appears to be redundant
@@ -127,7 +131,7 @@ class Workflow(Task):
         for key in self._final_task.inputs:
             self._final_task.inputs[key].compute_value()
             ans[key] = self._final_task.inputs[key].get_value()
-            getattr(self.outputs, key).set_value( ans[key] )
+            getattr(self.outputs, key).set_value(ans[key])
         for key in self.outputs:
             self.outputs[key].set_ready()
         return ans
@@ -153,24 +157,26 @@ class Workflow(Task):
 
     def execute(self):
         #return self._dfs_([self._start_task.id], lambda t: t.__call__())
-        if self.debug:                              #pragma:nocover
-            print( self.name, '---------------')
-            print( self.name, '---------------')
-            print( self.name, '   STARTING')
-            print( self.name, '---------------')
-            print( self.name, '---------------')
+        if self.debug:  #pragma:nocover
+            print(self.name, '---------------')
+            print(self.name, '---------------')
+            print(self.name, '   STARTING')
+            print(self.name, '---------------')
+            print(self.name, '---------------')
         #
         queued = set([self._start_task.id])
         queue = deque([self._start_task])
         waiting = OrderedDict()
-        while len(queue)+len(waiting) > 0:
+        while len(queue) + len(waiting) > 0:
             for id in waiting.keys():
                 t = waiting[id]
                 if not t.id in queued and t.ready():
                     #
-                    if self.debug:                  #pragma:nocover
-                        print(self.name, "WAITING: ",t.id," not queued and task ready")
-                        print(self.name, "Waiting task",t.name,t.id,t.ready())
+                    if self.debug:  #pragma:nocover
+                        print(self.name, "WAITING: ", t.id,
+                              " not queued and task ready")
+                        print(self.name, "Waiting task", t.name, t.id,
+                              t.ready())
                     #
                     queue.append(t)
                     queued.add(t.id)
@@ -184,11 +190,12 @@ class Workflow(Task):
                 #raise RuntimeError, "Workflow failed to terminate normally.  All available tasks are blocked."
             task = queue.popleft()
             #
-            if self.debug:                          #pragma:nocover
-                print(self.name, "TASK   ",str(task))
-                print(self.name, "QUEUE  ",queued)
-                print(self.name, "WAITING",waiting.keys())
-                print(self.name, "Executing Task "+task.name,task.next_task_ids())
+            if self.debug:  #pragma:nocover
+                print(self.name, "TASK   ", str(task))
+                print(self.name, "QUEUE  ", queued)
+                print(self.name, "WAITING", waiting.keys())
+                print(self.name, "Executing Task " + task.name,
+                      task.next_task_ids())
             #
             queued.remove(task.id)
             task()
@@ -197,9 +204,11 @@ class Workflow(Task):
                     continue
                 if t.ready():
                     #
-                    if self.debug:                  #pragma:nocover
-                        print(self.name, "NEXT: ",t.id," not queued and task ready")
-                        print(self.name, "Scheduling task",t.name,t.id,t.ready())
+                    if self.debug:  #pragma:nocover
+                        print(self.name, "NEXT: ", t.id,
+                              " not queued and task ready")
+                        print(self.name, "Scheduling task", t.name, t.id,
+                              t.ready())
                     #
                     queue.append(t)
                     queued.add(t.id)
@@ -209,40 +218,45 @@ class Workflow(Task):
                     if not t.id in waiting:
                         waiting[t.id] = t
                     #
-                    if self.debug:                  #pragma:nocover
-                        print(self.name, "NEXT: ",t.id," not queued and task NOT ready")
-                        print(self.name, "Ignoring task",t.name, t.id,t.ready())
-            if self.debug:                          #pragma:nocover
-                print(self.name, "FINAL QUEUE  ",queued)
-                print(self.name, "FINAL WAITING",waiting.keys())
+                    if self.debug:  #pragma:nocover
+                        print(self.name, "NEXT: ", t.id,
+                              " not queued and task NOT ready")
+                        print(self.name, "Ignoring task", t.name, t.id,
+                              t.ready())
+            if self.debug:  #pragma:nocover
+                print(self.name, "FINAL QUEUE  ", queued)
+                print(self.name, "FINAL WAITING", waiting.keys())
                 print(self.name, '---------------')
                 print(self.name, "    LOOP")
                 print(self.name, '---------------')
-        if self.debug:                              #pragma:nocover
+        if self.debug:  #pragma:nocover
             print(self.name, '---------------')
 
     def __str__(self):
-        return "\n".join(["Workflow %s:" % self.name]+self._dfs_([self._start_task.id], lambda t: t._name()))
+        return "\n".join(["Workflow %s:" % self.name] + self._dfs_(
+            [self._start_task.id], lambda t: t._name()))
 
     def __repr__(self):
-        return "Workflow %s:\n" % self.name+Task.__repr__(self)+'\n'+"\n".join(self._dfs_([self._start_task.id], lambda t: str(t)))
+        return "Workflow %s:\n" % self.name + Task.__repr__(
+            self) + '\n' + "\n".join(
+                self._dfs_([self._start_task.id], lambda t: str(t)))
 
     def _dfs_(self, indices, fn, touched=None):
         if touched is None:
             touched = set()
-        ans=[]
+        ans = []
         for i in indices:
             if i in touched:
                 # With this design, this condition should never be triggered
                 # TODO: verify that this is an O(n) search algorithm; I think it's
                 # O(n^2)
-                continue        #pragma:nocover
-            ok=True
+                continue  #pragma:nocover
+            ok = True
             task = self._tasks[i]
             for j in task.prev_task_ids():
                 if (j == NoTask.id) or (j in touched):
                     continue
-                ok=False
+                ok = False
                 break
             if not ok:
                 continue
@@ -252,4 +266,3 @@ class Workflow(Task):
             touched.add(i)
             ans = ans + self._dfs_(task.next_task_ids(), fn, touched)
         return ans
-

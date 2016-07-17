@@ -29,9 +29,11 @@ from six import text_type
 # Invalid CSV characters, control characters 0-31 sans \t, \n and \r
 CONTROL_CHARACTERS = re.compile(r"[\000-\010\013\014\016-\037]")
 
+
 def csv_safe(value):
     """Replaces invalid CSV characters with '?'."""
     return CONTROL_CHARACTERS.sub('?', value).replace(',', '_')
+
 
 class TestData(Plugin):
     """This plugin archives test data in standard CSV format."""
@@ -62,18 +64,23 @@ class TestData(Plugin):
         """Sets additional command line options."""
         Plugin.options(self, parser, env)
         parser.add_option(
-            '--testdata-file', action='store',
-            dest='testdata_file', metavar="FILE",
+            '--testdata-file',
+            action='store',
+            dest='testdata_file',
+            metavar="FILE",
             default=env.get('NOSE_TESTDATA_FILE', 'testdata.csv'),
             help=("Path to CSV file to store the test data. "
                   "Default is testdata.csv in the working directory "
                   "[NOSE_TESTDATA_FILE]"))
         parser.add_option(
-            '--testdata-table', action='store_true',
+            '--testdata-table',
+            action='store_true',
             dest='testdata_table',
             default=env.get('NOSE_TESTDATA_TABLE', False),
-            help=("If this option is specified, then the CSV file is "
-                  " formatted as a table.  By default, the format is a sparse list. "))
+            help=(
+                "If this option is specified, then the CSV file is "
+                " formatted as a table.  By default, the format is a sparse list. "
+            ))
 
     def configure(self, options, config):
         """Configures the testdata plugin."""
@@ -90,28 +97,33 @@ class TestData(Plugin):
 
     def report(self, stream):
         """Writes a CSV file with test data. """
-        if not os.environ.get('HUDSON_URL',None) is None:
+        if not os.environ.get('HUDSON_URL', None) is None:
             colprefix = 'job,build,node,'
-            prefix = "%s,%s,%s," % (os.environ['JOB_NAME'], os.environ['BUILD_NUMBER'], os.environ['NODE_NAME'])
+            prefix = "%s,%s,%s," % (os.environ['JOB_NAME'],
+                                    os.environ['BUILD_NUMBER'],
+                                    os.environ['NODE_NAME'])
         else:
             colprefix = ''
-            prefix=''
+            prefix = ''
         if self.format == 'table':
             keys = ['classname', 'name'] + sorted(list(self.datakeys))
-            self.report_file.write(colprefix + ','.join(map(self._quoteattr, keys))+'\n')
+            self.report_file.write(colprefix + ','.join(
+                map(self._quoteattr, keys)) + '\n')
             for data in self.reportdata:
                 tmp = []
                 for key in keys:
-                    tmp.append(str(data[2].get(key,'')))
-                self.report_file.write(prefix + ','.join(tmp)+'\n')
+                    tmp.append(str(data[2].get(key, '')))
+                self.report_file.write(prefix + ','.join(tmp) + '\n')
             self.report_file.close()
         else:
-            self.report_file.write(colprefix + 'classname,name,dataname,value\n')
+            self.report_file.write(colprefix +
+                                   'classname,name,dataname,value\n')
             for data in self.reportdata:
                 for key in data[2]:
                     self.report_file.write(prefix)
-                    self.report_file.write(str(data[0])+','+str(data[1]))
-                    self.report_file.write(','+str(key)+','+str(data[2][key]))
+                    self.report_file.write(str(data[0]) + ',' + str(data[1]))
+                    self.report_file.write(',' + str(key) + ',' + str(data[2][
+                        key]))
                     self.report_file.write('\n')
 
         if self.config.verbosity > 1:
@@ -131,6 +143,6 @@ class TestData(Plugin):
         for key in test.test.testdata:
             self.datakeys.add(key)
         classname = self._quoteattr('.'.join(id.split('.')[:-1]))
-        name      = self._quoteattr(id.split('.')[-1])
-        test.test.testdata['time']      = taken
+        name = self._quoteattr(id.split('.')[-1])
+        test.test.testdata['time'] = taken
         self.reportdata.append((classname, name, test.test.testdata))

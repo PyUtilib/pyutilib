@@ -20,6 +20,7 @@ from pyutilib.pyro.util import using_pyro4
 # this functionality (see: Pyro4 docs).
 #
 
+
 def Task(id=None, data=None, generateResponse=True):
     return {'id': id,
             'data': data,
@@ -29,6 +30,7 @@ def Task(id=None, data=None, generateResponse=True):
             'client': None,
             'type': None}
 
+
 #
 # A simple yet identifiable type that indicates
 # when an exception is encountered during task
@@ -36,6 +38,7 @@ def Task(id=None, data=None, generateResponse=True):
 # serialization hooks
 #
 class TaskProcessingError(Exception):
+
     def __init__(self, message):
         super(TaskProcessingError, self).__init__(message)
 
@@ -67,11 +70,11 @@ if using_pyro4:
     def TaskProcessingError_to_dict(obj):
         return {"__class__": "pyutilib.pyro.task.TaskProcessingError",
                 "message": obj.args[0]}
+
     def dict_to_TaskProcessingError(classname, d):
         return TaskProcessingError(d['message'])
-    SerializerBase.register_class_to_dict(
-        TaskProcessingError,
-        TaskProcessingError_to_dict)
+
+    SerializerBase.register_class_to_dict(TaskProcessingError,
+                                          TaskProcessingError_to_dict)
     SerializerBase.register_dict_to_class(
-        "pyutilib.pyro.task.TaskProcessingError",
-        dict_to_TaskProcessingError)
+        "pyutilib.pyro.task.TaskProcessingError", dict_to_TaskProcessingError)

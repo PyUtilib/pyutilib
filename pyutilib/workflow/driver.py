@@ -21,21 +21,26 @@ class TaskDriver(object):
             kwargs['formatter_class'] = argparse.RawDescriptionHelpFormatter
         self.parser = argparse.ArgumentParser(**kwargs)
         #self.parser.add_argument('--help-commands', dest='help_commands', action='store_true', default=False, help="Print a list of available subcommands")
-        self.subparsers = self.parser.add_subparsers(help='Sub-commands', dest='subparser_name')
+        self.subparsers = self.parser.add_subparsers(
+            help='Sub-commands', dest='subparser_name')
         self.wf = {}
 
     def register_task(self, wf, name=None, help=''):
         if name is None:
-            name=wf
-        ans = tasks.TaskFactory(wf, parser=self.subparsers.add_parser(name, help=help))
+            name = wf
+        ans = tasks.TaskFactory(
+            wf, parser=self.subparsers.add_parser(
+                name, help=help))
         if ans is None:
-            raise ValueError("Unknown workflow task '%s'\n    Available tasks: %s" % (wf, ' '.join(tasks.TaskFactory().services())))
+            raise ValueError(
+                "Unknown workflow task '%s'\n    Available tasks: %s" %
+                (wf, ' '.join(tasks.TaskFactory().services())))
         ans._parser.set_defaults(subparser_name=name)
         ans.set_arguments()
         self.wf[name] = ans
 
     def print_help(self):
-        self.parser.print_help()        #pragma:nocover
+        self.parser.print_help()  #pragma:nocover
 
     def parse_args(self, args=None):
         #
@@ -54,6 +59,5 @@ class TaskDriver(object):
         opt = Options()
         for key in dir(ret):
             if key[0] != '_' and key != 'subparser_name':
-                opt[key] = getattr(ret,key)
-        return self.wf[ ret.subparser_name ](opt)
-
+                opt[key] = getattr(ret, key)
+        return self.wf[ret.subparser_name](opt)

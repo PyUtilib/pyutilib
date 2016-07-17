@@ -9,6 +9,12 @@
 
 
 class ExcelSpreadsheet_base(object):
-    def can_read(self): return False
-    def can_write(self): return False
-    def can_calculate(self): return False
+
+    def can_read(self):
+        return False
+
+    def can_write(self):
+        return False
+
+    def can_calculate(self):
+        return False

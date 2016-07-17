@@ -6,7 +6,6 @@
 #  Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
-
 """
 The outline of the PyUtilib Component Architecture (PCA) is adapted from Trac
 (see the trac.core module).  This framework generalizes the Trac by supporting
@@ -41,7 +40,6 @@ class IgnorePluginPlugins(SingletonPlugin):
 
     def ignore(self, name):
         return name in globals()
-
 
 #
 # Import the 'pyutilib.component' plugins

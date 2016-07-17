@@ -20,6 +20,7 @@ def start_ns(max_allowed_connections=None):
     else:
         raise ImportError("Pyro or Pyro4 is not installed")
 
+
 def start_nsc():
     if Pyro is not None:
         if using_pyro4:

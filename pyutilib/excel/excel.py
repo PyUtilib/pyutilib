@@ -10,7 +10,6 @@
 #
 # See http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/440661
 #
-
 """ This modules provides a lightweight API to access Excel data.
     There are many ways to read Excel data, including ODBC. This module
     uses ADODB and has the advantage of only requiring a file name and a
@@ -24,8 +23,10 @@ except ImportError:
 try:
     unicode
 except:
+
     def unicode(x):
         return x
+
 
 class ExcelDocument(object):
     """ Represents an opened Excel document.
@@ -33,11 +34,9 @@ class ExcelDocument(object):
 
     def __init__(self, filename):
         self.connection = win32com.client.Dispatch('ADODB.Connection')
-        self.connection.Open(
-            'PROVIDER=Microsoft.Jet.OLEDB.4.0;'+
-            'DATA SOURCE=%s'%filename+
-            ';Extended Properties="Excel 8.0;HDR=1;IMEX=1"'
-        )
+        self.connection.Open('PROVIDER=Microsoft.Jet.OLEDB.4.0;' +
+                             'DATA SOURCE=%s' % filename +
+                             ';Extended Properties="Excel 8.0;HDR=1;IMEX=1"')
 
     def sheets(self):
         """ Returns a list of the name of the sheets found in the document.
@@ -72,39 +71,44 @@ class ExcelDocument(object):
         except:
             pass
 
+
 def _strip(value):
     """ Strip the input value if it is a string and returns None
         if it had only whitespaces """
     if isinstance(value, basestring):
         value = value.strip()
-        if len(value)==0:
+        if len(value) == 0:
             return None
     return value
+
 
 class _ExcelSheet(object):
     """ Represents an Excel sheet from a document, gives methods to obtain
         column names and iterate on its content.
     """
+
     def __init__(self, document, name, encoding, order_by):
         self.document = document
         self.name = name
         self.order_by = order_by
         if encoding:
+
             def encoder(value):
                 if isinstance(value, unicode):
                     value = value.strip()
-                    if len(value)==0:
+                    if len(value) == 0:
                         return None
                     else:
                         return value.encode(encoding)
                 elif isinstance(value, str):
                     value = value.strip()
-                    if len(value)==0:
+                    if len(value) == 0:
                         return None
                     else:
                         return value
                 else:
                     return value
+
             self.encoding = encoder
         else:
             self.encoding = _strip
@@ -113,7 +117,9 @@ class _ExcelSheet(object):
         """ Returns a list of column names for the sheet.
         """
         recordset = win32com.client.Dispatch('ADODB.Recordset')
-        recordset.Open(unicode('SELECT * FROM [%s]'%self.name), self.document.connection, 0, 1)
+        recordset.Open(
+            unicode('SELECT * FROM [%s]' % self.name), self.document.connection,
+            0, 1)
         try:
             return [self.encoding(field.Name) for field in recordset.Fields]
         finally:
@@ -132,14 +138,19 @@ class _ExcelSheet(object):
         # SLOW algorithm ! A lot of COM calls are performed.
         recordset = win32com.client.Dispatch('ADODB.Recordset')
         if self.order_by:
-            recordset.Open(unicode('SELECT * FROM [%s] ORDER BY %s'%(self.name, self.order_by)), self.document.connection, 0, 1)
+            recordset.Open(
+                unicode('SELECT * FROM [%s] ORDER BY %s' % (
+                    self.name, self.order_by)), self.document.connection, 0, 1)
         else:
-            recordset.Open(unicode('SELECT * FROM [%s]'%self.name), self.document.connection, 0, 1)
+            recordset.Open(
+                unicode('SELECT * FROM [%s]' % self.name),
+                self.document.connection, 0, 1)
         try:
             while not recordset.EOF:
                 source = {}
                 for field in recordset.Fields:
-                    source[self.encoding(field.Name)] = self.encoding(field.Value)
+                    source[self.encoding(field.Name)] = self.encoding(
+                        field.Value)
                 yield source
                 recordset.MoveNext()
             recordset.Close()
@@ -163,9 +174,13 @@ class _ExcelSheet(object):
         # of COM calls.
         recordset = win32com.client.Dispatch('ADODB.Recordset')
         if self.order_by:
-            recordset.Open(unicode('SELECT * FROM [%s] ORDER BY %s'%(self.name, self.order_by)), self.document.connection, 0, 1)
+            recordset.Open(
+                unicode('SELECT * FROM [%s] ORDER BY %s' % (
+                    self.name, self.order_by)), self.document.connection, 0, 1)
         else:
-            recordset.Open(unicode('SELECT * FROM [%s]'%self.name), self.document.connection, 0, 1)
+            recordset.Open(
+                unicode('SELECT * FROM [%s]' % self.name),
+                self.document.connection, 0, 1)
         try:
             fields = [self.encoding(field.Name) for field in recordset.Fields]
             ok = True

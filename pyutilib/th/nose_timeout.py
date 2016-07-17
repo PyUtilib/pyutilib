@@ -20,7 +20,9 @@ except ImportError:
 except NotImplementedError:
     _psutil_avail = False
 
-class Timeout(Exception): pass
+
+class Timeout(Exception):
+    pass
 
 
 class TestTimeout(Plugin):
@@ -30,19 +32,22 @@ class TestTimeout(Plugin):
 
     def options(self, parser, env):
         """Register command-line options."""
-        parser.add_option("--test-timeout", action="store",
-                          default=env.get('NOSE_TEST_TIMEOUT', 0),
-                          dest="test_timeout",
-                          metavar="SECONDS",
-                          help="A per-test timeout (in seconds). "
-                          "[NOSE_TEST_TIMEOUT]")
+        parser.add_option(
+            "--test-timeout",
+            action="store",
+            default=env.get('NOSE_TEST_TIMEOUT', 0),
+            dest="test_timeout",
+            metavar="SECONDS",
+            help="A per-test timeout (in seconds). "
+            "[NOSE_TEST_TIMEOUT]")
 
     def configure(self, options, config):
         self.timeout = int(options.test_timeout)
         self.enabled = self.timeout > 0
         if self.enabled and not _psutil_avail:
             self.enabled = False
-            raise ImportError("The nose Timeout plugin requires the psutil package.")
+            raise ImportError(
+                "The nose Timeout plugin requires the psutil package.")
 
     def startTest(self, test):
         signal.signal(signal.SIGALRM, self._killTest)
@@ -53,11 +58,11 @@ class TestTimeout(Plugin):
 
     def _all_children(self, p):
         ans = p.get_children()
-        i = 0;
+        i = 0
         while i < len(ans):
             ans.extend(self._all_children(ans[i]))
             i += 1
-        return ans;
+        return ans
 
     def _killTest(self, signum, frame):
         for p in self._all_children(Process(os.getpid())):
@@ -66,7 +71,7 @@ class TestTimeout(Plugin):
             except:
                 pass
         hour = int(self.timeout / 3600)
-        min = int(self.timeout / 60) - hour*60
+        min = int(self.timeout / 60) - hour * 60
         sec = self.timeout % 60
         txt = ""
         if hour:
@@ -80,4 +85,3 @@ class TestTimeout(Plugin):
                 txt += ", "
             txt += "%d second%s" % (sec, sec > 1 and "s" or "")
         raise Timeout("Test exceeded timeout (%s)" % txt)
-

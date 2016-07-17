@@ -20,25 +20,26 @@ from six import PY3
 
 try:
     import yaml
-    using_yaml=True
+    using_yaml = True
 except ImportError:
-    using_yaml=False
+    using_yaml = False
 
 
 class Test(unittest.TestCase):
 
     def setUp(self):
         self.config = config = ConfigBlock(
-            "Basic configuration for Flushing models", implicit=True )
+            "Basic configuration for Flushing models", implicit=True)
         net = config.declare('network', ConfigBlock())
-        net.declare( 'epanet file', ConfigValue( 
-                'Net3.inp', str, 
-                'EPANET network inp file', 
-                None ) ).declare_as_argument(dest='epanet')
+        net.declare('epanet file',
+                    ConfigValue('Net3.inp', str, 'EPANET network inp file',
+                                None)).declare_as_argument(dest='epanet')
 
-        sc = config.declare('scenario', ConfigBlock(
-                "Single scenario block", implicit=True, implicit_domain=str ) )
-        sc.declare( 'scenario file', ConfigValue(
+        sc = config.declare(
+            'scenario',
+            ConfigBlock(
+                "Single scenario block", implicit=True, implicit_domain=str))
+        sc.declare('scenario file', ConfigValue(
             'Net3.tsg', str,
             'Scenario generation file, see the TEVASIM documentation',
             """This is the (long) documentation for the 'scenario file'
@@ -46,110 +47,90 @@ class Test(unittest.TestCase):
             formatting; like a bulleted list:
               - item 1
               - item 2
-            """ ) ).declare_as_argument(group='Scenario definition')
-        sc.declare( 'merlion', ConfigValue( 
-                False, bool, 
-                'Water quality model',
-                """This is the (long) documentation for the 'merlion'
+            """)).declare_as_argument(group='Scenario definition')
+        sc.declare('merlion', ConfigValue(
+            False, bool, 'Water quality model',
+            """This is the (long) documentation for the 'merlion'
 parameter.  It contains multiple lines, but no apparent internal
 formatting; so the outputter should re-wrap everything.
-""" ) ).declare_as_argument(group='Scenario definition')
-        sc.declare( 'detection', ConfigValue(
-                # Note use of lambda for an "integer list domain"
-                [1,2,3], lambda x: list(int(i) for i in x),
-                'Sensor placement list, epanetID',
-                None ) )
-    
-        config.declare('scenarios', ConfigList(
-                [], sc, 
-                "List of scenario blocks", 
-                None ) )
+""")).declare_as_argument(group='Scenario definition')
+        sc.declare('detection',
+                   ConfigValue(
+                       # Note use of lambda for an "integer list domain"
+                       [1, 2, 3],
+                       lambda x: list(int(i) for i in x),
+                       'Sensor placement list, epanetID',
+                       None))
+
+        config.declare('scenarios', ConfigList([], sc,
+                                               "List of scenario blocks", None))
 
         config.declare('nodes', ConfigList(
-                [], ConfigValue(0, int, 'Node ID', None), 
-                "List of node IDs", 
-                None ) )
+            [], ConfigValue(0, int, 'Node ID', None), "List of node IDs", None))
 
         im = config.declare('impact', ConfigBlock())
-        im.declare( 'metric', ConfigValue(
-                'MC', str,
-                'Population or network based impact metric',
-                None ) )
-        
-        fl = config.declare( 'flushing', ConfigBlock() )
-        n = fl.declare( 'flush nodes', ConfigBlock() )
-        n.declare( 'feasible nodes', ConfigValue(
-                'ALL', str,
-                'ALL, NZD, NONE, list or filename',
-                None ) )
-        n.declare( 'infeasible nodes', ConfigValue(
-                'NONE', str,
-                'ALL, NZD, NONE, list or filename',
-                None ) )
-        n.declare( 'max nodes', ConfigValue(
-                2, int,
-                'Maximum number of nodes to flush',
-                None ) )
-        n.declare( 'rate', ConfigValue(
-                600, float,
-                'Flushing rate [gallons/min]',
-                None ) )
-        n.declare( 'response time', ConfigValue(
-                60, float,
-                'Time [min] between detection and flushing',
-                None ) )
-        n.declare( 'duration', ConfigValue(
-                600, float,
-                'Time [min] for flushing',
-                None ) )
-    
-        v = fl.declare( 'close valves', ConfigBlock() )
-        v.declare( 'feasible pipes', ConfigValue(
-                'ALL', str,
-                'ALL, DIAM min max [inch], NONE, list or filename',
-                None ) )
-        v.declare( 'infeasible pipes', ConfigValue(
-                'NONE', str,
-                'ALL, DIAM min max [inch], NONE, list or filename',
-                None ) )
-        v.declare( 'max pipes', ConfigValue(
-                2, int,
-                'Maximum number of pipes to close',
-                None ) )
-        v.declare( 'response time', ConfigValue(
-                60, float,
-                'Time [min] between detection and closing valves',
-                None ) )
+        im.declare('metric', ConfigValue(
+            'MC', str, 'Population or network based impact metric', None))
+
+        fl = config.declare('flushing', ConfigBlock())
+        n = fl.declare('flush nodes', ConfigBlock())
+        n.declare('feasible nodes', ConfigValue(
+            'ALL', str, 'ALL, NZD, NONE, list or filename', None))
+        n.declare('infeasible nodes', ConfigValue(
+            'NONE', str, 'ALL, NZD, NONE, list or filename', None))
+        n.declare('max nodes',
+                  ConfigValue(2, int, 'Maximum number of nodes to flush', None))
+        n.declare('rate', ConfigValue(600, float, 'Flushing rate [gallons/min]',
+                                      None))
+        n.declare('response time', ConfigValue(
+            60, float, 'Time [min] between detection and flushing', None))
+        n.declare('duration', ConfigValue(600, float, 'Time [min] for flushing',
+                                          None))
+
+        v = fl.declare('close valves', ConfigBlock())
+        v.declare('feasible pipes', ConfigValue(
+            'ALL', str, 'ALL, DIAM min max [inch], NONE, list or filename',
+            None))
+        v.declare('infeasible pipes', ConfigValue(
+            'NONE', str, 'ALL, DIAM min max [inch], NONE, list or filename',
+            None))
+        v.declare('max pipes',
+                  ConfigValue(2, int, 'Maximum number of pipes to close', None))
+        v.declare('response time', ConfigValue(
+            60, float, 'Time [min] between detection and closing valves', None))
 
         self._reference = {
             'network': {
-                'epanet file': 'Net3.inp'}, 
+                'epanet file': 'Net3.inp'
+            },
             'scenario': {
-                'detection': [1, 2, 3], 
-                'scenario file': 'Net3.tsg', 
-                'merlion': False}, 
-            'scenarios': [], 
+                'detection': [1, 2, 3],
+                'scenario file': 'Net3.tsg',
+                'merlion': False
+            },
+            'scenarios': [],
             'nodes': [],
             'impact': {
-                'metric': 'MC'}, 
+                'metric': 'MC'
+            },
             'flushing': {
                 'close valves': {
-                    'infeasible pipes': 'NONE', 
-                    'max pipes': 2, 
-                    'feasible pipes': 'ALL', 
-                    'response time': 60.0}, 
+                    'infeasible pipes': 'NONE',
+                    'max pipes': 2,
+                    'feasible pipes': 'ALL',
+                    'response time': 60.0
+                },
                 'flush nodes': {
-                    'feasible nodes': 'ALL', 
-                    'max nodes': 2, 
-                    'infeasible nodes': 'NONE', 
-                    'rate': 600.0, 
-                    'duration': 600.0, 
-                    'response time': 60.0},
+                    'feasible nodes': 'ALL',
+                    'max nodes': 2,
+                    'infeasible nodes': 'NONE',
+                    'rate': 600.0,
+                    'duration': 600.0,
+                    'response time': 60.0
+                },
             },
         }
 
-    
-    
     # Utility method for generating and validating a template description
     def _validateTemplate(self, reference_template, **kwds):
         test = self.config.generate_yaml_template(**kwds)
@@ -160,9 +141,8 @@ formatting; so the outputter should re-wrap everything.
             self.assertLessEqual(len(l), width)
             if l.strip().startswith("#"):
                 continue
-            self.assertEqual((len(l)-len(l.lstrip())) % indent, 0)
+            self.assertEqual((len(l) - len(l.lstrip())) % indent, 0)
         self.assertEqual(test, reference_template)
-
 
     def test_template_default(self):
         reference_template = """# Basic configuration for Flushing models
@@ -290,7 +270,6 @@ flushing:
 """
         self._validateTemplate(reference_template, indent_spacing=3, width=72)
 
-
     def test_display_default(self):
         reference = """network:
   epanet file: Net3.inp
@@ -354,7 +333,7 @@ flushing:
     response time: 60.0
 """
         self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion':True, 'detection':[]})
+        self.config['scenarios'].add({'merlion': True, 'detection': []})
         test = self.config.display()
         sys.stdout.write(test)
         self.assertEqual(test, reference)
@@ -374,7 +353,7 @@ flushing:
 
     def test_display_userdata_list_nonDefault(self):
         self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion':True, 'detection':[]})
+        self.config['scenarios'].add({'merlion': True, 'detection': []})
         test = self.config.display('userdata')
         sys.stdout.write(test)
         self.assertEqual(test, """scenarios:
@@ -385,20 +364,19 @@ flushing:
 """)
 
     def test_display_userdata_block(self):
-        self.config.add("foo", ConfigValue(0, int,None,None))
+        self.config.add("foo", ConfigValue(0, int, None, None))
         self.config.add("bar", ConfigBlock())
         test = self.config.display('userdata')
         sys.stdout.write(test)
         self.assertEqual(test, "")
 
     def test_display_userdata_block_nonDefault(self):
-        self.config.add("foo", ConfigValue(0, int,None,None))
+        self.config.add("foo", ConfigValue(0, int, None, None))
         self.config.add("bar", ConfigBlock(implicit=True)) \
                    .add("baz", ConfigBlock())
         test = self.config.display('userdata')
         sys.stdout.write(test)
         self.assertEqual(test, "bar:\n")
-
 
     def test_unusedUserValues_default(self):
         test = '\n'.join(x.name(True) for x in self.config.unused_user_values())
@@ -420,7 +398,7 @@ scenarios[0]""")
 
     def test_unusedUserValues_list_nonDefault(self):
         self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion':True, 'detection':[]})
+        self.config['scenarios'].add({'merlion': True, 'detection': []})
         test = '\n'.join(x.name(True) for x in self.config.unused_user_values())
         sys.stdout.write(test)
         self.assertEqual(test, """scenarios
@@ -431,7 +409,7 @@ scenarios[1].detection""")
 
     def test_unusedUserValues_list_nonDefault_listAccessed(self):
         self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion':True, 'detection':[]})
+        self.config['scenarios'].add({'merlion': True, 'detection': []})
         for x in self.config['scenarios']:
             pass
         test = '\n'.join(x.name(True) for x in self.config.unused_user_values())
@@ -443,7 +421,7 @@ scenarios[1].detection""")
 
     def test_unusedUserValues_list_nonDefault_itemAccessed(self):
         self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion':True, 'detection':[]})
+        self.config['scenarios'].add({'merlion': True, 'detection': []})
         self.config['scenarios'][1]['merlion']
         test = '\n'.join(x.name(True) for x in self.config.unused_user_values())
         sys.stdout.write(test)
@@ -461,7 +439,6 @@ scenarios[1].detection""")
         test = '\n'.join(x.name(True) for x in self.config.unused_user_values())
         sys.stdout.write(test)
         self.assertEqual(test, "scenario")
-
 
     def test_UserValues_default(self):
         test = '\n'.join(x.name(True) for x in self.config.user_values())
@@ -483,7 +460,7 @@ scenarios[0]""")
 
     def test_UserValues_list_nonDefault(self):
         self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion':True, 'detection':[]})
+        self.config['scenarios'].add({'merlion': True, 'detection': []})
         test = '\n'.join(x.name(True) for x in self.config.user_values())
         sys.stdout.write(test)
         self.assertEqual(test, """scenarios
@@ -494,7 +471,7 @@ scenarios[1].detection""")
 
     def test_UserValues_list_nonDefault_listAccessed(self):
         self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion':True, 'detection':[]})
+        self.config['scenarios'].add({'merlion': True, 'detection': []})
         for x in self.config['scenarios']:
             pass
         test = '\n'.join(x.name(True) for x in self.config.user_values())
@@ -507,7 +484,7 @@ scenarios[1].detection""")
 
     def test_UserValues_list_nonDefault_itemAccessed(self):
         self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion':True, 'detection':[]})
+        self.config['scenarios'].add({'merlion': True, 'detection': []})
         self.config['scenarios'][1]['merlion']
         test = '\n'.join(x.name(True) for x in self.config.user_values())
         sys.stdout.write(test)
@@ -529,7 +506,6 @@ scenarios[1].detection""")
         sys.stdout.write(test)
         self.assertEqual(test, "scenario")
 
-
     def test_parseDisplayAndValue_default(self):
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
@@ -541,7 +517,7 @@ scenarios[1].detection""")
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
         self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion':True, 'detection':[]})
+        self.config['scenarios'].add({'merlion': True, 'detection': []})
         test = self.config.display()
         sys.stdout.write(test)
         self.assertEqual(yaml.load(test), self.config.value())
@@ -565,19 +541,18 @@ scenarios[1].detection""")
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
         self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion':True, 'detection':[]})
+        self.config['scenarios'].add({'merlion': True, 'detection': []})
         test = self.config.display('userdata')
         sys.stdout.write(test)
-        self.assertEqual( yaml.load(test), 
-                          { 'scenarios': 
-                            [ None, 
-                              {'merlion':True,'detection':[]}
-                              ] } )
+        self.assertEqual(
+            yaml.load(test), {'scenarios':
+                              [None, {'merlion': True,
+                                      'detection': []}]})
 
     def test_parseDisplay_userdata_block(self):
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
-        self.config.add("foo", ConfigValue(0, int,None,None))
+        self.config.add("foo", ConfigValue(0, int, None, None))
         self.config.add("bar", ConfigBlock())
         test = self.config.display('userdata')
         sys.stdout.write(test)
@@ -586,7 +561,7 @@ scenarios[1].detection""")
     def test_parseDisplay_userdata_block_nonDefault(self):
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
-        self.config.add("foo", ConfigValue(0, int,None,None))
+        self.config.add("foo", ConfigValue(0, int, None, None))
         self.config.add("bar", ConfigBlock(implicit=True)) \
                    .add("baz", ConfigBlock())
         test = self.config.display('userdata')
@@ -617,8 +592,8 @@ scenarios[1].detection""")
         val = self.config['scenarios'].value()
         self.assertIs(type(val), list)
         self.assertEqual(len(val), 1)
-        self.assertEqual(val, [{'detection': [1, 2, 3], 
-                                'merlion': False, 
+        self.assertEqual(val, [{'detection': [1, 2, 3],
+                                'merlion': False,
                                 'scenario file': 'Net3.tsg'}])
 
     def test_name(self):
@@ -626,24 +601,22 @@ scenarios[1].detection""")
         self.assertEqual(self.config.name(), "")
         self.assertEqual(self.config['scenarios'].name(), "scenarios")
         self.assertEqual(self.config['scenarios'][0].name(), "[0]")
-        self.assertEqual(self.config['scenarios'][0].get('merlion').name(), 
+        self.assertEqual(self.config['scenarios'][0].get('merlion').name(),
                          "merlion")
 
     def test_name_fullyQualified(self):
         self.config['scenarios'].add()
         self.assertEqual(self.config.name(True), "")
         self.assertEqual(self.config['scenarios'].name(True), "scenarios")
-        self.assertEqual(self.config['scenarios'][0].name(True), 
-                         "scenarios[0]")
-        self.assertEqual(self.config['scenarios'][0].get('merlion').name(True), 
+        self.assertEqual(self.config['scenarios'][0].name(True), "scenarios[0]")
+        self.assertEqual(self.config['scenarios'][0].get('merlion').name(True),
                          "scenarios[0].merlion")
 
-    
     def test_setValue_scalar(self):
         self.config['flushing']['flush nodes']['rate'] = 50
         val = self.config['flushing']['flush nodes']['rate']
         self.assertIs(type(val), float)
-        self.assertEqual( val, 50.0 )
+        self.assertEqual(val, 50.0)
 
     def test_setValue_scalar_badDomain(self):
         try:
@@ -654,19 +627,19 @@ scenarios[1].detection""")
             self.fail('expected test to raise ValueError')
         val = self.config['flushing']['flush nodes']['rate']
         self.assertIs(type(val), float)
-        self.assertEqual( val, 600.0 )
+        self.assertEqual(val, 600.0)
 
     def test_setValue_scalarList_empty(self):
         self.config['scenario']['detection'] = []
         val = self.config['scenario']['detection']
         self.assertIs(type(val), list)
-        self.assertEqual( val, [] )
+        self.assertEqual(val, [])
 
     def test_setValue_scalarList_withvalue(self):
         self.config['scenario']['detection'] = [6]
         val = self.config['scenario']['detection']
         self.assertIs(type(val), list)
-        self.assertEqual( val, [6] )
+        self.assertEqual(val, [6])
 
     def test_setValue_scalarList_badDomain(self):
         try:
@@ -677,7 +650,7 @@ scenarios[1].detection""")
             self.fail('expected test to raise ValueError')
         val = self.config['scenario']['detection']
         self.assertIs(type(val), list)
-        self.assertEqual( val, [1,2,3] )
+        self.assertEqual(val, [1, 2, 3])
 
     def test_setValue_scalarList_badSubDomain(self):
         try:
@@ -688,19 +661,19 @@ scenarios[1].detection""")
             self.fail('expected test to raise ValueError')
         val = self.config['scenario']['detection']
         self.assertIs(type(val), list)
-        self.assertEqual( val, [1,2,3] )
+        self.assertEqual(val, [1, 2, 3])
 
     def test_setValue_list_scalardomain_list(self):
         self.config['nodes'] = [5, 10]
         val = self.config['nodes'].value()
         self.assertIs(type(val), list)
-        self.assertEqual( val, [5, 10] )
+        self.assertEqual(val, [5, 10])
 
     def test_setValue_list_scalardomain_scalar(self):
         self.config['nodes'] = 10
         val = self.config['nodes'].value()
         self.assertIs(type(val), list)
-        self.assertEqual( val, [10] )
+        self.assertEqual(val, [10])
 
     def test_setValue_list_badSubDomain(self):
         try:
@@ -711,53 +684,53 @@ scenarios[1].detection""")
             self.fail('expected test to raise ValueError')
         val = self.config['nodes'].value()
         self.assertIs(type(val), list)
-        self.assertEqual( val, [] )
+        self.assertEqual(val, [])
 
     def test_setValue_block_none(self):
         ref = self._reference['scenario']
         self.config['scenario'] = None
-        self.assertEqual( ref, self.config['scenario'].value() )
+        self.assertEqual(ref, self.config['scenario'].value())
         self.config['scenario']['merlion'] = True
         ref['merlion'] = True
-        self.assertEqual( ref, self.config['scenario'].value() )
+        self.assertEqual(ref, self.config['scenario'].value())
         self.config['scenario'] = None
-        self.assertEqual( ref, self.config['scenario'].value() )
+        self.assertEqual(ref, self.config['scenario'].value())
 
     def test_setValue_block_empty(self):
         ref = self._reference['scenario']
         self.config['scenario'] = {}
-        self.assertEqual( ref, self.config['scenario'].value() )
+        self.assertEqual(ref, self.config['scenario'].value())
         self.config['scenario']['merlion'] = True
         ref['merlion'] = True
-        self.assertEqual( ref, self.config['scenario'].value() )
+        self.assertEqual(ref, self.config['scenario'].value())
         self.config['scenario'] = {}
-        self.assertEqual( ref, self.config['scenario'].value() )
+        self.assertEqual(ref, self.config['scenario'].value())
 
     def test_setValue_block_simplevalue(self):
         _test = {'merlion': True, 'detection': [1]}
         ref = self._reference['scenario']
-        ref.update( _test )
+        ref.update(_test)
         self.config['scenario'] = _test
-        self.assertEqual( ref, self.config['scenario'].value() )
+        self.assertEqual(ref, self.config['scenario'].value())
 
     def test_setItem_block_implicit(self):
         ref = self._reference
         ref['foo'] = 1
         self.config['foo'] = 1
-        self.assertEqual( ref, self.config.value() )
+        self.assertEqual(ref, self.config.value())
         ref['bar'] = 1
         self.config['bar'] = 1
-        self.assertEqual( ref, self.config.value() )
+        self.assertEqual(ref, self.config.value())
 
     def test_setItem_block_implicit_domain(self):
         ref = self._reference['scenario']
         ref['foo'] = '1'
         self.config['scenario']['foo'] = 1
-        self.assertEqual( ref, self.config['scenario'].value() )
+        self.assertEqual(ref, self.config['scenario'].value())
         ref['bar'] = '1'
         self.config['scenario']['bar'] = 1
-        self.assertEqual( ref, self.config['scenario'].value() )
- 
+        self.assertEqual(ref, self.config['scenario'].value())
+
     def test_setValue_block_noImplicit(self):
         _test = {'epanet file': 'no_file.inp', 'foo': 1}
         try:
@@ -768,31 +741,31 @@ scenarios[1].detection""")
             raise
         else:
             self.fail("Expected test to raise ValueError")
-        self.assertEqual( self._reference, self.config.value() )
+        self.assertEqual(self._reference, self.config.value())
 
     def test_setValue_block_implicit(self):
-        _test = {'scenario':{'merlion': True, 'detection': [1]}, 'foo': 1}
+        _test = {'scenario': {'merlion': True, 'detection': [1]}, 'foo': 1}
         ref = self._reference
-        ref['scenario'].update( _test['scenario'] )
+        ref['scenario'].update(_test['scenario'])
         ref['foo'] = 1
-        self.config.set_value( _test )
-        self.assertEqual( ref, self.config.value() )
-        _test = {'scenario':{'merlion': True, 'detection': [1]}, 'bar': 1}
+        self.config.set_value(_test)
+        self.assertEqual(ref, self.config.value())
+        _test = {'scenario': {'merlion': True, 'detection': [1]}, 'bar': 1}
         ref['bar'] = 1
-        self.config.set_value( _test )
-        self.assertEqual( ref, self.config.value() )
+        self.config.set_value(_test)
+        self.assertEqual(ref, self.config.value())
 
     def test_setValue_block_implicit_domain(self):
         _test = {'merlion': True, 'detection': [1], 'foo': 1}
         ref = self._reference['scenario']
-        ref.update( _test )
+        ref.update(_test)
         ref['foo'] = '1'
         self.config['scenario'] = _test
-        self.assertEqual( ref, self.config['scenario'].value() )
+        self.assertEqual(ref, self.config['scenario'].value())
         _test = {'merlion': True, 'detection': [1], 'bar': '1'}
         ref['bar'] = '1'
         self.config['scenario'] = _test
-        self.assertEqual( ref, self.config['scenario'].value() )
+        self.assertEqual(ref, self.config['scenario'].value())
 
     def test_setValue_block_badDomain(self):
         _test = {'merlion': True, 'detection': ['a'], 'foo': 1, 'a': 1}
@@ -802,7 +775,7 @@ scenarios[1].detection""")
             pass
         else:
             self.fail('expected test to raise ValueError')
-        self.assertEqual( self._reference, self.config.value() )
+        self.assertEqual(self._reference, self.config.value())
 
         try:
             self.config['scenario'] = []
@@ -810,7 +783,7 @@ scenarios[1].detection""")
             pass
         else:
             self.fail('expected test to raise ValueError')
-        self.assertEqual( self._reference, self.config.value() )
+        self.assertEqual(self._reference, self.config.value())
 
     def test_default_function(self):
         c = ConfigValue(default=lambda: 10, domain=int)
@@ -821,20 +794,18 @@ scenarios[1].detection""")
         self.assertEqual(c.value(), 10)
 
         try:
-            c = ConfigValue(default=lambda x: 10*x, domain=int)
+            c = ConfigValue(default=lambda x: 10 * x, domain=int)
         except TypeError:
             pass
         else:
             self.fail("Expected type error")
-        
+
         try:
             c = ConfigValue('a', domain=int)
         except ValueError:
             pass
         else:
             self.fail("Expected casting a to int to raise a value error")
-        
-
 
     def test_getItem_setItem(self):
         # a freshly-initialized object should not be accessed
@@ -858,8 +829,8 @@ scenarios[1].detection""")
         self.assertFalse(self.config['scenario']._data['detection']._userSet)
 
         # setting a value should map it to the correct domain
-        self.assertEqual(self.config['scenario']['detection'], [1,2,3])
-        self.config['scenario']['detection'] = [ 42.5 ]
+        self.assertEqual(self.config['scenario']['detection'], [1, 2, 3])
+        self.config['scenario']['detection'] = [42.5]
         self.assertEqual(self.config['scenario']['detection'], [42])
 
         # setting a ConfigValue should mark it as userSet, but NOT any parent blocks
@@ -868,13 +839,15 @@ scenarios[1].detection""")
         self.assertTrue(self.config['scenario'].get('detection')._userSet)
 
     def test_generate_documentation(self):
-        oFile = os.path.join(currdir,'test_reference.out')
-        OUTPUT = open(oFile,'w')
+        oFile = os.path.join(currdir, 'test_reference.out')
+        OUTPUT = open(oFile, 'w')
         test = self.config.generate_documentation()
         OUTPUT.write(test)
         OUTPUT.close()
         print(test)
-        self.assertFalse(pyutilib.misc.comparison.compare_file(oFile, oFile[:-4]+'.txt')[0])
+        self.assertFalse(
+            pyutilib.misc.comparison.compare_file(oFile, oFile[:-4] + '.txt')[
+                0])
         os.remove(oFile)
 
     def test_block_get(self):
@@ -884,74 +857,73 @@ scenarios[1].detection""")
         self.assertEquals(self.config.get('fubar', 'bogus'), 'bogus')
 
     def test_block_keys(self):
-        ref = ['scenario file','merlion','detection']
+        ref = ['scenario file', 'merlion', 'detection']
 
         # list of keys
         keys = self.config['scenario'].keys()
         # lists are independent
-        self.assertFalse( keys is self.config['scenario'].keys() )
+        self.assertFalse(keys is self.config['scenario'].keys())
         if PY3:
-            self.assertIsNot( type(keys), list )
-            self.assertEqual( list(keys), ref )
+            self.assertIsNot(type(keys), list)
+            self.assertEqual(list(keys), ref)
         else:
-            self.assertIs( type(keys), list )
-            self.assertEqual( keys, ref )
+            self.assertIs(type(keys), list)
+            self.assertEqual(keys, ref)
 
         # keys iterator
         keyiter = self.config['scenario'].iterkeys()
-        self.assertIsNot( type(keyiter), list )
-        self.assertEqual( list(keyiter), ref )
+        self.assertIsNot(type(keyiter), list)
+        self.assertEqual(list(keyiter), ref)
         # iterators are independent
-        self.assertFalse( keyiter is self.config['scenario'].iterkeys() )
+        self.assertFalse(keyiter is self.config['scenario'].iterkeys())
 
         # default iterator
         keyiter = self.config['scenario'].__iter__()
-        self.assertIsNot( type(keyiter), list )
-        self.assertEqual( list(keyiter), ref )
+        self.assertIsNot(type(keyiter), list)
+        self.assertEqual(list(keyiter), ref)
         # iterators are independent
-        self.assertFalse( keyiter is self.config['scenario'].__iter__() )
-        
+        self.assertFalse(keyiter is self.config['scenario'].__iter__())
+
     def test_block_values(self):
-        ref = ['Net3.tsg', False, [1,2,3]]
+        ref = ['Net3.tsg', False, [1, 2, 3]]
 
         # list of values
         values = self.config['scenario'].values()
         if PY3:
-            self.assertIsNot( type(values), list )
+            self.assertIsNot(type(values), list)
         else:
-            self.assertIs( type(values), list )
-        self.assertEqual( list(values), ref )
+            self.assertIs(type(values), list)
+        self.assertEqual(list(values), ref)
         # lists are independent
-        self.assertFalse( values is self.config['scenario'].values() )
+        self.assertFalse(values is self.config['scenario'].values())
 
         # values iterator
         valueiter = self.config['scenario'].itervalues()
-        self.assertIsNot( type(valueiter), list )
-        self.assertEqual( list(valueiter), ref )
+        self.assertIsNot(type(valueiter), list)
+        self.assertEqual(list(valueiter), ref)
         # iterators are independent
-        self.assertFalse( valueiter is self.config['scenario'].itervalues() )
-        
+        self.assertFalse(valueiter is self.config['scenario'].itervalues())
+
     def test_block_items(self):
-        ref = [ ('scenario file', 'Net3.tsg'), 
-                ('merlion',False), 
-                ('detection',[1,2,3]) ]
+        ref = [('scenario file', 'Net3.tsg'), ('merlion', False),
+               ('detection', [1, 2, 3])]
 
         # list of items
         items = self.config['scenario'].items()
         if PY3:
-            self.assertIsNot( type(items), list )
+            self.assertIsNot(type(items), list)
         else:
-            self.assertIs( type(items), list )
-        self.assertEqual( list(items), ref )
+            self.assertIs(type(items), list)
+        self.assertEqual(list(items), ref)
         # lists are independent
-        self.assertFalse( items is self.config['scenario'].items() )
+        self.assertFalse(items is self.config['scenario'].items())
 
         # items iterator
         itemiter = self.config['scenario'].iteritems()
-        self.assertIsNot( type(itemiter), list )
-        self.assertEqual( list(itemiter), ref )
+        self.assertIsNot(type(itemiter), list)
+        self.assertEqual(list(itemiter), ref)
         # iterators are independent
-        self.assertFalse( itemiter is self.config['scenario'].iteritems() )
+        self.assertFalse(itemiter is self.config['scenario'].iteritems())
 
     def test_value(self):
         print(self.config.value())
@@ -961,7 +933,7 @@ scenarios[1].detection""")
         self.assertEqual(len(self.config['scenarios']), 0)
         self.config['scenarios'].add()
         self.assertEqual(len(self.config['scenarios']), 1)
-        self.config['scenarios'].add({'merlion':True, 'detection':[]})
+        self.config['scenarios'].add({'merlion': True, 'detection': []})
         self.assertEqual(len(self.config['scenarios']), 2)
         test = self.config.display('userdata')
         sys.stdout.write(test)
@@ -971,7 +943,7 @@ scenarios[1].detection""")
     merlion: true
     detection: []
 """)
-        self.config['scenarios'][0] = {'merlion':True, 'detection':[]}
+        self.config['scenarios'][0] = {'merlion': True, 'detection': []}
         self.assertEqual(len(self.config['scenarios']), 2)
         test = self.config.display('userdata')
         sys.stdout.write(test)
@@ -999,24 +971,24 @@ scenarios[1].detection""")
         config = ConfigBlock()
         try:
             config['test'] = 5
-            self.fail("Expected ConfigBlock to throw a ValueError for implicit declarations")
+            self.fail(
+                "Expected ConfigBlock to throw a ValueError for implicit declarations")
         except ValueError:
-            self.assertEqual(
-                sys.exc_info()[1].args, 
-                ("Key 'test' not defined in Config Block '' and Block disallows implicit entries",) )
+            self.assertEqual(sys.exc_info()[1].args, (
+                "Key 'test' not defined in Config Block '' and Block disallows implicit entries",
+            ))
 
         config = ConfigBlock(implicit=True)
         config['implicit_1'] = 5
-        config.declare( 'formal', ConfigValue( 42, int ) )
+        config.declare('formal', ConfigValue(42, int))
         config['implicit_2'] = 5
         print(config.display())
-        self.assertEqual( 3, len(config) )
-        self.assertEqual( ['implicit_1','formal','implicit_2'], 
-                          list(config.iterkeys()) )
+        self.assertEqual(3, len(config))
+        self.assertEqual(['implicit_1', 'formal', 'implicit_2'],
+                         list(config.iterkeys()))
         config.reset()
-        self.assertEqual( 1, len(config) )
-        self.assertEqual( ['formal'], 
-                          list(config.iterkeys()) )
+        self.assertEqual(1, len(config))
+        self.assertEqual(['formal'], list(config.iterkeys()))
 
     def test_argparse_help(self):
         try:
@@ -1039,13 +1011,11 @@ Scenario definition:
                         documentation
   --merlion             Water quality model
 """, help)
-        
 
     def test_argparse_help_implicit_disable(self):
-        self.config['scenario'].declare('epanet', ConfigValue( 
-                True, bool, 
-                'Use EPANET as the Water quality model',
-                None) ).declare_as_argument(group='Scenario definition')
+        self.config['scenario'].declare('epanet', ConfigValue(
+            True, bool, 'Use EPANET as the Water quality model',
+            None)).declare_as_argument(group='Scenario definition')
         try:
             import argparse
         except ImportError:
@@ -1069,8 +1039,6 @@ Scenario definition:
   --disable-epanet      [DON'T] Use EPANET as the Water quality model
 """, help)
 
-
-
     def test_argparse_import(self):
         try:
             import argparse
@@ -1083,8 +1051,7 @@ Scenario definition:
         self.assertEqual(0, len(vars(args)))
         leftovers = self.config.import_argparse(args)
         self.assertEqual(0, len(vars(args)))
-        self.assertEqual(
-            [], [x.name(True) for x in self.config.user_values()] )
+        self.assertEqual([], [x.name(True) for x in self.config.user_values()])
 
         args = parser.parse_args(['--merlion'])
         self.config.reset()
@@ -1092,25 +1059,20 @@ Scenario definition:
         self.assertEqual(1, len(vars(args)))
         leftovers = self.config.import_argparse(args)
         self.assertEqual(0, len(vars(args)))
-        self.assertEqual(
-            ['scenario.merlion'], 
-            [x.name(True) for x in self.config.user_values()] )
+        self.assertEqual(['scenario.merlion'],
+                         [x.name(True) for x in self.config.user_values()])
 
-
-        args = parser.parse_args(['--merlion','--epanet-file','foo'])
+        args = parser.parse_args(['--merlion', '--epanet-file', 'foo'])
         self.config.reset()
         self.assertFalse(self.config['scenario']['merlion'])
-        self.assertEqual( 'Net3.inp', 
-                          self.config['network']['epanet file'])
+        self.assertEqual('Net3.inp', self.config['network']['epanet file'])
         self.assertEqual(2, len(vars(args)))
         leftovers = self.config.import_argparse(args)
         self.assertEqual(1, len(vars(args)))
-        self.assertEqual(
-            ['network.epanet file','scenario.merlion'], 
-            [x.name(True) for x in self.config.user_values()] )
+        self.assertEqual(['network.epanet file', 'scenario.merlion'],
+                         [x.name(True) for x in self.config.user_values()])
         self.assertTrue(self.config['scenario']['merlion'])
         self.assertEqual('foo', self.config['network']['epanet file'])
-
 
     def test_argparse_subparsers(self):
         try:
@@ -1121,8 +1083,8 @@ Scenario definition:
         subp = parser.add_subparsers(title="Subcommands").add_parser('flushing')
 
         # Declare an argument by passing in the name of the subparser
-        self.config['flushing']['flush nodes'].get('duration').declare_as_argument(
-            group='flushing')
+        self.config['flushing']['flush nodes'].get(
+            'duration').declare_as_argument(group='flushing')
         # Declare an argument by passing in the name of the subparser
         # and an implicit group
         self.config['flushing']['flush nodes'].get('feasible nodes') \
@@ -1169,7 +1131,9 @@ Node information:
 
     def test_getattr_setattr(self):
         config = ConfigBlock()
-        foo = config.declare('foo', ConfigBlock(implicit=True, implicit_domain=int))
+        foo = config.declare(
+            'foo', ConfigBlock(
+                implicit=True, implicit_domain=int))
         foo.declare('explicit_bar', ConfigValue(0, int))
 
         self.assertEqual(1, len(foo))
@@ -1192,7 +1156,8 @@ Node information:
         except:
             raise
         else:
-            self.fail("Expected implicit assignment to explicit block to raise ValueError")
+            self.fail(
+                "Expected implicit assignment to explicit block to raise ValueError")
 
         try:
             a = config.baz
@@ -1201,8 +1166,9 @@ Node information:
         except:
             raise
         else:
-            self.fail("Expected implicit assignment to explicit block to raise ValueError")
+            self.fail(
+                "Expected implicit assignment to explicit block to raise ValueError")
+
+
 if __name__ == "__main__":
     unittest.main()
-
- 

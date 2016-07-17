@@ -25,23 +25,23 @@ class TaskPlugin(Plugin, task.Task):
 
     implements(IWorkflowTask)
 
-    def __init__(self, *args, **kwds):      #pragma:nocover
+    def __init__(self, *args, **kwds):  #pragma:nocover
         Plugin.__init__(self, *args, **kwds)
         task.Task.__init__(self, *args, **kwds)
 
     def __repr__(self):
-        return task.Task.__repr__(self)     #pragma:nocover
+        return task.Task.__repr__(self)  #pragma:nocover
 
 
 class WorkflowPlugin(Plugin, workflow.Workflow):
 
     implements(IWorkflowTask)
 
-    def __init__(self, *args, **kwds):      #pragma:nocover
+    def __init__(self, *args, **kwds):  #pragma:nocover
         Plugin.__init__(self, *args, **kwds)
         workflow.Workflow.__init__(self, *args, **kwds)
 
-    def __repr__(self):                     #pragma:nocover
+    def __repr__(self):  #pragma:nocover
         return workflow.Workflow.__repr__(self)
 
 
@@ -71,25 +71,28 @@ class Switch_Task(TaskPlugin):
         self.inputs.declare('value')
 
     def add_branch(self, value, task):
-        self._branches[value] = 'task'+str(task.id)
+        self._branches[value] = 'task' + str(task.id)
         self.output_controls.declare(self._branches[value])
 
-        task.input_controls.declare('task'+str(self.id))
-        setattr(task.input_controls, 'task'+str(self.id), self.output_controls[ self._branches[value] ])
+        task.input_controls.declare('task' + str(self.id))
+        setattr(task.input_controls, 'task' + str(self.id),
+                self.output_controls[self._branches[value]])
 
     def execute(self):
-        flag=False
+        flag = False
         for key in self._branches:
             if self.value == key:
                 self.output_controls[self._branches[key]].set_ready()
-                flag=True
+                flag = True
             else:
                 self.output_controls[self._branches[key]].reset()
         if not flag:
-            raise ValueError("Branch condition has value '%s' but no branch is indexed with that value.\n    Valid branch indices: %s" % (str(self.value), sorted(self._branches.keys())))
+            raise ValueError(
+                "Branch condition has value '%s' but no branch is indexed with that value.\n    Valid branch indices: %s"
+                % (str(self.value), sorted(self._branches.keys())))
 
     def __repr__(self):
-        return TaskPlugin.__repr__(self)        #pragma:nocover
+        return TaskPlugin.__repr__(self)  #pragma:nocover
 
 
 class IfThen_Task(Switch_Task):
@@ -100,5 +103,4 @@ class IfThen_Task(Switch_Task):
         Switch_Task.__init__(self, *args, **kwds)
 
     def __repr__(self):
-        return Switch_Task.__repr__(self)       #pragma:nocover
-
+        return Switch_Task.__repr__(self)  #pragma:nocover

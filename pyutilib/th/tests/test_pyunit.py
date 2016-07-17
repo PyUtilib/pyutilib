@@ -1,9 +1,9 @@
-
 import os
 from os.path import abspath, dirname
-currdir = dirname(abspath(__file__))+os.sep
+currdir = dirname(abspath(__file__)) + os.sep
 
 import pyutilib.th as unittest
+
 
 class Tester(unittest.TestCase):
 
@@ -19,7 +19,8 @@ class Tester(unittest.TestCase):
         self.fail("test_skip will always be skipped")
 
     def test_data(self):
-        self.recordTestData('foo','bar')
+        self.recordTestData('foo', 'bar')
+
 
 #@unittest.category('_foo_')
 class Tester2(unittest.TestCase):
@@ -27,8 +28,8 @@ class Tester2(unittest.TestCase):
     def test_pass(self):
         pass
 
-Tester2 = unittest.category('_foo_')(Tester2)
 
+Tester2 = unittest.category('_foo_')(Tester2)
 
 #
 # This class will create a test failure when the
@@ -37,12 +38,15 @@ Tester2 = unittest.category('_foo_')(Tester2)
 # is specified.
 #
 
+
 #@unittest.category('_ignore_')
 class Tester3(unittest.TestCase):
 
     def test_fail(self):
-        if os.environ.get('PYUTILIB_UNITTEST_CATEGORIES','') == '_ignore_':
-            self.fail("test_fail will fail when the _ignore_ category is specified.")
+        if os.environ.get('PYUTILIB_UNITTEST_CATEGORIES', '') == '_ignore_':
+            self.fail(
+                "test_fail will fail when the _ignore_ category is specified.")
+
 
 Tester3 = unittest.category('_ignore_')(Tester3)
 

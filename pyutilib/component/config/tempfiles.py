@@ -6,7 +6,6 @@
 #  Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
-
 """A plugin that manages temporary files."""
 
 __all__ = ['ITempfileManager', 'TempfileManagerPlugin', 'TempfileManager']
@@ -20,7 +19,6 @@ import shutil
 from pyutilib.component.core import Interface, implements
 from pyutilib.component.config.managed_plugin import ManagedSingletonPlugin
 from pyutilib.component.config.options import declare_option
-
 
 deletion_errors_are_fatal = True
 
@@ -63,11 +61,11 @@ class TempfileManagerPlugin(ManagedSingletonPlugin):
             return
         self._initialized = True
         #
-        kwds['name']='TempfileManager'
-        ManagedSingletonPlugin.__init__(self,**kwds)
+        kwds['name'] = 'TempfileManager'
+        ManagedSingletonPlugin.__init__(self, **kwds)
         self._tempfiles = [[]]
         declare_option("tempdir", default=None)
-        self._ctr=-1
+        self._ctr = -1
 
     def create_tempfile(self, suffix=None, prefix=None, text=False, dir=None):
         """
@@ -76,21 +74,21 @@ class TempfileManagerPlugin(ManagedSingletonPlugin):
         the filename.
         """
         if suffix is None:
-            suffix=''
+            suffix = ''
         if prefix is None:
-            prefix='tmp'
+            prefix = 'tmp'
         if dir is None:
-            dir=self.tempdir
+            dir = self.tempdir
 
         ans = tempfile.mkstemp(suffix=suffix, prefix=prefix, text=text, dir=dir)
         ans = list(ans)
-        if not os.path.isabs(ans[1]):           #pragma:nocover
-            fname = os.path.join(dir,ans[1])
+        if not os.path.isabs(ans[1]):  #pragma:nocover
+            fname = os.path.join(dir, ans[1])
         else:
             fname = ans[1]
         os.close(ans[0])
         if self._ctr >= 0:
-            new_fname = os.path.join(dir,prefix+str(self._ctr)+suffix)
+            new_fname = os.path.join(dir, prefix + str(self._ctr) + suffix)
             # Delete any file having the sequential name and then
             # rename
             if os.path.exists(new_fname):
@@ -108,14 +106,14 @@ class TempfileManagerPlugin(ManagedSingletonPlugin):
         the directory name.
         """
         if suffix is None:
-            suffix=''
+            suffix = ''
         if prefix is None:
-            prefix='tmp'
+            prefix = 'tmp'
         if dir is None:
-            dir=self.tempdir
+            dir = self.tempdir
         dirname = tempfile.mkdtemp(suffix=suffix, prefix=prefix, dir=dir)
         if self._ctr >= 0:
-            new_dirname = os.path.join(dir,prefix+str(self._ctr)+suffix)
+            new_dirname = os.path.join(dir, prefix + str(self._ctr) + suffix)
             # Delete any directory having the sequential name and then
             # rename
             if os.path.exists(new_dirname):
@@ -131,7 +129,7 @@ class TempfileManagerPlugin(ManagedSingletonPlugin):
         """Declare this file to be temporary."""
         tmp = os.path.abspath(filename)
         if exists and not os.path.exists(tmp):
-            raise IOError("Temporary file does not exist: "+tmp)
+            raise IOError("Temporary file does not exist: " + tmp)
         self._tempfiles[-1].append(tmp)
 
     def clear_tempfiles(self, remove=True):
@@ -142,11 +140,11 @@ class TempfileManagerPlugin(ManagedSingletonPlugin):
 
     def sequential_files(self, ctr=0):
         """Start generating sequential files, using the specified counter"""
-        self._ctr=ctr
+        self._ctr = ctr
 
     def unique_files(self):
         """Stop generating sequential files, using the specified counter"""
-        self._ctr=-1
+        self._ctr = -1
 
     #
     # Support "with" statements, where the pop automatically
@@ -165,7 +163,9 @@ class TempfileManagerPlugin(ManagedSingletonPlugin):
             for filename in files:
                 if os.path.exists(filename):
                     if os.path.isdir(filename):
-                        shutil.rmtree(filename, ignore_errors=not deletion_errors_are_fatal)
+                        shutil.rmtree(
+                            filename,
+                            ignore_errors=not deletion_errors_are_fatal)
                     else:
                         try:
                             os.remove(filename)
@@ -186,7 +186,7 @@ class TempfileManagerPlugin(ManagedSingletonPlugin):
                                     logger = logging.getLogger(
                                         'pyutilib.component.config')
                                     logger.warning("Unable to delete temporary "
-                                                   "file %s" % ( filename, ) )
+                                                   "file %s" % (filename,))
 
         if len(self._tempfiles) == 0:
             self._tempfiles = [[]]
@@ -196,4 +196,3 @@ class TempfileManagerPlugin(ManagedSingletonPlugin):
 # singleton plugin
 #
 TempfileManager = TempfileManagerPlugin()
-

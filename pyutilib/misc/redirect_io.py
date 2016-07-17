@@ -37,6 +37,7 @@ def setup_redirect(output):
         _local_file.append(False)
     sys.stdout = sys.stderr
 
+
 def reset_redirect():
     """ Reset redirection to use standard stdout and stderr """
     global _old_stdout
@@ -47,6 +48,7 @@ def reset_redirect():
         sys.stdout = _old_stdout.pop()
         sys.stderr = _old_stderr.pop()
 
+
 #
 # A class used to manage the redirection of IO.  The sys.stdout and
 # sys.stderr values are set to an instance of this class.
@@ -56,7 +58,7 @@ class _Redirecter:
     def __init__(self, ofile):
         """ Constructor. """
         self.ofile = ofile
-        self._out = open(ofile,"w")
+        self._out = open(ofile, "w")
 
     def write(self, s):
         """ Write an item. """

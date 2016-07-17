@@ -12,9 +12,10 @@ import sys
 import time
 import traceback
 
-__all__ = ('tic','toc')
+__all__ = ('tic', 'toc')
 
 _lastTime = _loadTime = time.time()
+
 
 def tic(msg=None):
     global _lastTime
@@ -24,6 +25,7 @@ def tic(msg=None):
     if msg:
         toc(msg, False)
 
+
 def toc(msg=None, delta=True, ostream=None):
 
     now = time.time()
@@ -31,14 +33,14 @@ def toc(msg=None, delta=True, ostream=None):
         ostream = sys.stdout
     if msg is None:
         msg = 'File "%s", line %s in %s' % \
-              traceback.extract_stack(limit=2)[0][:3] 
+              traceback.extract_stack(limit=2)[0][:3]
 
     if delta:
         global _lastTime
-        ans = now-_lastTime
-        ostream.write("[+%7.2f] %s\n" % ( ans, msg ))
+        ans = now - _lastTime
+        ostream.write("[+%7.2f] %s\n" % (ans, msg))
         _lastTime = now
     else:
-        ans = now-_loadTime
-        ostream.write("[%8.2f] %s\n" % ( ans, msg ))
+        ans = now - _loadTime
+        ostream.write("[%8.2f] %s\n" % (ans, msg))
     return ans
