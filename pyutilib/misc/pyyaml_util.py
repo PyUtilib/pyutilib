@@ -17,6 +17,10 @@ try:
     unicode
 except:
     basestring = str
+try:  # pragma no cover
+    from collections import OrderedDict
+except ImportError:  # pragma no cover
+    from odict import OrderedDict
 try:
     from StringIO import StringIO
 except:
@@ -258,7 +262,7 @@ def compare_repn(baseline,
                 % (prefix, j, pprint.pformat(baseline), pprint.pformat(output),
                    msg))
     #
-    elif type(baseline) is dict:
+    elif type(baseline) is dict or type(baseline) is OrderedDict:
         if exact and len(baseline.keys()) != len(output.keys()):
             raise IOError(
                 "(%s) Baseline and output have different keys:\nbaseline:\n%s\noutput:\n%s"

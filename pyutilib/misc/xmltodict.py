@@ -19,8 +19,8 @@ except ImportError:  # pragma no cover
     except ImportError:
         from io import StringIO
 try:  # pragma no cover
-    OrderedDict = dict
-    #from collections import OrderedDict
+    #OrderedDict = dict
+    from collections import OrderedDict
 except ImportError:  # pragma no cover
     from odict import OrderedDict
 
