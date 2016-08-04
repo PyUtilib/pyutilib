@@ -22,7 +22,7 @@ try:  # pragma no cover
     #OrderedDict = dict
     from collections import OrderedDict
 except ImportError:  # pragma no cover
-    from odict import OrderedDict
+    from ordereddict import OrderedDict
 
 try:  # pragma no cover
     _basestring = basestring

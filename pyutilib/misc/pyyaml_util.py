@@ -20,7 +20,7 @@ except:
 try:  # pragma no cover
     from collections import OrderedDict
 except ImportError:  # pragma no cover
-    from odict import OrderedDict
+    from ordereddict import OrderedDict
 try:
     from StringIO import StringIO
 except:
