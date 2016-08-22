@@ -3,6 +3,17 @@
 ====================
 
 -------------------------------------------------------------------------------
+ Version 5.4
+-------------------------------------------------------------------------------
+
+- Using ordered dictionary repns for XMLs to ensure consistent output
+- Reformatted PyUtilib code with yapf.
+- Fix to ensure compatibility with Pyro 4.46
+- Modified the test.pyutilib script to return an exit code from the console
+- Changes to eliminate import cycles
+- Removed internal use of 'import *'
+
+-------------------------------------------------------------------------------
  Version 5.3.5
 -------------------------------------------------------------------------------
 
