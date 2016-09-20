@@ -176,10 +176,11 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
             raise IOError("Setting data with " + str(len(val)) +
                           " rows but range has " + str(
                               self.get_range_nrows(rangename)))
-        ws = _range.destinations[0][0]
+        _destinations = list(_range.destinations)
+        ws = self.wb[_destinations[0][0]]
         #
         ylo, xlo, yhi, xhi = openpyxl.worksheet.worksheet.range_boundaries(
-            _range.destinations[0][1])
+            _destinations[0][1])
         for row in range(xhi - xlo + 1):
             for col in range(yhi - ylo + 1):
                 ws.cell(row=xlo + row, column=ylo + col).value = data[row][col]
@@ -222,8 +223,24 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
 
     def _get_range_data(self, _range, raw):
         ans = []
-        for row in _range.destinations[0][0].iter_rows(_range.destinations[0][
-                1]):
+        if type(_range) is tuple:
+            _data = _range
+        else:
+            _destinations = list(_range.destinations)
+            ws = self.wb[_destinations[0][0]]
+            #
+            # If we have a since cell, just return its value
+            #
+            if not ':' in _destinations[0][1]:
+                return [ ws[_destinations[0][1]].value ]
+            #
+            # If we have a range, return a list of values
+            #
+            _data = ws[_destinations[0][1]]
+        #
+        # Process Data
+        #
+        for row in _data:
             rvals = []
             for cell in row:
                 rvals.append(cell.value)
@@ -267,13 +284,15 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
             #
             # Otherwise, we assume that this is a range name.
             #
-            _range = self.wb.get_named_range(rangeid)
-            if _range is None:
-                if ':' in rangeid:
-                    return openpyxl.workbook.names.named_range.NamedRange(
-                        "temp", [(self.wb.active, rangeid)], None)
-                if exception:
-                    raise IOError("Unknown range name `" + str(rangeid) + "'")
-            return _range
+            try:
+                return self.wb.get_named_range(rangeid)
+            except KeyError:
+                pass
+            ws = self.wb.active
+            if ':' in rangeid:
+                _rangeid = rangeid.split(':')
+                return ws[_rangeid[0]:_rangeid[1]]
+            else:
+                return ws[rangeid:rangeid]
         except:
             raise IOError("Unknown range name `" + str(rangeid) + "'")

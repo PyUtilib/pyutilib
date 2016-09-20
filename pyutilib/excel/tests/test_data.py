@@ -162,8 +162,8 @@ class BaseTests(object):
         sheet.activate("Sheet2")
         val = sheet.get_range("sInfo")
         self.assertEqual(val, ["s1", "s2", "s3"])
-        val = sheet.get_range("A2:A2")
-        self.assertEqual(val, "s1")
+        val = sheet.get_range("A2:A4")
+        self.assertEqual(val, ["s1", "s2", "s3"])
         sheet.close()
 
     def test_calc_iterations(self):
