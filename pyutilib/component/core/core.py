@@ -957,7 +957,13 @@ class Plugin(with_metaclass(PluginMeta, object)):
 
     def enabled(self):
         """Return value indicating if this plugin is enabled"""
-        return self._enable
+        enable = self._enable
+        if hasattr(enable, 'get_value'):
+            try:
+                enable = enable.get_value()
+            except:
+                enable = None
+        return enable
 
     def __repr__(self, simple=False):
         """Return a textual representation of the plugin."""
