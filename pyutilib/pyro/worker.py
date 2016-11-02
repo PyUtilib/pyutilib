@@ -386,4 +386,8 @@ def TaskWorkerServer(cls, **kwds):
     try:
         worker.run()
     except _pyro.errors.ConnectionClosedError:
-        print("Lost connection to dispatch server " "- shutting down...")
+        print("Lost connection to dispatch server. "
+              "Shutting down...")
+    except:
+        worker.close()
+        raise
