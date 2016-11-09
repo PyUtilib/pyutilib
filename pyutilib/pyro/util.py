@@ -161,13 +161,17 @@ def get_dispatchers(group=":PyUtilibServer",
 def shutdown_pyro_components(host=None,
                              port=None,
                              num_retries=30,
+                             ns=None,
                              caller_name="Unknown"):
 
     if _pyro is None:
         raise ImportError("Pyro or Pyro4 is not available")
 
-    ns = get_nameserver(
-        host=host, port=port, num_retries=num_retries, caller_name=caller_name)
+    if ns is None:
+        ns = get_nameserver(host=host,
+                            port=port,
+                            num_retries=num_retries,
+                            caller_name=caller_name)
     if ns is None:
         print("***WARNING - Could not locate name server "
               "- Pyro components will not be shut down")
