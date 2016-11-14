@@ -2,6 +2,7 @@
 
 import sys
 from optparse import OptionParser
+import socket
 
 import pyutilib.pyro
 from pyutilib.pyro import Pyro as _pyro
@@ -39,8 +40,9 @@ def main():
         "--daemon-host",
         dest="daemon_host",
         metavar="HOST",
-        help="Hostname that the dispatcher daemon should bind on",
-        default=None)
+        help=("Hostname that the dispatcher daemon should bind on. "
+              "The default is the current hostname."),
+        default=socket.gethostname())
     parser.add_option(
         "--daemon-port",
         dest="daemon_port",
