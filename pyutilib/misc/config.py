@@ -622,6 +622,7 @@ class ConfigBlock(ConfigBase):
 
     def __getitem__(self, key):
         self._userAccessed = True
+        key = str(key)
         if isinstance(self._data[key], ConfigValue):
             return self._data[key].value()
         else:
@@ -629,6 +630,7 @@ class ConfigBlock(ConfigBase):
 
     def get(self, key, default=ConfigBase.NoArgument):
         self._userAccessed = True
+        key = str(key)
         if key in self._data:
             return self._data[key]
         if default is ConfigBase.NoArgument:
@@ -637,6 +639,7 @@ class ConfigBlock(ConfigBase):
         return default
 
     def __setitem__(self, key, val):
+        key = str(key)
         if key not in self._data:
             if self._implicit_domain is None:
                 self.add(key, ConfigValue(val))
@@ -647,6 +650,7 @@ class ConfigBlock(ConfigBase):
         #self._userAccessed = True
 
     def __contains__(self, key):
+        key = str(key)
         return key in self._data
 
     def __len__(self):
@@ -699,6 +703,7 @@ class ConfigBlock(ConfigBase):
         return list(self.iteritems())
 
     def _add(self, name, config):
+        name = str(name)
         if config._parent is not None:
             raise ValueError(
                 "config '%s' is already assigned to Config Block '%s'; "
@@ -746,8 +751,14 @@ class ConfigBlock(ConfigBase):
             raise ValueError("Expected dict value for %s.set_value, found %s" %
                              (self.name(True), type(value).__name__))
         _implicit = []
+        _decl_map = {}
         for key in value:
-            if key not in self._data:
+            if str(key) in self._data:
+                # str(key) may not be key... store the mapping so that
+                # when we later iterate over the _decl_order, we can map
+                # the local keys back to the incoming value keys.
+                _decl_map[str(key)] = key
+            else:
                 if self._implicit_declaration:
                     _implicit.append(key)
                 else:
@@ -765,9 +776,9 @@ class ConfigBlock(ConfigBase):
             # things are deterministic and in case a validation depends
             # on the order)
             for key in self._decl_order:
-                if key in value:
+                if key in _decl_map:
                     #print "Setting", key, " = ", value
-                    self._data[key].set_value(value[key])
+                    self._data[key].set_value(value[_decl_map[key]])
             # implicit data is declated at the end (in sorted order)
             if self._implicit_domain is None:
                 for key in sorted(_implicit):

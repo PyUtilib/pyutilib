@@ -1170,5 +1170,49 @@ Node information:
                 "Expected implicit assignment to explicit block to raise ValueError")
 
 
+    def test_nonString_keys(self):
+        config = ConfigBlock(implicit=True)
+        config.declare(5, ConfigValue(50, int))
+        self.assertIn(5, config)
+        self.assertIn('5', config)
+        self.assertEqual(config[5], 50)
+        self.assertEqual(config['5'], 50)
+        self.assertEqual(config.get(5).value(), 50)
+        self.assertEqual(config.get('5').value(), 50)
+
+        config[5] = 500
+        self.assertIn(5, config)
+        self.assertIn('5', config)
+        self.assertEqual(config[5], 500)
+        self.assertEqual(config['5'], 500)
+        self.assertEqual(config.get(5).value(), 500)
+        self.assertEqual(config.get('5').value(), 500)
+
+        config[1] = 10
+        self.assertIn(1, config)
+        self.assertIn('1', config)
+        self.assertEqual(config[1], 10)
+        self.assertEqual(config['1'], 10)
+        self.assertEqual(config.get(1).value(), 10)
+        self.assertEqual(config.get('1').value(), 10)
+
+        self.assertEqual(config.display(), "5: 500\n1: 10\n")
+
+        config.set_value({5:5000})
+        print config.display()
+        self.assertIn(1, config)
+        self.assertIn('1', config)
+        self.assertEqual(config[1], 10)
+        self.assertEqual(config['1'], 10)
+        self.assertEqual(config.get(1).value(), 10)
+        self.assertEqual(config.get('1').value(), 10)
+        self.assertIn(5, config)
+        self.assertIn('5', config)
+        self.assertEqual(config[5], 5000)
+        self.assertEqual(config['5'], 5000)
+        self.assertEqual(config.get(5).value(), 5000)
+        self.assertEqual(config.get('5').value(), 5000)
+
+
 if __name__ == "__main__":
     unittest.main()
