@@ -1199,7 +1199,6 @@ Node information:
         self.assertEqual(config.display(), "5: 500\n1: 10\n")
 
         config.set_value({5:5000})
-        print config.display()
         self.assertIn(1, config)
         self.assertIn('1', config)
         self.assertEqual(config[1], 10)
