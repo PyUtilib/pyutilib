@@ -438,7 +438,8 @@ scenarios[1].detection""")
         self.config['scenario'].add('foo', ConfigBlock())
         test = '\n'.join(x.name(True) for x in self.config.unused_user_values())
         sys.stdout.write(test)
-        self.assertEqual(test, "scenario")
+        self.assertEqual(test, """scenario
+scenario.foo""")
 
     def test_UserValues_default(self):
         test = '\n'.join(x.name(True) for x in self.config.user_values())
@@ -504,7 +505,8 @@ scenarios[1].detection""")
         self.config['scenario'].add('foo', ConfigBlock())
         test = '\n'.join(x.name(True) for x in self.config.user_values())
         sys.stdout.write(test)
-        self.assertEqual(test, "scenario")
+        self.assertEqual(test, """scenario
+scenario.foo""")
 
     def test_parseDisplayAndValue_default(self):
         if not using_yaml:

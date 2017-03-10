@@ -648,17 +648,14 @@ class ConfigBlock(ConfigBase):
         if key in self._data:
             return self._data[key]
         if default is ConfigBase.NoArgument:
-            raise KeyError("Key '%s' not found in ConfigBlock %s" %
-                           (key, self.name(True)))
-        return default
+            return None
+        else:
+            return default
 
     def __setitem__(self, key, val):
         key = str(key)
         if key not in self._data:
-            if self._implicit_domain is None:
-                self.add(key, ConfigValue(val))
-            else:
-                self.add(key, self._implicit_domain(val))
+            self.add(key, val)
         else:
             self._data[key].set_value(val)
         #self._userAccessed = True
@@ -747,7 +744,14 @@ class ConfigBlock(ConfigBase):
             raise ValueError("Key '%s' not defined in Config Block '%s'"
                              " and Block disallows implicit entries" %
                              (name, self.name(True)))
-        ans = self._add(name, config)
+
+        if self._implicit_domain is None:
+            if isinstance(config, ConfigBase):
+                ans = self._add(name, config)
+            else:
+                ans = self._add(name, ConfigValue(config))
+        else:
+            ans = self._add(name, self._implicit_domain(config))
         self._userSet = True
         return ans
 
@@ -794,12 +798,8 @@ class ConfigBlock(ConfigBase):
                     #print "Setting", key, " = ", value
                     self._data[key].set_value(value[_decl_map[key]])
             # implicit data is declated at the end (in sorted order)
-            if self._implicit_domain is None:
-                for key in sorted(_implicit):
-                    self.add(key, ConfigValue(value[key]))
-            else:
-                for key in sorted(_implicit):
-                    self.add(key, self._implicit_domain(value[key]))
+            for key in sorted(_implicit):
+                self.add(key, value[key])
         except:
             self.reset()
             self.set_value(_old_data)
