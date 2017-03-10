@@ -7,7 +7,6 @@
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
 
-from copy import deepcopy
 import re
 from sys import exc_info
 from textwrap import wrap
@@ -75,7 +74,7 @@ class ConfigBase(object):
     NoArgument = (None,)
 
     def __init__(self,
-                 default,
+                 default=None,
                  domain=None,
                  description=None,
                  doc=None,
@@ -126,10 +125,25 @@ class ConfigBase(object):
             object.__setattr__(self, key, val)
 
     def __call__(self, value=NoArgument):
-        ans = deepcopy(self)
-        ans.reset()
-        ans._parent = None
-        ans._name = None
+        ans = self.__class__()
+        ans._default     = self._default
+        ans._domain      = self._domain
+        ans._description = self._description
+        ans._doc         = self._doc
+        ans._visibility  = self._visibility
+        if self.__class__ is ConfigBlock:
+            ans._implicit_declaration = self._implicit_declaration
+            ans._implicit_domain = self._implicit_domain
+            for k in self._decl_order:
+                if k in self._declared:
+                    v = self._data[k]
+                    ans._data[k] = _tmp = v()
+                    ans._decl_order.append(k)
+                    ans._declared.add(k)
+                    _tmp._parent = ans
+                    _tmp._name = v._name
+        else:
+            ans.reset()
         if value is not ConfigBase.NoArgument:
             ans.set_value(value)
         return ans
