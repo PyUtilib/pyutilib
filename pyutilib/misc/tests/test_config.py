@@ -868,9 +868,65 @@ scenario.foo""")
 
     def test_block_get(self):
         self.assertTrue('scenario' in self.config)
-        self.assertNotEquals(self.config.get('scenario', 'bogus'), 'bogus')
+        self.assertNotEquals(
+            self.config.get('scenario', 'bogus').value(), 'bogus')
         self.assertFalse('fubar' in self.config)
-        self.assertEquals(self.config.get('fubar', 'bogus'), 'bogus')
+        self.assertEquals(
+            self.config.get('fubar', 'bogus').value(), 'bogus')
+
+        cfg = ConfigBlock()
+        cfg.declare('foo', ConfigValue(1, int))
+        self.assertEqual( cfg.get('foo', 5).value(), 1 )
+        self.assertEqual( len(cfg), 1 )
+        self.assertEqual( cfg.get('bar').value(), None )
+        self.assertEqual( len(cfg), 1 )
+
+        cfg = ConfigBlock(implicit=True)
+        cfg.declare('foo', ConfigValue(1, int))
+        self.assertEqual( cfg.get('foo', 5).value(), 1 )
+        self.assertEqual( len(cfg), 1 )
+        self.assertEqual( cfg.get('bar', 5).value(), 5 )
+        self.assertEqual( len(cfg), 1 )
+        self.assertEqual( cfg.get('baz').value(), None )
+        self.assertEqual( len(cfg), 1 )
+
+        cfg = ConfigBlock( implicit=True,
+                           implicit_domain=ConfigList(domain=str) )
+        cfg.declare('foo', ConfigValue(1, int))
+        self.assertEqual( cfg.get('foo', 5).value(), 1 )
+        self.assertEqual( len(cfg), 1 )
+        self.assertEqual( cfg.get('bar', [5]).value(), ['5'] )
+        self.assertEqual( len(cfg), 1 )
+        self.assertEqual( cfg.get('baz').value(), [] )
+        self.assertEqual( len(cfg), 1 )
+
+    def test_setdefault(self):
+        cfg = ConfigBlock()
+        cfg.declare('foo', ConfigValue(1, int))
+        self.assertEqual( cfg.setdefault('foo', 5).value(), 1 )
+        self.assertEqual( len(cfg), 1 )
+        self.assertRaisesRegexp(ValueError, '.*disallows implicit entries',
+                                cfg.setdefault, 'bar', 0)
+        self.assertEqual( len(cfg), 1 )
+
+        cfg = ConfigBlock(implicit=True)
+        cfg.declare('foo', ConfigValue(1, int))
+        self.assertEqual( cfg.setdefault('foo', 5).value(), 1 )
+        self.assertEqual( len(cfg), 1 )
+        self.assertEqual( cfg.setdefault('bar', 5).value(), 5 )
+        self.assertEqual( len(cfg), 2 )
+        self.assertEqual( cfg.setdefault('baz').value(), None )
+        self.assertEqual( len(cfg), 3 )
+
+        cfg = ConfigBlock( implicit=True,
+                           implicit_domain=ConfigList(domain=str) )
+        cfg.declare('foo', ConfigValue(1, int))
+        self.assertEqual( cfg.setdefault('foo', 5).value(), 1 )
+        self.assertEqual( len(cfg), 1 )
+        self.assertEqual( cfg.setdefault('bar', [5]).value(), ['5'] )
+        self.assertEqual( len(cfg), 2 )
+        self.assertEqual( cfg.setdefault('baz').value(), [] )
+        self.assertEqual( len(cfg), 3 )
 
     def test_block_keys(self):
         ref = ['scenario file', 'merlion', 'detection']

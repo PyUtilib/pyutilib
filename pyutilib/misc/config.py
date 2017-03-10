@@ -655,10 +655,25 @@ class ConfigBlock(ConfigBase):
         key = str(key)
         if key in self._data:
             return self._data[key]
-        if default is ConfigBase.NoArgument:
-            return None
+        if self._implicit_domain is not None:
+            if default is ConfigBase.NoArgument:
+                return self._implicit_domain()
+            else:
+                return self._implicit_domain(default)
+        elif default is ConfigBase.NoArgument:
+            return ConfigValue()
         else:
-            return default
+            return ConfigValue(default)
+
+    def setdefault(self, key, default=ConfigBase.NoArgument):
+        self._userAccessed = True
+        key = str(key)
+        if key in self._data:
+            return self._data[key]
+        if default is ConfigBase.NoArgument:
+            return self.add(key, None)
+        else:
+            return self.add(key, default)
 
     def __setitem__(self, key, val):
         key = str(key)
