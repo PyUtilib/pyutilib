@@ -10,6 +10,7 @@
 import sys
 import os
 import os.path
+import pickle
 currdir = os.path.dirname(os.path.abspath(__file__))
 import pyutilib.th as unittest
 
@@ -1283,6 +1284,14 @@ Node information:
         self.assertEqual(config['5'], 5000)
         self.assertEqual(config.get(5).value(), 5000)
         self.assertEqual(config.get('5').value(), 5000)
+
+    def test_pickle(self):
+        # A simple test: pickle the default config and restore it.
+        # calling other tests should still pass.
+        pickle_str = pickle.dumps(self.config)
+        self.config = None
+        self.config = pickle.loads(pickle_str)
+        self.test_display_list()
 
 
 if __name__ == "__main__":

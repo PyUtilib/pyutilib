@@ -11,6 +11,7 @@ import re
 from sys import exc_info
 from textwrap import wrap
 import logging
+import pickle
 
 import six
 from six.moves import xrange
@@ -61,6 +62,43 @@ def _strip_indentation(doc):
     for i, l in enumerate(lines[1:]):
         lines[i + 1] = l[minIndent:].rstrip()
     return '\n'.join(lines)
+
+
+class _UnpickleableDomain(object):
+    def __init__(self, obj):
+        self._type = type(obj).__name__
+        self._name = obj.name(True)
+
+    def __call__(self, arg):
+        logging.error(
+"""%s %s was pickled with an unpicklable domain.
+    The domain was stripped and lost during the pickle process.  Setting
+    new values on the restored object cannot be mapped into the correct
+    domain.
+""" % ( self._type, self._name))
+        return arg
+
+def _picklable(field,obj):
+    try:
+        pickle.dumps(field)
+        return field
+    except:
+        # Contrary to the documentation, Python is not at all consistent
+        # with the exception that is raised when pickling an object
+        # fails:
+        #
+        #    Python 2.6 - 3.4:  pickle.PicklingError
+        #    Python 3.5 - 4.6:  AttributeError
+        #    Python 2.6 - 2.7 (cPickle):  TypeError
+        #
+        # What we are concerned about is masking things like recursion
+        # errors.  Unfortunately, Python is not quite consistent there,
+        # either: exceeding recursion depth raises a RuntimeError
+        # through 3.4, then switches to a RecursionError (a derivative
+        # of RuntimeError).
+        if isinstance(exc_info()[0], RuntimeError):
+            raise
+        return _UnpickleableDomain(obj)
 
 
 class ConfigBase(object):
@@ -115,6 +153,8 @@ class ConfigBase(object):
         else:
             state = super(ConfigBase, self).__getstate__()
         state.update((key, getattr(self, key)) for key in ConfigBase.__slots__)
+        state['_domain'] = _picklable(state['_domain'], self)
+        state['_parent'] = None
         return state
 
     def __setstate__(self, state):
@@ -509,6 +549,11 @@ class ConfigList(ConfigBase):
             self._domain = ConfigValue(None, domain=self._domain)
 
 
+    def __setstate__(self, state):
+        state = super(ConfigList, self).__setstate__(state)
+        for x in self._data:
+            x._parent = self
+
     def __getitem__(self, key):
         self._userAccessed = True
         if isinstance(self._data[key], ConfigValue):
@@ -637,10 +682,15 @@ class ConfigBlock(ConfigBase):
         self._data = {}
 
     def __getstate__(self):
-        ans = super(ConfigBlock, self).__getstate__()
-        for key in ConfigBlock.__slots__:
-            ans[key] = getattr(self, key)
-        return ans
+        state = super(ConfigBlock, self).__getstate__()
+        state.update((key, getattr(self, key)) for key in ConfigBlock.__slots__)
+        state['_implicit_domain'] = _picklable(state['_implicit_domain'], self)
+        return state
+
+    def __setstate__(self, state):
+        state = super(ConfigBlock, self).__setstate__(state)
+        for x in six.itervalues(self._data):
+            x._parent = self
 
     def __getitem__(self, key):
         self._userAccessed = True
