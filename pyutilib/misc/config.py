@@ -501,6 +501,14 @@ class ConfigValue(ConfigBase):
 
 class ConfigList(ConfigBase):
 
+    def __init__(self, *args, **kwds):
+        ConfigBase.__init__(self, *args, **kwds)
+        if self._domain is None or isinstance(self._domain, ConfigBase):
+            pass
+        else:
+            self._domain = ConfigValue(None, domain=self._domain)
+
+
     def __getitem__(self, key):
         self._userAccessed = True
         if isinstance(self._data[key], ConfigValue):
