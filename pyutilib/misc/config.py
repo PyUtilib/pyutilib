@@ -578,9 +578,9 @@ class ConfigList(ConfigBase):
         self._data[-1]._userSet = True
         self._userSet = True
 
-    #@deprecated
     def add(self, value=ConfigBase.NoArgument):
-        #logger.warning("ConfigList.add() has been deprecated.  Use append()")
+        logger.warning(
+            "DEPRECATED: ConfigList.add() has been deprecated.  Use append()")
         return self.append(value)
 
     def _data_collector(self, level, prefix, visibility=None, docMode=False):

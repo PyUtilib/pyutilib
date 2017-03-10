@@ -332,8 +332,8 @@ flushing:
     max pipes: 2
     response time: 60.0
 """
-        self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion': True, 'detection': []})
+        self.config['scenarios'].append()
+        self.config['scenarios'].append({'merlion': True, 'detection': []})
         test = self.config.display()
         sys.stdout.write(test)
         self.assertEqual(test, reference)
@@ -344,7 +344,7 @@ flushing:
         self.assertEqual(test, "")
 
     def test_display_userdata_list(self):
-        self.config['scenarios'].add()
+        self.config['scenarios'].append()
         test = self.config.display('userdata')
         sys.stdout.write(test)
         self.assertEqual(test, """scenarios:
@@ -352,8 +352,8 @@ flushing:
 """)
 
     def test_display_userdata_list_nonDefault(self):
-        self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion': True, 'detection': []})
+        self.config['scenarios'].append()
+        self.config['scenarios'].append({'merlion': True, 'detection': []})
         test = self.config.display('userdata')
         sys.stdout.write(test)
         self.assertEqual(test, """scenarios:
@@ -390,15 +390,15 @@ flushing:
         self.assertEqual(test, "scenario.merlion")
 
     def test_unusedUserValues_list(self):
-        self.config['scenarios'].add()
+        self.config['scenarios'].append()
         test = '\n'.join(x.name(True) for x in self.config.unused_user_values())
         sys.stdout.write(test)
         self.assertEqual(test, """scenarios
 scenarios[0]""")
 
     def test_unusedUserValues_list_nonDefault(self):
-        self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion': True, 'detection': []})
+        self.config['scenarios'].append()
+        self.config['scenarios'].append({'merlion': True, 'detection': []})
         test = '\n'.join(x.name(True) for x in self.config.unused_user_values())
         sys.stdout.write(test)
         self.assertEqual(test, """scenarios
@@ -408,8 +408,8 @@ scenarios[1].merlion
 scenarios[1].detection""")
 
     def test_unusedUserValues_list_nonDefault_listAccessed(self):
-        self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion': True, 'detection': []})
+        self.config['scenarios'].append()
+        self.config['scenarios'].append({'merlion': True, 'detection': []})
         for x in self.config['scenarios']:
             pass
         test = '\n'.join(x.name(True) for x in self.config.unused_user_values())
@@ -420,8 +420,8 @@ scenarios[1].merlion
 scenarios[1].detection""")
 
     def test_unusedUserValues_list_nonDefault_itemAccessed(self):
-        self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion': True, 'detection': []})
+        self.config['scenarios'].append()
+        self.config['scenarios'].append({'merlion': True, 'detection': []})
         self.config['scenarios'][1]['merlion']
         test = '\n'.join(x.name(True) for x in self.config.unused_user_values())
         sys.stdout.write(test)
@@ -453,15 +453,15 @@ scenario.foo""")
         self.assertEqual(test, "scenario.merlion")
 
     def test_UserValues_list(self):
-        self.config['scenarios'].add()
+        self.config['scenarios'].append()
         test = '\n'.join(x.name(True) for x in self.config.user_values())
         sys.stdout.write(test)
         self.assertEqual(test, """scenarios
 scenarios[0]""")
 
     def test_UserValues_list_nonDefault(self):
-        self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion': True, 'detection': []})
+        self.config['scenarios'].append()
+        self.config['scenarios'].append({'merlion': True, 'detection': []})
         test = '\n'.join(x.name(True) for x in self.config.user_values())
         sys.stdout.write(test)
         self.assertEqual(test, """scenarios
@@ -471,8 +471,8 @@ scenarios[1].merlion
 scenarios[1].detection""")
 
     def test_UserValues_list_nonDefault_listAccessed(self):
-        self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion': True, 'detection': []})
+        self.config['scenarios'].append()
+        self.config['scenarios'].append({'merlion': True, 'detection': []})
         for x in self.config['scenarios']:
             pass
         test = '\n'.join(x.name(True) for x in self.config.user_values())
@@ -484,8 +484,8 @@ scenarios[1].merlion
 scenarios[1].detection""")
 
     def test_UserValues_list_nonDefault_itemAccessed(self):
-        self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion': True, 'detection': []})
+        self.config['scenarios'].append()
+        self.config['scenarios'].append({'merlion': True, 'detection': []})
         self.config['scenarios'][1]['merlion']
         test = '\n'.join(x.name(True) for x in self.config.user_values())
         sys.stdout.write(test)
@@ -518,8 +518,8 @@ scenario.foo""")
     def test_parseDisplayAndValue_list(self):
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
-        self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion': True, 'detection': []})
+        self.config['scenarios'].append()
+        self.config['scenarios'].append({'merlion': True, 'detection': []})
         test = self.config.display()
         sys.stdout.write(test)
         self.assertEqual(yaml.load(test), self.config.value())
@@ -534,7 +534,7 @@ scenario.foo""")
     def test_parseDisplay_userdata_list(self):
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
-        self.config['scenarios'].add()
+        self.config['scenarios'].append()
         test = self.config.display('userdata')
         sys.stdout.write(test)
         self.assertEqual(yaml.load(test), {'scenarios': [None]})
@@ -542,8 +542,8 @@ scenario.foo""")
     def test_parseDisplay_userdata_list_nonDefault(self):
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
-        self.config['scenarios'].add()
-        self.config['scenarios'].add({'merlion': True, 'detection': []})
+        self.config['scenarios'].append()
+        self.config['scenarios'].append({'merlion': True, 'detection': []})
         test = self.config.display('userdata')
         sys.stdout.write(test)
         self.assertEqual(
@@ -581,16 +581,16 @@ scenario.foo""")
         self.assertEqual(val, [])
 
     def test_value_ConfigList_simplePopulated(self):
-        self.config['nodes'].add('1')
-        self.config['nodes'].add(3)
-        self.config['nodes'].add()
+        self.config['nodes'].append('1')
+        self.config['nodes'].append(3)
+        self.config['nodes'].append()
         val = self.config['nodes'].value()
         self.assertIs(type(val), list)
         self.assertEqual(len(val), 3)
         self.assertEqual(val, [1, 3, 0])
 
     def test_value_ConfigList_complexPopulated(self):
-        self.config['scenarios'].add()
+        self.config['scenarios'].append()
         val = self.config['scenarios'].value()
         self.assertIs(type(val), list)
         self.assertEqual(len(val), 1)
@@ -599,7 +599,7 @@ scenario.foo""")
                                 'scenario file': 'Net3.tsg'}])
 
     def test_name(self):
-        self.config['scenarios'].add()
+        self.config['scenarios'].append()
         self.assertEqual(self.config.name(), "")
         self.assertEqual(self.config['scenarios'].name(), "scenarios")
         self.assertEqual(self.config['scenarios'][0].name(), "[0]")
@@ -607,7 +607,7 @@ scenario.foo""")
                          "merlion")
 
     def test_name_fullyQualified(self):
-        self.config['scenarios'].add()
+        self.config['scenarios'].append()
         self.assertEqual(self.config.name(True), "")
         self.assertEqual(self.config['scenarios'].name(True), "scenarios")
         self.assertEqual(self.config['scenarios'][0].name(True), "scenarios[0]")
@@ -933,9 +933,9 @@ scenario.foo""")
 
     def test_list_manipulation(self):
         self.assertEqual(len(self.config['scenarios']), 0)
-        self.config['scenarios'].add()
+        self.config['scenarios'].append()
         self.assertEqual(len(self.config['scenarios']), 1)
-        self.config['scenarios'].add({'merlion': True, 'detection': []})
+        self.config['scenarios'].append({'merlion': True, 'detection': []})
         self.assertEqual(len(self.config['scenarios']), 2)
         test = self.config.display('userdata')
         sys.stdout.write(test)
