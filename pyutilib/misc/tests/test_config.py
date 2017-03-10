@@ -625,6 +625,8 @@ scenario.foo""")
             self.config['flushing']['flush nodes']['rate'] = 'a'
         except ValueError:
             pass
+        except:
+            raise
         else:
             self.fail('expected test to raise ValueError')
         val = self.config['flushing']['flush nodes']['rate']
@@ -648,6 +650,8 @@ scenario.foo""")
             self.config['scenario']['detection'] = 50
         except ValueError:
             pass
+        except:
+            raise
         else:
             self.fail('expected test to raise ValueError')
         val = self.config['scenario']['detection']
@@ -659,6 +663,8 @@ scenario.foo""")
             self.config['scenario']['detection'] = [5.5, 'a']
         except ValueError:
             pass
+        except:
+            raise
         else:
             self.fail('expected test to raise ValueError')
         val = self.config['scenario']['detection']
@@ -682,6 +688,8 @@ scenario.foo""")
             self.config['nodes'] = [5, 'a']
         except ValueError:
             pass
+        except:
+            raise
         else:
             self.fail('expected test to raise ValueError')
         val = self.config['nodes'].value()
@@ -775,6 +783,8 @@ scenario.foo""")
             self.config['scenario'] = _test
         except ValueError:
             pass
+        except:
+            raise
         else:
             self.fail('expected test to raise ValueError')
         self.assertEqual(self._reference, self.config.value())
@@ -783,6 +793,8 @@ scenario.foo""")
             self.config['scenario'] = []
         except ValueError:
             pass
+        except:
+            raise
         else:
             self.fail('expected test to raise ValueError')
         self.assertEqual(self._reference, self.config.value())
@@ -806,6 +818,8 @@ scenario.foo""")
             c = ConfigValue('a', domain=int)
         except ValueError:
             pass
+        except:
+            raise
         else:
             self.fail("Expected casting a to int to raise a value error")
 
