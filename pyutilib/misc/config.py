@@ -130,8 +130,6 @@ class ConfigBase(object):
         self._visibility = visibility
         self._argparse = None
 
-        self.reset()
-
     def __getstate__(self):
         # Nominally, __getstate__() should return:
         #
@@ -528,6 +526,10 @@ group, subparser, or (subparser, group)."""
 
 class ConfigValue(ConfigBase):
 
+    def __init__(self, *args, **kwds):
+        ConfigBase.__init__(self, *args, **kwds)
+        self.reset()
+
     def value(self, accessValue=True):
         if accessValue:
             self._userAccessed = True
@@ -550,10 +552,13 @@ class ConfigList(ConfigBase):
 
     def __init__(self, *args, **kwds):
         ConfigBase.__init__(self, *args, **kwds)
-        if self._domain is None or isinstance(self._domain, ConfigBase):
+        if self._domain is None:
+            self._domain = ConfigValue()
+        elif isinstance(self._domain, ConfigBase):
             pass
         else:
             self._domain = ConfigValue(None, domain=self._domain)
+        self.reset()
 
 
     def __setstate__(self, state):
@@ -612,12 +617,14 @@ class ConfigList(ConfigBase):
 
     def reset(self):
         ConfigBase.reset(self)
-        # Because the base reset() calls set_value, which will recreate
-        # the list from scratch, I do not think that we need to
-        # explicitly call the reset() function on any newly-created
-        # entries:
-        #for val in self._data:
-        #    val.reset()
+        # Because the base reset() calls set_value, any deefault list
+        # entries will get their userSet flag set.  This is wrong, as
+        # reset() should conceptually reset teh object to it's default
+        # state (e.g., before the user ever had a chance to mess with
+        # things).  As the list could contain a ConfigBlock, this is a
+        # recursive operation to put the userSet values back.
+        for val in self.user_values():
+            val._userSet = False
 
     def append(self, value=ConfigBase.NoArgument):
         val = self._cast(value)
