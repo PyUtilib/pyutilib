@@ -567,13 +567,16 @@ class ConfigList(ConfigBase):
             x._parent = self
 
     def __getitem__(self, key):
-        self._userAccessed = True
-        if isinstance(self._data[key], ConfigValue):
-            return self._data[key].value()
+        val = self.get(key)
+        if isinstance(val, ConfigValue):
+            return val.value()
         else:
-            return self._data[key]
+            return val
 
     def get(self, key):
+        # Note: get() is borrowed from ConfigBlock for cases where we
+        # want the raw stored object (and to aviod the implicit
+        # conversion of ConfigValue members to their stored data).
         self._userAccessed = True
         return self._data[key]
 

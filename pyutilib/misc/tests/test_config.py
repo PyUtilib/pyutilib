@@ -1174,6 +1174,51 @@ endBlock{}
   detection: []
 """)
 
+    def test_list_get(self):
+        X = ConfigBlock(implicit=True)
+        X.config = ConfigList()
+        self.assertEqual(_display(X, 'userdata'), "")
+        self.assertRaisesRegexp(
+            IndexError, '.*out of range', X.config.get, 0 )
+        self.assertRaisesRegexp(
+            IndexError, '.*out of range', X.config.__getitem__, 0 )
+        # get() shouldn't change the userdata flag...
+        self.assertEqual(_display(X, 'userdata'), "")
+
+        X = ConfigBlock(implicit=True)
+        X.config = ConfigList([42], int)
+        self.assertEqual(_display(X, 'userdata'), "")
+        val = X.config.get(0)
+        self.assertEqual(val.value(), 42)
+        self.assertIs(type(val), ConfigValue)
+        # get() shouldn't change the userdata flag...
+        self.assertEqual(_display(X, 'userdata'), "")
+        val = X.config[0]
+        self.assertIs(type(val), int)
+        self.assertEqual(val, 42)
+        # get() shouldn't change the userdata flag...
+        self.assertEqual(_display(X, 'userdata'), "")
+
+        self.assertRaisesRegexp(IndexError, '.*out of range', X.config.get, 1)
+
+        # this should ONLY change the userSet flag on the item (and not
+        # the list)
+        X.config.get(0).set_value(20)
+        self.assertEqual(_display(X, 'userdata'), "  - 20\n")
+
+        # this should ONLY change the userSet flag on the item (and not
+        # the list)
+        X = ConfigBlock(implicit=True)
+        X.config = ConfigList([42], int)
+        X.config[0] = 20
+        self.assertEqual(_display(X, 'userdata'), "  - 20\n")
+
+        # This should change both...
+        X = ConfigBlock(implicit=True)
+        X.config = ConfigList([42], int)
+        X.config.append(20)
+        self.assertEqual(_display(X, 'userdata'), "config:\n  - 20\n")
+
     def test_implicit_entries(self):
         config = ConfigBlock()
         try:
