@@ -17,7 +17,7 @@ import pyutilib.th as unittest
 import pyutilib.misc.comparison
 from pyutilib.misc.config import ConfigValue, ConfigBlock, ConfigList
 
-from six import PY3
+from six import PY3, StringIO
 
 try:
     import yaml
@@ -25,6 +25,11 @@ try:
 except ImportError:
     using_yaml = False
 
+# Utility to redirect display() to a string
+def _display(obj, *args):
+    test = StringIO()
+    obj.display(ostream=test, *args)
+    return test.getvalue()
 
 class Test(unittest.TestCase):
 
@@ -296,7 +301,7 @@ flushing:
     max pipes: 2
     response time: 60.0
 """
-        test = self.config.display()
+        test = _display(self.config)
         sys.stdout.write(test)
         self.assertEqual(test, reference)
 
@@ -335,18 +340,18 @@ flushing:
 """
         self.config['scenarios'].append()
         self.config['scenarios'].append({'merlion': True, 'detection': []})
-        test = self.config.display()
+        test = _display(self.config)
         sys.stdout.write(test)
         self.assertEqual(test, reference)
 
     def test_display_userdata_default(self):
-        test = self.config.display('userdata')
+        test = _display(self.config, 'userdata')
         sys.stdout.write(test)
         self.assertEqual(test, "")
 
     def test_display_userdata_list(self):
         self.config['scenarios'].append()
-        test = self.config.display('userdata')
+        test = _display(self.config, 'userdata')
         sys.stdout.write(test)
         self.assertEqual(test, """scenarios:
   -
@@ -355,7 +360,7 @@ flushing:
     def test_display_userdata_list_nonDefault(self):
         self.config['scenarios'].append()
         self.config['scenarios'].append({'merlion': True, 'detection': []})
-        test = self.config.display('userdata')
+        test = _display(self.config, 'userdata')
         sys.stdout.write(test)
         self.assertEqual(test, """scenarios:
   -
@@ -367,7 +372,7 @@ flushing:
     def test_display_userdata_block(self):
         self.config.add("foo", ConfigValue(0, int, None, None))
         self.config.add("bar", ConfigBlock())
-        test = self.config.display('userdata')
+        test = _display(self.config, 'userdata')
         sys.stdout.write(test)
         self.assertEqual(test, "")
 
@@ -375,7 +380,7 @@ flushing:
         self.config.add("foo", ConfigValue(0, int, None, None))
         self.config.add("bar", ConfigBlock(implicit=True)) \
                    .add("baz", ConfigBlock())
-        test = self.config.display('userdata')
+        test = _display(self.config, 'userdata')
         sys.stdout.write(test)
         self.assertEqual(test, "bar:\n")
 
@@ -512,7 +517,7 @@ scenario.foo""")
     def test_parseDisplayAndValue_default(self):
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
-        test = self.config.display()
+        test = _display(self.config)
         sys.stdout.write(test)
         self.assertEqual(yaml.load(test), self.config.value())
 
@@ -521,14 +526,14 @@ scenario.foo""")
             self.skipTest("Cannot execute test because PyYAML is not available")
         self.config['scenarios'].append()
         self.config['scenarios'].append({'merlion': True, 'detection': []})
-        test = self.config.display()
+        test = _display(self.config)
         sys.stdout.write(test)
         self.assertEqual(yaml.load(test), self.config.value())
 
     def test_parseDisplay_userdata_default(self):
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
-        test = self.config.display('userdata')
+        test = _display(self.config, 'userdata')
         sys.stdout.write(test)
         self.assertEqual(yaml.load(test), None)
 
@@ -536,7 +541,7 @@ scenario.foo""")
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
         self.config['scenarios'].append()
-        test = self.config.display('userdata')
+        test = _display(self.config, 'userdata')
         sys.stdout.write(test)
         self.assertEqual(yaml.load(test), {'scenarios': [None]})
 
@@ -545,7 +550,7 @@ scenario.foo""")
             self.skipTest("Cannot execute test because PyYAML is not available")
         self.config['scenarios'].append()
         self.config['scenarios'].append({'merlion': True, 'detection': []})
-        test = self.config.display('userdata')
+        test = _display(self.config,'userdata')
         sys.stdout.write(test)
         self.assertEqual(
             yaml.load(test), {'scenarios':
@@ -557,7 +562,7 @@ scenario.foo""")
             self.skipTest("Cannot execute test because PyYAML is not available")
         self.config.add("foo", ConfigValue(0, int, None, None))
         self.config.add("bar", ConfigBlock())
-        test = self.config.display('userdata')
+        test = _display(self.config, 'userdata')
         sys.stdout.write(test)
         self.assertEqual(yaml.load(test), None)
 
@@ -567,7 +572,7 @@ scenario.foo""")
         self.config.add("foo", ConfigValue(0, int, None, None))
         self.config.add("bar", ConfigBlock(implicit=True)) \
                    .add("baz", ConfigBlock())
-        test = self.config.display('userdata')
+        test = _display(self.config, 'userdata')
         sys.stdout.write(test)
         self.assertEqual(yaml.load(test), {'bar': None})
 
@@ -1008,7 +1013,7 @@ scenario.foo""")
         self.assertEqual(len(self.config['scenarios']), 1)
         self.config['scenarios'].append({'merlion': True, 'detection': []})
         self.assertEqual(len(self.config['scenarios']), 2)
-        test = self.config.display('userdata')
+        test = _display(self.config, 'userdata')
         sys.stdout.write(test)
         self.assertEqual(test, """scenarios:
   -
@@ -1018,7 +1023,7 @@ scenario.foo""")
 """)
         self.config['scenarios'][0] = {'merlion': True, 'detection': []}
         self.assertEqual(len(self.config['scenarios']), 2)
-        test = self.config.display('userdata')
+        test = _display(self.config, 'userdata')
         sys.stdout.write(test)
         self.assertEqual(test, """scenarios:
   -
@@ -1028,7 +1033,7 @@ scenario.foo""")
     merlion: true
     detection: []
 """)
-        test = self.config['scenarios'].display()
+        test = _display(self.config['scenarios'])
         sys.stdout.write(test)
         self.assertEqual(test, """-
   scenario file: Net3.tsg
@@ -1055,7 +1060,6 @@ scenario.foo""")
         config['implicit_1'] = 5
         config.declare('formal', ConfigValue(42, int))
         config['implicit_2'] = 5
-        print(config.display())
         self.assertEqual(3, len(config))
         self.assertEqual(['implicit_1', 'formal', 'implicit_2'],
                          list(config.iterkeys()))
@@ -1269,7 +1273,7 @@ Node information:
         self.assertEqual(config.get(1).value(), 10)
         self.assertEqual(config.get('1').value(), 10)
 
-        self.assertEqual(config.display(), "5: 500\n1: 10\n")
+        self.assertEqual(_display(config), "5: 500\n1: 10\n")
 
         config.set_value({5:5000})
         self.assertIn(1, config)

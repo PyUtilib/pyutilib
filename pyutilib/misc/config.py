@@ -8,7 +8,7 @@
 #  _________________________________________________________________________
 
 import re
-from sys import exc_info
+from sys import exc_info, stdout
 from textwrap import wrap
 import logging
 import pickle
@@ -351,13 +351,15 @@ group, subparser, or (subparser, group)."""
                         del parsed_args.__dict__[_dest]
         return parsed_args
 
-    def display(self, content_filter=None, indent_spacing=2):
+    def display(self, content_filter=None, indent_spacing=2, ostream=None):
         if content_filter not in ConfigBlock.content_filters:
             raise ValueError("unknown content filter '%s'; valid values are %s"
                              % (content_filter, ConfigBlock.content_filters))
 
         _blocks = []
-        os = six.StringIO()
+        if ostream is None:
+            ostream=stdout
+
         for level, value, obj in self._data_collector(0, ""):
             if content_filter == 'userdata' and not obj._userSet:
                 continue
@@ -366,9 +368,8 @@ group, subparser, or (subparser, group)."""
 
             for i, v in enumerate(_blocks):
                 if v is not None:
-                    os.write(v)
+                    ostream.write(v)
                     _blocks[i] = None
-        return os.getvalue()
 
     def generate_yaml_template(self, indent_spacing=2, width=78, visibility=0):
         minDocWidth = 20
