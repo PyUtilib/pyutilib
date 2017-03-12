@@ -480,15 +480,21 @@ group, subparser, or (subparser, group)."""
             elif item_start:
                 os.write(indent + item_start)
             _doc = obj._doc or obj._description or ""
-            if '\n ' in _doc:
-                doc_lines = (item_body % (_doc),)
-            else:
-                doc_lines = wrap(
-                    item_body % (_doc),
-                    width,
-                    initial_indent=indent + ' ' * indent_spacing,
-                    subsequent_indent=indent + ' ' * indent_spacing)
             if _doc:
+                _wrapLines = '\n ' not in _doc
+                if '%s' in item_body:
+                    _doc = item_body % (_doc,)
+                elif _doc:
+                    _doc = item_body
+                if _wrapLines:
+                    doc_lines = wrap(
+                        _doc,
+                        width,
+                        initial_indent=indent + ' ' * indent_spacing,
+                        subsequent_indent=indent + ' ' * indent_spacing)
+                else:
+                    doc_lines = (_doc,)
+                # Write things out
                 os.writelines('\n'.join(doc_lines))
                 if not doc_lines[-1].endswith("\n"):
                     os.write('\n')

@@ -11,6 +11,8 @@ import sys
 import os
 import os.path
 import pickle
+import re
+
 currdir = os.path.dirname(os.path.abspath(__file__))
 import pyutilib.th as unittest
 
@@ -871,6 +873,133 @@ scenario.foo""")
             pyutilib.misc.comparison.compare_file(oFile, oFile[:-4] + '.txt')[
                 0])
         os.remove(oFile)
+
+    def test_generate_custom_documentation(self):
+        reference = \
+"""startBlock{}
+  startItem{network}
+  endItem{network}
+  startBlock{network}
+    startItem{epanet file}
+      item{EPANET network inp file}
+    endItem{epanet file}
+  endBlock{network}
+  startItem{scenario}
+    item{Single scenario block}
+  endItem{scenario}
+  startBlock{scenario}
+    startItem{scenario file}
+item{This is the (long) documentation for the 'scenario file'
+parameter.  It contains multiple lines, and some internal
+formatting; like a bulleted list:
+  - item 1
+  - item 2
+}
+    endItem{scenario file}
+    startItem{merlion}
+      item{This is the (long) documentation for the 'merlion' parameter.  It
+      contains multiple lines, but no apparent internal formatting; so the
+      outputter should re-wrap everything.}
+    endItem{merlion}
+    startItem{detection}
+      item{Sensor placement list, epanetID}
+    endItem{detection}
+  endBlock{scenario}
+  startItem{scenarios}
+    item{List of scenario blocks}
+  endItem{scenarios}
+  startBlock{scenarios}
+    startItem{scenario file}
+item{This is the (long) documentation for the 'scenario file'
+parameter.  It contains multiple lines, and some internal
+formatting; like a bulleted list:
+  - item 1
+  - item 2
+}
+    endItem{scenario file}
+    startItem{merlion}
+      item{This is the (long) documentation for the 'merlion' parameter.  It
+      contains multiple lines, but no apparent internal formatting; so the
+      outputter should re-wrap everything.}
+    endItem{merlion}
+    startItem{detection}
+      item{Sensor placement list, epanetID}
+    endItem{detection}
+  endBlock{scenarios}
+  startItem{nodes}
+    item{List of node IDs}
+  endItem{nodes}
+  startItem{impact}
+  endItem{impact}
+  startBlock{impact}
+    startItem{metric}
+      item{Population or network based impact metric}
+    endItem{metric}
+  endBlock{impact}
+  startItem{flushing}
+  endItem{flushing}
+  startBlock{flushing}
+    startItem{flush nodes}
+    endItem{flush nodes}
+    startBlock{flush nodes}
+      startItem{feasible nodes}
+        item{ALL, NZD, NONE, list or filename}
+      endItem{feasible nodes}
+      startItem{infeasible nodes}
+        item{ALL, NZD, NONE, list or filename}
+      endItem{infeasible nodes}
+      startItem{max nodes}
+        item{Maximum number of nodes to flush}
+      endItem{max nodes}
+      startItem{rate}
+        item{Flushing rate [gallons/min]}
+      endItem{rate}
+      startItem{response time}
+        item{Time [min] between detection and flushing}
+      endItem{response time}
+      startItem{duration}
+        item{Time [min] for flushing}
+      endItem{duration}
+    endBlock{flush nodes}
+    startItem{close valves}
+    endItem{close valves}
+    startBlock{close valves}
+      startItem{feasible pipes}
+        item{ALL, DIAM min max [inch], NONE, list or filename}
+      endItem{feasible pipes}
+      startItem{infeasible pipes}
+        item{ALL, DIAM min max [inch], NONE, list or filename}
+      endItem{infeasible pipes}
+      startItem{max pipes}
+        item{Maximum number of pipes to close}
+      endItem{max pipes}
+      startItem{response time}
+        item{Time [min] between detection and closing valves}
+      endItem{response time}
+    endBlock{close valves}
+  endBlock{flushing}
+endBlock{}
+"""
+        test = self.config.generate_documentation(
+            block_start= "startBlock{%s}\n",
+            block_end=   "endBlock{%s}\n",
+            item_start=  "startItem{%s}\n",
+            item_body=   "item{%s}\n",
+            item_end=    "endItem{%s}\n",
+        )
+        print test
+        self.assertEqual(test, reference)
+
+        test = self.config.generate_documentation(
+            block_start= "startBlock\n",
+            block_end=   "endBlock\n",
+            item_start=  "startItem\n",
+            item_body=   "item\n",
+            item_end=    "endItem\n",
+        )
+        stripped_reference = re.sub('\{[^\}]*\}','',reference,flags=re.M)
+        print test
+        self.assertEqual(test, stripped_reference)
 
     def test_block_get(self):
         self.assertTrue('scenario' in self.config)
