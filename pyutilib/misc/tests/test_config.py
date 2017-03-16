@@ -987,7 +987,7 @@ endBlock{}
             item_body=   "item{%s}\n",
             item_end=    "endItem{%s}\n",
         )
-        print test
+        print(test)
         self.assertEqual(test, reference)
 
         test = self.config.generate_documentation(
@@ -998,7 +998,7 @@ endBlock{}
             item_end=    "endItem\n",
         )
         stripped_reference = re.sub('\{[^\}]*\}','',reference,flags=re.M)
-        print test
+        print(test)
         self.assertEqual(test, stripped_reference)
 
     def test_block_get(self):
