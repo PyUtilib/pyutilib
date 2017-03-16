@@ -567,18 +567,29 @@ class ConfigList(ConfigBase):
             x._parent = self
 
     def __getitem__(self, key):
-        val = self.get(key)
+        val = self._data[key]
+        self._userAccessed = True
         if isinstance(val, ConfigValue):
             return val.value()
         else:
             return val
 
-    def get(self, key):
+    def get(self, key, default=ConfigBase.NoArgument):
         # Note: get() is borrowed from ConfigBlock for cases where we
         # want the raw stored object (and to aviod the implicit
         # conversion of ConfigValue members to their stored data).
-        self._userAccessed = True
-        return self._data[key]
+        try:
+            val = self._data[key]
+            self._userAccessed = True
+            return val
+        except:
+            pass
+        if default is ConfigBase.NoArgument:
+            return None
+        if self._domain is not None:
+            return self._domain(default)
+        else:
+            return ConfigValue(default)
 
     def __setitem__(self, key, val):
         # Note: this will fail if the element doesn't exist in _data.
@@ -722,13 +733,10 @@ class ConfigBlock(ConfigBase):
         key = str(key)
         if key in self._data:
             return self._data[key]
+        if default is ConfigBase.NoArgument:
+            return None
         if self._implicit_domain is not None:
-            if default is ConfigBase.NoArgument:
-                return self._implicit_domain()
-            else:
-                return self._implicit_domain(default)
-        elif default is ConfigBase.NoArgument:
-            return ConfigValue()
+            return self._implicit_domain(default)
         else:
             return ConfigValue(default)
 

@@ -1013,7 +1013,8 @@ endBlock{}
         cfg.declare('foo', ConfigValue(1, int))
         self.assertEqual( cfg.get('foo', 5).value(), 1 )
         self.assertEqual( len(cfg), 1 )
-        self.assertEqual( cfg.get('bar').value(), None )
+        self.assertIs( cfg.get('bar'), None )
+        self.assertEqual( cfg.get('bar',None).value(), None )
         self.assertEqual( len(cfg), 1 )
 
         cfg = ConfigBlock(implicit=True)
@@ -1022,7 +1023,8 @@ endBlock{}
         self.assertEqual( len(cfg), 1 )
         self.assertEqual( cfg.get('bar', 5).value(), 5 )
         self.assertEqual( len(cfg), 1 )
-        self.assertEqual( cfg.get('baz').value(), None )
+        self.assertIs( cfg.get('baz'), None )
+        self.assertIs( cfg.get('baz', None).value(), None )
         self.assertEqual( len(cfg), 1 )
 
         cfg = ConfigBlock( implicit=True,
@@ -1032,7 +1034,8 @@ endBlock{}
         self.assertEqual( len(cfg), 1 )
         self.assertEqual( cfg.get('bar', [5]).value(), ['5'] )
         self.assertEqual( len(cfg), 1 )
-        self.assertEqual( cfg.get('baz').value(), [] )
+        self.assertIs( cfg.get('baz'), None )
+        self.assertEqual( cfg.get('baz', None).value(), [] )
         self.assertEqual( len(cfg), 1 )
 
     def test_setdefault(self):
@@ -1178,8 +1181,8 @@ endBlock{}
         X = ConfigBlock(implicit=True)
         X.config = ConfigList()
         self.assertEqual(_display(X, 'userdata'), "")
-        self.assertRaisesRegexp(
-            IndexError, '.*out of range', X.config.get, 0 )
+        self.assertIs(X.config.get(0), None )
+        self.assertIs(X.config.get(0,None).value(), None )
         self.assertRaisesRegexp(
             IndexError, '.*out of range', X.config.__getitem__, 0 )
         # get() shouldn't change the userdata flag...
@@ -1199,7 +1202,9 @@ endBlock{}
         # get() shouldn't change the userdata flag...
         self.assertEqual(_display(X, 'userdata'), "")
 
-        self.assertRaisesRegexp(IndexError, '.*out of range', X.config.get, 1)
+        self.assertIs(X.config.get(1), None )
+        self.assertRaisesRegexp(
+            IndexError, '.*out of range', X.config.__getitem__, 1)
 
         # this should ONLY change the userSet flag on the item (and not
         # the list)
