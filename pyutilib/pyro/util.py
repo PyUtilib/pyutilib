@@ -29,6 +29,7 @@ try:
 except:
     try:
         import Pyro4
+        import Pyro4.naming
         #Pyro4.config.SERIALIZERS_ACCEPTED.add('pickle')
         #Pyro4.config.SERIALIZER = 'pickle'
         Pyro = Pyro4
