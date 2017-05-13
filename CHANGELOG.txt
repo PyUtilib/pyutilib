@@ -3,6 +3,17 @@
 ====================
 
 -------------------------------------------------------------------------------
+ Version 5.5
+-------------------------------------------------------------------------------
+
+- Close a pyro worker if an exception occurs
+- Allow an existing nameserver proxy to be passed into shutdown_pyro_components
+- When starting a nameserver, the default host is not localhost
+- The default behavior for the dispatch_srvr daemon binds to hostname
+- Support for non-string keys in ConfigBlocks
+- Changes to make ConfigBlock add more like dict
+
+-------------------------------------------------------------------------------
  Version 5.4.1
 -------------------------------------------------------------------------------
 
