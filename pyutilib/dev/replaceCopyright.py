@@ -79,6 +79,8 @@ def main():
             os.remove(file)
             os.rename(file + ".tmp", file)
             print("Updating file %s\n" % file)
+        else:
+            os.remove(file + ".tmp")
 
 
 if __name__ == '__main__':
