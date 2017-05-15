@@ -29,7 +29,14 @@ else:
     import unittest
     using_unittest2 = True
     main = unittest.main
-import pyutilib.misc
+
+#
+# Defer the pyutilib.misc import until it is actually needed.  If we
+# import it here, then PyUtilib's test coverage will report all
+# "module-level" lines as uncovered because they were executed before
+# the nose coverage plugin was watching things.
+#
+#import pyutilib.misc
 
 if using_unittest2:
     __all__.extend(
@@ -122,6 +129,7 @@ def _run_import_baseline_test(self,
     sys.path.insert(0, cwd)
     #
     try:
+        import pyutilib.misc
         pyutilib.misc.setup_redirect(outfile)
         pyutilib.misc.import_file(module + ".py", clear_cache=True)
         pyutilib.misc.reset_redirect()
@@ -250,6 +258,7 @@ class TestCase(unittest.TestCase):
                                  tolerance=0.0,
                                  exact=False):
         try:
+            import pyutilib.misc
             pyutilib.misc.compare_xml_files(
                 baseline, testfile, tolerance=tolerance, exact=exact)
             if delete:
@@ -267,6 +276,7 @@ class TestCase(unittest.TestCase):
                                   tolerance=0.0,
                                   exact=False):
         try:
+            import pyutilib.misc
             pyutilib.misc.compare_yaml_files(
                 baseline, testfile, tolerance=tolerance, exact=exact)
             if delete:
@@ -284,6 +294,7 @@ class TestCase(unittest.TestCase):
                                   tolerance=0.0,
                                   exact=False):
         try:
+            import pyutilib.misc
             pyutilib.misc.compare_json_files(
                 baseline, testfile, tolerance=tolerance, exact=exact)
             if delete:
@@ -300,6 +311,7 @@ class TestCase(unittest.TestCase):
                                  filter=None,
                                  delete=True,
                                  tolerance=None):
+        import pyutilib.misc
         [flag, lineno, diffs] = pyutilib.misc.compare_file(
             testfile, baseline, filter=filter, tolerance=tolerance)
         if not flag:
@@ -312,6 +324,7 @@ class TestCase(unittest.TestCase):
         return [flag, lineno]
 
     def assertFileEqualsLargeBaseline(self, testfile, baseline, delete=True):
+        import pyutilib.misc
         flag = pyutilib.misc.compare_large_file(testfile, baseline)
         if not flag:
             if delete:
