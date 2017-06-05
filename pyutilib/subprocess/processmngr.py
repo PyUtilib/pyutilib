@@ -17,7 +17,6 @@ import os
 import sys
 import tempfile
 import subprocess
-import copy
 from six import itervalues
 from threading import Thread
 
@@ -196,7 +195,18 @@ def _stream_reader(args):
             except ValueError:
                 pass
 
-    encoding = sys.__stdout__.encoding
+    raw_stderr = sys.__stderr__
+    if raw_stderr is None:
+        raw_stderr = sys.stderr
+    try:
+        encoding = stream.encoding
+    except:
+        encoding = None
+    if encoding is None:
+        try:
+            encoding = raw_stderr.encoding
+        except:
+            pass
     if encoding is None:
         encoding = 'utf-8'
 
@@ -234,14 +244,14 @@ def _stream_reader(args):
     if data:
         writeOK &= write(data.decode(encoding))
     flush()
-    if not writeOK:
-        sys.__stderr__.write("""
+    if not writeOK and raw_stderr is not None:
+        raw_stderr.write("""
 ERROR: pyutilib.subprocess: output stream closed before all subprocess output
        was written to it.  The following was left in the subprocess buffer:
             '%s'
 """ % (buf,))
         if data:
-            sys.__stderr__.write(
+            raw_stderr.write(
                 """The following undecoded unicode output was also present:
             '%s'
 """ % (data,))
@@ -289,7 +299,21 @@ def _merged_reader(*args):
                 except ValueError:
                     pass
 
-    encoding = sys.__stdout__.encoding
+    raw_stderr = sys.__stderr__
+    if raw_stderr is None:
+        # There are cases, e.g., in Anaconda, where there is no stdout
+        # for the original process because, for example, it was started
+        # in a windowing environment.
+        raw_stderr = sys.stderr
+    try:
+        encoding = stream.encoding
+    except:
+        encoding = None
+    if encoding is None:
+        try:
+            encoding = raw_stderr.encoding
+        except:
+            pass
     if encoding is None:
         encoding = 'utf-8'
 
@@ -351,14 +375,14 @@ def _merged_reader(*args):
         if s.data:
             writeOK &= s.write(s.data.decode(encoding))
         s.flush()
-    if not writeOK:
-        sys.__stderr__.write("""
+    if not writeOK and raw_stderr is not None:
+        raw_stderr.write("""
 ERROR: pyutilib.subprocess: output stream closed before all subprocess output
        was written to it.  The following was left in the subprocess buffer:
             '%s'
 """ % (buf,))
         if data:
-            sys.__stderr__.write(
+            raw_stderr.write(
                 """The following undecoded unicode output was also present:
             '%s'
 """ % (data,))
@@ -492,7 +516,7 @@ def run_command(cmd,
     # Setup the default environment
     #
     if env is None:
-        env = copy.copy(os.environ)
+        env = os.environ.copy()
     #
     # Setup signal handler
     #
