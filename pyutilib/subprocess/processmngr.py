@@ -544,6 +544,7 @@ def run_command(cmd,
         except:
             simpleCase = False
 
+        out_th = []
         GlobalData.signal_handler_busy = False
         if simpleCase:
             #
@@ -566,7 +567,6 @@ def run_command(cmd,
             # as doing a normal 'print'
             #
             out_fd = []
-            out_th = []
             for fid in (0, 1):
                 if fid == 0:
                     s, raw = stdout_arg, sys.stdout
@@ -632,34 +632,12 @@ def run_command(cmd,
                 th = Thread(target=reader, args=[x[0] for x in out_th])
                 th.daemon = True
                 th.start()
-            #for th in out_th:
-            #    th[0].daemon = True
-            #    th[0].start()
             #
             # Wait for process to finish
             #
             rc = process.wait(timelimit)
             GlobalData.current_process = None
             out_fd = None
-            #
-            # 'Closing' the PIPE to send EOF to the reader.
-            #
-            if out_th:
-                for p in out_th:
-                    os.close(p[2])
-                th.join()
-                for p in out_th:
-                    os.close(p[1])
-                del th
-            #for th in reversed(out_th):
-            #    os.close(th[2])
-            #    #
-            #    # Wait for readers to finish up with the data in the pipe.
-            #    #
-            #    th[0].join()
-            #    os.close(th[1])
-            #    thread = th[0]
-            #    del thread
 
     except _WindowsError:
         err = sys.exc_info()[1]
@@ -671,14 +649,37 @@ def run_command(cmd,
         # Ignore IOErrors, which are caused by interupts
         #
         pass
+
+    #
+    # Flush stdout/stderr. Some platforms (notably Matlab, which
+    # replaces stdout with a MexPrinter) have stdout/stderr that do not
+    # implement flush()  See https://github.com/Pyomo/pyomo/issues/156
+    #
+    try:
+        sys.stdout.flush()
+    except AttributeError:
+        pass
+    try:
+        sys.stderr.flush()
+    except AttributeError:
+        pass
+
+    if out_th:
+        #
+        # 'Closing' the PIPE to send EOF to the reader.
+        #
+        for p in out_th:
+            os.close(p[2])
+        th.join()
+        for p in out_th:
+            os.close(p[1])
+        del th
     if outfile is not None:
         stdout_arg.close()
     elif tmpfile is not None and not ignore_output:
         tmpfile.seek(0)
         output = "".join(tmpfile.readlines())
         tmpfile.close()
-    sys.stdout.flush()
-    sys.stderr.flush()
     #
     # Move back from the specified working directory
     #
