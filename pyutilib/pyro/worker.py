@@ -145,8 +145,21 @@ class TaskWorkerBase(object):
                 self.dispatcher._release()
         self.dispather = None
 
-    def _get_request_type(self):
-        raise NotImplementedError("This is an abstract method")
+    def run(self):
+        raise NotImplementedError       #pragma:nocover
+
+class TaskWorker(TaskWorkerBase):
+
+    def __init__(self, type=None, block=True, timeout=None, *args, **kwds):
+
+        self.type = type
+        self.block = block
+        self.timeout = timeout
+        # Indicates whether or not we assume that all task
+        # ids are contiguous and process them as such
+        self._contiguous_task_processing = False
+        self._next_processing_id = None
+        TaskWorkerBase.__init__(self, *args, **kwds)
 
     def run(self):
 
@@ -156,16 +169,17 @@ class TaskWorkerBase(object):
             self._worker_error = False
             self._worker_shutdown = False
             try:
-                tasks = {}
+                tasks = None
                 if self._bulk_task_collection:
-                    tasks = self.dispatcher.get_tasks(
-                        (self._get_request_type(),))
+                    tasks_ = self.dispatcher.get_tasks(
+                        ((self.type, self.block, self.timeout),))
+                    assert len(tasks_) == 1
+                    assert self.type in tasks_
+                    tasks = tasks_[self.type]
                 else:
-                    _type, _block, _timeout = self._get_request_type()
-                    _task = self.dispatcher.get_task(
-                        type=_type, block=_block, timeout=_timeout)
-                    if _task is not None:
-                        tasks[_type] = [_task]
+                    tasks = (self.dispatcher.get_task(
+                        type=self.type, block=self.block, timeout=self.timeout),)
+                assert tasks is not None
             except _worker_connection_problem as e:
                 x = sys.exc_info()[1]
                 # this can happen if the dispatcher is overloaded
@@ -180,65 +194,56 @@ class TaskWorkerBase(object):
                 time.sleep(sleep_interval)
             else:
                 if len(tasks) > 0:
-                    assert len(tasks) == 1
                     if self._verbose:
-                        print("Processing %s task(s) from queue %s" %
-                              (len(list(tasks.values())[0]),
-                               list(tasks.keys())[0]))
-
+                        print("Collected %s task(s) from queue %s" %
+                              (len(tasks), self.type))
                     results = {}
-                    # process tasks by type in order of increasing id
-                    for type_name, type_tasks in iteritems(tasks):
-                        for task in sorted(type_tasks, key=lambda x: x['id']):
-                            self._worker_task_return_queue = \
-                                _worker_task_return_queue_unset
-                            self._current_task_client = task['client']
-                            task['result'] = self.process(task['data'])
+                    # process tasks in order of increasing id
+                    for task in sorted(tasks, key=lambda x: x['id']):
+                        if self._verbose:
+                            print("Processing task with id=%s from queue %s" %
+                                  (task['id'], self.type))
+                        if self._contiguous_task_processing:
+                            # TODO: add code to skip tasks until the next contiguous
+                            #       task arrives
+                            if self._next_processing_id is None:
+                                self._next_processing_id = task['id']
+                            if self._next_processing_id != task['id']:
+                                raise RuntimeError("Got task with id=%s, expected id=%s"
+                                                   % (task['id'], self._next_processing_id))
+                            self._next_processing_id += 1
+                        self._worker_task_return_queue = \
+                            _worker_task_return_queue_unset
+                        self._current_task_client = task['client']
+                        task['result'] = self.process(task['data'])
+                        task['processedBy'] = self.WORKERNAME
+                        return_type_name = self._worker_task_return_queue
+                        if return_type_name is _worker_task_return_queue_unset:
+                            return_type_name = self.type
+                        if self._worker_error:
+                            if return_type_name not in results:
+                                results[return_type_name] = []
                             task['processedBy'] = self.WORKERNAME
-                            return_type_name = self._worker_task_return_queue
-                            if return_type_name is _worker_task_return_queue_unset:
-                                return_type_name = type_name
-                            if self._worker_error:
-                                if return_type_name not in results:
-                                    results[return_type_name] = []
-                                task['processedBy'] = self.WORKERNAME
-                                results[return_type_name].append(task)
-                                print(
-                                    "Task worker reported error during processing "
-                                    "of task with id=%s. Any remaining tasks in "
-                                    "local queue will be ignored." %
-                                    (task['id']))
-                                break
-                            if self._worker_shutdown:
-                                self.close()
-                                return
-                            if task['generateResponse']:
-                                if return_type_name not in results:
-                                    results[return_type_name] = []
-                                results[return_type_name].append(task)
+                            results[return_type_name].append(task)
+                            print(
+                                "Task worker reported error during processing "
+                                "of task with id=%s. Any remaining tasks in "
+                                "local queue will be ignored." %
+                                (task['id']))
+                            break
+                        if self._worker_shutdown:
+                            self.close()
+                            return
+                        if task['generateResponse']:
+                            if return_type_name not in results:
+                                results[return_type_name] = []
+                            results[return_type_name].append(task)
 
                         if self._worker_error:
                             break
 
                     if len(results):
                         self.dispatcher.add_results(results)
-
-
-class TaskWorker(TaskWorkerBase):
-
-    def __init__(self, type=None, block=True, timeout=None, *args, **kwds):
-
-        self.type = type
-        self.block = block
-        self.timeout = timeout
-
-        TaskWorkerBase.__init__(self, *args, **kwds)
-
-    # Called by the run() method to get the work type
-    # including blocking and timeout options
-    def _get_request_type(self):
-        return self.type, self.block, self.timeout
-
 
 class MultiTaskWorker(TaskWorkerBase):
 
@@ -337,7 +342,7 @@ class MultiTaskWorker(TaskWorkerBase):
                 if len(tasks) > 0:
 
                     if self._verbose:
-                        print("Processing %s tasks from %s queue(s)" %
+                        print("Collected %s task(s) from %s queue(s)" %
                               (sum(len(_tl)
                                    for _tl in itervalues(tasks)), len(tasks)))
 
