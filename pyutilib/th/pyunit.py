@@ -121,7 +121,10 @@ def _run_import_baseline_test(self,
                               exact=False,
                               forceskip=False):
     if forceskip:
-        self.skipTest("A forced test skip")
+        if forceskip is True:
+            self.skipTest("A forced test skip")
+        else:
+            self.skipTest(str(forceskip))
     if cwd is None:
         cwd = os.path.dirname(os.path.abspath(getfile(self.__class__)))
     oldpwd = os.getcwd()
@@ -163,7 +166,10 @@ def _run_cmd_baseline_test(self,
                            exact=False,
                            forceskip=False):
     if forceskip:
-        self.skipTest("A forced test skip")
+        if forceskip is True:
+            self.skipTest("A forced test skip")
+        else:
+            self.skipTest(str(forceskip))
     if cwd is None:
         cwd = os.path.dirname(os.path.abspath(getfile(self.__class__)))
     oldpwd = os.getcwd()
