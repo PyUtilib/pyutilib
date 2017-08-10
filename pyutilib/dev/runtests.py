@@ -42,6 +42,12 @@ def run(package, argv, use_exec=use_exec):
         dest='output',
         default=None,
         help='Redirect output to a file')
+    parser.add_option('--with-doctest',
+        action='store_true',
+        dest='doctests',
+        default=False,
+        help='Run tests included in Sphinx documentation')
+
 
     options, args = parser.parse_args(argv)
 
@@ -67,6 +73,11 @@ def run(package, argv, use_exec=use_exec):
         vflag = ['-v']
     else:
         vflag = []
+
+    if options.doctests:
+        doctest_flags = ['--with-doctest', '--doctest-extension=.rst']
+    else:
+        doctest_flags = []
 
     if options.coverage:
         coverage_flags = ['--with-coverage', '--cover-erase'] + cpkg
@@ -107,6 +118,7 @@ def run(package, argv, use_exec=use_exec):
                              os.environ.get('PATH','')
 
     cmd.extend(coverage_flags)
+    cmd.extend(doctest_flags)
     cmd.extend(vflag)
     cmd.append('--with-xunit')
     cmd.append('--xunit-file=TEST-' + package + '.xml')
