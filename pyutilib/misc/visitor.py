@@ -1,12 +1,12 @@
 from collections import deque
 
-class Visitor(object):
+class SimpleVisitor(object):
 
-    def visit(self, node, context=None):
+    def visit(self, node):
         pass
 
     def children(self, node):
-        return node.children[:]
+        return node.children
     
     def is_leaf(self, node):
         return len(node.children) == 0
@@ -14,7 +14,7 @@ class Visitor(object):
     def finalize(self):
         pass
 
-    def simple_bfs(self, node):
+    def bfs(self, node):
         """
         Breadth-first search
         """
@@ -22,10 +22,11 @@ class Visitor(object):
         while dq:
             current = dq.popleft()
             self.visit(current)
-            dq.extend(self.children(current))
+            if not self.is_leaf(current):
+                dq.extend(self.children(current))
         return self.finalize()
 
-    def simple_xbfs(self, node):
+    def xbfs(self, node):
         """
         Breadth-first search, except that 
         leaf nodes are immediately visited.
@@ -41,7 +42,7 @@ class Visitor(object):
                     dq.append(c)
         return self.finalize()
 
-    def simple_dfs_preorder(self, node):
+    def dfs_preorder(self, node):
         """
         Depth-first search - preorder
         """
@@ -49,13 +50,14 @@ class Visitor(object):
         while dq:
             current = dq.pop()
             self.visit(current)
-            for c in reversed(self.children(current)):
-                dq.append(c)
+            if not self.is_leaf(current):
+                for c in reversed(self.children(current)):
+                    dq.append(c)
         return self.finalize()
 
-    simple_dfs = simple_dfs_preorder
+    dfs = dfs_preorder
 
-    def simple_dfs_postorder(self, node):
+    def dfs_postorder(self, node):
         """
         Depth-first search - postorder
         """
@@ -72,30 +74,7 @@ class Visitor(object):
                 expanded.add(id(current))
         return self.finalize()
 
-    def retval_dfs_postorder(self, node):
-        """
-        Depth-first search - postorder
-        """
-        retval = [[]]
-        expanded = set()
-        dq = deque([node])
-        while dq:
-            current = dq[-1]
-            if id(current) in expanded:
-                dq.pop()
-                _vals = retval.pop()
-                retval[-1].append( self.visit(current, _vals) )
-            elif self.is_leaf(current):
-                dq.pop()
-                retval[-1].append( self.visit(current) )
-            else:
-                for c in reversed(self.children(current)):
-                    dq.append(c)
-                expanded.add(id(current))
-                retval.append( [] )
-        return self.finalize()
-
-    def simple_dfs_inorder(self, node):
+    def dfs_inorder(self, node):
         """
         Depth-first search - inorder
         """
@@ -117,101 +96,100 @@ class Visitor(object):
         return self.finalize()
 
 
-"""
-#---------
-# TEST
-#---------
-import sys
+class ValueVisitor(object):
 
-class CountVisitor(Visitor):
+    def visit(self, node, values):
+        pass
 
-    def __init__(self):
-        self.count = 0
-
-    def visit(self, node):
-        self.count += 1
-        node.num = self.count
-
-
-class PrintVisitor(Visitor):
-
-    def visit(self, node):
-        sys.stdout.write("%d " % node.num)
-        
-    def finalize(self):
-        sys.stdout.write("\n")
-
-
-class PPrintVisitor(Visitor):
-
-    def visit(self, node):
-        if self.is_leaf(node):
-            return
-        sys.stdout.write("%d :" % node.num)
-        for c in self.children(node):
-            sys.stdout.write(" %d" % c.num)
-        sys.stdout.write("\n")
-        
-
-class SumVisitor(Visitor):
-
-    def __init__(self):
-        self.count = 0
-
-    def visit(self, node, context=None):
-        if context is None or len(context) == 0:
-            self.count = node.num
-        else:
-            self.count = node.num + sum(context)
-        return self.count
+    def children(self, node):
+        return node.children
     
-    def finalize(self):
-        return self.count
+    def is_leaf(self, node):
+        return len(node.children) == 0
 
+    def finalize(self, ans):
+        pass
 
-cvisitor = CountVisitor()
-pvisitor = PrintVisitor()
-ppvisitor = PPrintVisitor()
-svisitor = SumVisitor()
+    def visiting_potential_leaf(self, node, values):
+        """ 
+        Visiting a potential leaf.
 
+        Return True if the node is not expanded.
+        """
+        if not self.is_leaf(node):
+            return False
+        ans = self.visit(node, None)
+        if ans is None:
+            return False
+        values.append( ans )
+        return True
 
-class Node(object):
+    def dfs_postorder_deque(self, node):
+        """
+        Depth-first search - postorder with a dequeue
+        """
+        _values = [[]]
+        expanded = set()
+        dq = deque([node])
+        while dq:
+            current = dq[-1]
+            if id(current) in expanded:
+                dq.pop()
+                values = _values.pop()
+                _values[-1].append( self.visit(current, values) )
+            elif self.visiting_potential_leaf(current, _values[-1]):
+                dq.pop()
+            else:
+                for c in reversed(self.children(current)):
+                    dq.append(c)
+                expanded.add(id(current))
+                _values.append( [] )
+        return self.finalize(_values[-1][0])
 
-    def __init__(self):
-        self.children = []
-        self.num = 0
+    def dfs_postorder_stack(self, node):
+        """
+        Depth-first search - postorder with a stack
+        """
+        _stack = [ (node, self.children(node), 0, len(self.children(node)), [])]
+        #
+        # Iterate until the stack is empty
+        #
+        # Note: 1 is faster than True for Python 2.x
+        #
+        while 1:
+            #
+            # Get the top of the stack
+            #   _obj        Current expression object
+            #   _argList    The arguments for this expression objet
+            #   _idx        The current argument being considered
+            #   _len        The number of arguments
+            #
+            _obj, _argList, _idx, _len, _result = _stack.pop()
+            #
+            # Iterate through the arguments
+            #
+            while _idx < _len:
+                _sub = _argList[_idx]
+                _idx += 1
+                if not self.visiting_potential_leaf(_sub, _result):
+                    #
+                    # Push an expression onto the stack
+                    #
+                    _stack.append( (_obj, _argList, _idx, _len, _result) )
+                    _obj                    = _sub
+                    _argList                = self.children(_sub)
+                    _idx                    = 0
+                    _len                    = len(_argList)
+                    _result                 = []
+            #
+            # Process the current node
+            #
+            ans = self.visit(_obj, _result)
+            if _stack:
+                #
+                # "return" the recursion by putting the return value on the end of the results stack
+                #
+                _stack[-1][-1].append( ans )
+            else:
+                return self.finalize(ans)
 
-    def __str__(self):
-        return str(self.num)
-
-root = Node()
-root.children = [Node(), Node(), Node()]
-root.children[0].children = [Node(), Node(), Node()]
-root.children[0].children[0].children = [Node(), Node(), Node()]
-root.children[0].children[1].children = [Node(), Node(), Node()]
-root.children[0].children[2].children = [Node(), Node(), Node()]
-root.children[1].children = [Node(), Node(), Node()]
-root.children[1].children[0].children = [Node(), Node(), Node()]
-root.children[1].children[1].children = [Node(), Node(), Node()]
-root.children[1].children[2].children = [Node(), Node(), Node()]
-root.children[2].children = [Node(), Node(), Node()]
-root.children[2].children[0].children = [Node(), Node(), Node()]
-root.children[2].children[1].children = [Node(), Node(), Node()]
-root.children[2].children[2].children = [Node(), Node(), Node()]
-
-cvisitor.simple_bfs(root)
-
-print("BFS")
-pvisitor.simple_bfs(root)
-print("DFS PreOrder")
-pvisitor.simple_dfs(root)
-print("DFS InOrder")
-pvisitor.simple_dfs_inorder(root)
-print("DFS PostOrder")
-pvisitor.simple_dfs_postorder(root)
-
-print("SUM %d" % svisitor.retval_dfs_postorder(root))
-ppvisitor.simple_bfs(root)
-ppvisitor.simple_xbfs(root)
-
-"""

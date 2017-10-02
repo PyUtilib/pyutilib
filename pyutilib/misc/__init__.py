@@ -28,4 +28,4 @@ from pyutilib.misc.redirect_io import setup_redirect, reset_redirect
 from pyutilib.misc.singleton import Singleton, MonoState
 from pyutilib.misc.tee_io import TeeStream, ConsoleBuffer
 from pyutilib.misc.xml_utils import get_xml_text, escape, compare_xml_files
-from pyutilib.misc.visitor import Visitor
+from pyutilib.misc.visitor import SimpleVisitor, ValueVisitor
