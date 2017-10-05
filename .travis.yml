@@ -29,8 +29,8 @@ install:
 - pip install coverage
 - python setup.py develop
 script:
-- cd ..
-- cp pyutilib/.coveragerc .
+#- cd ..
+#- cp pyutilib/.coveragerc .
 - test.pyutilib --cat=nightly --cov
 after_success:
 - pip install codecov
