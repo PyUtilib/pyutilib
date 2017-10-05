@@ -225,7 +225,11 @@ def run(package, basedir, argv, use_exec=use_exec, env=None):
     elif options.output:
         sys.stdout.write("Redirecting output to file '%s' ..." % options.output)
         rc, _ = pyutilib.subprocess.run(cmd, env=env, outfile=options.output)
-    elif use_exec:
+    elif use_exec and not (
+            sys.platform.startswith('win')
+            and sys.version_info[:2] in ((3,4),(3,5)) ):
+        # NOTE: execpe seems to generate a fatal error on Windows with
+        # 3.4 and 3.5.
         rc = None
         os.execvpe(cmd[0], cmd, env)
     else:
