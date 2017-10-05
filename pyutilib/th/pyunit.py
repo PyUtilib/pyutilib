@@ -30,6 +30,8 @@ else:
     using_unittest2 = True
     main = unittest.main
 
+from six import iteritems, itervalues
+
 #
 # Defer the pyutilib.misc import until it is actually needed.  If we
 # import it here, then PyUtilib's test coverage will report all
@@ -61,53 +63,58 @@ except ImportError:
         func.__test__ = False
         return func
 
-
-_test_category = None
-
-
-def _reset_test_category():
-    global _test_category
-    if 'PYUTILIB_UNITTEST_CATEGORY' in os.environ:
-        _cat = os.environ['PYUTILIB_UNITTEST_CATEGORY']
-        _cat = _cat.strip()
-        if _reset_test_category.cache == _cat:
-            return
-        _test_category = _cat
-        _reset_test_category.cache = _cat
+def _category_to_tuple(_cat):
+    _cat = str(_cat).lower().strip()
+    if _cat.endswith('=0') or _cat.endswith('=1'):
+        _val = int(_cat[-1])
+        _cat = _cat[:-2]
     else:
-        _test_category = None
-
-
-_reset_test_category.cache = None
-
+        _val = 1
+    if _cat and _cat[0] in '!~-':
+        _val = 1 - _val
+        _cat = _cat[1:]
+    return _cat, _val
 
 def category(*args, **kwargs):
-    _reset_test_category()
-    do_wrap = False
-    if not using_unittest2 or (kwargs.get('include_in_all', True) and
-                               _test_category is None):
-        do_wrap = True
+    # Get the set of categories for this test
+    _categories = {}
     for cat in args:
-        if cat.strip() == _test_category:
-            do_wrap = True
-            break
-    if do_wrap:
+        _cat, _val = _category_to_tuple(cat)
+        if not _cat:
+            continue
+        _categories[_cat] = _val
 
-        def _id(func):
-            if _test_category is None:
-                for arg in args:
-                    setattr(func, arg, 1)
-            else:
-                setattr(func, _test_category, 1)
-            if not _test_category == "smoke":
-                setattr(func, "smoke", 0)
-            return func
+    # Note: we used to try and short-circuit the nosetest test selection
+    # and return test skips for tests that couldn't/wouldn't be run.
+    # However, this code was unreliable, as categories could be set by
+    # both decorating the TestCase (class) and the function.  As a
+    # result, we will just rely on nosetest to do the right thing.
 
-        return _id
-    else:
-        return skip(
-            "Decorator test categories %s do not match the required test category %s"
-            % (sorted(args), _test_category))
+    def _id(func):
+        if hasattr(func, '__mro__') and TestCase in func.__mro__:
+            # @category() called on a TestCase class
+            for c,v in iteritems(func.unspecified_categories):
+                setattr(func, c, v)
+            default_updates = {}
+            for c,v in iteritems(_categories):
+                if c in func.unspecified_categories:
+                    default_updates[c] = v
+                setattr(func, c, v)
+            if default_updates:
+                for fcn in itervalues(func.__dict__):
+                    if hasattr(fcn, '_categories'):
+                        for c,v in iteritems(default_updates):
+                            if c not in fcn._categories:
+                                setattr(fcn, c, v)
+        else:
+            # This is a (currently unbound) method definition
+            for c,v in iteritems(TestCase.unspecified_categories):
+                setattr(func, c, v)
+            for c,v in iteritems(_categories):
+                setattr(func, c, v)
+            setattr(func, '_categories', _categories)
+        return func
+    return _id
 
 
 #@nottest
@@ -235,15 +242,33 @@ def _run_fn_test(self, fn, name, suite):
 
 
 class TestCase(unittest.TestCase):
-    """ Dictionary of options that may be used by function tests. """
+    # Dictionary of options that may be used by function tests.
     _options = {}
-    """ The default test categories are 'smoke' and 'nightly' and 'expensive'"""
+    # The default test categories are 'smoke' and 'nightly' and 'expensive'
     smoke = 1
     nightly = 1
     expensive = 1
+    fragile = 0
+    _default_categories = True
+    # If someone specifies a category, these are the default values of
+    # the default categories if the category() decorator omits them.
+    unspecified_categories = {
+        'smoke':0, 'nightly':0, 'expensive':0, 'fragile':0 }
 
     def __init__(self, methodName='runTest'):
         unittest.TestCase.__init__(self, methodName)
+
+    @staticmethod
+    def parse_categories(category_string):
+        return tuple(
+            tuple(_category_to_tuple(_cat) for _cat in _set.split(','))
+            for _set in category_string.split()
+        )
+
+    @staticmethod
+    def categories_to_string(categories):
+        return ' '.join(','.join("%s=%s" % y for y in x) for x in categories)
+
 
     def get_options(self, name, suite=None):
         return self._options[suite, name]
