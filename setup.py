@@ -41,11 +41,11 @@ packages = _find_packages('pyutilib')
 
 requires=[ 'nose', 'six' ]
 if sys.version_info < (2,7):
-    requires.append('argparse')
-    requires.append('ordereddict')
     requires.append('pbr')
     requires.append('traceback2')
     requires.append('unittest2')
+    requires.append('argparse')
+    requires.append('ordereddict')
 
 setup(name="PyUtilib",
     version='5.5.1',
