@@ -126,7 +126,7 @@ def run(package, basedir, argv, use_exec=use_exec, env=None):
         cmd = ['nosetests']
 
     if binDir not in env['PATH']:
-        env['PATH'] = os.pathsep.join(binDir, env.get('PATH',''))
+        env['PATH'] = os.pathsep.join([binDir, env.get('PATH','')])
 
     if options.coverage:
         cmd.extend(['--with-coverage', '--cover-erase'])
