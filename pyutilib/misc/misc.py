@@ -447,11 +447,11 @@ def create_hardlink(src, dst):
     """
     Create a hard link where dst points to src.
     """
-    if os.name == 'nt':
-        # Windows
+    if os.name == 'nt' and sys.version_info[:2] < (3.2):
+        # Windows; Python added native support for hard links in 3.2
         import ctypes
         if not ctypes.windll.kernel32.CreateHardLinkA(dst, src, 0):
             raise OSError("Failed to create hard link for file %s" % (src))
     else:
-        # Unix
+        # Unix; Windows >= Python3.2
         os.link(src, dst)
