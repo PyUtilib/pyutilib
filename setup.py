@@ -43,6 +43,8 @@ requires=[ 'nose', 'six' ]
 if sys.version_info < (2,7):
     requires.append('argparse')
     requires.append('ordereddict')
+    requires.append('pbr')
+    requires.append('traceback2')
     requires.append('unittest2')
 
 setup(name="PyUtilib",
