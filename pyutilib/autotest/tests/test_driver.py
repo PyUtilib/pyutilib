@@ -5,14 +5,14 @@
 
 import os
 import sys
-from os.path import abspath, dirname
+from os.path import abspath, dirname, join
 currdir = dirname(abspath(__file__)) + os.sep
-bindir = dirname(abspath(sys.executable)) + os.sep
 
 import pyutilib.th as unittest
 from pyutilib.misc import setup_redirect, reset_redirect
 import pyutilib.autotest
 import pyutilib.subprocess
+from pyutilib.dev.entry_point import run_entry_point
 
 try:
     import yaml
@@ -96,18 +96,18 @@ class TestYaml(pyutilib.th.TestCase):
 
     def test5(self):
         # run example1.yml
-        pyutilib.subprocess.run(
-            bindir + 'pyutilib_test_driver ' + currdir + 'example1.yml',
-            outfile=currdir + 'test5.out')
+        run_entry_point('PyUtilib','pyutilib_test_driver',
+                        [join(currdir,'example1.yml')],
+                        outfile=join(currdir,'test5.out'))
         self.assertFileEqualsBaseline(
             currdir + 'test5.out', currdir + 'test5.txt', filter=filter)
 
     def test6(self):
         # run --cat x_suite2 --cat x_suite1 example1.yml
-        pyutilib.subprocess.run(
-            bindir + 'pyutilib_test_driver --cat x_suite2 --cat x_suite1 ' +
-            currdir + 'example1.yml',
-            outfile=currdir + 'test6.out')
+        run_entry_point('PyUtilib', 'pyutilib_test_driver',
+                        [ '--cat', 'x_suite2', '--cat', 'x_suite1',
+                          join(currdir,'example1.yml') ],
+                        outfile=join(currdir,'test6.out'))
         self.assertFileEqualsBaseline(
             currdir + 'test6.out', currdir + 'test6.txt', filter=filter)
 
@@ -171,18 +171,18 @@ class TestJson(pyutilib.th.TestCase):
 
     def test5(self):
         # run example1.json
-        pyutilib.subprocess.run(
-            bindir + 'pyutilib_test_driver ' + currdir + 'example1.json',
-            outfile=currdir + 'test5.out')
+        run_entry_point('PyUtilib','pyutilib_test_driver',
+                        [join(currdir,'example1.json')],
+                        outfile=join(currdir,'test5.out'))
         self.assertFileEqualsBaseline(
             currdir + 'test5.out', currdir + 'test5.txt', filter=filter)
 
     def test6(self):
         # run --cat x_suite2 --cat x_suite1 example1.json
-        pyutilib.subprocess.run(
-            bindir + 'pyutilib_test_driver --cat x_suite2 --cat x_suite1 ' +
-            currdir + 'example1.json',
-            outfile=currdir + 'test6.out')
+        run_entry_point('PyUtilib', 'pyutilib_test_driver',
+                        [ '--cat', 'x_suite2', '--cat', 'x_suite1',
+                          join(currdir,'example1.json') ],
+                        outfile=join(currdir,'test6.out'))
         self.assertFileEqualsBaseline(
             currdir + 'test6.out', currdir + 'test6.txt', filter=filter)
 
