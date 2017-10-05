@@ -79,6 +79,11 @@ def run(package, basedir, argv, use_exec=use_exec, env=None):
         dest='xunit',
         default=True,
         help='Disable the nose XUnit plugin')
+    parser.add_option('--dry-run',
+        action='store_true',
+        dest='dryrun',
+        default=False,
+        help='Dry run: collect but do not execute the tests')
 
     options, args = parser.parse_args(argv)
 
@@ -131,6 +136,8 @@ def run(package, basedir, argv, use_exec=use_exec, env=None):
 
     if options.verbose:
         cmd.append('-v')
+    if options.dryrun:
+        cmd.append('--collect-only')
 
     if options.doctests:
         cmd.extend(['--with-doctest', '--doctest-extension=.rst'])
