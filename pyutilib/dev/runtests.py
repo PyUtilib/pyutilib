@@ -10,7 +10,7 @@ from os.path import dirname
 
 if sys.platform.startswith('win'):
     platform = 'win'
-    use_exec = True
+    use_exec = False
 else:
     platform = 'linux'
     use_exec = True
@@ -228,14 +228,19 @@ def run(package, basedir, argv, use_exec=use_exec, env=None):
     elif use_exec and not (
             sys.platform.startswith('win')
             and sys.version_info[:2] in ((3,4),(3,5)) ):
-        # NOTE: execpe seems to generate a fatal error on Windows with
+        # NOTE: execvpe seems to generate a fatal error on Windows with
         # 3.4 and 3.5.
+        #
+        # In other Python versions it fails to return the new process'
+        # return code to the owning shell (so the build harness doesn't
+        # see the command "fail" when there are failing tests.
         rc = None
+        sys.stderr.flush()
+        sys.stdout.flush()
         os.execvpe(cmd[0], cmd, env)
     else:
         sys.stdout.flush()
         rc, _ = pyutilib.subprocess.run(cmd, env=env, ostream=sys.stdout)
-        sys.stdout.flush()
     return rc
 
 
