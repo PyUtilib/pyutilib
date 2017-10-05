@@ -17,6 +17,7 @@ __all__ = ['Workflow']
 
 import argparse
 from collections import deque
+from six import iterkeys
 
 from pyutilib.workflow.task import Task, EmptyTask, NoTask
 from pyutilib.misc import Options
@@ -168,7 +169,7 @@ class Workflow(Task):
         queue = deque([self._start_task])
         waiting = OrderedDict()
         while len(queue) + len(waiting) > 0:
-            for id in waiting.keys():
+            for id in list(iterkeys(waiting)):
                 t = waiting[id]
                 if not t.id in queued and t.ready():
                     #
