@@ -45,8 +45,8 @@ class TestLogging(unittest.TestCase):
         logger.setLevel(logging.DEBUG)
         logger.warn("(warn)")
         lineno = getframeinfo(currentframe()).lineno - 1
-        ans += 'WARNING: "[base]/test_log_config.py", %d, test_simple_log\n' \
-               '\t(warn)\n' % (lineno,)
+        ans += 'WARNING: "[base]%stest_log_config.py", %d, test_simple_log\n' \
+               '\t(warn)\n' % (os.path.sep, lineno,)
         self.assertEqual(self.stream.getvalue(), ans)
 
     def test_alternate_base(self):
@@ -100,11 +100,11 @@ class TestLogging(unittest.TestCase):
         logger.setLevel(logging.DEBUG)
         logger.info(msg)
         lineno = getframeinfo(currentframe()).lineno - 1
-        ans += ( 'INFO: "[base]/test_log_config.py", %d, test_long_messages\n'
+        ans += ( 'INFO: "[base]%stest_log_config.py", %d, test_long_messages\n'
                  "\tThis is a long message\n"
                  "\tWith some kind of internal formatting\n"
                  "\t    - including a bulleted list\n"
-                 "\t    - list 2\n" % (lineno,))
+                 "\t    - list 2\n" % (os.path.sep, lineno,))
         self.assertEqual(self.stream.getvalue(), ans)
 
         msg += "\n"
@@ -119,9 +119,9 @@ class TestLogging(unittest.TestCase):
         logger.setLevel(logging.DEBUG)
         logger.info(msg)
         lineno = getframeinfo(currentframe()).lineno - 1
-        ans += ( 'INFO: "[base]/test_log_config.py", %d, test_long_messages\n'
+        ans += ( 'INFO: "[base]%stest_log_config.py", %d, test_long_messages\n'
                  "\tThis is a long message\n"
                  "\tWith some kind of internal formatting\n"
                  "\t    - including a bulleted list\n"
-                 "\t    - list 2\n" % (lineno,))
+                 "\t    - list 2\n" % (os.path.sep, lineno,))
         self.assertEqual(self.stream.getvalue(), ans)
