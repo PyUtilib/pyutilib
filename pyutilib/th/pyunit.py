@@ -181,14 +181,20 @@ def _run_cmd_baseline_test(self,
         cwd = os.path.dirname(os.path.abspath(getfile(self.__class__)))
     oldpwd = os.getcwd()
     os.chdir(cwd)
+    if type(cmd) in (list, tuple):
+        useShell = False
+    else:
+        useShell = True
+        cmd = cmd.strip()
+
 
     try:
         OUTPUT = open(outfile, "w")
         proc = subprocess.Popen(
-            cmd.strip(), shell=True, stdout=OUTPUT, stderr=subprocess.STDOUT)
+            cmd, shell=useShell, stdout=OUTPUT, stderr=subprocess.STDOUT)
         proc.wait()
         OUTPUT.close()
-        if not cmdfile is None:
+        if cmdfile is not None:
             OUTPUT = open(cmdfile, 'w')
             OUTPUT.write("#!/bin/sh\n")
             OUTPUT.write("# Baseline test command\n")
