@@ -187,12 +187,15 @@ def run(package, basedir, argv, use_exec=use_exec, env=None):
         for _category, _value in _category_set:
             if not _category:
                 continue
-            _attrs.append("%s=%s" % (_category, _value))
+            if _value:
+                _attrs.append(_category)
+            else:
+                _attrs.append("(not %s)" % (_category,))
             if _category == 'performance' and _value == 1:
                 _with_performance = True
         if _attrs:
-            attr.append('-a')
-            attr.append(','.join(_attrs))
+            #attr.append('--eval-attr')
+            attr.append("--eval-attr=%s" % (' and '.join(_attrs),))
     cmd.extend(attr)
     if attr:
         print(" ... for test categor%s: %s" %
