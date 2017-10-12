@@ -44,6 +44,12 @@ def run(package, basedir, argv, use_exec=use_exec, env=None):
         default=False,
         help='Enable the computation of coverage information')
     parser.add_option(
+        '--cover-erase',
+        action='store_true',
+        dest='cover_erase',
+        default=False,
+        help='Erase any previous coverage data files')
+    parser.add_option(
         '-d',
         '--dir',
         action='store',
@@ -129,8 +135,9 @@ def run(package, basedir, argv, use_exec=use_exec, env=None):
         env['PATH'] = os.pathsep.join([binDir, env.get('PATH','')])
 
     if options.coverage:
-        cmd.extend(['--with-coverage', #'--cover-erase'
-                ])
+        cmd.append('--with-coverage')
+        if options.cover_erase:
+            cmd.append('--cover-erase')
         if options.pkg:
             cmd.append('--cover-package=%s' % options.pkg)
         #env['COVERAGE_FILE'] = os.path.join(CWD, '.coverage')
