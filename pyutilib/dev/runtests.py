@@ -129,10 +129,11 @@ def run(package, basedir, argv, use_exec=use_exec, env=None):
         env['PATH'] = os.pathsep.join([binDir, env.get('PATH','')])
 
     if options.coverage:
-        cmd.extend(['--with-coverage', '--cover-erase'])
+        cmd.extend(['--with-coverage', #'--cover-erase'
+                ])
         if options.pkg:
             cmd.append('--cover-package=%s' % options.pkg)
-        env['COVERAGE_FILE'] = os.path.join(CWD, '.coverage')
+        #env['COVERAGE_FILE'] = os.path.join(CWD, '.coverage')
 
     if options.verbose:
         cmd.append('-v')
