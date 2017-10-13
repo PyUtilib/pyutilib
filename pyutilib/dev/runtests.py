@@ -226,7 +226,8 @@ def run(package, basedir, argv, use_exec=use_exec, env=None):
                 targets.add(arg)
     cmd.extend(list(targets))
 
-    print("Running...\n    %s\n" % (' '.join(cmd),))
+    print("Running...\n    %s\n" % (
+            ' '.join( (x if ' ' not in x else '"'+x+'"') for x in cmd ), ))
     rc = 0
     if sys.platform.startswith('java'):
         import subprocess
