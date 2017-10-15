@@ -72,7 +72,10 @@ class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base):
         #
         # Start the excel spreadsheet
         #
-        self.xl = self._excel_dispatch()
+        try:
+            self.xl = self._excel_dispatch()
+        except com_error:
+            raise IOError("Excel not installed.")
         self.wb = self.xl.Workbooks.Open(self.xlsfile)
         self.worksheets = set(worksheets)
         self._ws = {}
