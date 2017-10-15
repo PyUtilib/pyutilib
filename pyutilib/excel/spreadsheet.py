@@ -75,18 +75,18 @@ class ExcelSpreadsheet(ExcelSpreadsheet_base):
         # class instances here.
         #
         ctype = kwds.pop('ctype', None)
+        if ctype == 'xlrd':
+            return ExcelSpreadsheet_xlrd(*args, **kwds)
         if ctype == 'win32com':
             return ExcelSpreadsheet_win32com(*args, **kwds)
         if ctype == 'openpyxl':
             return ExcelSpreadsheet_openpyxl(*args, **kwds)
-        if ctype == 'xlrd':
-            return ExcelSpreadsheet_xlrd(*args, **kwds)
         #
+        if _xlrd:
+            return ExcelSpreadsheet_xlrd(*args, **kwds)
         if _win32com:
             return ExcelSpreadsheet_win32com(*args, **kwds)
         if _openpyxl:
             return ExcelSpreadsheet_openpyxl(*args, **kwds)
-        if _xlrd:
-            return ExcelSpreadsheet_xlrd(*args, **kwds)
         #
         return super(ExcelSpreadsheet, cls).__new__(cls)
