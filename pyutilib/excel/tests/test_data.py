@@ -20,7 +20,14 @@ except:
 
 try:
     from win32com.client.dynamic import Dispatch
-    _win32com_available = True
+    from pyutilib.excel.spreadsheet_win32com import ExcelSpreadsheet_win32com
+    tmp = ExcelSpreadsheet_win32com()
+    try:
+        tmp._excel_dispatch()
+        tmp._excel_quit()
+        _win32com_available = True
+    except IOError:
+        _win32com_available = False
 except:
     _win32com_available = False  #pragma:nocover
 try:
