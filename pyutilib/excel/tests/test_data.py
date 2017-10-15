@@ -31,7 +31,7 @@ if _win32com_available:
         tmp._excel_dispatch()
         tmp._excel_quit()
         _excel_available = True
-    except IOError:
+    except:
         pass
 try:
     import xlrd

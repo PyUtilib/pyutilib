@@ -21,7 +21,6 @@ import os
 # raise an exception in its constructor.
 #
 from win32com.client.dynamic import Dispatch
-from pythoncom import CoInitialize, CoUninitialize
 from pythoncom import CoInitialize, CoUninitialize, com_error
 
 from pyutilib.excel.base import ExcelSpreadsheet_base
