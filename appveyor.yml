@@ -7,25 +7,35 @@ environment:
     # The list here is complete (excluding Python 2.6, which
     # isn't covered by this document) at the time of writing.
 
-    - PYTHON: "C:\\Python27"
-    #- PYTHON: "C:\\Python33"
-    - PYTHON: "C:\\Python34"
-    - PYTHON: "C:\\Python35"
-    - PYTHON: "C:\\Python36"
-    - PYTHON: "C:\\Python27-x64"
+    - PYTHON: "C:\\Miniconda-x64"
+      #PYTHON: "C:\\Python27"
+
+    - PYTHON: "C:\\Miniconda3-x64"
+      #PYTHON: "C:\\Python34"
+
+    - PYTHON: "C:\\Miniconda35-x64"
+      #PYTHON: "C:\\Python35"
+
+    - PYTHON: "C:\\Miniconda36-x64"
+      #PYTHON: "C:\\Python36"
+
+    #- PYTHON: "C:\\Python27-x64"
     #- PYTHON: "C:\\Python33-x64"
     #  DISTUTILS_USE_SDK: "1"
-    - PYTHON: "C:\\Python34-x64"
-      DISTUTILS_USE_SDK: "1"
-    - PYTHON: "C:\\Python35-x64"
-    - PYTHON: "C:\\Python36-x64"
+    #- PYTHON: "C:\\Python34-x64"
+    #  DISTUTILS_USE_SDK: "1"
+    #- PYTHON: "C:\\Python35-x64"
+    #- PYTHON: "C:\\Python36-x64"
 
 install:
   # We need wheel installed to build wheels
-  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
-  - "python --version"
-  - "python -m pip install coverage"
-  - "python -m pip install nose"
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PYTHON%\\Library\\bin;%PATH%"
+  - python --version
+  - conda install -q -y --channel conda-forge setuptools
+  - python -m pip install coverage
+  - python -m pip install nose
+  - python -m pip install xlrd
+  - python -m pip install openpyxl
   - "dir %PYTHON%\\Scripts"
 
 build: off
