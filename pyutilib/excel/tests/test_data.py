@@ -21,15 +21,17 @@ except:
 try:
     from win32com.client.dynamic import Dispatch
     from pyutilib.excel.spreadsheet_win32com import ExcelSpreadsheet_win32com
+except:
+    _win32com_available = False  #pragma:nocover
+    _excel_available = False  #pragma:nocover
+if _win32com_available:
     tmp = ExcelSpreadsheet_win32com()
     try:
         tmp._excel_dispatch()
         tmp._excel_quit()
-        _win32com_available = True
+        _excel_available = True
     except IOError:
-        _win32com_available = False
-except:
-    _win32com_available = False  #pragma:nocover
+        pass
 try:
     import xlrd
     _xlrd_available = True
@@ -251,6 +253,7 @@ class BaseTests(object):
 
 
 @unittest.skipIf(not _win32com_available, "Cannot import win32com")
+@unittest.skipIf(not _excel_available, "Excel not installed")
 class Test_win32com(BaseTests, unittest.TestCase):
 
     ctype = 'win32com'
