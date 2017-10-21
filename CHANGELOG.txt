@@ -3,6 +3,18 @@
 ====================
 
 -------------------------------------------------------------------------------
+ Version 5.60
+-------------------------------------------------------------------------------
+
+- Changed the default logic for ExcelSpreadsheet to use xldrd when available
+- Changed logic for ExcelSpreadsheet to test for Excel with win32com
+- Updates to pyutilib.th and pyutilib.dev to make testing scripts more
+  robust
+- Added a visitor pattern in pyutilib.misc
+- Reordering some of the I/O management and guarding I/O (Pyomo #156)
+- Introduced contiguous task processing in pyutilib.worker
+
+-------------------------------------------------------------------------------
  Version 5.5.1
 -------------------------------------------------------------------------------
 
