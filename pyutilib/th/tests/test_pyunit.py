@@ -47,19 +47,22 @@ class TestNoCategory(unittest.TestCase):
 
     @unittest.category('fragile')
     def test_fragile(self):
-        self.assertEqual(self.test_custom.smoke, 0)
-        self.assertEqual(self.test_custom.nightly, 0)
-        self.assertEqual(self.test_custom.expensive, 0)
-        self.assertEqual(self.test_custom.fragile, 1)
+        self.assertRaises(
+            AttributeError, getattr, self.test_noCategory, 'smoke')
+        self.assertRaises(
+            AttributeError, getattr, self.test_noCategory, 'nightly')
+        self.assertRaises(
+            AttributeError, getattr, self.test_noCategory, 'expensive')
+        self.assertEqual(self.test_fragile.fragile, 1)
         self.assertRaises(
             AttributeError, getattr, self.test_notExpensive, 'custom')
 
     @unittest.category('fragile','smoke')
     def test_fragile_smoke(self):
-        self.assertEqual(self.test_custom.smoke, 1)
-        self.assertEqual(self.test_custom.nightly, 0)
-        self.assertEqual(self.test_custom.expensive, 0)
-        self.assertEqual(self.test_custom.fragile, 1)
+        self.assertEqual(self.test_fragile_smoke.smoke, 1)
+        self.assertEqual(self.test_fragile_smoke.nightly, 0)
+        self.assertEqual(self.test_fragile_smoke.expensive, 0)
+        self.assertEqual(self.test_fragile_smoke.fragile, 1)
         self.assertRaises(
             AttributeError, getattr, self.test_notExpensive, 'custom')
 
@@ -122,19 +125,19 @@ class TestExpensive(unittest.TestCase):
 
     @unittest.category('fragile')
     def test_fragile(self):
-        self.assertEqual(self.test_custom.smoke, 0)
-        self.assertEqual(self.test_custom.nightly, 0)
-        self.assertEqual(self.test_custom.expensive, 0)
-        self.assertEqual(self.test_custom.fragile, 1)
+        self.assertEqual(self.test_fragile.smoke, 0)
+        self.assertEqual(self.test_fragile.nightly, 0)
+        self.assertEqual(self.test_fragile.expensive, 1)
+        self.assertEqual(self.test_fragile.fragile, 1)
         self.assertRaises(
             AttributeError, getattr, self.test_notExpensive, 'custom')
 
     @unittest.category('fragile','smoke')
     def test_fragile_smoke(self):
-        self.assertEqual(self.test_custom.smoke, 1)
-        self.assertEqual(self.test_custom.nightly, 0)
-        self.assertEqual(self.test_custom.expensive, 0)
-        self.assertEqual(self.test_custom.fragile, 1)
+        self.assertEqual(self.test_fragile_smoke.smoke, 1)
+        self.assertEqual(self.test_fragile_smoke.nightly, 0)
+        self.assertEqual(self.test_fragile_smoke.expensive, 1)
+        self.assertEqual(self.test_fragile_smoke.fragile, 1)
         self.assertRaises(
             AttributeError, getattr, self.test_notExpensive, 'custom')
 

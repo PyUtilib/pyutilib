@@ -93,8 +93,10 @@ def category(*args, **kwargs):
     def _id(func):
         if hasattr(func, '__mro__') and TestCase in func.__mro__:
             # @category() called on a TestCase class
-            for c,v in iteritems(func.unspecified_categories):
-                setattr(func, c, v)
+            if len(_categories) > (1 if 'fragile' in _categories else 0):
+                for c,v in iteritems(func.unspecified_categories):
+                    setattr(func, c, v)
+                    _categories.setdefault(c, v)
             default_updates = {}
             for c,v in iteritems(_categories):
                 if c in func.unspecified_categories:
@@ -108,8 +110,9 @@ def category(*args, **kwargs):
                                 setattr(fcn, c, v)
         else:
             # This is a (currently unbound) method definition
-            for c,v in iteritems(TestCase.unspecified_categories):
-                setattr(func, c, v)
+            if len(_categories) > (1 if 'fragile' in _categories else 0):
+                for c,v in iteritems(TestCase.unspecified_categories):
+                    setattr(func, c, v)
             for c,v in iteritems(_categories):
                 setattr(func, c, v)
             setattr(func, '_categories', _categories)

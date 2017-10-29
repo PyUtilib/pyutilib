@@ -231,6 +231,29 @@ class Test_Runtests(unittest.TestCase):
         self.assertEqual(sorted(result), sorted(ref))
 
 
+    def test_fragile_AND_smoke(self):
+        result = self._run(['--cat=fragile,smoke'])
+        ref = [
+            #'pyutilib.th.tests.test_pyunit.TestExpensive.test_custom',
+            #'pyutilib.th.tests.test_pyunit.TestExpensive.test_expensive',
+            #'pyutilib.th.tests.test_pyunit.TestExpensive.test_fragile',
+            'pyutilib.th.tests.test_pyunit.TestExpensive.test_fragile_smoke',
+            #'pyutilib.th.tests.test_pyunit.TestExpensive.test_multi',
+            #'pyutilib.th.tests.test_pyunit.TestExpensive.test_noCategory',
+            #'pyutilib.th.tests.test_pyunit.TestExpensive.test_notExpensive',
+            #'pyutilib.th.tests.test_pyunit.TestExpensive.test_smoke',
+            #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_custom',
+            #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_expensive',
+            'pyutilib.th.tests.test_pyunit.TestNoCategory.test_fragile',
+            'pyutilib.th.tests.test_pyunit.TestNoCategory.test_fragile_smoke',
+            #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_multi',
+            #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_noCategory',
+            #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_notExpensive',
+            #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_smoke',
+        ]
+        self.assertEqual(sorted(result), sorted(ref))
+
+
     def test_fragile_OR_smoke(self):
         result = self._run(['--cat=fragile', '--cat=smoke'])
         ref = [
