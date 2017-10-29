@@ -34,7 +34,7 @@ install:
 script:
 #- cd ..
 #- cp pyutilib/.coveragerc .
-- test.pyutilib --cat=nightly --cov
+- test.pyutilib --cat=all --cov
 after_success:
 - pip install codecov
 - codecov
