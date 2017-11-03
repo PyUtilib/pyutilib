@@ -30,7 +30,7 @@ class TestLogging(unittest.TestCase):
     def test_simple_log(self):
         # Testing positional base, configurable verbosity
         self.handler = LogHandler(
-            os.path.dirname(__file__), 
+            os.path.dirname(__file__),
             stream = self.stream,
             verbosity=lambda: logger.isEnabledFor(logging.DEBUG))
         logger.addHandler(self.handler)
@@ -46,12 +46,12 @@ class TestLogging(unittest.TestCase):
         logger.warn("(warn)")
         lineno = getframeinfo(currentframe()).lineno - 1
         ans += 'WARNING: "[base]%stest_log_config.py", %d, test_simple_log\n' \
-               '\t(warn)\n' % (os.path.sep, lineno,)
+               '    (warn)\n' % (os.path.sep, lineno,)
         self.assertEqual(self.stream.getvalue(), ans)
 
     def test_alternate_base(self):
         self.handler = LogHandler(
-            base = 'log_config', 
+            base = 'log_config',
             stream = self.stream)
         logger.addHandler(self.handler)
 
@@ -61,7 +61,7 @@ class TestLogging(unittest.TestCase):
         logger.warn("(warn)")
         lineno = getframeinfo(currentframe()).lineno - 1
         ans = 'WARNING: "%s", %d, test_alternate_base\n' \
-               '\t(warn)\n' % (filename, lineno,)
+               '    (warn)\n' % (filename, lineno,)
         self.assertEqual(self.stream.getvalue(), ans)
 
     def test_no_base(self):
@@ -75,53 +75,126 @@ class TestLogging(unittest.TestCase):
         logger.warn("(warn)")
         lineno = getframeinfo(currentframe()).lineno - 1
         ans = 'WARNING: "%s", %d, test_no_base\n' \
-               '\t(warn)\n' % (filename, lineno,)
+               '    (warn)\n' % (filename, lineno,)
         self.assertEqual(self.stream.getvalue(), ans)
 
-    def test_long_messages(self):
+    def test_no_message(self):
         self.handler = LogHandler(
-            os.path.dirname(__file__), 
+            os.path.dirname(__file__),
             stream = self.stream,
             verbosity=lambda: logger.isEnabledFor(logging.DEBUG))
         logger.addHandler(self.handler)
 
-        msg = ("   This is a long message\n"
+        logger.setLevel(logging.WARNING)
+        logger.info("")
+        self.assertEqual(self.stream.getvalue(), "")
+
+        logger.warn("")
+        ans = "WARNING\n"
+        self.assertEqual(self.stream.getvalue(), ans)
+
+        logger.setLevel(logging.DEBUG)
+        logger.warn("")
+        lineno = getframeinfo(currentframe()).lineno - 1
+        ans += 'WARNING: "[base]%stest_log_config.py", %d, test_no_message\n' \
+               % (os.path.sep, lineno,)
+        self.assertEqual(self.stream.getvalue(), ans)
+
+    def test_numbered_level(self):
+        testname ='test_numbered_level'
+        self.handler = LogHandler(
+            os.path.dirname(__file__),
+            stream = self.stream,
+            verbosity=lambda: logger.isEnabledFor(logging.DEBUG))
+        logger.addHandler(self.handler)
+
+        logger.setLevel(logging.WARNING)
+        logger.log(45, "(hi)")
+        ans = "Level 45: (hi)\n"
+        self.assertEqual(self.stream.getvalue(), ans)
+
+        logger.log(45, "")
+        ans += "Level 45\n"
+        self.assertEqual(self.stream.getvalue(), ans)
+
+        logger.setLevel(logging.DEBUG)
+        logger.log(45, "(hi)")
+        lineno = getframeinfo(currentframe()).lineno - 1
+        ans += 'Level 45: "[base]%stest_log_config.py", %d, %s\n' \
+               '    (hi)\n' % (os.path.sep, lineno, testname)
+        self.assertEqual(self.stream.getvalue(), ans)
+
+        logger.log(45, "")
+        lineno = getframeinfo(currentframe()).lineno - 1
+        ans += 'Level 45: "[base]%stest_log_config.py", %d, %s\n' \
+               % (os.path.sep, lineno, testname)
+        self.assertEqual(self.stream.getvalue(), ans)
+
+    def test_long_messages(self):
+        self.handler = LogHandler(
+            os.path.dirname(__file__),
+            stream = self.stream,
+            verbosity=lambda: logger.isEnabledFor(logging.DEBUG))
+        logger.addHandler(self.handler)
+
+        msg = ("This is a long message\n\n"
                "With some kind of internal formatting\n"
                "    - including a bulleted list\n"
                "    - list 2  ")
         logger.setLevel(logging.WARNING)
         logger.warn(msg)
-        ans = ( "WARNING: This is a long message\n"
-                "\tWith some kind of internal formatting\n"
-                "\t    - including a bulleted list\n"
-                "\t    - list 2\n" )
+        ans = ( "WARNING: This is a long message\n\n"
+                "    With some kind of internal formatting\n"
+                "        - including a bulleted list\n"
+                "        - list 2\n" )
         self.assertEqual(self.stream.getvalue(), ans)
 
         logger.setLevel(logging.DEBUG)
         logger.info(msg)
         lineno = getframeinfo(currentframe()).lineno - 1
         ans += ( 'INFO: "[base]%stest_log_config.py", %d, test_long_messages\n'
-                 "\tThis is a long message\n"
-                 "\tWith some kind of internal formatting\n"
-                 "\t    - including a bulleted list\n"
-                 "\t    - list 2\n" % (os.path.sep, lineno,))
+                 "    This is a long message\n\n"
+                 "    With some kind of internal formatting\n"
+                 "        - including a bulleted list\n"
+                 "        - list 2\n" % (os.path.sep, lineno,))
         self.assertEqual(self.stream.getvalue(), ans)
 
+        # test trailing newline
         msg += "\n"
         logger.setLevel(logging.WARNING)
         logger.warn(msg)
-        ans += ( "WARNING: This is a long message\n"
-                "\tWith some kind of internal formatting\n"
-                "\t    - including a bulleted list\n"
-                "\t    - list 2\n" )
+        ans += ( "WARNING: This is a long message\n\n"
+                "    With some kind of internal formatting\n"
+                "        - including a bulleted list\n"
+                "        - list 2\n" )
         self.assertEqual(self.stream.getvalue(), ans)
 
         logger.setLevel(logging.DEBUG)
         logger.info(msg)
         lineno = getframeinfo(currentframe()).lineno - 1
         ans += ( 'INFO: "[base]%stest_log_config.py", %d, test_long_messages\n'
-                 "\tThis is a long message\n"
-                 "\tWith some kind of internal formatting\n"
-                 "\t    - including a bulleted list\n"
-                 "\t    - list 2\n" % (os.path.sep, lineno,))
+                 "    This is a long message\n\n"
+                 "    With some kind of internal formatting\n"
+                 "        - including a bulleted list\n"
+                 "        - list 2\n" % (os.path.sep, lineno,))
+        self.assertEqual(self.stream.getvalue(), ans)
+
+        # test initial and final blank lines
+        msg = "\n" + msg + "\n\n"
+        logger.setLevel(logging.WARNING)
+        logger.warn(msg)
+        ans += ( "WARNING: This is a long message\n\n"
+                "    With some kind of internal formatting\n"
+                "        - including a bulleted list\n"
+                "        - list 2\n" )
+        self.assertEqual(self.stream.getvalue(), ans)
+
+        logger.setLevel(logging.DEBUG)
+        logger.info(msg)
+        lineno = getframeinfo(currentframe()).lineno - 1
+        ans += ( 'INFO: "[base]%stest_log_config.py", %d, test_long_messages\n'
+                 "    This is a long message\n\n"
+                 "    With some kind of internal formatting\n"
+                 "        - including a bulleted list\n"
+                 "        - list 2\n" % (os.path.sep, lineno,))
         self.assertEqual(self.stream.getvalue(), ans)
