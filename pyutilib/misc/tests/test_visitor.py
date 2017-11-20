@@ -9,9 +9,6 @@ class Node(object):
         self.children = []
         self.num = 0
 
-    def __str__(self):
-        return str(self.num)
-
 class CountVisitor(SimpleVisitor):
 
     def __init__(self):
