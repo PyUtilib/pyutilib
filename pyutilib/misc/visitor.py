@@ -1,8 +1,9 @@
 from collections import deque
 
+
 class SimpleVisitor(object):
 
-    def visit(self, node):
+    def visit(self, node):  #pragma: no cover
         pass
 
     def children(self, node):
@@ -11,7 +12,7 @@ class SimpleVisitor(object):
     def is_leaf(self, node):
         return len(node.children) == 0
 
-    def finalize(self):
+    def finalize(self):     #pragma: no cover
         pass
 
     def bfs(self, node):
@@ -98,7 +99,7 @@ class SimpleVisitor(object):
 
 class ValueVisitor(object):
 
-    def visit(self, node, values):
+    def visit(self, node, values):  #pragma: no cover
         pass
 
     def children(self, node):
@@ -107,27 +108,26 @@ class ValueVisitor(object):
     def is_leaf(self, node):
         return len(node.children) == 0
 
-    def finalize(self, ans):
+    def finalize(self, ans):    #pragma: no cover
         pass
 
-    def visiting_potential_leaf(self, node, values):
+    def visiting_potential_leaf(self, node):
         """ 
         Visiting a potential leaf.
 
         Return True if the node is not expanded.
         """
         if not self.is_leaf(node):
-            return False
-        ans = self.visit(node, None)
-        if ans is None:
-            return False
-        values.append( ans )
-        return True
+            return False, None
+        return True, self.visit(node, None)
 
     def dfs_postorder_deque(self, node):
         """
         Depth-first search - postorder with a dequeue
         """
+        flag, value = self.visiting_potential_leaf(node)
+        if flag:
+            return value
         _values = [[]]
         expanded = set()
         dq = deque([node])
@@ -137,7 +137,10 @@ class ValueVisitor(object):
                 dq.pop()
                 values = _values.pop()
                 _values[-1].append( self.visit(current, values) )
-            elif self.visiting_potential_leaf(current, _values[-1]):
+                continue
+            flag, value = self.visiting_potential_leaf(current)
+            if flag:
+                _values[-1].append(value)
                 dq.pop()
             else:
                 for c in reversed(self.children(current)):
@@ -150,6 +153,9 @@ class ValueVisitor(object):
         """
         Depth-first search - postorder with a stack
         """
+        flag, value = self.visiting_potential_leaf(node)
+        if flag:
+            return value
         _stack = [ (node, self.children(node), 0, len(self.children(node)), [])]
         #
         # Iterate until the stack is empty
@@ -171,7 +177,10 @@ class ValueVisitor(object):
             while _idx < _len:
                 _sub = _argList[_idx]
                 _idx += 1
-                if not self.visiting_potential_leaf(_sub, _result):
+                flag, value = self.visiting_potential_leaf(_sub)
+                if flag:
+                    _result.append( value )
+                else:
                     #
                     # Push an expression onto the stack
                     #
@@ -192,4 +201,5 @@ class ValueVisitor(object):
                 _stack[-1][-1].append( ans )
             else:
                 return self.finalize(ans)
+
 

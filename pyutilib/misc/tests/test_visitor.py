@@ -9,6 +9,9 @@ class Node(object):
         self.children = []
         self.num = 0
 
+    def __str__(self):      #pragma: no cover
+        return str(self.num)
+
 class CountVisitor(SimpleVisitor):
 
     def __init__(self):
@@ -90,13 +93,23 @@ class Test(unittest.TestCase):
         ans = visitor.dfs_postorder(self.root)
         self.assertEqual(ans, [14,15,16,5,17,18,19,6,20,21,22,7,2,23,24,25,8,26,27,28,9,29,30,31,10,3,32,33,34,11,35,36,37,12,38,39,40,13,4,1])
 
-    def test_retval_dfs_postorder(self):
+    def test_retval_dfs_postorder_tree(self):
         visitor = SumVisitor()
         ans = visitor.dfs_postorder_deque(self.root)
         self.assertEqual(ans, 820)
         visitor = SumVisitor()
         ans = visitor.dfs_postorder_stack(self.root)
         self.assertEqual(ans, 820)
+
+    def test_retval_dfs_postorder_trivial(self):
+        root = Node()
+        root.num = 1
+        visitor = SumVisitor()
+        ans = visitor.dfs_postorder_deque(root)
+        self.assertEqual(ans, 1)
+        visitor = SumVisitor()
+        ans = visitor.dfs_postorder_stack(root)
+        self.assertEqual(ans, 1)
 
     def test_count_bfs(self):
         cvisitor = CountVisitor()
