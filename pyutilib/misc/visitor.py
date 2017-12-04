@@ -240,8 +240,12 @@ class ValueVisitor(object):
         this visitor pattern computes and returns value for each
         node to enable the computation of this value.
 
+        Args:
+            ans: The final value computed by the search method.
+
         Returns:
-            The final value after the search.
+            The final value after the search. Defaults to simply
+            returning :attr:`ans`.
         """
         return ans
 
