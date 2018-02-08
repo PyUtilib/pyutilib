@@ -52,7 +52,7 @@ def reset_redirect():
 
 
 @contextmanager
-def redirected_stdout(output=None):
+def capture_output(output=None):
     """Temporarily redirect stdout into a string buffer."""
     if output is None:
         output = StringIO()
