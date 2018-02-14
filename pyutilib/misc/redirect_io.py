@@ -8,6 +8,8 @@
 #  _________________________________________________________________________
 
 import sys
+from contextlib import contextmanager
+from six import StringIO
 
 _old_stdout = []
 _old_stderr = []
@@ -47,6 +49,18 @@ def reset_redirect():
             sys.stdout.close()
         sys.stdout = _old_stdout.pop()
         sys.stderr = _old_stderr.pop()
+
+
+@contextmanager
+def capture_output(output=None):
+    """Temporarily redirect stdout into a string buffer."""
+    if output is None:
+        output = StringIO()
+    try:
+        setup_redirect(output)
+        yield output
+    finally:
+        reset_redirect()
 
 
 #
