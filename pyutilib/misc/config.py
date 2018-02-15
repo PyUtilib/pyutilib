@@ -108,10 +108,11 @@ class ConfigBase(object):
                  '_default', '_domain', '_description', '_doc', '_visibility',
                  '_argparse')
 
-    # This just needs to be any reference-counted object; we use it so
-    # that we can tell if an argument is provided (and we can't use None
-    # as None is a valid user-specified argument)
-    NoArgument = (None,)
+    # This just needs to be any singleton-like object; we use it so that
+    # we can tell if an argument is provided (and we can't use None as
+    # None is a valid user-specified argument).  Making it a class helps
+    # when Config objects are pickled.
+    class NoArgument(object): pass
 
     def __init__(self,
                  default=None,
@@ -897,7 +898,7 @@ class ConfigBlock(ConfigBase):
                 if key in _decl_map:
                     #print "Setting", key, " = ", value
                     self._data[key].set_value(value[_decl_map[key]])
-            # implicit data is declated at the end (in sorted order)
+            # implicit data is declared at the end (in sorted order)
             for key in sorted(_implicit):
                 self.add(key, value[key])
         except:
