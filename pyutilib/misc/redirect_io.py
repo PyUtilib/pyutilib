@@ -26,9 +26,6 @@ def setup_redirect(output):
     Redirect stdout and stderr to a specified output, which
     is either the string name for a file, or a file-like class.
     """
-    global _old_stdout
-    global _old_stderr
-    global _local_file
     _old_stdout.append(sys.stdout)
     _old_stderr.append(sys.stderr)
     if isinstance(output, basestring):
@@ -42,8 +39,6 @@ def setup_redirect(output):
 
 def reset_redirect():
     """ Reset redirection to use standard stdout and stderr """
-    global _old_stdout
-    global _old_stderr
     if len(_old_stdout) > 0:
         if _local_file.pop():
             sys.stdout.close()
