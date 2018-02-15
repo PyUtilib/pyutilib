@@ -864,11 +864,13 @@ class ConfigBlock(ConfigBase):
 
     def set_value(self, value):
         if value is None:
-            return
+            return self
         if (type(value) is not dict) and \
            (not isinstance(value, ConfigBlock)):
             raise ValueError("Expected dict value for %s.set_value, found %s" %
                              (self.name(True), type(value).__name__))
+        if not value:
+            return self
         _implicit = []
         _decl_map = {}
         for key in value:
@@ -906,6 +908,7 @@ class ConfigBlock(ConfigBase):
             self.set_value(_old_data)
             raise
         self._userSet = True
+        return self
 
     def reset(self):
         # Reset the values in the order they were declared.  This
