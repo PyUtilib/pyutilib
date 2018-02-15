@@ -52,6 +52,8 @@ def _strip_indentation(doc):
     if not doc:
         return doc
     lines = doc.splitlines()
+    while lines and not lines[0].strip():
+        lines.pop(0)
     if len(lines) == 1:
         return doc.lstrip()
     minIndent = min(len(_leadingSpace.match(l).group(0)) for l in lines[1:])
