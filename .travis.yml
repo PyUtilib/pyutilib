@@ -52,7 +52,8 @@ deploy:
     tags: false
     branch: master
     python: '2.7'
-    condition: '"$YAML" = "pyyaml"'
+    condition: 'False'
+#    condition: '"$YAML" = "pyyaml"'
 - provider: pypi
   user: whart111
   password:
@@ -62,4 +63,5 @@ deploy:
     tags: true
     branch: master
     python: '2.7'
-    condition: '"$YAML" = "pyyaml"'
+    condition: 'False'
+#    condition: '"$YAML" = "pyyaml"'
