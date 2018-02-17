@@ -26,8 +26,8 @@ install:
 - if [ "${TRAVIS_PYTHON_VERSION}" = "2.6" ]; then pip install pbr; fi
 - if [ "${TRAVIS_PYTHON_VERSION}" = "2.6" ]; then pip install linecache2; fi
 - if [ "${TRAVIS_PYTHON_VERSION}" = "2.6" ]; then pip install traceback2; fi
+- if [ "${TRAVIS_PYTHON_VERSION}" != "2.6" ]; then pip install openpyxl; fi
 - pip install xlrd
-- pip install openpyxl
 - pip install $PYRO
 - pip install coverage
 - python setup.py develop
