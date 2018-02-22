@@ -13,7 +13,7 @@
 
 import unittest
 
-import pyutilib.enum as enum
+import pyutilib.enum.enum as enum
 
 
 class Mock_Enum(object):
