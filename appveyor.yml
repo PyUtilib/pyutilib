@@ -35,7 +35,7 @@ install:
   - python -m pip install coverage
   - python -m pip install nose
   - python -m pip install xlrd
-  - python -m pip install openpyxl
+  #- python -m pip install openpyxl
   - "dir %PYTHON%\\Scripts"
 
 build: off

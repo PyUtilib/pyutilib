@@ -52,6 +52,8 @@ def _strip_indentation(doc):
     if not doc:
         return doc
     lines = doc.splitlines()
+    while lines and not lines[0].strip():
+        lines.pop(0)
     if len(lines) == 1:
         return doc.lstrip()
     minIndent = min(len(_leadingSpace.match(l).group(0)) for l in lines[1:])
@@ -106,10 +108,11 @@ class ConfigBase(object):
                  '_default', '_domain', '_description', '_doc', '_visibility',
                  '_argparse')
 
-    # This just needs to be any reference-counted object; we use it so
-    # that we can tell if an argument is provided (and we can't use None
-    # as None is a valid user-specified argument)
-    NoArgument = (None,)
+    # This just needs to be any singleton-like object; we use it so that
+    # we can tell if an argument is provided (and we can't use None as
+    # None is a valid user-specified argument).  Making it a class helps
+    # when Config objects are pickled.
+    class NoArgument(object): pass
 
     def __init__(self,
                  default=None,
@@ -861,11 +864,13 @@ class ConfigBlock(ConfigBase):
 
     def set_value(self, value):
         if value is None:
-            return
+            return self
         if (type(value) is not dict) and \
            (not isinstance(value, ConfigBlock)):
             raise ValueError("Expected dict value for %s.set_value, found %s" %
                              (self.name(True), type(value).__name__))
+        if not value:
+            return self
         _implicit = []
         _decl_map = {}
         for key in value:
@@ -895,7 +900,7 @@ class ConfigBlock(ConfigBase):
                 if key in _decl_map:
                     #print "Setting", key, " = ", value
                     self._data[key].set_value(value[_decl_map[key]])
-            # implicit data is declated at the end (in sorted order)
+            # implicit data is declared at the end (in sorted order)
             for key in sorted(_implicit):
                 self.add(key, value[key])
         except:
@@ -903,6 +908,7 @@ class ConfigBlock(ConfigBase):
             self.set_value(_old_data)
             raise
         self._userSet = True
+        return self
 
     def reset(self):
         # Reset the values in the order they were declared.  This

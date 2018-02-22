@@ -175,6 +175,20 @@ class IODebug(unittest.TestCase):
         indenter.close()
         self.assertEqual(indenter.closed, True)
 
+    def test_redirected_stdout(self):
+        with pyutilib.misc.capture_output() as output:
+            print("test1")
+            print("test2")
+        self.assertEqual(output.getvalue(), "test1\ntest2\n")
+
+    def test_redirected_stdout_with_arg(self):
+        stream = six.StringIO()
+        stream.write("before\n")
+        with pyutilib.misc.capture_output(stream) as output:
+            print("test1")
+            print("test2")
+        self.assertEqual(output.getvalue(), "before\ntest1\ntest2\n")
+
 
 if __name__ == "__main__":
     unittest.main()

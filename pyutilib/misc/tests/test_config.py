@@ -57,11 +57,15 @@ class Test(unittest.TestCase):
               - item 2
             """)).declare_as_argument(group='Scenario definition')
         sc.declare('merlion', ConfigValue(
-            False, bool, 'Water quality model',
-            """This is the (long) documentation for the 'merlion'
-parameter.  It contains multiple lines, but no apparent internal
-formatting; so the outputter should re-wrap everything.
-""")).declare_as_argument(group='Scenario definition')
+            default=False,
+            domain=bool,
+            description='Water quality model',
+            doc="""
+
+            This is the (long) documentation for the 'merlion'
+            parameter.  It contains multiple lines, but no apparent internal
+            formatting; so the outputter should re-wrap everything."""
+        )).declare_as_argument(group='Scenario definition')
         sc.declare('detection',
                    ConfigValue(
                        # Note use of lambda for an "integer list domain"
