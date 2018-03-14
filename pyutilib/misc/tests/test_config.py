@@ -1485,6 +1485,16 @@ Node information:
         self.config = pickle.loads(pickle_str)
         self.test_display_list()
 
+    def test_set_value(self):
+        config = ConfigBlock()
+        config.declare('a b', ConfigValue())
+        config.declare('a_c', ConfigValue())
+        config.declare('a d e', ConfigValue())
+
+        config.set_value({'a_b':10, 'a_c': 20, 'a_d_e': 30})
+        self.assertEqual(config.a_b, 10)
+        self.assertEqual(config.a_c, 20)
+        self.assertEqual(config.a_d_e, 30)
 
 if __name__ == "__main__":
     unittest.main()

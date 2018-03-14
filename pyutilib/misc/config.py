@@ -874,19 +874,24 @@ class ConfigBlock(ConfigBase):
         _implicit = []
         _decl_map = {}
         for key in value:
-            if str(key) in self._data:
+            _key = str(key)
+            if _key in self._data:
                 # str(key) may not be key... store the mapping so that
                 # when we later iterate over the _decl_order, we can map
                 # the local keys back to the incoming value keys.
-                _decl_map[str(key)] = key
+                _decl_map[_key] = key
             else:
-                if self._implicit_declaration:
-                    _implicit.append(key)
+                _key = _key.replace('_', ' ')
+                if _key in self._data:
+                    _decl_map[str(_key)] = key
                 else:
-                    raise ValueError(
-                        "key '%s' not defined for Config Block '%s' and "
-                        "implicit (undefined) keys are not allowed" %
-                        (key, self.name(True)))
+                    if self._implicit_declaration:
+                        _implicit.append(key)
+                    else:
+                        raise ValueError(
+                            "key '%s' not defined for Config Block '%s' and "
+                            "implicit (undefined) keys are not allowed" %
+                            (key, self.name(True)))
 
         # If the set_value fails part-way through the new values, we
         # want to restore a deterministic state.  That is, either
