@@ -17,13 +17,11 @@ from six.moves import zip
 from six.moves import xrange
 
 
-def isclose(a, b, rel_tol=1e-9, abs_tol=0.0):
-    diff = math.fabs(a-b)
-    if diff <= rel_tol*max(math.fabs(a),math.fabs(b)):
-        return True
-    if diff <= abs_tol:
-        return True
-    return False
+try:
+    from math import isclose
+except:
+    def isclose(a, b, rel_tol=1e-9, abs_tol=0.0):
+        return abs(a-b) <= max( rel_tol * max(abs(a), abs(b)), abs_tol )
 
 
 def approx_equal(A, B, abstol, reltol):
