@@ -10,3 +10,4 @@
 debug = False
 current_process = None
 signal_handler_busy = None
+DEFINE_SIGNAL_HANDLERS_DEFAULT = True

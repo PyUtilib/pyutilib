@@ -422,7 +422,7 @@ def run_command(cmd,
                 valgrind_options=None,
                 memmon=False,
                 env=None,
-                define_signal_handlers=True,
+                define_signal_handlers=None,
                 debug=False,
                 verbose=True,
                 timelimit=None,
@@ -430,6 +430,11 @@ def run_command(cmd,
                 ignore_output=False,
                 shell=False,
                 thread_reader=None):
+    #
+    # Set the define_signal_handlers based on the global default flag.
+    #
+    if define_signal_handlers is None:
+        define_signal_handlers = GlobalData.DEFINE_SIGNAL_HANDLERS_DEFAULT
     #
     # Move to the specified working directory
     #
