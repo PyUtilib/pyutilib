@@ -30,7 +30,7 @@ def setup_enum_value_fixtures(testcase):
     testcase.bad_keys = [None, 0, 1, (), Mock_Enum()]
 
     testcase.other_values = [
-        None,
+        #None,                  Python 3.x does not support comparisons between integers and None
         0,
         1,
         (),
