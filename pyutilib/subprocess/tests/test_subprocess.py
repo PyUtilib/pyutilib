@@ -139,6 +139,7 @@ class Test(unittest.TestCase):
                             (["Tee Script: ERR", "Tee Script: OUT"],
                              ["Tee Script: OUT", "Tee Script: ERR"]))
 
+    @unittest.category("fragile")
     def test_tee(self):
         stream_out = six.StringIO()
         script_out = six.StringIO()
@@ -168,6 +169,7 @@ class Test(unittest.TestCase):
                             (["Tee Script: ERR", "Tee Script: OUT"],
                              ["Tee Script: OUT", "Tee Script: ERR"]))
 
+    @unittest.category("fragile")
     def test_tee_stdout(self):
         stream_out = six.StringIO()
         script_out = six.StringIO()
@@ -192,6 +194,7 @@ class Test(unittest.TestCase):
                             (["Tee Script: ERR", "Tee Script: OUT"],
                              ["Tee Script: OUT", "Tee Script: ERR"]))
 
+    @unittest.category("fragile")
     def test_tee_stderr(self):
         stream_out = six.StringIO()
         script_out = six.StringIO()
