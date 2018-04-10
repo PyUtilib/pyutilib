@@ -1,0 +1,21 @@
+Pull latest updates
+  git pull
+
+Update the CHANGELOG.txt file
+  vi CHANGELOG.txt
+
+Update the version in setup.py
+  vi setup.py
+
+Commit and push these revisions
+  git commit .
+  git push
+
+Tag the release
+  git tag -a '5.6.3' -m 'Tagging PyUtilib 5.6.3'
+
+Push the tag
+  git push --tags
+
+Upload to PyPI
+  lpython setup.py register sdist --format=gztar bdist_wheel --universal upload
