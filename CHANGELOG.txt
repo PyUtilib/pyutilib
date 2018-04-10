@@ -3,6 +3,15 @@
 ====================
 
 -------------------------------------------------------------------------------
+ Version 5.6.3
+-------------------------------------------------------------------------------
+
+- Resolved enum test failure on Python 3.x
+- Created a global default for disabling the default signal handling (#32)
+- Updated the isclose() method to match PEP-485
+- Fix for setting a ConfigBlock with keys that contains spaces/underscores.
+
+-------------------------------------------------------------------------------
  Version 5.6.2
 -------------------------------------------------------------------------------
 
