@@ -168,6 +168,16 @@ def signal_handler(signum, frame, verbose=False):
             raise OSError("Problem terminating process" + repr(
                 GlobalData.current_process.pid))
         GlobalData.current_process = None
+
+    # Restore the original signal handlers (because the subprocess is
+    # now defunct, and we shouldn't return here)
+    for _sig in list(GlobalData.original_signal_handlers):
+        signal.signal(_sig, GlobalData.original_signal_handlers.pop(_sig))
+    # If there was originally a signal handler, then we should trigger
+    # it, too
+    orig_handler = signal.getsignal(signum)
+    if hasattr(orig_handler, '__call__'):
+        orig_handler(signum, frame)
     raise OSError("Interrupted by signal " + repr(signum))
 
 
@@ -422,7 +432,7 @@ def run_command(cmd,
                 valgrind_options=None,
                 memmon=False,
                 env=None,
-                define_signal_handlers=True,
+                define_signal_handlers=None,
                 debug=False,
                 verbose=True,
                 timelimit=None,
@@ -430,6 +440,11 @@ def run_command(cmd,
                 ignore_output=False,
                 shell=False,
                 thread_reader=None):
+    #
+    # Set the define_signal_handlers based on the global default flag.
+    #
+    if define_signal_handlers is None:
+        define_signal_handlers = GlobalData.DEFINE_SIGNAL_HANDLERS_DEFAULT
     #
     # Move to the specified working directory
     #
@@ -521,16 +536,14 @@ def run_command(cmd,
     # Setup signal handler
     #
     if define_signal_handlers:
-        if verbose:
-            signal.signal(signal.SIGINT, verbose_signal_handler)
-            if sys.platform[0:3] != "win" and sys.platform[0:4] != 'java':
-                signal.signal(signal.SIGHUP, verbose_signal_handler)
-            signal.signal(signal.SIGTERM, verbose_signal_handler)
-        else:
-            signal.signal(signal.SIGINT, signal_handler)
-            if sys.platform[0:3] != "win" and sys.platform[0:4] != 'java':
-                signal.signal(signal.SIGHUP, signal_handler)
-            signal.signal(signal.SIGTERM, signal_handler)
+        handler = verbose_signal_handler if verbose else signal_handler
+        if sys.platform[0:3] != "win" and sys.platform[0:4] != 'java':
+            GlobalData.original_signal_handlers[signal.SIGHUP] \
+                = signal.signal(signal.SIGHUP, handler)
+        GlobalData.original_signal_handlers[signal.SIGINT] \
+            = signal.signal(signal.SIGINT, handler)
+        GlobalData.original_signal_handlers[signal.SIGTERM] \
+            = signal.signal(signal.SIGTERM, handler)
     rc = -1
     if debug:
         print("Executing command %s" % (_cmd,))
@@ -649,6 +662,10 @@ def run_command(cmd,
         # Ignore IOErrors, which are caused by interupts
         #
         pass
+    finally:
+        # restore the previous signal handlers, if necessary
+        for _sig in list(GlobalData.original_signal_handlers):
+            signal.signal(_sig, GlobalData.original_signal_handlers.pop(_sig))
 
     #
     # Flush stdout/stderr. Some platforms (notably Matlab, which
