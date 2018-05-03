@@ -695,7 +695,7 @@ class IOptionDataProvider(Interface):
     def get(self, section, name):
         """Returns the value of a given (section,name) pair"""
 
-    def clear():
+    def clear(self):
         """Clears the data"""
 
 
