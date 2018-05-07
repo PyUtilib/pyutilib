@@ -685,7 +685,7 @@ class IOptionDataProvider(Interface):
     the Configuration class.
     """
 
-    def get_data():
+    def get_data(self):
         """Returns a dictionary of dictionaries that represents the
         options data."""
 
@@ -695,7 +695,7 @@ class IOptionDataProvider(Interface):
     def get(self, section, name):
         """Returns the value of a given (section,name) pair"""
 
-    def clear():
+    def clear(self):
         """Clears the data"""
 
 
