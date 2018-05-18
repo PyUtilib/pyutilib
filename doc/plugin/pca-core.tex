@@ -159,7 +159,7 @@ from pyutilib.component.core import *
 # observe when a task is added.
 class ITaskObserver(Interface):
 
-    def task_added(name, description):
+    def task_added(self, name, description):
         """Called when a task is added."""
 
 # The task list application, which declares an extension point
