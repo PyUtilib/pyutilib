@@ -52,14 +52,14 @@ try:
     #
     for entrypoint in pkg_resources.iter_entry_points('pyutilib.component'):
         plugin_class = entrypoint.load()
-        # print "Loading plugins... (%s)" % entrypoint
+        # print("Loading plugins... ({})".format(entrypoint))
 except ImportError:
     pass
 except Exception:
     import sys
     err = sys.exc_info()[1]
     from sys import stderr as SE
-    SE.write("Error loading 'pyutilib.component' entry points: '%s'\n" % err)
+    SE.write("Error loading 'pyutilib.component' entry points: '{}'\n".format(err))
 
 #
 # Remove the "pca" environment as the default
