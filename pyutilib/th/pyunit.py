@@ -253,6 +253,9 @@ def _run_fn_test(self, fn, name, suite):
 class TestCase(unittest.TestCase):
     # Dictionary of options that may be used by function tests.
     _options = {}
+    # A "bogus" category that we can use to check if TestCase came from
+    # pyutilib or from unittest
+    pyutilib_th = 1
     # The default test categories are 'smoke' and 'nightly' and 'expensive'
     smoke = 1
     nightly = 1

@@ -168,12 +168,11 @@ def run(package, basedir, argv, use_exec=use_exec, env=None):
         _categories = []
         for x in options.cat:
             _categories.extend( TestCase.parse_categories(x) )
-        if not _categories:
-            _categories.extend( TestCase.parse_categories('smoke') )
 
-    # If no one specified a category, default to "smoke"
+    # If no one specified a category, default to "smoke" (and anything
+    # not built on pyutilib.th.TestCase)
     if not _categories:
-        _categories = [ (('smoke',1),) ]
+        _categories = [ (('smoke',1),), (('pyutilib_th',0),) ]
     # process each category set (that is, each conjunction of categories)
     for _category_set in _categories:
         _attrs = []
