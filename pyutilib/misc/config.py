@@ -761,6 +761,14 @@ class ConfigBlock(ConfigBase):
             self._data[key].set_value(val)
         #self._userAccessed = True
 
+    def __delitem__(self, key):
+        # Note that this will produce a KeyError if the key is not valid
+        # for this ConfigBlock.
+        del self._data[key]
+        # Clean up the other data structures
+        self._decl_order.remove(key)
+        self._declared.discard(key)
+
     def __contains__(self, key):
         key = str(key)
         return key in self._data

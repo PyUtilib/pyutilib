@@ -866,6 +866,17 @@ scenario.foo""")
         self.assertFalse(self.config._data['scenario']._userSet)
         self.assertTrue(self.config['scenario'].get('detection')._userSet)
 
+    def test_delitem(self):
+        config = ConfigBlock(implicit=True)
+        config.declare('bar', ConfigValue())
+        self.assertEqual(sorted(config.keys()), ['bar'])
+        config.foo = 5
+        self.assertEqual(sorted(config.keys()), ['bar', 'foo'])
+        del config['foo']
+        self.assertEqual(sorted(config.keys()), ['bar'])
+        del config['bar']
+        self.assertEqual(sorted(config.keys()), [])
+
     def test_generate_documentation(self):
         oFile = os.path.join(currdir, 'test_reference.out')
         OUTPUT = open(oFile, 'w')
