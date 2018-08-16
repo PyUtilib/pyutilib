@@ -81,8 +81,12 @@ class _UnpickleableDomain(object):
         return arg
 
 def _picklable(field,obj):
+    ftype = type(field)
+    if ftype in _picklable.known:
+        return field if _picklable.known[ftype] else _UnpickleableDomain(obj)
     try:
         pickle.dumps(field)
+        _picklable.known[ftype] = True
         return field
     except:
         # Contrary to the documentation, Python is not at all consistent
@@ -90,7 +94,7 @@ def _picklable(field,obj):
         # fails:
         #
         #    Python 2.6 - 3.4:  pickle.PicklingError
-        #    Python 3.5 - 4.6:  AttributeError
+        #    Python 3.5 - 3.6:  AttributeError
         #    Python 2.6 - 2.7 (cPickle):  TypeError
         #
         # What we are concerned about is masking things like recursion
@@ -100,8 +104,10 @@ def _picklable(field,obj):
         # of RuntimeError).
         if isinstance(exc_info()[0], RuntimeError):
             raise
+        _picklable.known[ftype] = False
         return _UnpickleableDomain(obj)
 
+_picklable.known = {}
 
 class ConfigBase(object):
     __slots__ = ('_parent', '_name', '_userSet', '_userAccessed', '_data',
