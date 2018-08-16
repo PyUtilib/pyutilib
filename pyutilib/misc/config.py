@@ -551,7 +551,10 @@ class ConfigValue(ConfigBase):
     def _data_collector(self, level, prefix, visibility=None, docMode=False):
         if visibility is not None and visibility < self._visibility:
             return
-        _str = dump(self._data, default_flow_style=True).rstrip()
+        try:
+            _str = dump(self._data, default_flow_style=True).rstrip()
+        except:
+            _str = str(type(self._data))
         if _str.endswith("..."):
             _str = _str[:-3].rstrip()
         yield (level, prefix + _str, self)
