@@ -9,18 +9,18 @@
 #  ___________________________________________________________________________
 
 
-class CachedFactory(object):
+class Factory(object):
     """
     A class that is used to define a factory for objects.
 
-    Factory objects are cached for future use.
+    Factory objects may be cached for future use.
     """
 
     def __init__(self, description=None):
         self._description = description
         self._cls = {}
         self._doc = {}
-        self._cached = True
+        self._cached = False
         self._cache = {}
 
     def __call__(self, name, **kwds):
@@ -68,15 +68,29 @@ class CachedFactory(object):
             return cls
         return fn
 
+    #
+    # The following methods might be used by developers working
+    # with factories defined using PyUtilib component plugins.  These methods
+    # are deprecated.
+    #
+    def services(self):
+        raise RuntimeError("ERROR: Factory.services() is not defined.  Use Factory.__iter__() instead.")
 
-class Factory(CachedFactory):
+    def activate(self):
+        raise RuntimeError("ERROR: Factory.activate() is not defined.")
+
+    def deactivate(self):
+        raise RuntimeError("ERROR: Factory.deactivate() is not defined.")
+
+
+class CachedFactory(Factory):
     """
     A class that is used to define a factory for objects.
 
-    Factory objects are *not* cached for future use.
+    Factory objects are cached for future use.
     """
 
     def __init__(self, description=None):
-        CachedFactory.__init__(self, description)
-        self._cached = False
+        Factory.__init__(self, description)
+        self._cached = True
 
