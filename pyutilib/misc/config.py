@@ -173,7 +173,7 @@ class ConfigBase(object):
 
     def __call__(self, value=NoArgument):
         ans = self.__class__()
-        ans._default     = self._default
+        ans._default     = self.value()
         ans._domain      = self._domain
         ans._description = self._description
         ans._doc         = self._doc
@@ -208,6 +208,13 @@ class ConfigBase(object):
                 return pName + '.' + self._name
         else:
             return self._name
+
+    def set_default_value(self, default):
+        self._default = default
+
+    def set_domain(self, domain):
+        self._domain = domain
+        self.set_value(self.value(accessValue=False))
 
     def _cast(self, value):
         if value is None:
@@ -958,6 +965,10 @@ class ConfigBlock(ConfigBase):
             for v in self._data[key]._data_collector(level, key + ': ',
                                                      visibility, docMode):
                 yield v
+
+# Future-proofing: We will be renaming the ConfigBlock to ConfigDict in
+# the future
+ConfigDict = ConfigBlock
 
 # In Python3, the items(), etc methods of dict-like things return
 # generator-like objects.
