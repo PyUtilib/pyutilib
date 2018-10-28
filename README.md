@@ -17,7 +17,7 @@ PyUtilib is available under the BSD License.
 
 ### Installation
 
-#### PyPI [![PyPI](https://img.shields.io/pypi/v/pyutilib.svg?maxAge=2592000)]() [![PyPI](https://img.shields.io/pypi/dm/pyutilib.svg?maxAge=2592000)]()
+#### PyPI [![PyPI](https://img.shields.io/pypi/v/pyutilib.svg?maxAge=2592000)]() 
 
     pip install pyutilib
     
@@ -36,10 +36,6 @@ PyUtilib is available under the BSD License.
 PyUtilib development moved to this repository in October, 2015 from
 Sandia National Laboratories. Developer discussions are hosted by [google groups](https://groups.google.com/forum/#!forum/pyutilib-developers).
 
-Branches for PyUtilib
-
-* master: The main development branch.  Most developers should contribute to this branch.
-* pyomo: The development branch for the Pyomo project.  This branch is deprecated.
 
 By contributing to this software project, you are agreeing to the following terms and conditions for your contributions:
 
