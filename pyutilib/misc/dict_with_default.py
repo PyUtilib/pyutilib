@@ -2,8 +2,13 @@ import sys
 
 __all__ = ['SparseMapping']
 
+import six
+
 try:
-    from collections import MutableMapping
+    if six.PY2:
+        from collections import MutableMapping
+    else:
+        from collections.abc import MutableMapping
 
     class SparseMapping(MutableMapping):
         """
