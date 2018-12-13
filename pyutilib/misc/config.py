@@ -171,13 +171,26 @@ class ConfigBase(object):
             # of setting self.__dict__[key] = val.
             object.__setattr__(self, key, val)
 
-    def __call__(self, value=NoArgument):
+    def __call__(self, value=NoArgument, domain=NoArgument,
+                 description=NoArgument, doc=NoArgument, visibility=NoArgument):
         ans = self.__class__()
         ans._default     = self.value()
-        ans._domain      = self._domain
-        ans._description = self._description
-        ans._doc         = self._doc
-        ans._visibility  = self._visibility
+        if domain is NoArgument:
+            ans._domain = self._domain
+        else:
+            ans._domain = domain
+        if description is NoArgument:
+            ans._description = self._description
+        else:
+            ans._description = _strip_indentation(description)
+        if doc is NoArgument:
+            ans._doc = self._doc
+        else:
+            ans._doc = _strip_indentation(doc)
+        if visibility is NoArgument:
+            ans._visibility = self._visibility
+        else:
+            ans._visibility = visibility
         if self.__class__ is ConfigBlock:
             ans._implicit_declaration = self._implicit_declaration
             ans._implicit_domain = self._implicit_domain
