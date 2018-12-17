@@ -224,11 +224,12 @@ class ConfigBase(object):
         ans = self.__class__(**kwds)
         if isinstance(self, ConfigBlock):
             for k in self._decl_order:
-                if k in self._declared or preserve_implicit:
+                if preserve_implicit or k in self._declared:
                     v = self._data[k]
                     ans._data[k] = _tmp = v(preserve_implicit=preserve_implicit)
                     ans._decl_order.append(k)
-                    ans._declared.add(k)
+                    if k in self._declared:
+                        ans._declared.add(k)
                     _tmp._parent = ans
                     _tmp._name = v._name
         else:
