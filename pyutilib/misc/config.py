@@ -173,7 +173,8 @@ class ConfigBase(object):
 
     def __call__(self, value=NoArgument, default=NoArgument, domain=NoArgument,
                  description=NoArgument, doc=NoArgument, visibility=NoArgument,
-                 implicit=NoArgument, implicit_domain=NoArgument):
+                 implicit=NoArgument, implicit_domain=NoArgument,
+                 preserve_implicit=False):
         # We will pass through overriding arguments to the constructor.
         # This way if the constructor does special processing of any of
         # the arguments (like implicit_domain), we don't have to repeat
@@ -223,9 +224,9 @@ class ConfigBase(object):
         ans = self.__class__(**kwds)
         if isinstance(self, ConfigBlock):
             for k in self._decl_order:
-                if k in self._declared:
+                if k in self._declared or preserve_implicit:
                     v = self._data[k]
-                    ans._data[k] = _tmp = v()
+                    ans._data[k] = _tmp = v(preserve_implicit=preserve_implicit)
                     ans._decl_order.append(k)
                     ans._declared.add(k)
                     _tmp._parent = ans

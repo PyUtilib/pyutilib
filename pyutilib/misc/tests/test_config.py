@@ -1513,10 +1513,14 @@ Node information:
     def test_call_options(self):
         config = ConfigBlock(description="base description",
                              doc="base doc",
-                             visibility=1)
+                             visibility=1,
+                             implicit=True)
         config.declare("a", ConfigValue(domain=int, doc="a doc", default=1))
         config.declare("b", config.get("a")(2))
         config.declare("c", config.get("a")(domain=float, doc="c doc"))
+        config.d = 0
+        config.e = ConfigBlock(implicit=True)
+        config.e.a = 0
 
         reference_template = """# base description
 """
@@ -1525,9 +1529,23 @@ Node information:
 a: 1
 b: 2
 c: 1.0
+d: 0
+e:
+  a: 0
 """
         self._validateTemplate(config, reference_template, visibility=1)
 
+        # Preserving implicit values should leave the copy the same as
+        # the original
+        implicit_copy = config(preserve_implicit=True)
+        self._validateTemplate(config, reference_template, visibility=1)
+
+        # Simple copies strip out the implicitly-declared values
+        reference_template = """# base description
+a: 1
+b: 2
+c: 1.0
+"""
         simple_copy = config()
         self._validateTemplate(simple_copy, reference_template, visibility=1)
         self.assertEqual(simple_copy._doc, "base doc")
