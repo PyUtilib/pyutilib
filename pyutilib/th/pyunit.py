@@ -259,7 +259,7 @@ class TestCase(unittest.TestCase):
     # The default test categories are 'smoke' and 'nightly' and 'expensive'
     smoke = 1
     nightly = 1
-    expensive = 1
+    expensive = 0
     fragile = 0
     _default_categories = True
     # If someone specifies a category, these are the default values of
