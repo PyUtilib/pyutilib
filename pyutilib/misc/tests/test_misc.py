@@ -317,12 +317,14 @@ yy: 2""")
         ] = pyutilib.misc.compare_file_with_numeric_values(
             currdir + "filecmp1.txt", currdir + "filecmp3.txt")
         if not flag or lineno != 4:
-            self.fail("test_file_compare1a - expected difference at line 4")
+            self.fail("test_file_compare1a - expected difference at line 4",
+                      ", got %s, %s" % (flag, lineno))
         [flag, lineno, diffstr
         ] = pyutilib.misc.compare_file_with_numeric_values(
             currdir + "filecmp1.txt", currdir + "filecmp4.txt")
         if not flag or lineno != 3:
-            self.fail("test_file_compare1a - expected difference at line 3")
+            self.fail("test_file_compare1a - expected difference at line 3"
+                      ", got %s, %s" % (flag, lineno))
         try:
             [flag, lineno, diffstr
             ] = pyutilib.misc.compare_file_with_numeric_values(

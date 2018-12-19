@@ -158,6 +158,16 @@ def read_and_filter_line(stream, ignore_chars, filter):
     return line, lineno
 
 
+def _extract_floats(line, regex):
+    ans = []
+    while True:
+        g = regex.search(line)
+        if g is None:
+            return ans, line
+        ans.append(float(g.group()))
+        line = regex.sub(" # ", line, count=1)
+
+
 def compare_file_with_numeric_values(filename1,
                                      filename2,
                                      ignore=["\n", "\r"],
@@ -185,116 +195,96 @@ def compare_file_with_numeric_values(filename1,
         raise IOError("compare_file: cannot find file `" + filename2 + "' (in "
                       + os.getcwd() + ")")
 
-    if filecmp.cmp(filename1, filename2):
-        return [False, None, ""]
+    #if filecmp.cmp(filename1, filename2):
+    #    return [False, None, ""]
 
     if strict_numbers:
         float_p = strict_float_p
     else:
         float_p = relaxed_float_p
 
-    INPUT1 = open_possibly_compressed_file(filename1)
     try:
+        absolute_tolerance, relative_tolerance = tolerance
+    except:
+        absolute_tolerance = relative_tolerance = tolerance
+
+    INPUT1 = INPUT2 = None
+    try:
+        INPUT1 = open_possibly_compressed_file(filename1)
         INPUT2 = open_possibly_compressed_file(filename2)
-    except IOError:
-        INPUT1.close()
-        raise
-    lineno = 0
-    while True:
 
-        # If either line is composed entirely of characters to
-        # ignore, then get another one.  In this way we can
-        # skip blank lines that are in one file but not the other
-
-        try:
-            line1, delta_lineno = read_and_filter_line(INPUT1, ignore, filter)
-        except UnicodeDecodeError:
-            err = sys.exc_info()[1]
-            raise RuntimeError("Decoding error while processing file %s: %s" %
-                               (filename1, str(err)))
-        lineno += delta_lineno
-        try:
-            line2 = read_and_filter_line(INPUT2, ignore, filter)[0]
-        except UnicodeDecodeError:
-            err = sys.exc_info()[1]
-            raise RuntimeError("Decoding error while processing file %s: %s" %
-                               (filename2, str(err)))
-
-        #print "line1 '%s'" % line1
-        #print "line2 '%s'" % line2
-
-        if line1 is None and line2 is None:
-            INPUT1.close()
-            INPUT2.close()
-            return [False, None, ""]
-
-        if line1 is None or line2 is None:
-            INPUT1.close()
-            INPUT2.close()
-            return [True, lineno, file_diff(
-                filename1, filename2, lineno=lineno)]
-
-        floats1 = float_p.findall(line1)
-        floats2 = float_p.findall(line2)
-        #print "floats1 '%s'" % floats1
-        #print "floats2 '%s'" % floats2
-
-        if len(floats1) != len(floats2):
-            INPUT1.close()
-            INPUT2.close()
-            return [True, lineno, file_diff(
-                filename1, filename2, lineno=lineno)]
-
-        if len(floats1) > 0:
-            for i in xrange(len(floats1)):
-                if floats1[i] == floats2[i]:
-                    continue
-                try:
-                    v1 = float(floats1[i])
-                    v2 = float(floats2[i])
-                except Exception:
-                    INPUT1.close()
-                    INPUT2.close()
-                    return [True, lineno, file_diff(
-                        filename1, filename2, lineno=lineno)]
-                if math.fabs(v1 - v2) > tolerance:
-                    INPUT1.close()
-                    INPUT2.close()
-                    return [True, lineno, file_diff(
-                        filename1, filename2, lineno=lineno)]
-
-        line1 = float_p.sub('#', whitespace_p.sub(' ', line1.strip()))
-        line2 = float_p.sub('#', whitespace_p.sub(' ', line2.strip()))
-
-        #print "Line1 '%s'" % line1
-        #print "Line2 '%s'" % line2
-
-        index1 = 0
-        index2 = 0
+        lineno = 0
         while True:
-            # Set the value of nc1
-            if index1 == len(line1):
-                nc1 = None
-            else:
-                nc1 = line1[index1]
-            # Set the value of nc2
-            if index2 == len(line2):
-                nc2 = None
-            else:
-                nc2 = line2[index2]
-            # Compare curent character values
-            if nc1 != nc2:
-                INPUT1.close()
-                INPUT2.close()
+
+            # If either line is composed entirely of characters to
+            # ignore, then get another one.  In this way we can
+            # skip blank lines that are in one file but not the other
+
+            try:
+                line1, delta_lineno = read_and_filter_line(
+                    INPUT1, ignore, filter)
+            except UnicodeDecodeError:
+                err = sys.exc_info()[1]
+                raise RuntimeError(
+                    "Decoding error while processing file %s: %s" %
+                    (filename1, str(err)))
+
+            lineno += delta_lineno
+            try:
+                line2 = read_and_filter_line(INPUT2, ignore, filter)[0]
+            except UnicodeDecodeError:
+                err = sys.exc_info()[1]
+                raise RuntimeError(
+                    "Decoding error while processing file %s: %s" %
+                    (filename2, str(err)))
+
+            #print "line1 '%s'" % line1
+            #print "line2 '%s'" % line2
+
+            if line1 is None and line2 is None:
+                return [False, None, ""]
+
+            if line1 is None or line2 is None:
                 return [True, lineno, file_diff(
                     filename1, filename2, lineno=lineno)]
-            if nc1 is None and nc2 is None:
-                break
-            index1 = index1 + 1
-            index2 = index2 + 1
 
-    INPUT1.close()
-    INPUT2.close()
+            try:
+                floats1, line1 = _extract_floats(line1, float_p)
+                floats2, line2 = _extract_floats(line2, float_p)
+            except:
+                return [True, lineno, file_diff(
+                    filename1, filename2, lineno=lineno)]
+
+            #print "floats1 '%s'" % floats1
+            #print "floats2 '%s'" % floats2
+
+            if len(floats1) != len(floats2):
+                return [True, lineno, file_diff(
+                    filename1, filename2, lineno=lineno)]
+
+            for v1, v2 in zip(floats1, floats2):
+                vDiff = math.fabs(v1 - v2)
+                vMax = max(math.fabs(v1), math.fabs(v2))
+                if vDiff > absolute_tolerance and \
+                   vDiff / vMax > relative_tolerance:
+                    return [True, lineno, file_diff(
+                        filename1, filename2, lineno=lineno)]
+
+            line1 = whitespace_p.sub(' ', line1.strip())
+            line2 = whitespace_p.sub(' ', line2.strip())
+
+            #print "Line1 '%s'" % line1
+            #print "Line2 '%s'" % line2
+
+            if line1 != line2:
+                return [True, lineno, file_diff(
+                    filename1, filename2, lineno=lineno)]
+    finally:
+        if INPUT1 is not None:
+            INPUT1.close()
+        if INPUT2 is not None:
+            INPUT2.close()
+
     return [False, None, ""]
 
 
@@ -346,71 +336,40 @@ def compare_file(filename1,
         raise IOError("compare_file: cannot find file `" + filename2 + "' (in "
                       + os.getcwd() + ")")
 
-    INPUT1 = open_possibly_compressed_file(filename1)
+    INPUT1 = INPUT2 = None
     try:
+        INPUT1 = open_possibly_compressed_file(filename1)
         INPUT2 = open_possibly_compressed_file(filename2)
-    except IOError:
-        INPUT1.close()
-        raise
-    #
-    # This is check is deferred until the zipfiles are setup to ensure a
-    # consistent logic for zipfile analysis.  If the files are the same,
-    # but they are zipfiles with > 1 files, then we raise an exception.
-    #
-    if not sys.platform.startswith('win') and os.stat(filename1) == os.stat(
-            filename2):
-        INPUT1.close()
-        INPUT2.close()
-        return [False, None, ""]
-    #
-    lineno = 0
-    while True:
-
-        # If either line is composed entirely of characters to
-        # ignore, then get another one.  In this way we can
-        # skip blank lines that are in one file but not the other
-
-        line1, delta_lineno = read_and_filter_line(INPUT1, ignore, filter)
-        lineno += delta_lineno
-        line2 = read_and_filter_line(INPUT2, ignore, filter)[0]
-
-        if line1 is None and line2 is None:
-            INPUT1.close()
-            INPUT2.close()
+        #
+        # This is check is deferred until the zipfiles are setup to ensure a
+        # consistent logic for zipfile analysis.  If the files are the same,
+        # but they are zipfiles with > 1 files, then we raise an exception.
+        #
+        if not sys.platform.startswith('win') and os.stat(filename1) == os.stat(
+                filename2):
             return [False, None, ""]
-
-        if line1 is None or line2 is None:
-            INPUT1.close()
-            INPUT2.close()
-            return [True, lineno, file_diff(
-                filename1, filename2, lineno=lineno)]
-
-        index1 = 0
-        index2 = 0
+        #
+        lineno = 0
         while True:
-            # Set the value of nc1
-            if index1 == len(line1):
-                nc1 = None
-            else:
-                nc1 = line1[index1]
-            # Set the value of nc2
-            if index2 == len(line2):
-                nc2 = None
-            else:
-                nc2 = line2[index2]
-            # Compare curent character values
-            if nc1 != nc2:
-                INPUT1.close()
-                INPUT2.close()
+            # If either line is composed entirely of characters to
+            # ignore, then get another one.  In this way we can
+            # skip blank lines that are in one file but not the other
+
+            line1, delta_lineno = read_and_filter_line(INPUT1, ignore, filter)
+            lineno += delta_lineno
+            line2 = read_and_filter_line(INPUT2, ignore, filter)[0]
+
+            if line1 is None and line2 is None:
+                return [False, None, ""]
+
+            if line1 != line2:
                 return [True, lineno, file_diff(
                     filename1, filename2, lineno=lineno)]
-            if nc1 is None and nc2 is None:
-                break
-            index1 = index1 + 1
-            index2 = index2 + 1
-    #
-    INPUT1.close()
-    INPUT2.close()
+    finally:
+        if INPUT1 is not None:
+            INPUT1.close()
+        if INPUT2 is not None:
+            INPUT2.close()
 
 
 def compare_large_file(filename1,
