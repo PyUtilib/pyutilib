@@ -1,21 +1,19 @@
-We are pleased to announce the release of !PyUtilib 5.1 (5.1.3548). The !PyUtilib project supports the development of an ensemble of Python packages that include a wide variety of utilities, including a well-developed component architecture.
+We are pleased to announce the release of PyUtilib 5.6.4. The
+PyUtilib project supports the development of an ensemble of Python
+packages that include a wide variety of utilities, including a
+well-developed component architecture.
 
-The following are highlights of this release:
+The following are highlights of the 5.6 release series:
 
-- Adding multiple task submission capability to Pyro dispatcher.
-- Adding support for xlrd and openpyxl interfaces.
-- Changing the semantics of Config* objects to return the values
-  of ConfigValue objects.
-- When loading dictionaries, recursively create Container objects
-    for sub-dictionaries.
-- Updates to the ConfigBlock
-  - Support for multiple argument definitions for a single ConfigValue
-  - Support for declaring groups by passing argparse parser or group objects
+- Added a general visitor pattern in pyutilib.misc
+- Improvements to the ConfigBlock class
+- Improved I/O management
+- Improved test script robustness
 
-See https://software.sandia.gov/trac/pyutilib/wiki/GettingStarted for instructions for getting started with !PyUtilib.  !PyUtilib can be downloaded from PyPI.  
+PyUtilib can be installed from PyPI using pip or conda-forge using conda.
 
 Enjoy!
 
- - !PyUtilib Developer Team
+ - PyUtilib Developer Team
  - pyutilib-developers@googlecode.com
  - https://github.com/PyUtilib/pyutilib.git
