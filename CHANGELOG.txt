@@ -3,10 +3,10 @@
 ====================
 
 -------------------------------------------------------------------------------
- Version 5.X.X
+ Version 5.6.4
 -------------------------------------------------------------------------------
 
-- Bugfix method missing 'self' as the first parameter (#34)
+- Fix IOptionDataProvider methods missing 'self' argument (#34)
 - Updates to ConfigBlock
   - Add missing API, add ConfigDict alias, fix default value handling (#40)
   - Add option to preserve implicit values (#45)
