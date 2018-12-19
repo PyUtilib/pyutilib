@@ -35,7 +35,7 @@ except ImportError:
 
 __all__ = ('ConfigBlock', 'ConfigList', 'ConfigValue')
 
-logger = logging.getLogger('pyutilib.misc')
+logger = logging.getLogger('pyutilib.misc.config')
 
 
 def _munge_name(name, space_to_dash=True):
@@ -171,26 +171,70 @@ class ConfigBase(object):
             # of setting self.__dict__[key] = val.
             object.__setattr__(self, key, val)
 
-    def __call__(self, value=NoArgument):
-        ans = self.__class__()
-        ans._default     = self.value()
-        ans._domain      = self._domain
-        ans._description = self._description
-        ans._doc         = self._doc
-        ans._visibility  = self._visibility
-        if self.__class__ is ConfigBlock:
-            ans._implicit_declaration = self._implicit_declaration
-            ans._implicit_domain = self._implicit_domain
+    def __call__(self, value=NoArgument, default=NoArgument, domain=NoArgument,
+                 description=NoArgument, doc=NoArgument, visibility=NoArgument,
+                 implicit=NoArgument, implicit_domain=NoArgument,
+                 preserve_implicit=False):
+        # We will pass through overriding arguments to the constructor.
+        # This way if the constructor does special processing of any of
+        # the arguments (like implicit_domain), we don't have to repeat
+        # that code here.  Unfortunately, it means we need to do a bit
+        # of logic to be sure we only pass through appropriate
+        # arguments.
+        kwds = {}
+        kwds['description'] = ( self._description
+                                if description is ConfigBase.NoArgument else
+                                description )
+        kwds['doc'] = ( self._doc
+                        if doc is ConfigBase.NoArgument else
+                        doc )
+        kwds['visibility'] = ( self._visibility
+                               if visibility is ConfigBase.NoArgument else
+                               visibility )
+        if isinstance(self, ConfigBlock):
+            kwds['implicit'] = ( self._implicit_declaration
+                                 if implicit is ConfigBase.NoArgument else
+                                 implicit )
+            kwds['implicit_domain'] = (
+                self._implicit_domain
+                if implicit_domain is ConfigBase.NoArgument else
+                implicit_domain )
+            if domain is not ConfigBase.NoArgument:
+                logger.warn("domain ignored by __call__(): "
+                            "class is a ConfigBlock" % (type(self),))
+            if default is not ConfigBase.NoArgument:
+                logger.warn("default ignored by __call__(): "
+                            "class is a ConfigBlock" % (type(self),))
+        else:
+            kwds['default'] = ( self.value()
+                                if default is ConfigBase.NoArgument else
+                                default )
+            kwds['domain'] = ( self._domain
+                               if domain is ConfigBase.NoArgument else
+                               domain )
+            if implicit is not ConfigBase.NoArgument:
+                logger.warn("implicit ignored by __call__(): "
+                            "class %s is not a ConfigBlock" % (type(self),))
+            if implicit_domain is not ConfigBase.NoArgument:
+                logger.warn("implicit_domain ignored by __call__(): "
+                            "class %s is not a ConfigBlock" % (type(self),))
+
+        # Copy over any other object-specific information (mostly Block
+        # definitions)
+        ans = self.__class__(**kwds)
+        if isinstance(self, ConfigBlock):
             for k in self._decl_order:
-                if k in self._declared:
+                if preserve_implicit or k in self._declared:
                     v = self._data[k]
-                    ans._data[k] = _tmp = v()
+                    ans._data[k] = _tmp = v(preserve_implicit=preserve_implicit)
                     ans._decl_order.append(k)
-                    ans._declared.add(k)
+                    if k in self._declared:
+                        ans._declared.add(k)
                     _tmp._parent = ans
                     _tmp._name = v._name
         else:
             ans.reset()
+        # ... and set the value, if appropriate
         if value is not ConfigBase.NoArgument:
             ans.set_value(value)
         return ans
@@ -221,7 +265,10 @@ class ConfigBase(object):
             return value
         if self._domain is not None:
             try:
-                return self._domain(value)
+                if value is not ConfigBase.NoArgument:
+                    return self._domain(value)
+                else:
+                    return self._domain()
             except:
                 err = exc_info()[1]
                 if hasattr(self._domain, '__name__'):

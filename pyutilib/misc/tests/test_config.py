@@ -144,8 +144,8 @@ class Test(unittest.TestCase):
         }
 
     # Utility method for generating and validating a template description
-    def _validateTemplate(self, reference_template, **kwds):
-        test = self.config.generate_yaml_template(**kwds)
+    def _validateTemplate(self, config, reference_template, **kwds):
+        test = config.generate_yaml_template(**kwds)
         width = kwds.get('width', 80)
         indent = kwds.get('indent_spacing', 2)
         sys.stdout.write(test)
@@ -183,7 +183,7 @@ flushing:
     max pipes: 2            # Maximum number of pipes to close
     response time: 60.0     # Time [min] between detection and closing valves
 """
-        self._validateTemplate(reference_template)
+        self._validateTemplate(self.config, reference_template)
 
     def test_template_3space(self):
         reference_template = """# Basic configuration for Flushing models
@@ -215,7 +215,8 @@ flushing:
       response time: 60.0     # Time [min] between detection and closing
                               #   valves
 """
-        self._validateTemplate(reference_template, indent_spacing=3)
+        self._validateTemplate(self.config, reference_template,
+                               indent_spacing=3)
 
     def test_template_4space(self):
         reference_template = """# Basic configuration for Flushing models
@@ -247,7 +248,8 @@ flushing:
         response time: 60.0     # Time [min] between detection and closing
                                 #   valves
 """
-        self._validateTemplate(reference_template, indent_spacing=4)
+        self._validateTemplate(self.config, reference_template,
+                               indent_spacing=4)
 
     def test_template_3space_narrow(self):
         reference_template = """# Basic configuration for Flushing models
@@ -280,7 +282,8 @@ flushing:
       response time: 60.0     # Time [min] between detection and closing
                               #   valves
 """
-        self._validateTemplate(reference_template, indent_spacing=3, width=72)
+        self._validateTemplate(self.config, reference_template,
+                               indent_spacing=3, width=72)
 
     def test_display_default(self):
         reference = """network:
@@ -1506,6 +1509,61 @@ Node information:
         self.assertEqual(config.a_b, 10)
         self.assertEqual(config.a_c, 20)
         self.assertEqual(config.a_d_e, 30)
+
+    def test_call_options(self):
+        config = ConfigBlock(description="base description",
+                             doc="base doc",
+                             visibility=1,
+                             implicit=True)
+        config.declare("a", ConfigValue(domain=int, doc="a doc", default=1))
+        config.declare("b", config.get("a")(2))
+        config.declare("c", config.get("a")(domain=float, doc="c doc"))
+        config.d = 0
+        config.e = ConfigBlock(implicit=True)
+        config.e.a = 0
+
+        reference_template = """# base description
+"""
+        self._validateTemplate(config, reference_template)
+        reference_template = """# base description
+a: 1
+b: 2
+c: 1.0
+d: 0
+e:
+  a: 0
+"""
+        self._validateTemplate(config, reference_template, visibility=1)
+
+        # Preserving implicit values should leave the copy the same as
+        # the original
+        implicit_copy = config(preserve_implicit=True)
+        self._validateTemplate(config, reference_template, visibility=1)
+
+        # Simple copies strip out the implicitly-declared values
+        reference_template = """# base description
+a: 1
+b: 2
+c: 1.0
+"""
+        simple_copy = config()
+        self._validateTemplate(simple_copy, reference_template, visibility=1)
+        self.assertEqual(simple_copy._doc, "base doc")
+        self.assertEqual(simple_copy._description, "base description")
+        self.assertEqual(simple_copy._visibility, 1)
+
+        mod_copy = config(description="new description",
+                          doc="new doc",
+                          visibility=0)
+        reference_template = """# new description
+a: 1
+b: 2
+c: 1.0
+"""
+        self._validateTemplate(mod_copy, reference_template, visibility=0)
+        self.assertEqual(mod_copy._doc, "new doc")
+        self.assertEqual(mod_copy._description, "new description")
+        self.assertEqual(mod_copy._visibility, 0)
 
 if __name__ == "__main__":
     unittest.main()
