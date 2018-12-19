@@ -3,6 +3,19 @@
 ====================
 
 -------------------------------------------------------------------------------
+ Version 5.6.4
+-------------------------------------------------------------------------------
+
+- Fix IOptionDataProvider methods missing 'self' argument (#34)
+- Updates to ConfigBlock
+  - Add missing API, add ConfigDict alias, fix default value handling (#40)
+  - Add option to preserve implicit values (#45)
+  - Allow overriding attributes when copying (#44)
+- Update project administration files (#41) 
+- Update MutableMapping import to avoid deprecation warning (#43)
+- Fix and simplify file comparison operators (#47)
+
+-------------------------------------------------------------------------------
  Version 5.6.3
 -------------------------------------------------------------------------------
 
