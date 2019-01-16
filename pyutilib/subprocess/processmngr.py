@@ -558,6 +558,7 @@ def run_command(cmd,
             simpleCase = False
 
         out_th = []
+        th = None
         GlobalData.signal_handler_busy = False
         if simpleCase:
             #
@@ -687,10 +688,16 @@ def run_command(cmd,
         #
         for p in out_th:
             os.close(p[2])
-        th.join()
+        if th is not None:
+            # Note, there is a condition where the subprocess can die
+            # very quickly (raising an OSError) before the reader
+            # threads have a chance to be set up.  Testing for None
+            # avoids joining a thread that doesn't exist.
+            th.join()
         for p in out_th:
             os.close(p[1])
-        del th
+        if th is not None:
+            del th
     if outfile is not None:
         stdout_arg.close()
     elif tmpfile is not None and not ignore_output:
