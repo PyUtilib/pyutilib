@@ -1,4 +1,4 @@
-We are pleased to announce the release of PyUtilib 5.6.4. The
+We are pleased to announce the release of PyUtilib 5.6.5. The
 PyUtilib project supports the development of an ensemble of Python
 packages that include a wide variety of utilities, including a
 well-developed component architecture.
