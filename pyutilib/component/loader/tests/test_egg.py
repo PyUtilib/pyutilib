@@ -22,10 +22,14 @@ except ImportError:
     yaml_available = False
 
 
+@unittest.skipIf(not pkg_resources_avail, "Cannot import 'pkg_resources'")
 class Test(pyutilib.th.TestCase):
 
     def test_egg1(self):
-        """Load an egg for the 'project1' project.  Eggs are loaded in the 'eggs1' directory, but only the Project1 stuff is actually imported."""
+        #
+        # Load an egg for the 'project1' project.
+        # Eggs are loaded in the 'eggs1' directory, but only the Project1 stuff is actually imported.
+        #
         pyutilib.subprocess.run(
             [sys.executable, currdir + os.sep + "egg1.py", currdir, "json"])
         self.assertMatchesJsonBaseline(currdir + "egg1.out",
@@ -37,7 +41,11 @@ class Test(pyutilib.th.TestCase):
                                            currdir + "egg1.yml")
 
     def test_egg2(self):
-        """Load an egg for the 'project1' project.  Eggs are loaded in the 'eggs1' and 'eggs2' directories, but only the Project1 and Project 3 stuff is actually imported."""
+        #
+        # Load an egg for the 'project1' project.
+        # Eggs are loaded in the 'eggs1' and 'eggs2' directories, but only the 
+        # Project1 and Project 3 stuff is actually imported.
+        #
         pyutilib.subprocess.run(
             [sys.executable, currdir + os.sep + "egg2.py", currdir, "json"])
         self.assertMatchesJsonBaseline(currdir + "egg2.out",
@@ -47,10 +55,6 @@ class Test(pyutilib.th.TestCase):
                 [sys.executable, currdir + os.sep + "egg2.py", currdir, "yaml"])
             self.assertMatchesYamlBaseline(currdir + "egg2.out",
                                            currdir + "egg2.yml")
-
-# Apply class decorator explicitly, which works in Python 2.5
-Test = unittest.skipIf(not pkg_resources_avail,
-                       "Cannot import 'pkg_resources'")(Test)
 
 if __name__ == "__main__":
     unittest.main()
