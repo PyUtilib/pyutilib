@@ -1,8 +1,6 @@
 language: python
 matrix:
   include:
-  - python: '2.6'
-    env: PYRO="Pyro"  YAML="pyyaml"
   - python: '2.7'
     env: PYRO="Pyro"  YAML="pyyaml"
   #- python: '2.7'     
@@ -22,11 +20,6 @@ matrix:
 install:
 - if [ -n "${JYTHON}" ]; then source install_jython.sh; fi
 - if [ -n "${YAML}" ]; then pip install pyyaml; fi
-- if [ "${TRAVIS_PYTHON_VERSION}" = "2.6" ]; then pip install ordereddict; fi
-- if [ "${TRAVIS_PYTHON_VERSION}" = "2.6" ]; then pip install pbr; fi
-- if [ "${TRAVIS_PYTHON_VERSION}" = "2.6" ]; then pip install linecache2; fi
-- if [ "${TRAVIS_PYTHON_VERSION}" = "2.6" ]; then pip install traceback2; fi
-- if [ "${TRAVIS_PYTHON_VERSION}" != "2.6" ]; then pip install openpyxl; fi
 - pip install xlrd
 - pip install $PYRO
 - pip install coverage
