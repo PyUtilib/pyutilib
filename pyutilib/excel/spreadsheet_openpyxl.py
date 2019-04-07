@@ -55,11 +55,10 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             self.wb = openpyxl.load_workbook(self.xlsfile)
-        self.worksheets = self.wb.get_sheet_names()
+        self.worksheets = self.wb.sheetnames
         self._ws = {}
         for wsid in worksheets:
-            self._ws[wsid] = self.wb.get_sheet_by_name(self.worksheets[wsid -
-                                                                       1])
+            self._ws[wsid] = self.wb[self.worksheets[wsid - 1]]
         self.default_worksheet = default_worksheet
 
     def ws(self):
@@ -136,7 +135,7 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
         self.activate(wsid)
         ws = self.wb.active
         ans = []
-        for row in ws.get_squared_range(row, col, row2, col2):
+        for row in ws.iter_rows(min_col=col, min_row=row, max_col=col2, max_row=row2):
             ans_ = []
             for col in row:
                 ans_.append(col.value)
@@ -285,7 +284,7 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
             # Otherwise, we assume that this is a range name.
             #
             try:
-                return self.wb.get_named_range(rangeid)
+                return self.wb.defined_names[rangeid]
             except KeyError:
                 pass
             ws = self.wb.active
