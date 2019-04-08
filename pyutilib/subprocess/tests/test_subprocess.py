@@ -57,7 +57,9 @@ class Test(unittest.TestCase):
         foo.wait(targetTime)
         runTime = timer() - stime
         print("Ran for %f seconds" % (runTime,))
+        #
         # timeout should be accurate to 1/10 second
+        #
         self.assertTrue(runTime <= targetTime + 0.1)
 
     @unittest.skipIf(_mswindows,
