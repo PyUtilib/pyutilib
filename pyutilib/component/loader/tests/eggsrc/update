@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+# A script that is used to update the EGG files with a new version of Python
+#
 
 cd pkg1
 python setup.py sdist bdist_egg
