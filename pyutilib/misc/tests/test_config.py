@@ -528,7 +528,7 @@ scenario.foo""")
             self.skipTest("Cannot execute test because PyYAML is not available")
         test = _display(self.config)
         sys.stdout.write(test)
-        self.assertEqual(yaml.load(test), self.config.value())
+        self.assertEqual(yaml.load(test, Loader=yaml.FullLoader), self.config.value())
 
     def test_parseDisplayAndValue_list(self):
         if not using_yaml:
@@ -537,14 +537,14 @@ scenario.foo""")
         self.config['scenarios'].append({'merlion': True, 'detection': []})
         test = _display(self.config)
         sys.stdout.write(test)
-        self.assertEqual(yaml.load(test), self.config.value())
+        self.assertEqual(yaml.load(test, Loader=yaml.FullLoader), self.config.value())
 
     def test_parseDisplay_userdata_default(self):
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
         test = _display(self.config, 'userdata')
         sys.stdout.write(test)
-        self.assertEqual(yaml.load(test), None)
+        self.assertEqual(yaml.load(test, Loader=yaml.FullLoader), None)
 
     def test_parseDisplay_userdata_list(self):
         if not using_yaml:
@@ -552,7 +552,7 @@ scenario.foo""")
         self.config['scenarios'].append()
         test = _display(self.config, 'userdata')
         sys.stdout.write(test)
-        self.assertEqual(yaml.load(test), {'scenarios': [None]})
+        self.assertEqual(yaml.load(test, Loader=yaml.FullLoader), {'scenarios': [None]})
 
     def test_parseDisplay_userdata_list_nonDefault(self):
         if not using_yaml:
@@ -562,7 +562,7 @@ scenario.foo""")
         test = _display(self.config,'userdata')
         sys.stdout.write(test)
         self.assertEqual(
-            yaml.load(test), {'scenarios':
+            yaml.load(test, Loader=yaml.FullLoader), {'scenarios':
                               [None, {'merlion': True,
                                       'detection': []}]})
 
@@ -573,7 +573,7 @@ scenario.foo""")
         self.config.add("bar", ConfigBlock())
         test = _display(self.config, 'userdata')
         sys.stdout.write(test)
-        self.assertEqual(yaml.load(test), None)
+        self.assertEqual(yaml.load(test, Loader=yaml.FullLoader), None)
 
     def test_parseDisplay_userdata_block_nonDefault(self):
         if not using_yaml:
@@ -583,7 +583,7 @@ scenario.foo""")
                    .add("baz", ConfigBlock())
         test = _display(self.config, 'userdata')
         sys.stdout.write(test)
-        self.assertEqual(yaml.load(test), {'bar': None})
+        self.assertEqual(yaml.load(test, Loader=yaml.FullLoader), {'bar': None})
 
     def test_value_ConfigValue(self):
         val = self.config['flushing']['flush nodes']['rate']
