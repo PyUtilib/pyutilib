@@ -106,6 +106,7 @@ def kill_process(process, sig=signal.SIGTERM, verbose=False):
             print("  ERROR: invalid pid %d" % pid)
             sys.exit(1)
         os.killpg(pgid, signal.SIGTERM)
+        process.terminate()
         #
         # This is a hack.  The Popen.__del__ method references
         # the 'os' package, and when a process is interupted this
@@ -893,6 +894,8 @@ class SubprocessMngr(object):
         Kill the subprocess and its children
         """
         kill_process(self.process, sig)
+        self.process.terminate()
+        self.process.wait()
         del self.process
         self.process = None
 

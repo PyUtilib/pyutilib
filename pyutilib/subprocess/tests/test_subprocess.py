@@ -49,15 +49,17 @@ class Test(unittest.TestCase):
         if ' ' in sys.executable:
             foo = SubprocessMngr(
                 "'" + sys.executable + "' -q -c \"while True: pass\"",
-                shell=not _mswindows)
+                shell=False)
         else:
             foo = SubprocessMngr(
                 sys.executable + " -q -c \"while True: pass\"",
-                shell=not _mswindows)
+                shell=False)
         foo.wait(targetTime)
         runTime = timer() - stime
         print("Ran for %f seconds" % (runTime,))
+        #
         # timeout should be accurate to 1/10 second
+        #
         self.assertTrue(runTime <= targetTime + 0.1)
 
     @unittest.skipIf(_mswindows,
@@ -114,7 +116,7 @@ class Test(unittest.TestCase):
         INPUT.close()
         os.remove(currdir + 'tee.out')
         if _peek_available:
-            self.assertEquals(
+            self.assertEqual(
                 sorted(output.splitlines()),
                 ["Tee Script: ERR", "Tee Script: OUT"])
         else:
@@ -129,7 +131,7 @@ class Test(unittest.TestCase):
             [sys.executable, currdir + "tee_script.py"], ostream=script_out)
 
         if _peek_available:
-            self.assertEquals(
+            self.assertEqual(
                 sorted(script_out.getvalue().splitlines()),
                 ["Tee Script: ERR", "Tee Script: OUT"])
         else:
@@ -151,10 +153,10 @@ class Test(unittest.TestCase):
         pyutilib.misc.reset_redirect()
         # The following is only deterministic if Peek/Select is available
         if _peek_available:
-            self.assertEquals(
+            self.assertEqual(
                 sorted(stream_out.getvalue().splitlines()),
                 ["Tee Script: ERR", "Tee Script: OUT"])
-            self.assertEquals(
+            self.assertEqual(
                 sorted(script_out.getvalue().splitlines()),
                 ["Tee Script: ERR", "Tee Script: OUT"])
         else:
@@ -179,12 +181,12 @@ class Test(unittest.TestCase):
             ostream=script_out,
             tee=(True, False))
         pyutilib.misc.reset_redirect()
-        self.assertEquals(stream_out.getvalue().splitlines(),
+        self.assertEqual(stream_out.getvalue().splitlines(),
                           ["Tee Script: OUT"])
 
         # The following is only deterministic if Peek/Select is available
         if _peek_available:
-            self.assertEquals(
+            self.assertEqual(
                 sorted(script_out.getvalue().splitlines()),
                 ["Tee Script: ERR", "Tee Script: OUT"])
         else:
@@ -204,12 +206,12 @@ class Test(unittest.TestCase):
             ostream=script_out,
             tee=(False, True))
         pyutilib.misc.reset_redirect()
-        self.assertEquals(stream_out.getvalue().splitlines(),
+        self.assertEqual(stream_out.getvalue().splitlines(),
                           ["Tee Script: ERR"])
 
         # The following is only deterministic if Peek/Select is available
         if _peek_available:
-            self.assertEquals(
+            self.assertEqual(
                 sorted(script_out.getvalue().splitlines()),
                 ["Tee Script: ERR", "Tee Script: OUT"])
         else:
