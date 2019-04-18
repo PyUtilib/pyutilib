@@ -294,6 +294,10 @@ class TestCase(unittest.TestCase):
         if not tmp is None:
             tmp[name] = value
 
+    def shortDescription(self):
+        # Disable nose's use of test docstrings for the test description.
+        return None
+
     def assertMatchesXmlBaseline(self,
                                  testfile,
                                  baseline,
