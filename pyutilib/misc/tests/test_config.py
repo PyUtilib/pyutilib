@@ -24,6 +24,12 @@ from six import PY3, StringIO
 try:
     import yaml
     using_yaml = True
+    if int(yaml.__version__.split('.')[0]) < 5:
+        def yaml_load(arg):
+            return yaml.load(arg)
+    else:
+        def yaml_load(arg):
+            return yaml.load(arg, Loader=yaml.FullLoader)
 except ImportError:
     using_yaml = False
 
@@ -528,7 +534,7 @@ scenario.foo""")
             self.skipTest("Cannot execute test because PyYAML is not available")
         test = _display(self.config)
         sys.stdout.write(test)
-        self.assertEqual(yaml.load(test, Loader=yaml.FullLoader), self.config.value())
+        self.assertEqual(yaml_load(test), self.config.value())
 
     def test_parseDisplayAndValue_list(self):
         if not using_yaml:
@@ -537,14 +543,14 @@ scenario.foo""")
         self.config['scenarios'].append({'merlion': True, 'detection': []})
         test = _display(self.config)
         sys.stdout.write(test)
-        self.assertEqual(yaml.load(test, Loader=yaml.FullLoader), self.config.value())
+        self.assertEqual(yaml_load(test), self.config.value())
 
     def test_parseDisplay_userdata_default(self):
         if not using_yaml:
             self.skipTest("Cannot execute test because PyYAML is not available")
         test = _display(self.config, 'userdata')
         sys.stdout.write(test)
-        self.assertEqual(yaml.load(test, Loader=yaml.FullLoader), None)
+        self.assertEqual(yaml_load(test), None)
 
     def test_parseDisplay_userdata_list(self):
         if not using_yaml:
@@ -552,7 +558,7 @@ scenario.foo""")
         self.config['scenarios'].append()
         test = _display(self.config, 'userdata')
         sys.stdout.write(test)
-        self.assertEqual(yaml.load(test, Loader=yaml.FullLoader), {'scenarios': [None]})
+        self.assertEqual(yaml_load(test), {'scenarios': [None]})
 
     def test_parseDisplay_userdata_list_nonDefault(self):
         if not using_yaml:
@@ -562,9 +568,9 @@ scenario.foo""")
         test = _display(self.config,'userdata')
         sys.stdout.write(test)
         self.assertEqual(
-            yaml.load(test, Loader=yaml.FullLoader), {'scenarios':
-                              [None, {'merlion': True,
-                                      'detection': []}]})
+            yaml_load(test), {'scenarios':
+                                  [None, {'merlion': True,
+                                          'detection': []}]})
 
     def test_parseDisplay_userdata_block(self):
         if not using_yaml:
@@ -573,7 +579,7 @@ scenario.foo""")
         self.config.add("bar", ConfigBlock())
         test = _display(self.config, 'userdata')
         sys.stdout.write(test)
-        self.assertEqual(yaml.load(test, Loader=yaml.FullLoader), None)
+        self.assertEqual(yaml_load(test), None)
 
     def test_parseDisplay_userdata_block_nonDefault(self):
         if not using_yaml:
@@ -583,7 +589,7 @@ scenario.foo""")
                    .add("baz", ConfigBlock())
         test = _display(self.config, 'userdata')
         sys.stdout.write(test)
-        self.assertEqual(yaml.load(test, Loader=yaml.FullLoader), {'bar': None})
+        self.assertEqual(yaml_load(test), {'bar': None})
 
     def test_value_ConfigValue(self):
         val = self.config['flushing']['flush nodes']['rate']
