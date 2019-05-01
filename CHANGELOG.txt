@@ -6,6 +6,10 @@
  Current Development
 -------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+ Version 5.6.6
+-------------------------------------------------------------------------------
+
 - Disable nose's use of docstrings for test descriptions (#54)
 - Resolve testing issues with new version of PyYAML (#53, #55)
 - Resolve testing issues with subprocess (#53)
