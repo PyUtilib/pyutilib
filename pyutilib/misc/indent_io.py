@@ -22,20 +22,20 @@ class StreamIndenter(object):
     def __getattr__(self, name):
         return getattr(self.os, name)
 
-    def write(self, str):
-        if not len(str):
+    def write(self, data):
+        if not len(data):
             return
-        if self.newline:
-            self.os.write(self.indent)
-            self.newline = False
-        frag = str.rsplit('\n', 1)
-        self.os.write(frag[0].replace('\n', '\n' + self.indent))
-        if len(frag) > 1:
-            self.os.write('\n')
-            if len(frag[1]):
-                self.os.write(self.indent + frag[1])
+        lines = data.split('\n')
+        if lines[0] and self.newline:
+            self.os.write(self.indent+lines[0])
+        else:
+            self.os.write(lines[0])
+        for line in lines[1:]:
+            if line:
+                self.os.write("\n"+self.indent+line)
             else:
-                self.newline = True
+                self.os.write("\n")
+        self.newline = not bool(lines[-1])
 
     def writelines(self, sequence):
         for x in sequence:
