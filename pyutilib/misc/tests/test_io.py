@@ -145,17 +145,22 @@ class IODebug(unittest.TestCase):
 
     def test_indenter_write(self):
         output = six.StringIO()
-        indenter = pyutilib.misc.StreamIndenter(output, "X")
+        indenter = pyutilib.misc.StreamIndenter(output, "X ")
         indenter.write("foo")
-        self.assertEqual(output.getvalue(), "Xfoo")
+        self.assertEqual(output.getvalue(), "X foo")
         indenter.write("\n")
-        self.assertEqual(output.getvalue(), "Xfoo\n")
+        self.assertEqual(output.getvalue(), "X foo\n")
         indenter.write("foo\n")
-        self.assertEqual(output.getvalue(), "Xfoo\nXfoo\n")
+        self.assertEqual(output.getvalue(), "X foo\nX foo\n")
         indenter.write("")
-        self.assertEqual(output.getvalue(), "Xfoo\nXfoo\n")
+        self.assertEqual(output.getvalue(), "X foo\nX foo\n")
+        indenter.write("\n")
+        self.assertEqual(output.getvalue(), "X foo\nX foo\nX\n")
         indenter.write("baz\nbin")
-        self.assertEqual(output.getvalue(), "Xfoo\nXfoo\nXbaz\nXbin")
+        self.assertEqual(output.getvalue(), "X foo\nX foo\nX\nX baz\nX bin")
+        indenter.write("a\nb\n\nc\n")
+        self.assertEqual(output.getvalue(),
+                         "X foo\nX foo\nX\nX baz\nX bina\nX b\nX\nX c\n")
 
         self.assertEqual(indenter.closed, False)
         indenter.close()
