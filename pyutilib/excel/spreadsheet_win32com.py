@@ -20,7 +20,7 @@ import os
 # set a flag to tell the ExcelSpreadsheet class that it should
 # raise an exception in its constructor.
 #
-from win32com.client.dynamic import Dispatch
+from win32com.client import DispatchEx as Dispatch
 from pythoncom import CoInitialize, CoUninitialize, com_error
 
 from pyutilib.excel.base import ExcelSpreadsheet_base
