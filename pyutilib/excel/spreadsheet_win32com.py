@@ -19,8 +19,12 @@ import os
 # Attempt to import win32com stuff.  If this fails, then
 # set a flag to tell the ExcelSpreadsheet class that it should
 # raise an exception in its constructor.
-#
-from win32com.client.dynamic import Dispatch
+
+# BLN: Use DispatchEx instead of Dispatch to make sure we launch
+# BLN: a new instance of Excel, otherwise we unintentionally 
+# BLN: close any open Excel Windows when importing Pyomo 
+# BLN: See https://github.com/Pyomo/pyomo/issues/355
+from win32com.client import DispatchEx as Dispatch
 from pythoncom import CoInitialize, CoUninitialize, com_error
 
 from pyutilib.excel.base import ExcelSpreadsheet_base
