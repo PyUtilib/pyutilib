@@ -3,11 +3,14 @@
 ====================
 
 -------------------------------------------------------------------------------
- Current Development
+ Version 5.7.1   21 Jun 2019
 -------------------------------------------------------------------------------
 
+- StreamIndenter fix for blank lines (#58)
+- Fix in Excel interface to avoid closing previously open Excel windows (#59)
+
 -------------------------------------------------------------------------------
- Version 5.7.0
+ Version 5.7.0    1 May 2019
 -------------------------------------------------------------------------------
 
 - Disable nose's use of docstrings for test descriptions (#54)
@@ -17,13 +20,13 @@
 - Fix component loader (#51)
 
 -------------------------------------------------------------------------------
- Version 5.6.5
+ Version 5.6.5   18 Jan 2019
 -------------------------------------------------------------------------------
 
 - Fix condition where subprocess exits before I/O threads were created (#49)
 
 -------------------------------------------------------------------------------
- Version 5.6.4
+ Version 5.6.4   19 Dec 2018
 -------------------------------------------------------------------------------
 
 - Fix IOptionDataProvider methods missing 'self' argument (#34)
@@ -36,7 +39,7 @@
 - Fix and simplify file comparison operators (#47)
 
 -------------------------------------------------------------------------------
- Version 5.6.3
+ Version 5.6.3    9 Apr 2018
 -------------------------------------------------------------------------------
 
 - Resolved enum test failure on Python 3.x
@@ -45,13 +48,13 @@
 - Fix for setting a ConfigBlock with keys that contains spaces/underscores.
 
 -------------------------------------------------------------------------------
- Version 5.6.2
+ Version 5.6.2   28 Feb 2018
 -------------------------------------------------------------------------------
 
 - Resolving appveyor test failures.
 
 -------------------------------------------------------------------------------
- Version 5.6.1
+ Version 5.6.1   23 Feb 2018
 -------------------------------------------------------------------------------
 
 - Minor cleanup of ConfigBlock class.
@@ -60,7 +63,7 @@
 - Adding line wrapping to the LogHandler
 
 -------------------------------------------------------------------------------
- Version 5.6
+ Version 5.6     21 Oct 2017
 -------------------------------------------------------------------------------
 
 - Changed the default logic for ExcelSpreadsheet to use xldrd when available
@@ -72,14 +75,14 @@
 - Introduced contiguous task processing in pyutilib.worker
 
 -------------------------------------------------------------------------------
- Version 5.5.1
+ Version 5.5.1   18 Jun 2017
 -------------------------------------------------------------------------------
 
 - Fix for making private copies of os.environ
 - Defer imports of pyutilib.misc in pyutilib.th to improve coverage
 
 -------------------------------------------------------------------------------
- Version 5.5
+ Version 5.5     13 May 2017
 -------------------------------------------------------------------------------
 
 - Close a pyro worker if an exception occurs
@@ -90,7 +93,7 @@
 - Changes to make ConfigBlock add more like dict
 
 -------------------------------------------------------------------------------
- Version 5.4.1
+ Version 5.4.1   30 Oct 2016
 -------------------------------------------------------------------------------
 
 - Updates to work with OpenPyxl 2.4
