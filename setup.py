@@ -35,7 +35,16 @@ def _find_packages(path):
     return [pkg for pkg in map(lambda x:x.replace(os.sep,"."), pkg_list)]
 
 def read(*rnames):
-    return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
+    with open(os.path.join(os.path.dirname(__file__), *rnames)) as README:
+        # Strip all leading badges up to, but not including the COIN-OR
+        # badge so that they do not appear in the PyPI description
+        while True:
+            line = README.readline()
+            if 'COIN-OR' in line:
+                break
+            if line.strip() and '[![' not in line:
+                break
+        return line + README.read()
 
 packages = _find_packages('pyutilib')
 
@@ -56,7 +65,8 @@ setup(name="PyUtilib",
     platforms = ["any"],
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
     description = 'PyUtilib: A collection of Python utilities',
-    long_description = read('README.txt'),
+    long_description = read('README.md'),
+    long_description_content_type='text/markdown',
     classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: End Users/Desktop',

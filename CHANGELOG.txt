@@ -8,6 +8,7 @@
 
 - StreamIndenter fix for blank lines (#58)
 - Fix in Excel interface to avoid closing previously open Excel windows (#59)
+- Removed README.txt, standardizing on README.md
 
 -------------------------------------------------------------------------------
  Version 5.7.0    1 May 2019
