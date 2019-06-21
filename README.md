@@ -3,7 +3,7 @@
 [![codecov.io](https://codecov.io/github/PyUtilib/pyutilib/coverage.svg?branch=master)](https://codecov.io/github/PyUtilib/pyutilib?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/PyUtilib/pyutilib/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/PyUtilib/pyutilib/?branch=master)
 [![Depsy Software Impact](http://depsy.org/api/package/pypi/PyUtilib/badge.svg)](http://depsy.org/package/python/PyUtilib)
-[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 
 ## PyUtilib Overview
 

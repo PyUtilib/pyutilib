@@ -1,4 +1,4 @@
-We are pleased to announce the release of PyUtilib 5.7.0. The
+We are pleased to announce the release of PyUtilib 5.7.1. The
 PyUtilib project supports the development of an ensemble of Python
 packages that include a wide variety of utilities, including a
 well-developed component architecture.
@@ -7,6 +7,7 @@ The following are highlights of the 5.7 release series:
 
 - Dropped support for Python 2.6
 - Updates to resolve testing issues
+- Minor bug fixes
 
 PyUtilib can be installed from PyPI using pip or conda-forge using conda.
 
