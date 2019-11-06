@@ -14,8 +14,6 @@ import traceback
 
 __all__ = ('TicTocTimer', 'tic', 'toc')
 
-_loadTime = time.time()
-
 class TicTocTimer(object):
     """A class to calculate and report elapsed time.
 
@@ -35,9 +33,11 @@ class TicTocTimer(object):
            logging package. Note: timing logged using logger.info
     """
     def __init__(self, ostream=None, logger=None):
-        self._lastTime = time.time()
+        self._lastTime = self._loadTime = time.time()
         self._ostream = ostream
         self._logger = logger
+        self._start_count = 0
+        self._cumul = 0
 
     def tic(self, msg=None, ostream=None, logger=None):
         """Reset the tic/toc delta timer.
@@ -85,38 +85,60 @@ class TicTocTimer(object):
                 logging package (overrides the ostream provided when the
                 class was constructed). Note: timing logged using logger.info
         """
-        now = time.time()
-        if delta:
-            ans = now - self._lastTime
-            self._lastTime = now
-        else:
-            ans = now - _loadTime
 
         if msg is None:
             msg = 'File "%s", line %s in %s' % \
                   traceback.extract_stack(limit=2)[0][:3]
+
+        now = time.time()
+        if self._start_count or self._lastTime is None:
+            ans = self._cumul
+            if self._lastTime:
+                ans += time.time() - self._lastTime
+            if msg:
+                msg = "[%8.2f|%4d] %s\n" % (ans, self._start_count, msg)
+        elif delta:
+            ans = now - self._lastTime
+            self._lastTime = now
+            if msg:
+                msg = "[+%7.2f] %s\n" % (ans, msg)
+        else:
+            ans = now - self._loadTime
+            if msg:
+                msg = "[%8.2f] %s\n" % (ans, msg)
+
         if msg:
             if ostream is None:
                 ostream = self._ostream
                 if ostream is None and logger is None:
                     ostream = sys.stdout
-                
             if ostream is not None:
-                if delta:
-                    ostream.write("[+%7.2f] %s\n" % (ans, msg))
-                else:
-                    ostream.write("[%8.2f] %s\n" % (ans, msg))
+                ostream.write(msg)
 
             if logger is None:
                 logger = self._logger
-
             if logger is not None:
-                if delta:
-                    logger.info("[+%7.2f] %s\n" % (ans, msg))
-                else:
-                    logger.info("[%8.2f] %s\n" % (ans, msg))
+                logger.info(msg)
 
         return ans
+
+    def stop(self):
+        try:
+            delta = time.time() - self._lastTime
+        except TypeError:
+            if self._lastTime is None:
+                raise RuntimeError(
+                    "Stopping a TicTocTimer that was already stopped")
+            raise
+        self._cumul += delta
+        self._lastTime = None
+        return delta
+
+    def start(self):
+        if self._lastTime:
+            self.stop()
+        self._start_count += 1
+        self._lastTime = time.time()
 
 _globalTimer = TicTocTimer()
 tic = _globalTimer.tic
