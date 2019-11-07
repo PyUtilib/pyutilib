@@ -10,8 +10,8 @@ environment:
     - PYTHON: "C:\\Miniconda-x64"
       #PYTHON: "C:\\Python27"
 
-    - PYTHON: "C:\\Miniconda34-x64"
-      #PYTHON: "C:\\Python34"
+    #- PYTHON: "C:\\Miniconda34-x64"
+    #  #PYTHON: "C:\\Python34"
 
     - PYTHON: "C:\\Miniconda35-x64"
       #PYTHON: "C:\\Python35"
