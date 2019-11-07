@@ -7,6 +7,7 @@
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
 
+
 def add_method(self, method, name=None):
     """
     Add a method to a class:
@@ -20,12 +21,20 @@ def add_method(self, method, name=None):
     """
     if name is None:
         name = method.__name__
-    class new(self.__class__): pass
+
+    class new(self.__class__):
+        pass
+
     setattr(new, name, method)
     self.__class__ = new
-    return getattr(self,name)
+    return getattr(self, name)
 
-def add_method_by_name(self, method_name, name=None, globals=globals(),locals=None):
+
+def add_method_by_name(self,
+                       method_name,
+                       name=None,
+                       globals=globals(),
+                       locals=None):
     """
     Add a method to a class given a function class
 
@@ -38,4 +47,4 @@ def add_method_by_name(self, method_name, name=None, globals=globals(),locals=No
     Adapted from code submitted by Moshe Zadka to the
     ActiveState Programmer Network http://aspn.activestate.com
     """
-    add_method(self, eval(method_name,globals,locals), name)
+    add_method(self, eval(method_name, globals, locals), name)

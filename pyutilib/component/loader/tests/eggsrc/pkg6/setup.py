@@ -4,17 +4,16 @@
 from setuptools import setup
 
 setup(
-    name = 'Package6',
-    version = '0.1',
-    packages = ['package6'],
-    package_data = { 'package6': [ ] },
-
-    author = 'Jane Doe',
-    author_email = 'jdoe@dev.null',
-    description = 'Package6 description.',
-    license = 'BSD',
-    keywords = 'package6 plugin',
-    classifiers = [
+    name='Package6',
+    version='0.1',
+    packages=['package6'],
+    package_data={'package6': []},
+    author='Jane Doe',
+    author_email='jdoe@dev.null',
+    description='Package6 description.',
+    license='BSD',
+    keywords='package6 plugin',
+    classifiers=[
         'Framework :: Package6',
         'Development Status :: 1 - Planning',
         'Environment :: Web Environment',
@@ -25,10 +24,8 @@ setup(
     ],
 
     #install_requires = ['PyUtilib==100.0'],
-
-    entry_points = {
+    entry_points={
         'project1.plugins': [
             'package6.main = package6.unknown',
         ]
-    }
-)
+    })

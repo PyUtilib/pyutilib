@@ -6,7 +6,6 @@
 #  Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
-
 """
 This package defines the Configuration class, which provides a generic interface for reading/writing configuration files.  This class uses a simple
 model for configuration data:
@@ -76,7 +75,7 @@ class Configuration(Plugin):
     def __getitem__(self, name):
         """Return the configuration section with the specified name."""
         if name not in self.data:
-            raise ConfigurationError("No section "+name+" in data")
+            raise ConfigurationError("No section " + name + " in data")
         return self.data[name]
 
     def sections(self):
@@ -85,7 +84,7 @@ class Configuration(Plugin):
 
     def load(self, filename=None):
         """Load configuration from a file."""
-        if len(self.parsers) == 0:              #pragma:nocover
+        if len(self.parsers) == 0:  #pragma:nocover
             raise ConfigurationError("No IConfiguration parsers are registered")
         if not filename is None:
             self.filename = filename
@@ -99,7 +98,7 @@ class Configuration(Plugin):
         self.config = self.parsers.service(self.parser_type).load(self.filename)
         self.data = {}
         self.section = []
-        for (s,o,v) in self.config:
+        for (s, o, v) in self.config:
             if not s in self.data:
                 self.section.append(s)
                 self.data[s] = {}
@@ -122,9 +121,12 @@ class Configuration(Plugin):
                 flag = False
                 for plugin in plugins:
                     if plugin.matches_name(option):
-                        flag = plugin.load(option, self.data[sec][option]) or flag
+                        flag = plugin.load(option,
+                                           self.data[sec][option]) or flag
                 if not flag:
-                    raise ConfigurationError("Problem loading file %r. Option %r in section %r is not recognized!" % (self.filename, option,sec))
+                    raise ConfigurationError(
+                        "Problem loading file %r. Option %r in section %r is not recognized!"
+                        % (self.filename, option, sec))
         #
         # Finalize the configuration process
         #
@@ -144,7 +146,7 @@ class Configuration(Plugin):
         self.data = self.option_data_plugin.service().get_data()
         self.section = list(self.data.keys())
         self.section.sort()
-        flag=False
+        flag = False
         header = "\nNote: the following configuration options have been omitted because their\nvalue is 'None':\n"
         for sec in self.section:
             plugins = []
@@ -159,10 +161,11 @@ class Configuration(Plugin):
                     if plugin.matches_name(option):
                         if not self.data[sec][option] is None:
                             val = self.data[sec][option]
-                            self.config.append( (sec,option,val) )
+                            self.config.append((sec, option, val))
                         else:
-                            flag=True
-                            header = header + "  section=%r option=%r\n" % (sec,option)
+                            flag = True
+                            header = header + "  section=%r option=%r\n" % (
+                                sec, option)
                         break
         if flag:
             header = header + "\n"
@@ -171,13 +174,14 @@ class Configuration(Plugin):
         #
         # Write config file
         #
-        self.parsers.service(self.parser_type).save(self.filename, self.config, header)
+        self.parsers.service(self.parser_type).save(self.filename, self.config,
+                                                    header)
 
     def pprint(self):
         """Print a simple summary of the configuration data."""
         text = ""
-        for (s,o,v) in self.config:
-            text += "[%s] %s = %s\n" % (s,o,v)
+        for (s, o, v) in self.config:
+            text += "[%s] %s = %s\n" % (s, o, v)
         print(text)
 
     def summarize(self):
@@ -188,14 +192,14 @@ class Configuration(Plugin):
         keys = list(tmp.keys())
         keys.sort()
         for key in keys:
-            print("["+key+"]")
+            print("[" + key + "]")
             print("")
             okeys = list(tmp[key].keys())
             okeys.sort()
             for okey in okeys:
-                print("  Option:    "+tmp[key][okey].name)
-                print("  Type:      "+tmp[key][okey].__class__.__name__)
-                print("  Default:   "+tmp[key][okey].default_str())
-                print("  Doc:       "+tmp[key][okey].__doc__)
+                print("  Option:    " + tmp[key][okey].name)
+                print("  Type:      " + tmp[key][okey].__class__.__name__)
+                print("  Default:   " + tmp[key][okey].default_str())
+                print("  Doc:       " + tmp[key][okey].__doc__)
                 print("")
             print("")

@@ -15,13 +15,14 @@ import pyutilib.common
 
 try:
     import runpy
-    runpy_available=True
-except ImportError:   #pragma:nocover
+    runpy_available = True
+except ImportError:  #pragma:nocover
     try:
         import runpy2 as runpy
-        runpy_available=True
-    except ImportError: #pragma:nocover
-        runpy_available=False
+        runpy_available = True
+    except ImportError:  #pragma:nocover
+        runpy_available = False
+
 
 def import_file(filename, context=None, name=None, clear_cache=False):
     """
@@ -124,7 +125,8 @@ def import_file(filename, context=None, name=None, clear_cache=False):
         else:
             if dirname is not None:
                 # find_module will return the .py file (never .pyc)
-                fp, pathname, description = imp.find_module(modulename, [dirname])
+                fp, pathname, description = imp.find_module(modulename,
+                                                            [dirname])
                 fp.close()
             else:
                 sys.path.insert(0, implied_dirname)
@@ -142,17 +144,17 @@ def import_file(filename, context=None, name=None, clear_cache=False):
             #       it will use the .pyc or .pyo file if it exists
             module = imp.load_source(name, pathname)
         except:
-            et,e,tb = sys.exc_info()
+            et, e, tb = sys.exc_info()
             import traceback
-            _,line,_,txt = traceback.extract_tb(tb,2)[-1]
+            _, line, _, txt = traceback.extract_tb(tb, 2)[-1]
             import logging
             logger = logging.getLogger('pyutilib.misc')
             msg = ''
-            if isinstance(e,Exception):
+            if isinstance(e, Exception):
                 msg = " raised %s:\n%s" % (et.__name__, e)
-            logger.error( 'Failed to load python module "%s"\n'
-                          '%s line %s ("%s")%s'
-                          % ( filename, pathname, line, txt, msg) )
+            logger.error('Failed to load python module "%s"\n'
+                         '%s line %s ("%s")%s' %
+                         (filename, pathname, line, txt, msg))
             raise
 
     #
@@ -167,8 +169,9 @@ def run_file(filename, logfile=None, execdir=None):
     """
     Execute a Python file and optionally redirect output to a logfile.
     """
-    if not runpy_available:                     #pragma:nocover
-        raise pyutilib.common.ConfigurationError("Cannot apply the run_file() function because runpy is not available") 
+    if not runpy_available:  #pragma:nocover
+        raise pyutilib.common.ConfigurationError(
+            "Cannot apply the run_file() function because runpy is not available")
     #
     # Open logfile
     #
@@ -177,15 +180,15 @@ def run_file(filename, logfile=None, execdir=None):
         sys.stdout.flush()
         save_stdout = sys.stdout
         save_stderr = sys.stderr
-        OUTPUT=open(logfile,"w")
-        sys.stdout=OUTPUT
-        sys.stderr=OUTPUT
+        OUTPUT = open(logfile, "w")
+        sys.stdout = OUTPUT
+        sys.stderr = OUTPUT
     #
     # Add the file directory to the system path
     #
-    currdir_=''
+    currdir_ = ''
     if '/' in filename:
-        currdir_= "/".join((filename).split("/")[:-1])
+        currdir_ = "/".join((filename).split("/")[:-1])
         tmp_import = (filename).split("/")[-1]
         sys.path.append(currdir_)
     elif '\\' in filename:
@@ -200,15 +203,15 @@ def run_file(filename, logfile=None, execdir=None):
     #
     try:
         if not execdir is None:
-            tmp=os.getcwd()
+            tmp = os.getcwd()
             os.chdir(execdir)
             tmp_path = sys.path
             sys.path = [execdir] + sys.path
-        runpy.run_module(name,None,"__main__")
+        runpy.run_module(name, None, "__main__")
         if not execdir is None:
             os.chdir(tmp)
             sys.path = tmp_path
-    except Exception:          #pragma:nocover
+    except Exception:  #pragma:nocover
         if not logfile is None:
             OUTPUT.close()
             sys.stdout = save_stdout

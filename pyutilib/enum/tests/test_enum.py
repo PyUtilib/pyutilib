@@ -8,15 +8,14 @@
 # This is free software; you may copy, modify and/or distribute this work
 # under the terms of the GNU General Public License, version 2 or later
 # or, at your option, the terms of the Python license.
-
 """ Unit test for ‘enum’ module.
     """
 
 import unittest
 
-import pyutilib.enum as enum
+import pyutilib.enum.enum as enum
 
-
+
 class Mock_Enum(object):
     """ Mock object for Enum testing. """
 
@@ -28,14 +27,17 @@ class Mock_Enum(object):
 def setup_enum_value_fixtures(testcase):
     """ Set up fixtures for test cases using ‘EnumValue’. """
 
-    testcase.bad_keys = [
-        None, 0, 1, (), Mock_Enum()
-        ]
+    testcase.bad_keys = [None, 0, 1, (), Mock_Enum()]
 
     testcase.other_values = [
-        None, 0, 1, (), Mock_Enum(), "bogus-str",
+        #None,                  Python 3.x does not support comparisons between integers and None
+        0,
+        1,
+        (),
+        Mock_Enum(),
+        "bogus-str",
         enum.EnumValue(Mock_Enum(), 0, 'bogus-enum'),
-        ]
+    ]
 
     testcase.planets = [
         ('mercury', "Mercury"),
@@ -46,14 +48,19 @@ def setup_enum_value_fixtures(testcase):
         ('saturn', "Saturn"),
         ('uranus', "Uranus"),
         ('neptune', "Neptune"),
-        ]
+    ]
     planet_keys = [key for (key, name) in testcase.planets]
 
     colour_keys = [
-        'red', 'green', 'blue',
-        'yellow', 'orange', 'purple',
-        'white', 'black',
-        ]
+        'red',
+        'green',
+        'blue',
+        'yellow',
+        'orange',
+        'purple',
+        'white',
+        'black',
+    ]
 
     simple_keys = ['spam', 'eggs', 'beans']
     testcase.SimpleEnum = testcase.enum_factory_class(*simple_keys)
@@ -62,12 +69,10 @@ def setup_enum_value_fixtures(testcase):
     Planet = testcase.enum_factory_class(*planet_keys)
     testcase.valid_values = {
         Colour: dict(
-            keys = colour_keys,
-            ),
+            keys=colour_keys,),
         Planet: dict(
-            keys = planet_keys,
-            ),
-        }
+            keys=planet_keys,),
+    }
 
     for enumtype, params in testcase.valid_values.items():
         params['enumtype'] = enumtype
@@ -76,7 +81,7 @@ def setup_enum_value_fixtures(testcase):
             values[key] = enum.EnumValue(enumtype, i, key)
         params['values'] = values
 
-
+
 class XTest_Module(object):
     """ Test case for the module. """
 
@@ -155,7 +160,7 @@ class XTest_Module(object):
         mod_version = self.module.__version__
         self.assertTrue(isinstance(mod_version, basestring))
 
-
+
 class Test_EnumException(unittest.TestCase):
     """ Test case for the Enum exception classes. """
 
@@ -163,26 +168,21 @@ class Test_EnumException(unittest.TestCase):
         """ Set up test fixtures. """
         self.valid_exceptions = {
             enum.EnumEmptyError: dict(
-                min_args = 0,
-                types = (enum.EnumException, AssertionError),
-                ),
+                min_args=0,
+                types=(enum.EnumException, AssertionError),),
             enum.EnumBadKeyError: dict(
-                min_args = 1,
-                types = (enum.EnumException, TypeError),
-                ),
+                min_args=1,
+                types=(enum.EnumException, TypeError),),
             enum.EnumBadIndexError: dict(
-                min_args = 2,
-                types = (enum.EnumException, AssertionError),
-                ),
+                min_args=2,
+                types=(enum.EnumException, AssertionError),),
             enum.EnumBadTypeError: dict(
-                min_args = 2,
-                types = (enum.EnumException, TypeError),
-                ),
+                min_args=2,
+                types=(enum.EnumException, TypeError),),
             enum.EnumImmutableError: dict(
-                min_args = 1,
-                types = (enum.EnumException, TypeError),
-                ),
-            }
+                min_args=1,
+                types=(enum.EnumException, TypeError),),
+        }
 
         for exc_type, params in self.valid_exceptions.items():
             args = (None,) * params['min_args']
@@ -191,8 +191,7 @@ class Test_EnumException(unittest.TestCase):
 
     def test_EnumException_abstract(self):
         # The module exception base class should be abstract.
-        self.assertRaises(
-            NotImplementedError, enum.EnumException)
+        self.assertRaises(NotImplementedError, enum.EnumException)
 
     def test_exception_instance(self):
         # Exception instance should be created.
@@ -207,11 +206,10 @@ class Test_EnumException(unittest.TestCase):
             for match_type in params['types']:
                 self.assertTrue(
                     isinstance(instance, match_type),
-                    msg=(
-                        "instance: %(instance)r, match_type: %(match_type)s"
-                        ) % vars())
+                    msg=("instance: %(instance)r, match_type: %(match_type)s") %
+                    vars())
 
-
+
 class Test_EnumValue(unittest.TestCase):
     """ Test case for the EnumValue class. """
 
@@ -280,8 +278,7 @@ class Test_EnumValue(unittest.TestCase):
                     if i == j:
                         continue
                     other_instance = params['values'][other_key]
-                    self.assertNotEqual(
-                        hash(instance), hash(other_instance))
+                    self.assertNotEqual(hash(instance), hash(other_instance))
 
     def Xtest_comparison_method_has_matching_name(self):
         """ Comparison method should have matching name for attribute. """
@@ -289,33 +286,29 @@ class Test_EnumValue(unittest.TestCase):
             func_name = compare_func.__name__
             expect_name = func_name
             compare_method = getattr(enum.EnumValue, func_name)
-            self.assertEqual(
-                expect_name, compare_method.__name__)
+            self.assertEqual(expect_name, compare_method.__name__)
 
     def Xtest_comparison_method_has_docstring(self):
         """ Comparison method should have docstring. """
         for compare_func in compare_functions:
             func_name = compare_func.__name__
             compare_method = getattr(enum.EnumValue, func_name)
-            self.assertTrue(
-                isinstance(compare_method.__doc__, basestring))
+            self.assertTrue(isinstance(compare_method.__doc__, basestring))
 
     def test_compare_equal(self):
         # An EnumValue should compare equal to its value.
         for enumtype, params in self.valid_values.items():
             for i, key in enumerate(params['keys']):
                 instance = params['values'][key]
-                self.assertEqual(
-                    instance, enum.EnumValue(enumtype, i, key))
+                self.assertEqual(instance, enum.EnumValue(enumtype, i, key))
 
     def test_compare_unequal(self):
         # An EnumValue should compare different to other values.
         for enumtype, params in self.valid_values.items():
             for i, key in enumerate(params['keys']):
                 instance = params['values'][key]
-                self.assertNotEqual(
-                    instance,
-                    enum.EnumValue(enumtype, None, None))
+                self.assertNotEqual(instance,
+                                    enum.EnumValue(enumtype, None, None))
 
     def XXtest_compare_sequence(self):
         # EnumValue instances should compare as their sequence order.
@@ -324,10 +317,9 @@ class Test_EnumValue(unittest.TestCase):
                 for j, right_key in enumerate(params['keys']):
                     for compare_func in compare_functions:
                         self.assertEqual(
-                            compare_func(i, j),
-                            compare_func(params['values'][left_key],
-                                enum.EnumValue(enumtype, j, right_key))
-                            )
+                            compare_func(i, j), compare_func(
+                                params['values'][left_key],
+                                enum.EnumValue(enumtype, j, right_key)))
 
     def Xtest_compare_different_enum(self):
         """ An EnumValue should not implement comparison to other enums. """
@@ -383,7 +375,7 @@ class Test_EnumValue(unittest.TestCase):
             for key, instance in params['values'].items():
                 self.assertEqual(enumtype, instance.enumtype)
 
-
+
 class Test_Enum(unittest.TestCase):
     """ Test case for the Enum class. """
 
@@ -395,26 +387,21 @@ class Test_Enum(unittest.TestCase):
 
     def test_empty_enum(self):
         # Enum constructor should refuse empty keys sequence.
-        self.assertRaises(
-            enum.EnumEmptyError,
-            enum.Enum)
+        self.assertRaises(enum.EnumEmptyError, enum.Enum)
 
     def test_bad_key(self):
         # Enum constructor should refuse non-string keys.
         for key in self.bad_keys:
             args = ("valid", key, "valid")
-            self.assertRaises(
-                enum.EnumBadKeyError,
-                enum.Enum, *args)
+            self.assertRaises(enum.EnumBadKeyError, enum.Enum, *args)
 
     def test_bad_index(self):
-        self.assertRaises(enum.EnumBadIndexError,
-                          enum.Enum, (enum.EnumValue(None, 1, 'a')))
+        self.assertRaises(enum.EnumBadIndexError, enum.Enum,
+                          (enum.EnumValue(None, 1, 'a')))
 
     def test_bad_type(self):
-        self.assertRaises(enum.EnumBadTypeError,
-                          enum.Enum, *(enum.EnumValue(None, 0, 'a'),
-                                       enum.EnumValue(1, 1, 'b')))
+        self.assertRaises(enum.EnumBadTypeError, enum.Enum, *(
+            enum.EnumValue(None, 0, 'a'), enum.EnumValue(1, 1, 'b')))
 
     def test_value_attributes(self):
         # Enumeration should have attributes for each value.
@@ -477,51 +464,45 @@ class Test_Enum(unittest.TestCase):
     def test_add_attribute(self):
         # Enumeration should refuse attribute addition.
         for enumtype, params in self.valid_values.items():
-            self.assertRaises(
-                enum.EnumImmutableError,
-                setattr, enumtype, 'bogus', "bogus")
+            self.assertRaises(enum.EnumImmutableError, setattr, enumtype,
+                              'bogus', "bogus")
 
     def test_modify_attribute(self):
         # Enumeration should refuse attribute modification.
         for enumtype, params in self.valid_values.items():
             for key in params['keys']:
-                self.assertRaises(
-                    enum.EnumImmutableError,
-                    setattr, enumtype, key, "bogus")
+                self.assertRaises(enum.EnumImmutableError, setattr, enumtype,
+                                  key, "bogus")
 
     def test_delete_attribute(self):
         # Enumeration should refuse attribute deletion.
         for enumtype, params in self.valid_values.items():
             for key in params['keys']:
-                self.assertRaises(
-                    enum.EnumImmutableError,
-                    delattr, enumtype, key)
+                self.assertRaises(enum.EnumImmutableError, delattr, enumtype,
+                                  key)
 
     def test_add_item(self):
         # Enumeration should refuse item addition.
         for enumtype, params in self.valid_values.items():
             index = len(params['keys'])
-            self.assertRaises(
-                enum.EnumImmutableError,
-                enumtype.__setitem__, index, "bogus")
+            self.assertRaises(enum.EnumImmutableError, enumtype.__setitem__,
+                              index, "bogus")
 
     def test_modify_item(self):
         # Enumeration should refuse item modification.
         for enumtype, params in self.valid_values.items():
             for i, key in enumerate(params['keys']):
-                self.assertRaises(
-                    enum.EnumImmutableError,
-                    enumtype.__setitem__, i, "bogus")
+                self.assertRaises(enum.EnumImmutableError, enumtype.__setitem__,
+                                  i, "bogus")
 
     def test_delete_item(self):
         # Enumeration should refuse item deletion.
         for enumtype, params in self.valid_values.items():
             for i, key in enumerate(params['keys']):
-                self.assertRaises(
-                    enum.EnumImmutableError,
-                    enumtype.__delitem__, i)
+                self.assertRaises(enum.EnumImmutableError, enumtype.__delitem__,
+                                  i)
 
-
+
 def suite():
     """ Create the test suite for this module. """
     from sys import modules
@@ -529,7 +510,7 @@ def suite():
     suite = loader.loadTestsFromModule(modules[__name__])
     return suite
 
-
+
 def __main__(argv=None):
     """ Mainline function for this module. """
     import sys as _sys
@@ -544,12 +525,12 @@ def __main__(argv=None):
 
     return exitcode
 
+
 if __name__ == '__main__':
     import sys
     exitcode = __main__(sys.argv)
     sys.exit(exitcode)
 
-
 # Local variables:
 # mode: python
 # End:

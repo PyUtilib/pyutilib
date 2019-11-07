@@ -6,7 +6,6 @@
 #  Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
-
 """A plugin that supports global configuration of logging options for pyutilib.component.core."""
 
 import sys
@@ -24,46 +23,63 @@ class LoggingConfig(Plugin):
 
     implements(IUpdatedOptionsAction)
 
-
     def __init__(self, namespace):
         """Initialize logging information for a specified namespace"""
-        self._hdlr=None
-        self.namespace=namespace
+        self._hdlr = None
+        self.namespace = namespace
         self.env_plugins = ExtensionPoint(IEnvironmentConfig)
         if self.namespace == "":
             section = "logging"
             section_re = None
         else:
-            section = "logging."+namespace
+            section = "logging." + namespace
             section_re = "^logging$"
         #
-        declare_option("timestamp", section=section, section_re=section_re,
+        declare_option(
+            "timestamp",
+            section=section,
+            section_re=section_re,
             default=False,
             doc="""Add timestamp to logging information.""")
         #
-        declare_option("log_dir", section=section, section_re=section_re,
+        declare_option(
+            "log_dir",
+            section=section,
+            section_re=section_re,
             default=None,
             doc="""The logging directory.
 
         The default directory is the application directory plus 'log'.""")
         #
-        declare_option("log_type", section=section, section_re=section_re,
+        declare_option(
+            "log_type",
+            section=section,
+            section_re=section_re,
             default='none',
             doc="""Logging facility to use.
 
         Should be one of (`none`, `file`, `stderr`, `syslog`, `winlog`).""")
         #
-        declare_option("log_file", section=section, section_re=section_re,
-            default=namespace+'.log',
+        declare_option(
+            "log_file",
+            section=section,
+            section_re=section_re,
+            default=namespace + '.log',
             doc="""If `log_type` is `file`, this should be a path to the log-file.""")
         #
-        declare_option("log_level", section=section, section_re=section_re,
+        declare_option(
+            "log_level",
+            section=section,
+            section_re=section_re,
             default='WARN',
             doc="""Level of verbosity in log.
 
         Should be one of (`CRITICAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`).""")
         #
-        declare_option("log_format", section=section, section_re=section_re,
+        declare_option(
+            "log_format",
+            section=section,
+            section_re=section_re,
             default=None,
             doc="""Custom logging format.
 
@@ -88,7 +104,7 @@ class LoggingConfig(Plugin):
         objects.
         """
         sys.stdout.flush()
-        logger = logging.getLogger('pyutilib.component.core.'+self.namespace)
+        logger = logging.getLogger('pyutilib.component.core.' + self.namespace)
         if not self._hdlr is None:
             logger.removeHandler(self._hdlr)
         #
@@ -114,7 +130,7 @@ class LoggingConfig(Plugin):
         if self.log_dir is None:
             path = None
             for plugin in self.env_plugins:
-                (flag,count) = plugin.matches(self.namespace)
+                (flag, count) = plugin.matches(self.namespace)
                 tmp = plugin.get_option("path")
                 if flag and not tmp is None:
                     path = tmp
@@ -154,8 +170,7 @@ class LoggingConfig(Plugin):
             hdlr = logging.FileHandler(logfile)
         elif logtype in ('winlog', 'eventlog', 'nteventlog'):
             # Requires win32 extensions
-            hdlr = handlers.NTEventLogHandler(logid,
-                                                  logtype='Application')
+            hdlr = handlers.NTEventLogHandler(logid, logtype='Application')
         elif logtype in ('syslog', 'unix'):
             hdlr = handlers.SysLogHandler('/dev/log')
         elif logtype in ('stderr'):
@@ -171,7 +186,6 @@ class LoggingConfig(Plugin):
         logger.addHandler(hdlr)
         self._log = logger
 
-
     def flush(self):
         """Flush logging I/O"""
         self._hdlr.flush()
@@ -182,5 +196,5 @@ class LoggingConfig(Plugin):
         #
         logging.shutdown()
 
-    def log(self,message):
+    def log(self, message):
         self._log.info(message)

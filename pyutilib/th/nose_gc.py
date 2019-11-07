@@ -9,6 +9,7 @@ Use the following command-line option with nosetests ::
 from gc import collect
 from nose.plugins.base import Plugin
 
+
 class ForcedGC(Plugin):
     """Force calls to the Python garbage collector before and after each test."""
     name = 'forced-gc'

@@ -6,7 +6,6 @@
 #  Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
-
 """
 Python modules that use Pyro to manage a generic task queue.
 
@@ -52,7 +51,6 @@ from pyutilib.pyro.nameserver import start_ns, start_nsc
 #http://www.opensource.org/licenses/mit-license.php (it strongly resembles
 #the modified BSD license).
 #
-
 
 #
 # Pyro4 License

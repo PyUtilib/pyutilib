@@ -23,36 +23,45 @@ class ExternalExecutable(Plugin):
 
     implements(IExternalExecutable, service=True)
 
-    def __init__(self,**kwds):
+    def __init__(self, **kwds):
         if 'doc' in kwds:
             self.exec_doc = kwds["doc"]
         else:
             self.exec_doc = ""
         if 'name' in kwds:
             self.name = kwds['name']
-            declare_option(kwds['name'], local_name="executable", section="executables", default=None, doc=self.exec_doc, cls=ExecutableOption)
+            declare_option(
+                kwds['name'],
+                local_name="executable",
+                section="executables",
+                default=None,
+                doc=self.exec_doc,
+                cls=ExecutableOption)
         else:
             raise PluginError("An ExternalExectuable requires a name")
         if 'path' in kwds:
-            self.path=kwds['path']
+            self.path = kwds['path']
         else:
-            self.path=None
+            self.path = None
         if 'validate' in kwds:
-            self.validate=kwds['validate']
+            self.validate = kwds['validate']
         else:
-            self.validate=None
+            self.validate = None
         self.find_executable()
 
     def find_executable(self):
         if not self.path is None:
             self.exec_default = self.path
         else:
-            self.exec_default = pyutilib.misc.search_file(self.name,
-                                implicitExt=pyutilib.misc.executable_extension,
-                                executable=True, validate=self.validate)
+            self.exec_default = pyutilib.misc.search_file(
+                self.name,
+                implicitExt=pyutilib.misc.executable_extension,
+                executable=True,
+                validate=self.validate)
 
     def enabled(self):
-        return self._enable and ((self.executable is not None) or (self.exec_default is not None))
+        return self._enable and ((self.executable is not None) or
+                                 (self.exec_default is not None))
 
     def get_path(self):
         if not self.enabled():

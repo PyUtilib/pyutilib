@@ -7,9 +7,8 @@
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
 
-
 try:
     from pyutilib.excel.spreadsheet import ExcelSpreadsheet
 
-except ImportError:   #pragma:nocover
+except ImportError:  #pragma:nocover
     pass

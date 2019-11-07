@@ -27,7 +27,7 @@ applied as follows:
 \begin{lstlisting}
 import sys
 import os
-env = sys.environ["PATH"]
+env = os.environ["PATH"]
 PluginGlobals.load_services(path=env.split(os.sep))
 \end{lstlisting}
 \end{quotation}

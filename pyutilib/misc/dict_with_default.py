@@ -2,8 +2,13 @@ import sys
 
 __all__ = ['SparseMapping']
 
+import six
+
 try:
-    from collections import MutableMapping
+    if six.PY2:
+        from collections import MutableMapping
+    else:
+        from collections.abc import MutableMapping
 
     class SparseMapping(MutableMapping):
         """
@@ -11,7 +16,9 @@ try:
         the dictionary, a specified index for keys, and a specified value that
         mappings are within.
         """
-        def __init__(self, default=None, index=None, within=None, *args, **kwds):
+
+        def __init__(self, default=None, index=None, within=None, *args,
+                     **kwds):
             self._map = kwds
             self.default = default
             self._index = index
@@ -42,10 +49,14 @@ try:
         def __getitem__(self, key):
             if key in self._map:
                 return self._map[key]
-            if not self.default is None and (self._index is None or key in self._index):
+            if not self.default is None and (self._index is None or
+                                             key in self._index):
                 return self.default
-            if (self.default is None) and (not self._index is None) and (key in self._index):
-                raise ValueError("Legal key '%s' specified in SparseMapping, but value is uninitialized and there is no default value" % key)
+            if (self.default is None) and (not self._index is None) and (
+                    key in self._index):
+                raise ValueError(
+                    "Legal key '%s' specified in SparseMapping, but value is uninitialized and there is no default value"
+                    % key)
             raise KeyError("Unknown key value: %s" % str(key))
 
         def __setitem__(self, key, value):
@@ -64,7 +75,6 @@ try:
         def __delitem__(self, key):
             del self._map[key]
 
-
 except ImportError:
 
     class SparseMapping(dict):
@@ -75,7 +85,9 @@ except ImportError:
         Adapted from code developed by Andreas Kloss and submitted to
         the ActiveState Programmer Network http://aspn.activestate.com
         """
-        def __init__(self, default=None, index=None, within=None, *args, **kwds):
+
+        def __init__(self, default=None, index=None, within=None, *args,
+                     **kwds):
             super(SparseMapping, self).__init__()
             self.update(kwds)
             self.default = default
@@ -101,10 +113,11 @@ except ImportError:
 
         def __getitem__(self, key):
             try:
-                return dict.__getitem__(self,key)
+                return dict.__getitem__(self, key)
             except KeyError:
                 err = sys.exc_info()[1]
-                if not self.default is None and (self._index is None or key in self._index):
+                if not self.default is None and (self._index is None or
+                                                 key in self._index):
                     return self.default
                 raise err
 

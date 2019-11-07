@@ -8,14 +8,14 @@ import sys
 import shutil
 import os
 from os.path import abspath, dirname
-currdir = dirname(abspath(__file__))+os.sep
-tempdir = dirname(abspath(__file__))+os.sep+'tempdir'+os.sep
-
+currdir = dirname(abspath(__file__)) + os.sep
+tempdir = dirname(abspath(__file__)) + os.sep + 'tempdir' + os.sep
 
 from pyutilib.component.config import *
 import pyutilib.th as unittest
 
 old_tempdir = TempfileManager.tempdir
+
 
 class Test(unittest.TestCase):
 
@@ -26,7 +26,6 @@ class Test(unittest.TestCase):
         if os.path.exists(tempdir):
             shutil.rmtree(tempdir)
         os.mkdir(tempdir)
-    
 
     def tearDown(self):
         TempfileManager.pop()
@@ -38,7 +37,7 @@ class Test(unittest.TestCase):
     def test_add1(self):
         """Test explicit adding of a file that is missing"""
         try:
-            TempfileManager.add_tempfile(tempdir+'add1')
+            TempfileManager.add_tempfile(tempdir + 'add1')
             self.fail("Expected IOError because file 'add1' does not exist")
         except IOError:
             pass
@@ -46,120 +45,121 @@ class Test(unittest.TestCase):
     def test_add1_dir(self):
         """Test explicit adding of a directory that is missing"""
         try:
-            TempfileManager.add_tempfile(tempdir+'add1')
-            self.fail("Expected IOError because directory 'add1' does not exist")
+            TempfileManager.add_tempfile(tempdir + 'add1')
+            self.fail(
+                "Expected IOError because directory 'add1' does not exist")
         except IOError:
             pass
 
     def test_add2(self):
         """Test explicit adding of a file that is missing"""
-        TempfileManager.add_tempfile(tempdir+'add2', False)
+        TempfileManager.add_tempfile(tempdir + 'add2', False)
 
     def test_add2_dir(self):
         """Test explicit adding of a directory that is missing"""
-        TempfileManager.add_tempfile(tempdir+'add2', False)
+        TempfileManager.add_tempfile(tempdir + 'add2', False)
 
     def test_add3(self):
         """Test explicit adding of a file that already exists"""
-        OUTPUT = open(tempdir+'add3', 'w')
+        OUTPUT = open(tempdir + 'add3', 'w')
         OUTPUT.write('tempfile\n')
         OUTPUT.close()
-        TempfileManager.add_tempfile(tempdir+'add3')
+        TempfileManager.add_tempfile(tempdir + 'add3')
 
     def test_add3_dir(self):
         """Test explicit adding of a directory that already exists"""
-        os.mkdir(tempdir+'add3')
-        TempfileManager.add_tempfile(tempdir+'add3')
+        os.mkdir(tempdir + 'add3')
+        TempfileManager.add_tempfile(tempdir + 'add3')
 
     def test_pushpop1(self):
         """Test pushpop logic"""
         TempfileManager.push()
-        OUTPUT = open(tempdir+'pushpop1', 'w')
+        OUTPUT = open(tempdir + 'pushpop1', 'w')
         OUTPUT.write('tempfile\n')
         OUTPUT.close()
-        TempfileManager.add_tempfile(tempdir+'pushpop1')
+        TempfileManager.add_tempfile(tempdir + 'pushpop1')
         TempfileManager.pop()
-        if os.path.exists(tempdir+'pushpop1'):
+        if os.path.exists(tempdir + 'pushpop1'):
             self.fail("pop() failed to clean out files")
 
     def test_pushpop1_dir(self):
         """Test pushpop logic with directories"""
         TempfileManager.push()
-        os.mkdir(tempdir+'pushpop1')
-        TempfileManager.add_tempfile(tempdir+'pushpop1')
+        os.mkdir(tempdir + 'pushpop1')
+        TempfileManager.add_tempfile(tempdir + 'pushpop1')
         TempfileManager.pop()
-        if os.path.exists(tempdir+'pushpop1'):
+        if os.path.exists(tempdir + 'pushpop1'):
             self.fail("pop() failed to clean out directories")
 
     def test_pushpop2(self):
         """Test pushpop logic"""
         TempfileManager.push()
-        OUTPUT = open(tempdir+'pushpop2', 'w')
+        OUTPUT = open(tempdir + 'pushpop2', 'w')
         OUTPUT.write('tempfile\n')
         OUTPUT.close()
-        TempfileManager.add_tempfile(tempdir+'pushpop2')
+        TempfileManager.add_tempfile(tempdir + 'pushpop2')
 
         TempfileManager.push()
-        OUTPUT = open(tempdir+'pushpop2a', 'w')
+        OUTPUT = open(tempdir + 'pushpop2a', 'w')
         OUTPUT.write('tempfile\n')
         OUTPUT.close()
-        TempfileManager.add_tempfile(tempdir+'pushpop2a')
+        TempfileManager.add_tempfile(tempdir + 'pushpop2a')
         TempfileManager.pop()
-        if not os.path.exists(tempdir+'pushpop2'):
+        if not os.path.exists(tempdir + 'pushpop2'):
             self.fail("pop() clean out all files")
-        if os.path.exists(tempdir+'pushpop2a'):
+        if os.path.exists(tempdir + 'pushpop2a'):
             self.fail("pop() failed to clean out files")
 
         TempfileManager.pop()
-        if os.path.exists(tempdir+'pushpop2'):
+        if os.path.exists(tempdir + 'pushpop2'):
             self.fail("pop() failed to clean out files")
 
     def test_pushpop2_dir(self):
         """Test pushpop logic with directories"""
         TempfileManager.push()
-        os.mkdir(tempdir+'pushpop2')
-        TempfileManager.add_tempfile(tempdir+'pushpop2')
+        os.mkdir(tempdir + 'pushpop2')
+        TempfileManager.add_tempfile(tempdir + 'pushpop2')
 
         TempfileManager.push()
-        os.mkdir(tempdir+'pushpop2a')
-        TempfileManager.add_tempfile(tempdir+'pushpop2a')
+        os.mkdir(tempdir + 'pushpop2a')
+        TempfileManager.add_tempfile(tempdir + 'pushpop2a')
         TempfileManager.pop()
-        if not os.path.exists(tempdir+'pushpop2'):
+        if not os.path.exists(tempdir + 'pushpop2'):
             self.fail("pop() clean out all files")
-        if os.path.exists(tempdir+'pushpop2a'):
+        if os.path.exists(tempdir + 'pushpop2a'):
             self.fail("pop() failed to clean out files")
 
         TempfileManager.pop()
-        if os.path.exists(tempdir+'pushpop2'):
+        if os.path.exists(tempdir + 'pushpop2'):
             self.fail("pop() failed to clean out files")
 
     def test_clear(self):
         """Test clear logic"""
         TempfileManager.push()
-        OUTPUT = open(tempdir+'pushpop2', 'w')
+        OUTPUT = open(tempdir + 'pushpop2', 'w')
         OUTPUT.write('tempfile\n')
         OUTPUT.close()
-        os.mkdir(tempdir+'pushpopdir2')
-        TempfileManager.add_tempfile(tempdir+'pushpop2')
-        TempfileManager.add_tempfile(tempdir+'pushpopdir2')
+        os.mkdir(tempdir + 'pushpopdir2')
+        TempfileManager.add_tempfile(tempdir + 'pushpop2')
+        TempfileManager.add_tempfile(tempdir + 'pushpopdir2')
 
         TempfileManager.push()
-        OUTPUT = open(tempdir+'pushpop2a', 'w')
+        OUTPUT = open(tempdir + 'pushpop2a', 'w')
         OUTPUT.write('tempfile\n')
         OUTPUT.close()
-        os.mkdir(tempdir+'pushpopdir2a')
-        TempfileManager.add_tempfile(tempdir+'pushpop2a')
-        TempfileManager.add_tempfile(tempdir+'pushpopdir2a')
+        os.mkdir(tempdir + 'pushpopdir2a')
+        TempfileManager.add_tempfile(tempdir + 'pushpop2a')
+        TempfileManager.add_tempfile(tempdir + 'pushpopdir2a')
 
         TempfileManager.clear_tempfiles()
 
-        if os.path.exists(tempdir+'pushpop2a'):
+        if os.path.exists(tempdir + 'pushpop2a'):
             self.fail("clear_tempfiles() failed to clean out files")
-        if os.path.exists(tempdir+'pushpopdir2a'):
+        if os.path.exists(tempdir + 'pushpopdir2a'):
             self.fail("clear_tempfiles() failed to clean out directories")
-        if os.path.exists(tempdir+'pushpop2'):
+        if os.path.exists(tempdir + 'pushpop2'):
             self.fail("clear_tempfiles() failed to clean out files")
-        if os.path.exists(tempdir+'pushpopdir2'):
+        if os.path.exists(tempdir + 'pushpopdir2'):
             self.fail("clear_tempfiles() failed to clean out directories")
 
     def test_create1(self):
@@ -168,14 +168,14 @@ class Test(unittest.TestCase):
         OUTPUT = open(fname, 'w')
         OUTPUT.write('tempfile\n')
         OUTPUT.close()
-        self.assertEqual(len(list(glob.glob(tempdir+'*'))), 1)
+        self.assertEqual(len(list(glob.glob(tempdir + '*'))), 1)
         fname = os.path.basename(fname)
         self.assertTrue(fname.startswith('tmp'))
 
     def test_create1_dir(self):
         """Test create logic - no options"""
         fname = TempfileManager.create_tempdir()
-        self.assertEqual(len(list(glob.glob(tempdir+'*'))), 1)
+        self.assertEqual(len(list(glob.glob(tempdir + '*'))), 1)
         fname = os.path.basename(fname)
         self.assertTrue(fname.startswith('tmp'))
 
@@ -185,14 +185,14 @@ class Test(unittest.TestCase):
         OUTPUT = open(fname, 'w')
         OUTPUT.write('tempfile\n')
         OUTPUT.close()
-        self.assertEqual(len(list(glob.glob(tempdir+'*'))), 1)
+        self.assertEqual(len(list(glob.glob(tempdir + '*'))), 1)
         fname = os.path.basename(fname)
         self.assertTrue(fname.startswith('tmp'))
 
     def test_create1a_dir(self):
         """Test create logic - no options"""
         fname = TempfileManager.create_tempdir(dir=tempdir)
-        self.assertEqual(len(list(glob.glob(tempdir+'*'))), 1)
+        self.assertEqual(len(list(glob.glob(tempdir + '*'))), 1)
         fname = os.path.basename(fname)
         self.assertTrue(fname.startswith('tmp'))
 
@@ -202,14 +202,14 @@ class Test(unittest.TestCase):
         OUTPUT = open(fname, 'w')
         OUTPUT.write('tempfile\n')
         OUTPUT.close()
-        self.assertEqual(len(list(glob.glob(tempdir+'*'))), 1)
+        self.assertEqual(len(list(glob.glob(tempdir + '*'))), 1)
         fname = os.path.basename(fname)
         self.assertTrue(fname.startswith('foo'))
 
     def test_create2_dir(self):
         """Test create logic - no options"""
         fname = TempfileManager.create_tempdir(prefix='foo')
-        self.assertEqual(len(list(glob.glob(tempdir+'*'))), 1)
+        self.assertEqual(len(list(glob.glob(tempdir + '*'))), 1)
         fname = os.path.basename(fname)
         self.assertTrue(fname.startswith('foo'))
 
@@ -219,14 +219,14 @@ class Test(unittest.TestCase):
         OUTPUT = open(fname, 'w')
         OUTPUT.write('tempfile\n')
         OUTPUT.close()
-        self.assertEqual(len(list(glob.glob(tempdir+'*'))), 1)
+        self.assertEqual(len(list(glob.glob(tempdir + '*'))), 1)
         fname = os.path.basename(fname)
         self.assertTrue(fname.endswith('bar'))
 
     def test_create3_dir(self):
         """Test create logic - no options"""
         fname = TempfileManager.create_tempdir(suffix='bar')
-        self.assertEqual(len(list(glob.glob(tempdir+'*'))), 1)
+        self.assertEqual(len(list(glob.glob(tempdir + '*'))), 1)
         fname = os.path.basename(fname)
         self.assertTrue(fname.endswith('bar'))
 
@@ -237,7 +237,7 @@ class Test(unittest.TestCase):
         OUTPUT = open(fname, 'w')
         OUTPUT.write('tempfile\n')
         OUTPUT.close()
-        self.assertEqual(len(list(glob.glob(tempdir+'*'))), 1)
+        self.assertEqual(len(list(glob.glob(tempdir + '*'))), 1)
         fname = os.path.basename(fname)
         self.assertEqual(fname, 'tmp2')
         #
@@ -246,7 +246,7 @@ class Test(unittest.TestCase):
         OUTPUT = open(fname, 'w')
         OUTPUT.write('tempfile\n')
         OUTPUT.close()
-        self.assertEqual(len(list(glob.glob(tempdir+'*'))), 2)
+        self.assertEqual(len(list(glob.glob(tempdir + '*'))), 2)
         fname = os.path.basename(fname)
         self.assertNotEqual(fname, 'tmp3')
         self.assertTrue(fname.startswith('tmp'))
@@ -255,16 +255,17 @@ class Test(unittest.TestCase):
         """Test create logic - no options"""
         TempfileManager.sequential_files(2)
         fname = TempfileManager.create_tempdir()
-        self.assertEqual(len(list(glob.glob(tempdir+'*'))), 1)
+        self.assertEqual(len(list(glob.glob(tempdir + '*'))), 1)
         fname = os.path.basename(fname)
         self.assertEqual(fname, 'tmp2')
         #
         TempfileManager.unique_files()
         fname = TempfileManager.create_tempdir()
-        self.assertEqual(len(list(glob.glob(tempdir+'*'))), 2)
+        self.assertEqual(len(list(glob.glob(tempdir + '*'))), 2)
         fname = os.path.basename(fname)
         self.assertNotEqual(fname, 'tmp3')
         self.assertTrue(fname.startswith('tmp'))
+
 
 if __name__ == "__main__":
     unittest.main()

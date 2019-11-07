@@ -1,5 +1,6 @@
 from pyutilib.component.core import *
 
+
 class IPackage4Util(Interface):
     """Interface for Package4 utilities"""
 

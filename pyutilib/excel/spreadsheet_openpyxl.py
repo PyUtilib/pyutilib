@@ -6,7 +6,6 @@
 #  Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
-
 """
 A class for interacting with an Excel spreadsheet.
 """
@@ -23,9 +22,14 @@ from pyutilib.excel.base import ExcelSpreadsheet_base
 
 class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
 
-    def can_read(self): return True
-    def can_write(self): return True
-    def can_calculate(self): return False
+    def can_read(self):
+        return True
+
+    def can_write(self):
+        return True
+
+    def can_calculate(self):
+        return False
 
     def __init__(self, filename=None, worksheets=(1,), default_worksheet=1):
         """
@@ -51,12 +55,11 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             self.wb = openpyxl.load_workbook(self.xlsfile)
-        self.worksheets = self.wb.get_sheet_names()
+        self.worksheets = self.wb.sheetnames
         self._ws = {}
         for wsid in worksheets:
-            self._ws[wsid] = self.wb.get_sheet_by_name( self.worksheets[wsid-1] )
+            self._ws[wsid] = self.wb[self.worksheets[wsid - 1]]
         self.default_worksheet = default_worksheet
-
 
     def ws(self):
         """ The active worksheet """
@@ -79,16 +82,16 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
             self.wb.active = idx
         elif not name in self._ws:
             self.wb.add_sheet(name)
-            idx = len(self.wb.get_sheet_names())-1
+            idx = len(self.wb.get_sheet_names()) - 1
             self._ws[idx] = self.wb.Worksheets.Item(name)
             self._ws[idx].Activate()
-        self.default_worksheet=idx
+        self.default_worksheet = idx
 
     def close(self):
         """
         Close the spreadsheet
         """
-        if self is None:       #pragma:nocover
+        if self is None:  #pragma:nocover
             return
         if self._ws is None:
             return
@@ -98,14 +101,16 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
         if val is None:
             return self.xl.Iteration
         if not type(val) is bool:
-            raise ValueError("ExcelSpreadsheet calc_iterations can only be set to a boolean")
+            raise ValueError(
+                "ExcelSpreadsheet calc_iterations can only be set to a boolean")
         self.xl.Iteration = val
 
     def max_iterations(self, val=None):
         if val is None:
             return self.xl.MaxIterations
-        if (not type(val) in [int,float,long]) or val < 0:
-            raise ValueError("ExcelSpreadsheet max_iterations can only be set to nonnegative integer")
+        if (not type(val) in [int, float, long]) or val < 0:
+            raise ValueError(
+                "ExcelSpreadsheet max_iterations can only be set to nonnegative integer")
         self.xl.MaxIterations = val
 
     def calculate(self):
@@ -117,23 +122,23 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
     def set_array(self, row, col, val, wsid=None):
         self.activate(wsid)
         ws = self.wb.active
-        xlo=row
-        xhi=row+len(val)-1
-        ylo=col
-        yhi=col+1
-        for row in range(xhi-xlo+1):
-            for col in range(yhi-ylo+1):
+        xlo = row
+        xhi = row + len(val) - 1
+        ylo = col
+        yhi = col + 1
+        for row in range(xhi - xlo + 1):
+            for col in range(yhi - ylo + 1):
                 #print(row,col)
-                ws.cell(row=xlo+row, column=ylo+col).value = val[row][col]
+                ws.cell(row=xlo + row, column=ylo + col).value = val[row][col]
 
     def get_array(self, row, col, row2, col2, wsid=None, raw=False):
         self.activate(wsid)
         ws = self.wb.active
         ans = []
-        for row in ws.get_squared_range(row,col,row2,col2):
+        for row in ws.iter_rows(min_col=col, min_row=row, max_col=col2, max_row=row2):
             ans_ = []
             for col in row:
-                ans_.append( col.value )
+                ans_.append(col.value)
             if len(ans_) == 1:
                 ans.append(ans_[0])
             else:
@@ -147,17 +152,17 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
         #
         # Process data into tuples
         #
-        if type(val) in (int,float):
-            val=((val,),)
+        if type(val) in (int, float):
+            val = ((val,),)
         if type(val) is tuple:
             data = val
-        elif type(val) not in (float,int,bool):
-            data=[]
+        elif type(val) not in (float, int, bool):
+            data = []
             for item in val:
                 if type(item) is tuple:
                     data.append(item)
-                elif type(item) in (float,int,bool):
-                    data.append( (item,) )
+                elif type(item) in (float, int, bool):
+                    data.append((item,))
                 else:
                     data.append(tuple(item))
             data = tuple(data)
@@ -167,13 +172,17 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
         self.activate(wsid)
         _range = self._range(rangename)
         if not _range is None and len(val) != self.get_range_nrows(rangename):
-            raise IOError("Setting data with "+str(len(val))+" rows but range has "+str(self.get_range_nrows(rangename)))
-        ws = _range.destinations[0][0]
+            raise IOError("Setting data with " + str(len(val)) +
+                          " rows but range has " + str(
+                              self.get_range_nrows(rangename)))
+        _destinations = list(_range.destinations)
+        ws = self.wb[_destinations[0][0]]
         #
-        ylo,xlo,yhi,xhi = openpyxl.worksheet.worksheet.range_boundaries(_range.destinations[0][1])
-        for row in range(xhi-xlo+1):
-            for col in range(yhi-ylo+1):
-                ws.cell(row=xlo+row, column=ylo+col).value = data[row][col]
+        ylo, xlo, yhi, xhi = openpyxl.worksheet.worksheet.range_boundaries(
+            _destinations[0][1])
+        for row in range(xhi - xlo + 1):
+            for col in range(yhi - ylo + 1):
+                ws.cell(row=xlo + row, column=ylo + col).value = data[row][col]
 
     def get_column(self, colname, wsid=None, raw=False, contiguous=False):
         """
@@ -187,7 +196,7 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
         starting from the first non-blank cell until the first blank cell.
         """
         self.activate(wsid)
-        name = colname+"1"
+        name = colname + "1"
         if self.get_range(name) is None:
             start = self.ws().Range(name).End(self.xlDown)
         else:
@@ -195,7 +204,8 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
         if contiguous:
             range = self.ws().Range(start, start.End(self.xlDown))
         else:
-            range = self.ws().Range(start, self.ws().Range(colname+"65536").End(self.xlUp))
+            range = self.ws().Range(
+                start, self.ws().Range(colname + "65536").End(self.xlUp))
         tmp = self._get_range_data(range, raw)
         return tmp
 
@@ -212,10 +222,27 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
 
     def _get_range_data(self, _range, raw):
         ans = []
-        for row in _range.destinations[0][0].iter_rows(_range.destinations[0][1]):
+        if type(_range) is tuple:
+            _data = _range
+        else:
+            _destinations = list(_range.destinations)
+            ws = self.wb[_destinations[0][0]]
+            #
+            # If we have a since cell, just return its value
+            #
+            if not ':' in _destinations[0][1]:
+                return [ ws[_destinations[0][1]].value ]
+            #
+            # If we have a range, return a list of values
+            #
+            _data = ws[_destinations[0][1]]
+        #
+        # Process Data
+        #
+        for row in _data:
             rvals = []
             for cell in row:
-                rvals.append( cell.value )
+                rvals.append(cell.value)
             if len(rvals) == 1:
                 ans.append(rvals[0])
             else:
@@ -256,13 +283,15 @@ class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
             #
             # Otherwise, we assume that this is a range name.
             #
-            _range = self.wb.get_named_range(rangeid)
-            if _range is None:
-                if ':' in rangeid:
-                    return openpyxl.workbook.names.named_range.NamedRange("temp", [(self.wb.active, rangeid)], None)
-                if exception:
-                    raise IOError("Unknown range name `"+str(rangeid)+"'")
-            return _range
+            try:
+                return self.wb.defined_names[rangeid]
+            except KeyError:
+                pass
+            ws = self.wb.active
+            if ':' in rangeid:
+                _rangeid = rangeid.split(':')
+                return ws[_rangeid[0]:_rangeid[1]]
+            else:
+                return ws[rangeid:rangeid]
         except:
-            raise IOError("Unknown range name `"+str(rangeid)+"'")
-
+            raise IOError("Unknown range name `" + str(rangeid) + "'")

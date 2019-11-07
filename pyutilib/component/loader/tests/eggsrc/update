@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# A script that is used to update the EGG files with a new version of Python
+#
+
+cd pkg1
+python setup.py sdist bdist_egg
+
+cd ../pkg2
+python setup.py sdist bdist_egg
+
+cd ../pkg3
+python setup.py sdist bdist_egg
+
+cd ../pkg4
+python setup.py sdist bdist_egg
+
+cd ../pkg5
+python setup.py sdist bdist_egg
+
+cd ../pkg6
+python setup.py sdist bdist_egg
+
+cd ../pkg7
+python setup.py sdist bdist_egg
+
+cd ..
+cp pkg[1-2]/dist/P*egg ../eggs1
+cp pkg[3-7]/dist/P*egg ../eggs2
+

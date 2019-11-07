@@ -34,7 +34,8 @@ class ImportLoader(ManagedSingletonPlugin):
     implements(IPluginLoader)
 
     def load(self, env, search_path, disable_re, name_re):
-        generate_debug_messages = __debug__ and env.log.isEnabledFor(logging.DEBUG)
+        generate_debug_messages = __debug__ and env.log.isEnabledFor(
+            logging.DEBUG)
         env.log.info('Loading plugins with ImportLoader')
         for path in search_path:
             plugin_files = glob(os.path.join(path, '*.py'))
@@ -47,9 +48,10 @@ class ImportLoader(ManagedSingletonPlugin):
                 #
                 # Load the module
                 #
-                module=None
+                module = None
                 plugin_name = os.path.basename(plugin_file[:-3])
-                if plugin_name not in sys.modules and name_re.match(plugin_name):
+                if plugin_name not in sys.modules and name_re.match(
+                        plugin_name):
                     try:
                         module = imp.load_source(plugin_name, plugin_file)
                         if generate_debug_messages:
@@ -57,8 +59,10 @@ class ImportLoader(ManagedSingletonPlugin):
                                   (plugin_name, plugin_file))
                     except Exception:
                         e = sys.exc_info()[1]
-                        env.log.error('Failed to load plugin from %s',
-                                 plugin_file, exc_info=True)
+                        env.log.error(
+                            'Failed to load plugin from %s',
+                            plugin_file,
+                            exc_info=True)
                         env.log.error('Load error: %r' % str(e))
                 #
                 # Disable singleton plugins that match
@@ -66,33 +70,34 @@ class ImportLoader(ManagedSingletonPlugin):
                 if not module is None:
                     if not disable_re.match(plugin_name) is None:
                         if generate_debug_messages:
-                            env.log.debug('Disabling services in module %s' % plugin_name)
+                            env.log.debug('Disabling services in module %s' %
+                                          plugin_name)
                         for item in dir(module):
                             #
                             # This seems like a hack, but
                             # without this we can disable pyutilib
                             # functionality!
                             #
-                            flag=False
+                            flag = False
                             for service in ImportLoader.ep_services:
                                 if service.ignore(item):
-                                    flag=True
+                                    flag = True
                                     break
                             if flag:
                                 continue
 
                             cls = getattr(module, item)
                             try:
-                                is_instance = isinstance(cls,Plugin)
-                            except TypeError:           #pragma:nocover
+                                is_instance = isinstance(cls, Plugin)
+                            except TypeError:  #pragma:nocover
                                 is_instance = False
                             try:
-                                is_plugin = issubclass(cls,Plugin)
+                                is_plugin = issubclass(cls, Plugin)
                             except TypeError:
                                 is_plugin = False
                             try:
-                                is_singleton = not(cls.__instance__ is None)
-                            except AttributeError:      #pragma:nocover
+                                is_singleton = not (cls.__instance__ is None)
+                            except AttributeError:  #pragma:nocover
                                 is_singleton = False
                             if is_singleton and is_plugin:
                                 if generate_debug_messages:
@@ -103,8 +108,8 @@ class ImportLoader(ManagedSingletonPlugin):
                                     env.log.debug('Disabling service %s' % item)
                                 cls._enable = False
                     elif generate_debug_messages:
-                        env.log.debug('All services in module %s are enabled' % plugin_name)
-
+                        env.log.debug('All services in module %s are enabled' %
+                                      plugin_name)
 
 # Copyright (C) 2005-2008 Edgewall Software
 # Copyright (C) 2005-2006 Christopher Lenz <cmlenz@gmx.de>

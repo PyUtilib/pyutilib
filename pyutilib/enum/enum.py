@@ -61,18 +61,22 @@ original arguments used to create the enumeration::
 
 import six
 
-
+
 class EnumException(Exception):
     """ Base class for all exceptions in this module. """
+
     def __init__(self):
         if self.__class__ is EnumException:
-            raise NotImplementedError("%s is an abstract class for subclassing" % self.__class__)
+            raise NotImplementedError("%s is an abstract class for subclassing"
+                                      % self.__class__)
+
 
 class EnumEmptyError(AssertionError, EnumException):
     """ Raised when attempting to create an empty enumeration. """
 
     def __str__(self):
         return "Enumerations cannot be empty"
+
 
 class EnumBadKeyError(TypeError, EnumException):
     """ Raised when creating an Enum with non-string keys. """
@@ -84,6 +88,7 @@ class EnumBadKeyError(TypeError, EnumException):
         return ("Enumeration keys must be strings or "
                 "instances of EnumValue: %s" % (self.key,))
 
+
 class EnumBadIndexError(AssertionError, EnumException):
     """ Raised when creating an Enum with with an invalid index."""
 
@@ -92,8 +97,9 @@ class EnumBadIndexError(AssertionError, EnumException):
         self.reason = reason
 
     def __str__(self):
-        return ("Enumeration index (%s) is not valid. Reason: %s"
-                % (self.index, self.reason))
+        return ("Enumeration index (%s) is not valid. Reason: %s" %
+                (self.index, self.reason))
+
 
 class EnumBadTypeError(TypeError, EnumException):
     """ Raised when creating an Enum with a bad type value."""
@@ -103,8 +109,9 @@ class EnumBadTypeError(TypeError, EnumException):
         self.reason = reason
 
     def __str__(self):
-        return ("Enumeration type=%r is not valid. Reason: %s"
-                % (self.type_, self.reason))
+        return ("Enumeration type=%r is not valid. Reason: %s" %
+                (self.type_, self.reason))
+
 
 class EnumImmutableError(TypeError, EnumException):
     """ Raised when attempting to modify an Enum. """
@@ -115,7 +122,7 @@ class EnumImmutableError(TypeError, EnumException):
     def __str__(self):
         return "Enumeration does not allow modification"
 
-
+
 class EnumValue(object):
     """ A specific value of an enumerated type. """
 
@@ -127,10 +134,12 @@ class EnumValue(object):
 
     def __get_enumtype(self):
         return self.__enumtype
+
     enumtype = property(__get_enumtype)
 
     def __get_key(self):
         return self.__key
+
     key = property(__get_key)
 
     def __str__(self):
@@ -138,19 +147,18 @@ class EnumValue(object):
 
     def __get_index(self):
         return self.__index
+
     index = property(__get_index)
 
     def __repr__(self):
-        return "EnumValue(%s, %s, %s)" % (
-            repr(self.__enumtype),
-            repr(self.__index),
-            repr(self.__key),
-        )
+        return "EnumValue(%s, %s, %s)" % (repr(self.__enumtype),
+                                          repr(self.__index),
+                                          repr(self.__key),)
 
     def __hash__(self):
         return hash(self.__index)
 
-    def __lt__(self,other):
+    def __lt__(self, other):
         """Less than operator
 
         (Called in response to 'self < other' or 'other > self'.)
@@ -160,7 +168,7 @@ class EnumValue(object):
         except Exception:
             return NotImplemented
 
-    def __gt__(self,other):
+    def __gt__(self, other):
         """Greater than operator
 
         (Called in response to 'self > other' or 'other < self'.)
@@ -170,7 +178,7 @@ class EnumValue(object):
         except Exception:
             return NotImplemented
 
-    def __le__(self,other):
+    def __le__(self, other):
         """Less than or equal operator
 
         (Called in response to 'self <= other' or 'other >= self'.)
@@ -180,7 +188,7 @@ class EnumValue(object):
         except Exception:
             return NotImplemented
 
-    def __ge__(self,other):
+    def __ge__(self, other):
         """Greater than or equal operator
 
         (Called in response to 'self >= other' or 'other <= self'.)
@@ -190,7 +198,7 @@ class EnumValue(object):
         except Exception:
             return NotImplemented
 
-    def __eq__(self,other):
+    def __eq__(self, other):
         """Equal to operator
 
         (Called in response to 'self == other'.)
@@ -200,7 +208,7 @@ class EnumValue(object):
         except Exception:
             return NotImplemented
 
-    def __ne__(self,other):
+    def __ne__(self, other):
         """Equal to operator
 
         (Called in response to 'self != other'.)
@@ -210,7 +218,7 @@ class EnumValue(object):
         except Exception:
             return NotImplemented
 
-
+
 class Enum(object):
     """ Enumerated type. """
 
@@ -235,18 +243,17 @@ class Enum(object):
                 key = value.key
                 if value.index != i:
                     raise EnumBadIndexError(
-                        value.index,
-                        "Assigned index for argument with key %s, "
-                        "does not match location in the initialization list"
-                        % (key))
+                        value.index, "Assigned index for argument with key %s, "
+                        "does not match location in the initialization list" %
+                        (key))
             values[i] = value
             if value.enumtype != values[0].enumtype:
                 raise EnumBadTypeError(
                     value.enumtype,
                     "Type assigned to positional argument %s (key=%s) "
                     "does not match the type assigned to the first "
-                    "positional argument (key=%s): %r"
-                    % (i, key, values[0].key, values[0].enumtype))
+                    "positional argument (key=%s): %r" %
+                    (i, key, values[0].key, values[0].enumtype))
             try:
                 super(Enum, self).__setattr__(key, value)
             except TypeError:
@@ -268,8 +275,8 @@ class Enum(object):
         if not isinstance(index, six.string_types):
             tmp = str(index)
         else:
-            tmp=index
-        return getattr(self,tmp)
+            tmp = index
+        return getattr(self, tmp)
 
     def __setattr__(self, name, value):
         raise EnumImmutableError(name)

@@ -1,3 +1,2 @@
-
 def f():
     return 'a'

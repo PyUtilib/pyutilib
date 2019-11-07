@@ -8,7 +8,7 @@
 #  _________________________________________________________________________
 #
 
-__test__=False
+__test__ = False
 
 import pyutilib.component.core
 pyutilib.component.core.PluginGlobals.add_env('pyutilib.autotest')

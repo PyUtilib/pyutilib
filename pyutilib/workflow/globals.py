@@ -9,9 +9,12 @@
 
 __all__ = ['unique_id', 'reset_id_counter']
 
+
 def unique_id():
     unique_id.counter += 1
     return unique_id.counter
+
+
 unique_id.counter = 0
 
 

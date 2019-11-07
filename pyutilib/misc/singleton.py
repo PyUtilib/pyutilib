@@ -11,6 +11,7 @@
 class MonoState(object):
     """A class where every instance shares state."""
     _state = {}
+
     def __new__(cls, *p, **k):
         self = object.__new__(cls, *p, **k)
         self.__dict__ = cls._state
@@ -19,6 +20,7 @@ class MonoState(object):
 
 class Singleton(object):
     """A class where the __new__() method returns the same instance."""
+
     def __new__(cls, *p, **k):
         if not '_the_instance' in cls.__dict__:
             cls._the_instance = object.__new__(cls)

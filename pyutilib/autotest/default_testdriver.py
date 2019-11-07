@@ -37,5 +37,5 @@ class DefaultTestDriver(Plugin):
 
     def run_test(self, testcase, name, options):
         """Execute a single test in the suite"""
-        print('run_test '+name)
+        print('run_test ' + name)
         print(options)

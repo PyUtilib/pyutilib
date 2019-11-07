@@ -1,8 +1,7 @@
-
 import os
 import sys
 from os.path import abspath, dirname
-currdir = dirname(abspath(__file__))+os.sep
+currdir = dirname(abspath(__file__)) + os.sep
 
 import pyutilib.th as unittest
 import pyutilib.workflow
@@ -76,7 +75,7 @@ class TaskB(pyutilib.workflow.Task):
         self.outputs.declare('b')
 
     def execute(self):
-        self.b = 100*self.i+2*self.a
+        self.b = 100 * self.i + 2 * self.a
 
 
 class TaskAAA(pyutilib.workflow.Task):
@@ -84,7 +83,7 @@ class TaskAAA(pyutilib.workflow.Task):
     def __init__(self, *args, **kwds):
         pyutilib.workflow.Task.__init__(self, *args, **kwds)
         self.inputs.declare('a', optional=True)
-        self.outputs.declare('a',self.inputs.a)
+        self.outputs.declare('a', self.inputs.a)
 
     def execute(self):
         pass
@@ -97,8 +96,8 @@ class TaskBB(TaskB):
 
     def _create_parser(self, parser=None):
         pyutilib.workflow.Task._create_parser(self, parser)
-        self.add_argument("--a",dest="a", type=int)
-        self.add_argument("--i",dest="i", type=int)
+        self.add_argument("--a", dest="a", type=int)
+        self.add_argument("--i", dest="i", type=int)
 
 
 class TaskC(pyutilib.workflow.Task):
@@ -109,7 +108,7 @@ class TaskC(pyutilib.workflow.Task):
         self.outputs.declare('o')
 
     def execute(self):
-        self.o = 10*self.i
+        self.o = 10 * self.i
 
 
 class TaskCC(TaskC):
@@ -119,7 +118,7 @@ class TaskCC(TaskC):
 
     def _create_parser(self, parser=None):
         pyutilib.workflow.Task._create_parser(self, parser)
-        self.add_argument("--i",dest="i", type=int)
+        self.add_argument("--i", dest="i", type=int)
 
 
 class TaskD(pyutilib.workflow.Task):
@@ -131,7 +130,7 @@ class TaskD(pyutilib.workflow.Task):
         self.outputs.declare('z')
 
     def execute(self):
-        self.o = 10*self.i
+        self.o = 10 * self.i
         self.z = -999
 
 
@@ -160,7 +159,8 @@ class Test(unittest.TestCase):
         # Create workflow
         w = pyutilib.workflow.Workflow()
         w.add(A)
-        w.add(A)  # This is redundant, but it double-checks the logic for adding tasks
+        w.add(
+            A)  # This is redundant, but it double-checks the logic for adding tasks
         #
         # Print workflow
         #
@@ -172,7 +172,7 @@ Task2 prev: [5] next: [1] resources: []
 Task3 prev: [5] next: [1] resources: []
 Task1 prev: [2, 3] next: [6] resources: []
 Task6 prev: [1] next: [] resources: []""")
-        self.assertEqual(w(i=3, a=2), {'z':334})
+        self.assertEqual(w(i=3, a=2), {'z': 334})
 
     def test1c(self):
         pyutilib.workflow.globals.reset_id_counter()
@@ -201,7 +201,7 @@ Task2 prev: [4] next: [1] resources: []
 Task3 prev: [4] next: [1] resources: []
 Task1 prev: [2, 3] next: [7] resources: []
 Task7 prev: [1] next: [] resources: []""")
-        self.assertEqual(w(i=3), {'z':60})
+        self.assertEqual(w(i=3), {'z': 60})
 
     def test1b(self):
         pyutilib.workflow.globals.reset_id_counter()
@@ -214,18 +214,21 @@ Task7 prev: [1] next: [] resources: []""")
         A.inputs.y = C.outputs.o
         # Create workflow
         w = pyutilib.workflow.Workflow()
-        w.add(A,loadall=False)
-        self.assertEqual(str(w),"Workflow Task4:\nTask5 prev: [] next: [] resources: []")
+        w.add(A, loadall=False)
+        self.assertEqual(
+            str(w), "Workflow Task4:\nTask5 prev: [] next: [] resources: []")
 
     def test1a(self):
         pyutilib.workflow.globals.reset_id_counter()
         # Create workflow
         w = pyutilib.workflow.Workflow()
-        self.assertEqual(str(w),"Workflow Task1:\nTask2 prev: [] next: [] resources: []")
+        self.assertEqual(
+            str(w), "Workflow Task1:\nTask2 prev: [] next: [] resources: []")
         w.add(pyutilib.workflow.task.NoTask)
-        self.assertEqual(str(w),"Workflow Task1:\nTask2 prev: [] next: [] resources: []")
+        self.assertEqual(
+            str(w), "Workflow Task1:\nTask2 prev: [] next: [] resources: []")
 
-    @unittest.skipIf( is_python24or25 or sys.version_info >= (3,0), "There is a slight (space) formatting differences in different Python version... Skipping test.")
+    @unittest.skipIf(is_python24or25 or sys.version_info >= (3, 0), "There is a slight (space) formatting differences in different Python version... Skipping test.") # yapf: disable
     def test2(self):
         # Do we really want to be testing pformat output?  I think we might
         # actually want to override __cmp__ in the workflow.Task code and instead
@@ -283,7 +286,7 @@ Task7 prev: [1] next: [] resources: []""")
                       'Value': 'None'}}}"""
         self.assertEqual(str(A), base)
 
-    @unittest.skipIf( is_python24or25, "There is a slight (space) formatting difference from pformat from Python2.6.  Skipping test.")
+    @unittest.skipIf(is_python24or25, "There is a slight (space) formatting difference from pformat from Python2.6.  Skipping test.") # yapf: disable
     def test3(self):
         # Do we really want to be testing pformat output?  I think we might
         # actually want to override __cmp__ in the workflow.Task code and instead
@@ -292,13 +295,14 @@ Task7 prev: [1] next: [] resources: []""")
         A = TaskA()
         B = TaskB()
         A.inputs.x = B.outputs.b
-        OUTPUT = open(currdir+'test3.out','w')
-        OUTPUT.write(str(A.inputs)+'\n')
-        OUTPUT.write(str(A.outputs)+'\n')
+        OUTPUT = open(currdir + 'test3.out', 'w')
+        OUTPUT.write(str(A.inputs) + '\n')
+        OUTPUT.write(str(A.outputs) + '\n')
         OUTPUT.close()
-        self.assertFileEqualsBaseline(currdir+'test3.out', currdir+'test3.txt')
+        self.assertFileEqualsBaseline(currdir + 'test3.out',
+                                      currdir + 'test3.txt')
 
-    @unittest.skipIf( is_python24or25, "There is a slight (space) formatting difference from pformat from Python2.6.  Skipping test.")
+    @unittest.skipIf(is_python24or25, "There is a slight (space) formatting difference from pformat from Python2.6.  Skipping test.") # yapf: disable
     def test4(self):
         # Do we really want to be testing pformat output?  I think we might
         # actually want to override __cmp__ in the workflow.Task code and instead
@@ -307,10 +311,11 @@ Task7 prev: [1] next: [] resources: []""")
         A = TaskA()
         A.inputs['x'] = 2
         self.assertEqual(A.inputs['x'].get_value(), 2)
-        OUTPUT = open(currdir+'test4.out','w')
-        OUTPUT.write(str(A)+'\n')
+        OUTPUT = open(currdir + 'test4.out', 'w')
+        OUTPUT.write(str(A) + '\n')
         OUTPUT.close()
-        self.assertFileEqualsBaseline(currdir+'test4.out', currdir+'test4.txt')
+        self.assertFileEqualsBaseline(currdir + 'test4.out',
+                                      currdir + 'test4.txt')
 
     def test5(self):
         pyutilib.workflow.globals.reset_id_counter()
@@ -324,7 +329,7 @@ Task7 prev: [1] next: [] resources: []""")
         # Create workflow
         w = pyutilib.workflow.Workflow()
         w.add(A)
-        w.set_options(['--i=3','--a=2'])
+        w.set_options(['--i=3', '--a=2'])
         try:
             w()
             self.fail("Expected ValueError because the inputs are not defined")
@@ -343,14 +348,13 @@ Task7 prev: [1] next: [] resources: []""")
         # Create workflow
         w = pyutilib.workflow.Workflow()
         w.add(A)
-        w.set_options(['--i=3','--a=2'])
-        self.assertEqual(w(), {'z':334})
+        w.set_options(['--i=3', '--a=2'])
+        self.assertEqual(w(), {'z': 334})
         # This doesn't work, since we can't merge options that aren't
         # in groups.  The soln is to move to argparse, but I'll save that for later
         #w.print_help()
 
-
-    @unittest.skipIf( is_python24or25, "There is a slight (space) formatting difference from pformat from Python2.6.  Skipping test.")
+    @unittest.skipIf(is_python24or25, "There is a slight (space) formatting difference from pformat from Python2.6.  Skipping test.") # yapf: disable
     def test5b(self):
         # Do we really want to be testing pformat output?  I think we might
         # actually want to override __cmp__ in the workflow.Task code and instead
@@ -368,19 +372,21 @@ Task7 prev: [1] next: [] resources: []""")
         # Create workflow
         w = pyutilib.workflow.Workflow()
         w.add(A)
-        w.set_options(['--i=3','--a=2'])
+        w.set_options(['--i=3', '--a=2'])
         w()
-        OUTPUT = open(currdir+'test5b.out','w')
-        OUTPUT.write(str(w)+'\n')
+        OUTPUT = open(currdir + 'test5b.out', 'w')
+        OUTPUT.write(str(w) + '\n')
         OUTPUT.close()
-        self.assertFileEqualsBaseline(currdir+'test5b.out', currdir+'test5b.txt')
+        self.assertFileEqualsBaseline(currdir + 'test5b.out',
+                                      currdir + 'test5b.txt')
 
     def test_error1(self):
         pyutilib.workflow.globals.reset_id_counter()
         A = TaskA()
         try:
             A.inputs['inputs'] = 2
-            self.fail("Expected ValueError because we're using the reserved 'inputs' attribute name")
+            self.fail(
+                "Expected ValueError because we're using the reserved 'inputs' attribute name")
         except TypeError:
             pass
 
@@ -406,7 +412,8 @@ Task7 prev: [1] next: [] resources: []""")
         w = pyutilib.workflow.Workflow()
         try:
             w.add(A)
-            self.fail("Expected ValueError because there are multiple outputs with the same name")
+            self.fail(
+                "Expected ValueError because there are multiple outputs with the same name")
         except ValueError:
             pass
 
@@ -427,7 +434,6 @@ Task7 prev: [1] next: [] resources: []""")
             self.fail("Expected ValueError because inputs are None")
         except ValueError:
             pass
-
 
     def test_error5(self):
         pyutilib.workflow.globals.reset_id_counter()
@@ -462,7 +468,8 @@ Task7 prev: [1] next: [] resources: []""")
         A3.inputs.x = A1.outputs.z
         try:
             A3.inputs.x = A2.outputs.z
-            self.fail("Expected ValueError because we're connecting two outputs to an input with action 'store'")
+            self.fail(
+                "Expected ValueError because we're connecting two outputs to an input with action 'store'")
         except:
             pass
 
@@ -472,22 +479,24 @@ Task7 prev: [1] next: [] resources: []""")
         A2.inputs.x = A1.outputs.z
         try:
             A2.inputs.x.validate()
-            self.fail("Expected ValueError because the 'x' input does not have a nontrivial value")
+            self.fail(
+                "Expected ValueError because the 'x' input does not have a nontrivial value")
         except:
             pass
         self.assertFalse(A2.ready())
-        
+
     def test_error9(self):
         A1 = TaskAA2()
         A2 = TaskAA2()
         A2.inputs.x = A1.outputs.z
         try:
             A2.inputs.x.validate()
-            self.fail("Expected ValueError because the 'x' input does not have a nontrivial value")
+            self.fail(
+                "Expected ValueError because the 'x' input does not have a nontrivial value")
         except:
             pass
         self.assertFalse(A2.ready())
-        
+
     def test_error10(self):
         A1 = TaskAA3()
         A2 = TaskAA3()
@@ -496,7 +505,8 @@ Task7 prev: [1] next: [] resources: []""")
         A2.inputs.x = A3.outputs.z
         try:
             A2.inputs.x.validate()
-            self.fail("Expected ValueError because the 'x' input does not have a nontrivial value")
+            self.fail(
+                "Expected ValueError because the 'x' input does not have a nontrivial value")
         except:
             pass
         self.assertFalse(A2.ready())
@@ -511,7 +521,7 @@ Task7 prev: [1] next: [] resources: []""")
             self.fail("Expected IOError because resource is busy.")
         except IOError:
             pass
-    
+
     def test_driver1(self):
         driver = pyutilib.workflow.TaskDriver()
         driver.register_task('workflow.selection')
@@ -536,11 +546,12 @@ Task7 prev: [1] next: [] resources: []""")
         driver.register_task('workflow.selection')
         try:
             # Set sys.argv and then parse arguments
-            sys.argv=['foo','-h']
+            sys.argv = ['foo', '-h']
             driver.parse_args()
             self.fail("Expected system exit because of bad options")
         except SystemExit:
             pass
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -24,7 +24,8 @@ from pyutilib.misc.log_config import LogHandler
 from pyutilib.misc.method import add_method, add_method_by_name
 from pyutilib.misc.misc import deprecated, tostr, flatten, flatten_list, recursive_flatten_tuple, flatten_tuple, handleRemoveReadonly, rmtree, quote_split, traceit, tuplize, find_files, search_file, sort_index, count_lines, Bunch, Container, Options, create_hardlink, executable_extension
 from pyutilib.misc.pyyaml_util import yaml_fix, json_fix, load_yaml, load_json, extract_subtext, compare_repn, compare_strings, compare_yaml_files, compare_json_files, simple_yaml_parser
-from pyutilib.misc.redirect_io import setup_redirect, reset_redirect
+from pyutilib.misc.redirect_io import capture_output, setup_redirect, reset_redirect
 from pyutilib.misc.singleton import Singleton, MonoState
 from pyutilib.misc.tee_io import TeeStream, ConsoleBuffer
 from pyutilib.misc.xml_utils import get_xml_text, escape, compare_xml_files
+from pyutilib.misc.visitor import SimpleVisitor, ValueVisitor

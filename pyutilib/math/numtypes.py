@@ -8,7 +8,6 @@
 #  _________________________________________________________________________
 
 __all__ = ['infinity', 'nan', 'is_nan', 'is_finite']
-
 """
 Definitions of mathematical constants
 """
@@ -16,33 +15,30 @@ Definitions of mathematical constants
 import sys
 import math
 
-
-if sys.version_info < (2,6):
+if sys.version_info < (2, 6):
     """ Definition of infinity """
     infinity = float(1e3000)
-
     """ Definition of NaN """
-    nan = infinity/infinity
+    nan = infinity / infinity
 
     def is_nan(x):
         """
         Returns true if the argument is a float and it does not equal itself
         """
         return type(x) is float and x != x
-    
+
     def is_finite(val):
         """
         Returns true if the argument is a float or int and it is not infinite or NaN
         """
-        return type(val) in (float,int) and val not in (infinity, -infinity, nan)
+        return type(val) in (float, int) and val not in (infinity, -infinity,
+                                                         nan)
 
 else:
     """ Definition of infinity """
     infinity = float('inf')
-
     """ Definition of NaN """
-    nan = infinity/infinity
-
+    nan = infinity / infinity
 
     def is_nan(x):
         """
@@ -52,7 +48,7 @@ else:
             return math.isnan(x)
         except TypeError:
             return False
-    
+
     def is_finite(x):
         """
         Returns true if the argument is a float or int and it is not infinite or NaN
@@ -61,4 +57,3 @@ else:
             return not math.isinf(x)
         except TypeError:
             return False
-

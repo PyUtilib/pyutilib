@@ -7,6 +7,8 @@
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
 
-debug=False
+debug = False
 current_process = None
 signal_handler_busy = None
+DEFINE_SIGNAL_HANDLERS_DEFAULT = True
+original_signal_handlers = {}

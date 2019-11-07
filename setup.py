@@ -35,24 +35,38 @@ def _find_packages(path):
     return [pkg for pkg in map(lambda x:x.replace(os.sep,"."), pkg_list)]
 
 def read(*rnames):
-    return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
+    with open(os.path.join(os.path.dirname(__file__), *rnames)) as README:
+        # Strip all leading badges up to, but not including the COIN-OR
+        # badge so that they do not appear in the PyPI description
+        while True:
+            line = README.readline()
+            if 'COIN-OR' in line:
+                break
+            if line.strip() and '[![' not in line:
+                break
+        return line + README.read()
 
 packages = _find_packages('pyutilib')
 
 requires=[ 'nose', 'six' ]
 if sys.version_info < (2,7):
-    requires.append('argparse')
+    requires.append('pbr')
+    requires.append('traceback2')
     requires.append('unittest2')
+    requires.append('argparse')
+    requires.append('ordereddict')
 
 setup(name="PyUtilib",
-    version='5.3.5',
+    version='5.7.2.dev0',
     maintainer='William E. Hart',
     maintainer_email='wehart@sandia.gov',
     url = 'https://github.com/PyUtilib/pyutilib',
     license = 'BSD',
     platforms = ["any"],
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
     description = 'PyUtilib: A collection of Python utilities',
-    long_description = read('README.txt'),
+    long_description = read('README.md'),
+    long_description_content_type='text/markdown',
     classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: End Users/Desktop',
@@ -63,11 +77,13 @@ setup(name="PyUtilib",
         'Operating System :: Unix',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: Jython',
         'Programming Language :: Python :: Implementation :: PyPy',

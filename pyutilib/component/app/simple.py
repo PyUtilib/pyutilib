@@ -6,7 +6,6 @@
 #  Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
-
 """
 This is a convenience class that configures the PyUtilib Component Architecture
 for a named application.  This class registers and activates a variety of
@@ -31,7 +30,8 @@ class SimpleApplication(object):
         self._env_config = pyutilib.component.config.EnvironmentConfig(name)
         self._env_config.options.path = os.getcwd()
         self.logger = pyutilib.component.config.LoggingConfig(name)
-        self._egg_plugin = pyutilib.component.core.PluginFactory("EggLoader", namespace=name, env='pca')
+        self._egg_plugin = pyutilib.component.core.PluginFactory(
+            "EggLoader", namespace=name, env='pca')
 
     def configure(self, filename):
         """Load a configuration file, and update options"""

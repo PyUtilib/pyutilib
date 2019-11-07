@@ -11,26 +11,26 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 from xml.parsers import expat
 from xml.sax.saxutils import XMLGenerator
 from xml.sax.xmlreader import AttributesImpl
-try: # pragma no cover
+try:  # pragma no cover
     from cStringIO import StringIO
-except ImportError: # pragma no cover
+except ImportError:  # pragma no cover
     try:
         from StringIO import StringIO
     except ImportError:
         from io import StringIO
-try: # pragma no cover
-    OrderedDict = dict
-    #from collections import OrderedDict
-except ImportError: # pragma no cover
-    from odict import OrderedDict
+try:  # pragma no cover
+    #OrderedDict = dict
+    from collections import OrderedDict
+except ImportError:  # pragma no cover
+    from ordereddict import OrderedDict
 
-try: # pragma no cover
+try:  # pragma no cover
     _basestring = basestring
-except NameError: # pragma no cover
+except NameError:  # pragma no cover
     _basestring = str
-try: # pragma no cover
+try:  # pragma no cover
     _unicode = unicode
-except NameError: # pragma no cover
+except NameError:  # pragma no cover
     _unicode = str
 
 from pyutilib.misc.pyyaml_util import yaml_eval
@@ -39,17 +39,21 @@ __author__ = 'Martin Blech'
 __version__ = '0.2'
 __license__ = 'MIT'
 
-class ParsingInterrupted(Exception): pass
+
+class ParsingInterrupted(Exception):
+    pass
+
 
 class _DictSAXHandler:
+
     def __init__(self,
-            item_depth=0,
-            item_callback=lambda *args: True,
-            xml_attribs=True,
-            attr_prefix='@',
-            cdata_key='#text',
-            force_cdata=False,
-            cdata_separator=''):
+                 item_depth=0,
+                 item_callback=lambda *args: True,
+                 xml_attribs=True,
+                 attr_prefix='@',
+                 cdata_key='#text',
+                 force_cdata=False,
+                 cdata_separator=''):
         self.path = []
         self.stack = []
         self.data = None
@@ -57,7 +61,7 @@ class _DictSAXHandler:
         self.item_depth = item_depth
         self.xml_attribs = xml_attribs
         self.item_callback = item_callback
-        self.attr_prefix = attr_prefix;
+        self.attr_prefix = attr_prefix
         self.cdata_key = cdata_key
         self.force_cdata = force_cdata
         self.cdata_separator = cdata_separator
@@ -66,11 +70,11 @@ class _DictSAXHandler:
         self.path.append((name, attrs or None))
         if len(self.path) > self.item_depth:
             self.stack.append((self.item, self.data))
-            attrs = OrderedDict((self.attr_prefix+key, yaml_eval(value))
-                    for (key, value) in attrs.items())
+            attrs = OrderedDict((self.attr_prefix + key, yaml_eval(value))
+                                for (key, value) in attrs.items())
             self.item = self.xml_attribs and attrs or None
             self.data = None
-    
+
     def endElement(self, name):
         if len(self.path) == self.item_depth:
             item = self.item
@@ -112,6 +116,7 @@ class _DictSAXHandler:
                 self.item[key] = [value, yaml_eval(data)]
         except KeyError:
             self.item[key] = yaml_eval(data)
+
 
 def parse(xml_input, *args, **kwargs):
     """Parse the given XML input and convert it into a dictionary.
@@ -170,4 +175,3 @@ def parse(xml_input, *args, **kwargs):
     else:
         parser.Parse(xml_input, True)
     return handler.item
-
