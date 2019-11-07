@@ -13,12 +13,15 @@ class Test_Runtests(unittest.TestCase):
             del os.environ['PYUTILIB_UNITTEST_CATEGORY']
         stream_out = six.StringIO()
         pyutilib.misc.setup_redirect(stream_out)
-        runPyUtilibTests(['nosetests', '-v', '--no-xunit'] + args + 
-                         ['pyutilib.th.tests.test_pyunit'],
-                         use_exec=False)
+        rc = runPyUtilibTests(['nosetests', '-v', '--no-xunit'] + args +
+                              ['pyutilib.th.tests.test_pyunit'],
+                              use_exec=False)
         pyutilib.misc.reset_redirect()
         if oldCat is not None:
             os.environ['PYUTILIB_UNITTEST_CATEGORY'] = oldCat
+
+        if rc:
+            self.fail("running nosetests failed (rc=%s)" % (rc,))
 
         result = []
         for line in stream_out.getvalue().splitlines():
@@ -136,7 +139,7 @@ class Test_Runtests(unittest.TestCase):
             #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_fragile',
             #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_fragile_smoke',
             #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_multi',
-            'pyutilib.th.tests.test_pyunit.TestNoCategory.test_noCategory',
+            #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_noCategory',
             #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_notExpensive',
             #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_smoke',
         ]
@@ -158,7 +161,7 @@ class Test_Runtests(unittest.TestCase):
             #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_fragile',
             #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_fragile_smoke',
             #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_multi',
-            'pyutilib.th.tests.test_pyunit.TestNoCategory.test_noCategory',
+            #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_noCategory',
             #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_notExpensive',
             #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_smoke',
         ]
@@ -202,7 +205,7 @@ class Test_Runtests(unittest.TestCase):
             #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_fragile',
             #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_fragile_smoke',
             'pyutilib.th.tests.test_pyunit.TestNoCategory.test_multi',
-            #'pyutilib.th.tests.test_pyunit.TestNoCategory.test_noCategory',
+            'pyutilib.th.tests.test_pyunit.TestNoCategory.test_noCategory',
             'pyutilib.th.tests.test_pyunit.TestNoCategory.test_notExpensive',
             'pyutilib.th.tests.test_pyunit.TestNoCategory.test_smoke',
         ]
