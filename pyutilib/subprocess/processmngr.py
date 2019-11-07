@@ -80,6 +80,19 @@ if sys.version_info[0:2] >= (3, 0):
 else:
     bytes_cast = lambda x: x  # Do nothing
 
+#
+# Setup the timer
+#
+if sys.version_info >= (3,3):
+    # perf_counter is guaranteed to be monotonic and the most accurate timer
+    timer = time.perf_counter
+else:
+    # On old Pythons, clock() is more accurate than time() on Windows
+    # (.35us vs 15ms), but time() is more accurate than clock() on Linux
+    # (1ns vs 1us).  However, since we are only worring about process
+    # timeouts here, we will stick with strictly monotonic timers
+    timer = time.clock
+
 
 def kill_process(process, sig=signal.SIGTERM, verbose=False):
     """
@@ -717,14 +730,6 @@ def run_command(cmd,
 
 # Create an alias for run_command
 run = run_command
-
-#
-# Setup the timer
-#
-if _mswindows:
-    timer = time.clock
-else:
-    timer = time.time
 
 
 class SubprocessMngr(object):
