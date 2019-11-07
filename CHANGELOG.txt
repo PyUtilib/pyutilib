@@ -3,8 +3,13 @@
 ====================
 
 -------------------------------------------------------------------------------
-Current Development
+ Version 5.7.2    7 Nov 2019
 -------------------------------------------------------------------------------
+
+- Add ability to start/stop a TicTocTimer (#63)
+- Add support for Python 3.8 (#66)
+- Uncategorized tests no longer default to expensive (#46)
+- Update minor mistakes in listings (#35)
 
 -------------------------------------------------------------------------------
  Version 5.7.1   21 Jun 2019
