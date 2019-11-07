@@ -9,8 +9,8 @@ from pyutilib.th import TestCase
 from os.path import dirname
 
 if sys.platform.startswith('win'):
-    platform = 'win'
-    use_exec = False
+    platform='win'
+    use_exec = False # Try to use subprocess.run
 else:
     platform = 'linux'
     use_exec = True
