@@ -42,6 +42,7 @@ def _display(obj, *args):
 class Test(unittest.TestCase):
 
     def setUp(self):
+        os.environ["COLUMNS"] = "80"
         self.config = config = ConfigBlock(
             "Basic configuration for Flushing models", implicit=True)
         net = config.declare('network', ConfigBlock())
@@ -148,6 +149,8 @@ class Test(unittest.TestCase):
                 },
             },
         }
+    def tearDown(self):
+        del os.environ["COLUMNS"]
 
     # Utility method for generating and validating a template description
     def _validateTemplate(self, config, reference_template, **kwds):
@@ -892,7 +895,7 @@ scenario.foo""")
         test = self.config.generate_documentation()
         OUTPUT.write(test)
         OUTPUT.close()
-        print(test)
+        #print(test)
         self.assertFalse(
             pyutilib.misc.comparison.compare_file(oFile, oFile[:-4] + '.txt')[
                 0])
@@ -1011,7 +1014,7 @@ endBlock{}
             item_body=   "item{%s}\n",
             item_end=    "endItem{%s}\n",
         )
-        print(test)
+        #print(test)
         self.assertEqual(test, reference)
 
         test = self.config.generate_documentation(
@@ -1027,7 +1030,7 @@ endBlock{}
             stripped_reference = re.sub('\{[^\}]*\}','',reference)
         else:
             stripped_reference = re.sub('\{[^\}]*\}','',reference,flags=re.M)
-        print(test)
+        #print(test)
         self.assertEqual(test, stripped_reference)
 
     def test_block_get(self):
@@ -1165,7 +1168,7 @@ endBlock{}
         self.assertFalse(itemiter is self.config['scenario'].iteritems())
 
     def test_value(self):
-        print(self.config.value())
+        #print(self.config.value())
         self.assertEqual(self._reference, self.config.value())
 
     def test_list_manipulation(self):
@@ -1283,7 +1286,7 @@ endBlock{}
         parser = argparse.ArgumentParser(prog='tester')
         self.config.initialize_argparse(parser)
         help = parser.format_help()
-        print(help)
+        #print(help)
         self.assertEqual(
             """usage: tester [-h] [--epanet-file EPANET] [--scenario-file STR] [--merlion]
 
@@ -1308,7 +1311,8 @@ Scenario definition:
         parser = argparse.ArgumentParser(prog='tester')
         self.config.initialize_argparse(parser)
         help = parser.format_help()
-        print(help)
+        #print(help)
+        self.maxDiff = None
         self.assertEqual(
             """usage: tester [-h] [--epanet-file EPANET] [--scenario-file STR] [--merlion]
               [--disable-epanet]
@@ -1380,7 +1384,7 @@ Scenario definition:
         self.config.initialize_argparse(parser)
 
         help = parser.format_help()
-        print(help)
+        #print(help)
         self.assertEqual(
             """usage: tester [-h] [--epanet-file EPANET] [--scenario-file STR] [--merlion]
               {flushing} ...
@@ -1399,7 +1403,7 @@ Scenario definition:
 """, help)
 
         help = subp.format_help()
-        print(help)
+        #print(help)
         self.assertEqual(
             """usage: tester flushing [-h] [--feasible-nodes STR] [--infeasible-nodes STR]
                        [--duration FLOAT]
