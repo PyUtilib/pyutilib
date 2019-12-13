@@ -175,7 +175,7 @@ def run_file(filename, logfile=None, execdir=None):
     #
     # Open logfile
     #
-    if not logfile is None:
+    if logfile is not None:
         sys.stderr.flush()
         sys.stdout.flush()
         save_stdout = sys.stdout
