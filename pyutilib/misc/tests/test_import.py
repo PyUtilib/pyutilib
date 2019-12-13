@@ -101,8 +101,7 @@ class TestImportFile(unittest.TestCase):
     def test_import_exception(self):
         orig_path = list(sys.path)
         with self.assertRaisesRegexp(RuntimeError, "raised during import"):
-            pyutilib.misc.run_file(
-                "import_exception.py", execdir=currdir)
+            pyutilib.misc.import_file(currdir + "import_exception.py")
         self.assertIsNot(orig_path, sys.path)
         self.assertEqual(orig_path, sys.path)
 
