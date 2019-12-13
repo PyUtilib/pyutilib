@@ -198,7 +198,7 @@ def run_file(filename, logfile=None, execdir=None):
             split_path.append(norm_file)
             norm_file = ''
     split_path.reverse()
-    currdir_ = os.path.join(split_path[:-1])
+    currdir_ = os.path.join(*tuple(split_path[:-1]))
     tmp_import = split_path[-1]
 
     name = ".".join((tmp_import).split(".")[:-1])
