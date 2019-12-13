@@ -57,7 +57,7 @@ if sys.version_info < (2,7):
     requires.append('ordereddict')
 
 setup(name="PyUtilib",
-    version='5.7.3.dev0',
+    version='5.7.3',
     maintainer='William E. Hart',
     maintainer_email='wehart@sandia.gov',
     url = 'https://github.com/PyUtilib/pyutilib',
