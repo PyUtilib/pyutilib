@@ -92,11 +92,11 @@ def import_file(filename, context=None, name=None, clear_cache=False):
         else:
             if clear_cache and modulename in sys.modules:
                 del sys.modules[modulename]
-            if dirname is not None:
-                sys.path.insert(0, dirname)
-            else:
-                sys.path.insert(0, implied_dirname)
             try:
+                if dirname is not None:
+                    sys.path.insert(0, dirname)
+                else:
+                    sys.path.insert(0, implied_dirname)
                 module = __import__(modulename)
             except ImportError:
                 pass
@@ -129,8 +129,8 @@ def import_file(filename, context=None, name=None, clear_cache=False):
                                                             [dirname])
                 fp.close()
             else:
-                sys.path.insert(0, implied_dirname)
                 try:
+                    sys.path.insert(0, implied_dirname)
                     # find_module will return the .py file
                     # (never .pyc)
                     fp, pathname, description = imp.find_module(modulename)
@@ -202,29 +202,18 @@ def run_file(filename, logfile=None, execdir=None):
     # Run the module
     #
     try:
-        if not execdir is None:
+        tmp_path = list(sys.path)
+        if execdir is not None:
             tmp = os.getcwd()
             os.chdir(execdir)
-            tmp_path = sys.path
             sys.path = [execdir] + sys.path
         runpy.run_module(name, None, "__main__")
-        if not execdir is None:
+    finally:
+        # Mandatory cleanup
+        sys.path = tmp_path
+        if execdir is not None:
             os.chdir(tmp)
-            sys.path = tmp_path
-    except Exception:  #pragma:nocover
-        if not logfile is None:
+        if logfile is not None:
             OUTPUT.close()
             sys.stdout = save_stdout
             sys.stderr = save_stderr
-        raise
-    if currdir_ in sys.path:
-        sys.path.remove(currdir_)
-    if execdir in sys.path:
-        sys.path.remove(execdir)
-    #
-    # Close logfile
-    #
-    if not logfile is None:
-        OUTPUT.close()
-        sys.stdout = save_stdout
-        sys.stderr = save_stderr
