@@ -187,16 +187,20 @@ def run_file(filename, logfile=None, execdir=None):
     # Add the file directory to the system path
     #
     currdir_ = ''
-    if '/' in filename:
-        currdir_ = "/".join((filename).split("/")[:-1])
-        tmp_import = (filename).split("/")[-1]
-        sys.path.append(currdir_)
-    elif '\\' in filename:
-        currdir_ = "\\".join((filename).split("\\")[:-1])
-        tmp_import = (filename).split("\\")[-1]
-        sys.path.append(currdir_)
-    else:
-        tmp_import = filename
+    norm_file = os.path.normpath(filename)
+    assert norm_file[-1] not in '\\/'
+    split_path = []
+    while norm_file:
+        norm_file, tail = os.path.split(norm_file)
+        split_path.append(tail)
+        # Absolute paths can get stuck returning ('/', '')
+        if not tail:
+            split_path.append(norm_file)
+            norm_file = ''
+    split_path.reverse()
+    currdir_ = os.path.join(split_path[:-1])
+    tmp_import = split_path[-1]
+
     name = ".".join((tmp_import).split(".")[:-1])
     #
     # Run the module
@@ -207,6 +211,10 @@ def run_file(filename, logfile=None, execdir=None):
             tmp = os.getcwd()
             os.chdir(execdir)
             sys.path = [execdir] + sys.path
+        # [JDS 191130] I am not sure why we put the target file's
+        # directory at the end of sys.path, but I am preserving that
+        # decision.
+        sys.path.append(currdir_)
         runpy.run_module(name, None, "__main__")
     finally:
         # Mandatory cleanup
