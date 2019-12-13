@@ -54,6 +54,18 @@ class TestRunFile(unittest.TestCase):
                                                   currdir + "import2.txt")[0])
         os.remove(currdir + "import2.log")
 
+    def test_run_file_exception(self):
+        with self.assertRaisesRegexp(RuntimeError, "raised from __main__"):
+            pyutilib.misc.run_file(
+                "import_main_exception.py",
+                logfile=currdir + "import_main_exception.log", execdir=currdir)
+
+        self.assertFalse(
+            pyutilib.misc.comparison.compare_file(
+                currdir + "import_main_exception.log",
+                currdir + "import_main_exception.txt")[0])
+        os.remove(currdir + "import_main_exception.log")
+
 
 class TestImportFile(unittest.TestCase):
 
@@ -82,6 +94,11 @@ class TestImportFile(unittest.TestCase):
         pyutilib.misc.import_file(currdir + "import1.py", context=globals())
         if not "import1" in globals():
             self.fail("test_import_file - failed to import the import1.py file")
+
+    def test_run_file_exception(self):
+        with self.assertRaisesRegexp(RuntimeError, "raised during import"):
+            pyutilib.misc.run_file(
+                "import_exception.py", execdir=currdir)
 
     def test1(self):
         try:
