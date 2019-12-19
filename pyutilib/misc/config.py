@@ -978,7 +978,7 @@ class ConfigBlock(ConfigBase):
         return dict((name, config.value(accessValue))
                     for name, config in six.iteritems(self._data))
 
-    def set_value(self, value):
+    def set_value(self, value, skip_implicit=False):
         if value is None:
             return self
         if (type(value) is not dict) and \
@@ -1001,7 +1001,9 @@ class ConfigBlock(ConfigBase):
                 if _key in self._data:
                     _decl_map[str(_key)] = key
                 else:
-                    if self._implicit_declaration:
+                    if skip_implicit:
+                        pass
+                    elif self._implicit_declaration:
                         _implicit.append(key)
                     else:
                         raise ValueError(
