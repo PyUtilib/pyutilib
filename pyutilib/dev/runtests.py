@@ -132,6 +132,11 @@ def run(package, basedir, argv, use_exec=use_exec, env=None):
         cmd = ['nosetests']
 
     if (platform == 'win' and sys.version_info[0:2] >= (3, 8)):
+        #######################################################
+        # This option is required due to a (likely) bug within nosetests.
+        # Nose is no longer maintained, but this workaround is based on a public forum suggestion:
+        #   https://stackoverflow.com/questions/58556183/nose-unittest-discovery-broken-on-python-3-8
+        #######################################################
         cmd.append('--traverse-namespace')
 
     if binDir not in env['PATH']:
