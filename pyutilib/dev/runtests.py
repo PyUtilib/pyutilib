@@ -131,7 +131,7 @@ def run(package, basedir, argv, use_exec=use_exec, env=None):
     else:
         cmd = ['nosetests']
 
-    if (platform == 'win' and sys.version_info[0:2] == (3, 8)):
+    if (platform == 'win' and sys.version_info[0:2] >= (3, 8)):
         cmd.append('--traverse-namespace')
 
     if binDir not in env['PATH']:
