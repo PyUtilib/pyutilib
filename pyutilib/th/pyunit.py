@@ -30,7 +30,7 @@ else:
     using_unittest2 = True
     main = unittest.main
 
-from six import iteritems, itervalues
+from six import iteritems, itervalues, PY2
 
 #
 # Defer the pyutilib.misc import until it is actually needed.  If we
@@ -266,6 +266,11 @@ class TestCase(unittest.TestCase):
     # the default categories if the category() decorator omits them.
     unspecified_categories = {
         'smoke':0, 'nightly':0, 'expensive':0, 'fragile':0 }
+
+    if PY2:
+        # Compatibility shim: assertRaisesRegexp was renamed to
+        # assertRaisesRegex in Python 3.2
+        assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
 
     def __init__(self, methodName='runTest'):
         unittest.TestCase.__init__(self, methodName)
