@@ -1022,7 +1022,7 @@ class ConfigBlock(ConfigBase):
             for key in self._decl_order:
                 if key in _decl_map:
                     #print "Setting", key, " = ", value
-                    self._data[key].set_value(value[_decl_map[key]])
+                    self[key] = value[_decl_map[key]]
             # implicit data is declared at the end (in sorted order)
             for key in sorted(_implicit):
                 self.add(key, value[key])
