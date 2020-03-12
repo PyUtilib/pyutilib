@@ -26,12 +26,16 @@ except ImportError:
             return str(x).lower()
         return str(x)
 
-
 try:
     import argparse
     argparse_is_available = True
 except ImportError:
     argparse_is_available = False
+
+try:
+    import builtins as _builtins
+except ImportError:
+    import __builtin__ as _builtins
 
 __all__ = ('ConfigBlock', 'ConfigList', 'ConfigValue')
 
@@ -64,6 +68,35 @@ def _strip_indentation(doc):
     for i, l in enumerate(lines[1:]):
         lines[i + 1] = l[minIndent:].rstrip()
     return '\n'.join(lines)
+
+
+def _value2string(prefix, value, obj):
+    _str = prefix
+    if value is not None:
+        try:
+            _data = value._data if value is obj else value
+            if getattr(_builtins, _data.__class__.__name__, None
+                   ) is not None:
+                _str += dump(_data, default_flow_style=True).rstrip()
+                if _str.endswith("..."):
+                    _str = _str[:-3].rstrip()
+            else:
+                _str += str(_data)
+        except:
+            _str += str(type(_data))
+    return _str.rstrip()
+
+def _value2yaml(prefix, value, obj):
+    _str = prefix
+    if value is not None:
+        try:
+            _data = value._data if value is obj else value
+            _str += dump(_data, default_flow_style=True).rstrip()
+            if _str.endswith("..."):
+                _str = _str[:-3].rstrip()
+        except:
+            _str += str(type(_data))
+    return _str.rstrip()
 
 
 class _UnpickleableDomain(object):
@@ -390,14 +423,14 @@ group, subparser, or (subparser, group)."""
             _parser.add_argument(*_args, default=argparse.SUPPRESS, **_kwds)
 
         assert (argparse_is_available)
-        for level, value, obj in self._data_collector(None, ""):
+        for level, prefix, value, obj in self._data_collector(None, ""):
             if obj._argparse is None:
                 continue
             for _args, _kwds in obj._argparse:
                 _process_argparse_def(_args, _kwds)
 
     def import_argparse(self, parsed_args):
-        for level, value, obj in self._data_collector(None, ""):
+        for level, prefix, value, obj in self._data_collector(None, ""):
             if obj._argparse is None:
                 continue
             for _args, _kwds in obj._argparse:
@@ -421,11 +454,13 @@ group, subparser, or (subparser, group)."""
         if ostream is None:
             ostream=stdout
 
-        for level, value, obj in self._data_collector(0, ""):
+        for level, prefix, value, obj in self._data_collector(0, ""):
             if content_filter == 'userdata' and not obj._userSet:
                 continue
 
-            _blocks[level:] = [' ' * indent_spacing * level + value + "\n",]
+            _str = _value2string(prefix, value, obj)
+            _blocks[level:] = [
+                ' ' * indent_spacing * level + _str + "\n",]
 
             for i, v in enumerate(_blocks):
                 if v is not None:
@@ -437,11 +472,12 @@ group, subparser, or (subparser, group)."""
         comment = "  # "
         data = list(self._data_collector(0, "", visibility))
         level_info = {}
-        for lvl, val, obj in data:
+        for lvl, pre, val, obj in data:
+            _str = _value2yaml(pre, val, obj)
             if lvl not in level_info:
                 level_info[lvl] = {'data': [], 'off': 0, 'line': 0, 'over': 0}
             level_info[lvl]['data'].append(
-                (val.find(':') + 2, len(val), len(obj._description or "")))
+                (_str.find(':') + 2, len(_str), len(obj._description or "")))
         for lvl in sorted(level_info):
             indent = lvl * indent_spacing
             _ok = width - indent - len(comment) - minDocWidth
@@ -479,19 +515,20 @@ group, subparser, or (subparser, group)."""
         os = six.StringIO()
         if self._description:
             os.write(comment.lstrip() + self._description + "\n")
-        for lvl, val, obj in data:
+        for lvl, pre, val, obj in data:
+            _str = _value2yaml(pre, val, obj)
             if not obj._description:
-                os.write(' ' * indent_spacing * lvl + val + "\n")
+                os.write(' ' * indent_spacing * lvl + _str + "\n")
                 continue
             if lvl <= maxLvl:
                 field = pad - len(comment)
             else:
                 field = level_info[lvl]['off'] - len(comment)
             os.write(' ' * indent_spacing * lvl)
-            if width - len(val) - minDocWidth >= 0:
-                os.write('%%-%ds' % (field - indent_spacing * lvl) % val)
+            if width - len(_str) - minDocWidth >= 0:
+                os.write('%%-%ds' % (field - indent_spacing * lvl) % _str)
             else:
-                os.write(val + '\n' + ' ' * field)
+                os.write(_str + '\n' + ' ' * field)
             os.write(comment)
             txtArea = max(width - field - len(comment), minDocWidth)
             os.write(("\n" + ' ' * field + comment).join(
@@ -515,7 +552,7 @@ group, subparser, or (subparser, group)."""
         level = []
         lastObj = self
         indent = ''
-        for lvl, val, obj in self._data_collector(1, '', visibility, True):
+        for lvl, pre, val, obj in self._data_collector(1, '', visibility, True):
             #print len(level), lvl, val, obj
             if len(level) < lvl:
                 while len(level) < lvl - 1:
@@ -575,14 +612,14 @@ group, subparser, or (subparser, group)."""
     def user_values(self):
         if self._userSet:
             yield self
-        for level, value, obj in self._data_collector(0, ""):
+        for level, prefix, value, obj in self._data_collector(0, ""):
             if obj._userSet:
                 yield obj
 
     def unused_user_values(self):
         if self._userSet and not self._userAccessed:
             yield self
-        for level, value, obj in self._data_collector(0, ""):
+        for level, prefix, value, obj in self._data_collector(0, ""):
             if obj._userSet and not obj._userAccessed:
                 yield obj
 
@@ -605,13 +642,7 @@ class ConfigValue(ConfigBase):
     def _data_collector(self, level, prefix, visibility=None, docMode=False):
         if visibility is not None and visibility < self._visibility:
             return
-        try:
-            _str = dump(self._data, default_flow_style=True).rstrip()
-        except:
-            _str = str(type(self._data))
-        if _str.endswith("..."):
-            _str = _str[:-3].rstrip()
-        yield (level, prefix + _str, self)
+        yield (level, prefix, self, self)
 
 
 class ConfigList(ConfigBase):
@@ -732,7 +763,7 @@ class ConfigList(ConfigBase):
             # domain, potentially duplicating that documentation is
             # somewhat redundant, and worse, if the list is empty, then
             # no documentation is generated at all!)
-            yield (level, prefix.rstrip(), self)
+            yield (level, prefix, None, self)
             subDomain = self._domain._data_collector(level + 1, '- ',
                                                      visibility, docMode)
             # Pop off the (empty) block entry
@@ -742,9 +773,9 @@ class ConfigList(ConfigBase):
             return
         if prefix:
             if not self._data:
-                yield (level, prefix.rstrip() + ' []', self)
+                yield (level, prefix, [], self)
             else:
-                yield (level, prefix.rstrip(), self)
+                yield (level, prefix, None, self)
                 if level is not None:
                     level += 1
         for value in self._data:
@@ -1005,7 +1036,7 @@ class ConfigBlock(ConfigBase):
         if visibility is not None and visibility < self._visibility:
             return
         if prefix:
-            yield (level, prefix.rstrip(), self)
+            yield (level, prefix, None, self)
             if level is not None:
                 level += 1
         for key in self._decl_order:
