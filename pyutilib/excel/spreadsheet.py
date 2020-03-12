@@ -10,58 +10,56 @@
 __all__ = ['ExcelSpreadsheet']
 
 import pyutilib.common
-
-#
-# Attempt to import openpyxl
-#
-try:
-    import openpyxl
-    _openpyxl = True
-except:
-    _openpyxl = False
-#
-# Attempt to import xlrd
-#
-try:
-    import xlrd
-    _xlrd = True
-except:
-    _xlrd = False
-#
-# Attempt to import win32com stuff. 
-#
-try:
-    from win32com.client.dynamic import Dispatch
-    from pythoncom import CoInitialize, CoUninitialize
-    from pythoncom import CoInitialize, CoUninitialize, com_error
-    _win32com = True
-except:
-    _win32com = False  #pragma:nocover
-
 from pyutilib.excel.base import ExcelSpreadsheet_base
 
-if _win32com:
-    from pyutilib.excel.spreadsheet_win32com import ExcelSpreadsheet_win32com
-else:
+class _Interface(object):
+    def __init__(self, available, module):
+        self.available = available
+        self.module = module
 
-    class ExcelSpreadsheet_win32com(ExcelSpreadsheet_base):
-        pass
+class Interfaces(object):
+    singleton = None
 
+    def __new__(cls):
+        if _Interfaces.singleton is None:
+            _Interfaces.singleton = super(_Interfaces,cls).__new__(cls)
+        return _Interfaces.singleton
 
-if _openpyxl:
-    from pyutilib.excel.spreadsheet_openpyxl import ExcelSpreadsheet_openpyxl
-else:
+    def __init__(self):
+        self.options = ['xlrd','win32com','openpyxl']
+        self._modules = {}
 
-    class ExcelSpreadsheet_openpyxl(ExcelSpreadsheet_base):
-        pass
+        try:
+            import xlrd
+            from pyutilib.excel.spreadsheet_xlrd import (
+                ExcelSpreadsheet_xlrd as module
+            )
+            self._modules['xlrd'] = _Interface(True, module)
+        except ImportError:
+            self._modules['xlrd'] = _Interface(False, None)
 
+        try:
+            from win32com.client.dynamic import Dispatch
+            from pythoncom import CoInitialize, CoUninitialize
+            from pythoncom import CoInitialize, CoUninitialize, com_error
+            from pyutilib.excel.spreadsheet_win32com import (
+                ExcelSpreadsheet_win32com as module
+            )
+            self._modules['win32com'] = _Interface(True, module)
+        except ImportError:
+            self._modules['win32com'] = _Interface(False, None)
 
-if _xlrd:
-    from pyutilib.excel.spreadsheet_xlrd import ExcelSpreadsheet_xlrd
-else:
+        try:
+            import openpyxl
+            from pyutilib.excel.spreadsheet_openpyxl import (
+                ExcelSpreadsheet_openpyxl as module
+            )
+            self._modules['openpyxl'] = _Interface(True, module)
+        except ImportError:
+            self._modules['openpyxl'] = _Interface(False, None)
 
-    class ExcelSpreadsheet_xlrd(ExcelSpreadsheet_base):
-        pass
+    def __getitem__(self, item):
+        return self._modules[item]
 
 
 class ExcelSpreadsheet(ExcelSpreadsheet_base):
@@ -75,18 +73,23 @@ class ExcelSpreadsheet(ExcelSpreadsheet_base):
         # class instances here.
         #
         ctype = kwds.pop('ctype', None)
-        if ctype == 'xlrd':
-            return ExcelSpreadsheet_xlrd(*args, **kwds)
-        if ctype == 'win32com':
-            return ExcelSpreadsheet_win32com(*args, **kwds)
-        if ctype == 'openpyxl':
-            return ExcelSpreadsheet_openpyxl(*args, **kwds)
-        #
-        if _xlrd:
-            return ExcelSpreadsheet_xlrd(*args, **kwds)
-        if _win32com:
-            return ExcelSpreadsheet_win32com(*args, **kwds)
-        if _openpyxl:
-            return ExcelSpreadsheet_openpyxl(*args, **kwds)
-        #
-        return super(ExcelSpreadsheet, cls).__new__(cls)
+        interfaces = _Interfaces()
+
+        if not ctype:
+            for interface in interfaces.options:
+                if interfaces[interface].available:
+                    ctype = interface
+                    break
+            if not ctype:
+                raise RuntimeError("No excel interface (from %s) available"
+                                   % (interfaces.options,))
+
+        if ctype not in interfaces.options:
+            raise RuntimeError(
+                "Excel interface %s not in known interfaces (%s)"
+                % (ctype, interfaces.options,))
+
+        if not interfaces[ctype].available:
+            raise ImportError("Excel interface %s is not aailable" % (ctype,))
+
+        return interfaces[ctype].module(*args, **kwds)
