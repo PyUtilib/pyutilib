@@ -37,7 +37,7 @@ try:
 except ImportError:
     import __builtin__ as _builtins
 
-__all__ = ('ConfigBlock', 'ConfigList', 'ConfigValue')
+__all__ = ('ConfigDict', 'ConfigBlock', 'ConfigList', 'ConfigValue')
 
 logger = logging.getLogger('pyutilib.misc.config')
 
