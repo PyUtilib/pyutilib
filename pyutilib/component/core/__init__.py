@@ -44,22 +44,10 @@ class IgnorePluginPlugins(SingletonPlugin):
 #
 # Import the 'pyutilib.component' plugins
 #
-try:
-    import pkg_resources
-    #
-    # Load modules associated with Plugins that are defined in
-    # EGG files.
-    #
-    for entrypoint in pkg_resources.iter_entry_points('pyutilib.component'):
-        plugin_class = entrypoint.load()
-        # print "Loading plugins... (%s)" % entrypoint
-except ImportError:
-    pass
-except Exception:
-    import sys
-    err = sys.exc_info()[1]
-    from sys import stderr as SE
-    SE.write("Error loading 'pyutilib.component' entry points: '%s'\n" % err)
+import pyutilib.component.app as _app
+import pyutilib.component.config as _config
+import pyutilib.component.executables as _executables
+import pyutilib.component.loader as _loader
 
 #
 # Remove the "pca" environment as the default
