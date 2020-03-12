@@ -42,7 +42,11 @@ def _display(obj, *args):
 class Test(unittest.TestCase):
 
     def setUp(self):
+        # Save the original environment, then force a fixed column width
+        # so tests do not fail on some platforms (notably, OSX)
+        self.original_environ = dict(os.environ)
         os.environ["COLUMNS"] = "80"
+
         self.config = config = ConfigBlock(
             "Basic configuration for Flushing models", implicit=True)
         net = config.declare('network', ConfigBlock())
@@ -150,7 +154,8 @@ class Test(unittest.TestCase):
             },
         }
     def tearDown(self):
-        del os.environ["COLUMNS"]
+        # Restore the original environment
+        os.environ = self.original_environ
 
     # Utility method for generating and validating a template description
     def _validateTemplate(self, config, reference_template, **kwds):
