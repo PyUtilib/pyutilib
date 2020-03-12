@@ -11,4 +11,4 @@ The pyutilib.component.app package defines application interfaces that
 simplify the use of the PyUtilib Component Architecture.
 """
 
-from pyutilib.component.app.simple import SimpleApplication
+from .simple import SimpleApplication

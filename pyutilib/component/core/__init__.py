@@ -19,19 +19,18 @@ NOTE: The PCA does not rely on any other part of PyUtilib.  Consequently,
 this package can be independently used in other projects.
 """
 
-from pyutilib.component.core.core import Plugin, implements, Interface, CreatePluginFactory, \
-           PluginMeta, alias, ExtensionPoint, SingletonPlugin, \
-           PluginFactory, PluginError, PluginGlobals, with_metaclass, \
-           IPluginLoader, IPluginLoadPath, IIgnorePluginWhenLoading, \
-           IOptionDataProvider, PluginEnvironment
-
-PluginGlobals.add_env("pca")
+from pyutilib.component.core.core import (
+    Plugin, implements, Interface, CreatePluginFactory,
+    PluginMeta, alias, ExtensionPoint, SingletonPlugin,
+    PluginFactory, PluginError, PluginGlobals, with_metaclass,
+    IPluginLoader, IPluginLoadPath, IIgnorePluginWhenLoading,
+    IOptionDataProvider, PluginEnvironment
+)
 
 #
 # This declaration is here because this is a convenient place where
 # all symbols in this module have been defined.
 #
-
 
 class IgnorePluginPlugins(SingletonPlugin):
     """Ignore plugins from the pyutilib.component module"""
@@ -40,16 +39,3 @@ class IgnorePluginPlugins(SingletonPlugin):
 
     def ignore(self, name):
         return name in globals()
-
-#
-# Import the 'pyutilib.component' plugins
-#
-import pyutilib.component.app as _app
-import pyutilib.component.config as _config
-import pyutilib.component.executables as _executables
-import pyutilib.component.loader as _loader
-
-#
-# Remove the "pca" environment as the default
-#
-PluginGlobals.pop_env()
