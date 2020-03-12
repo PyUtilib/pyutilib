@@ -445,7 +445,8 @@ group, subparser, or (subparser, group)."""
                         del parsed_args.__dict__[_dest]
         return parsed_args
 
-    def display(self, content_filter=None, indent_spacing=2, ostream=None):
+    def display(self, content_filter=None, indent_spacing=2, ostream=None,
+                visibility=None):
         if content_filter not in ConfigBlock.content_filters:
             raise ValueError("unknown content filter '%s'; valid values are %s"
                              % (content_filter, ConfigBlock.content_filters))
@@ -454,13 +455,12 @@ group, subparser, or (subparser, group)."""
         if ostream is None:
             ostream=stdout
 
-        for level, prefix, value, obj in self._data_collector(0, ""):
+        for lvl, prefix, value, obj in self._data_collector(0, "", visibility):
             if content_filter == 'userdata' and not obj._userSet:
                 continue
 
             _str = _value2string(prefix, value, obj)
-            _blocks[level:] = [
-                ' ' * indent_spacing * level + _str + "\n",]
+            _blocks[lvl:] = [' ' * indent_spacing * lvl + _str + "\n",]
 
             for i, v in enumerate(_blocks):
                 if v is not None:
