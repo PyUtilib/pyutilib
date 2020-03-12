@@ -942,17 +942,17 @@ class ConfigBlock(ConfigBase):
         self._declared.add(name)
         return ans
 
-    def inherit_from(self, other, skip=None):
+    def declare_from(self, other, skip=None):
         if not isinstance(other, ConfigBlock):
             raise ValueError(
-                "ConfigBlock.inherit_from() only accepts other ConfigBlocks")
+                "ConfigBlock.declare_from() only accepts other ConfigBlocks")
         # Note that we duplicate ["other()"] other so that this
         # ConfigBlock's entries are independent of the other's
         for key in other.iterkeys():
             if skip and key in skip:
                 continue
             if key in self:
-                raise ValueError("ConfigBlock.inherit_from passed a block "
+                raise ValueError("ConfigBlock.declare_from passed a block "
                                  "with a duplicate field, %s" % (key,))
             self.declare(key, other._data[key]())
 
