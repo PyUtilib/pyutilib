@@ -21,9 +21,9 @@ class Interfaces(object):
     singleton = None
 
     def __new__(cls):
-        if _Interfaces.singleton is None:
-            _Interfaces.singleton = super(_Interfaces,cls).__new__(cls)
-        return _Interfaces.singleton
+        if Interfaces.singleton is None:
+            Interfaces.singleton = super(Interfaces,cls).__new__(cls)
+        return Interfaces.singleton
 
     def __init__(self):
         self.options = ['xlrd','win32com','openpyxl']
@@ -73,7 +73,7 @@ class ExcelSpreadsheet(ExcelSpreadsheet_base):
         # class instances here.
         #
         ctype = kwds.pop('ctype', None)
-        interfaces = _Interfaces()
+        interfaces = Interfaces()
 
         if not ctype:
             for interface in interfaces.options:
