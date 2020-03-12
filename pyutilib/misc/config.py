@@ -51,6 +51,165 @@ def _munge_name(name, space_to_dash=True):
 
 _leadingSpace = re.compile('^([ \n\t]*)')
 
+"""The PyUtilib Config System
+
+The PyUtilib config system provides a set of three classes (ConfigDict,
+ConfigList, and ConfigValue) for managing and documenting structured
+configuration information and user input.  The system is based around
+the ConfigValue class, which provides storage for a single configuration
+entry.  ConfigValue objects can be grouped using two containers
+(ConfigDict and ConfigList), which provide functionality analogous to
+Python's dict and list classes, respectively.
+
+At its simplest, the Config system allows for developers to specify a
+dictionary of documented configuration entries, allow users to provide
+values for those entries, and retrieve the current values:
+
+.. doctest::
+    :hide:
+    >>> from pyutilib.misc.config import (
+    ...     ConfigBlock, ConfigList, ConfigValue, In,
+    ... )
+
+.. doctest::
+    >>> config = ConfigBlock()
+    >>> config.declare('filename', ConfigValue(
+    ...     default=None,
+    ...     domain=str,
+    ...     description="Input file name",
+    ... ))
+    >>> config.declare("bound tolerance", ConfigValue(
+    ...     default=1E-5,
+    ...     domain=float,
+    ...     description="Bound tolerance",
+    ...     doc="Relative tolerance for bound feasibility checks"
+    ... ))
+    >>> config.declare("iteration limit", ConfigValue(
+    ...     default=30,
+    ...     domain=int,
+    ...     description="Iteration limit",
+    ...     doc="Number of maximum iterations in the decomposition methods"
+    ... ))
+    >>> config['filename'] = 'tmp.txt'
+    >>> print(config['filename'])
+    tmp.txt
+    >>> print(config['iteration limit'])
+    30
+
+For convenience, ConfigBlock objects support read/write access via
+attributes (with spaces in the declaration names replaced by
+underscores):
+
+.. doctest::
+    >>> print(config.filename)
+    tmp.txt
+    >>> print(config.iteration_limit)
+    30
+    >>> config.iteration_limit = 20
+    >>> print(config.iteration_limit)
+    20
+
+All Config objects support a `domain` keyword that accepts a callable
+object (type, function, or callable instance).  The domain callable
+should take data and map it onto the desired domain, optionally
+performing domain validation (see :py:class:`ConfigValue`,
+:py:class:`ConfigBlock`, and :py:class:`ConfigList` for more
+information).  This allows client code to accept a very flexible set of
+inputs without "cluttering" the code with input validation:
+
+.. doctest::
+    >>> config.iteration_limit = 35.5
+    >>> print(config.iteration_limit)
+    35
+    >>> print(type(config.iteration_limit).__name__)
+    int
+
+
+A feature of the Config system is that the core classes all implement
+`__call__`, and can themselves be used as `domain` values.  Beyond
+providing domain verification for complex hierarchical structures, this
+feature allows ConfigBlocks to cleanly support the configuration of
+derived objects.  Consider the following example:
+
+.. doctest::
+    >>> class Base(object):
+    ...     CONFIG = ConfigBlock()
+    ...     CONFIG.declare('filename', ConfigValue(
+    ...         default='input.txt',
+    ...         domain=str,
+    ...     ))
+    ...     def __init__(self, **kwds):
+    ...         c = self.CONFIG(kwds)
+    ...         c.display()
+    ...
+    >>> class Derived(Base):
+    ...     CONFIG = Base.CONFIG()
+    ...     CONFIG.declare('pattern', ConfigValue(
+    ...         default=None,
+    ...         domain=str,
+    ...     ))
+    ...
+    >>> Base(filename='foo.txt')
+    filename: foo.txt
+    >>> Derived(pattern='.*warning')
+    filename: input.txt
+    pattern: .*warning
+
+Here, the base class `Base` declares a class-level attribute CONFIG as a
+ConfigBlock containing a single entry (`filename`).  The derived class
+(`Derived`) then starts by making a copy of the base class' `CONFIG`,
+and then defines an additional entry (`pattern`).  Instances of the base
+class will still create `c` instances that only have the single
+`filename` entry, whereas instances of the derived class will have `c`
+instances with two entries: the `pattern` entry declared by the derived
+class, and the `filename` entry "inherited" from the base class.
+
+An extension of this design pattern provides a clean approach for
+handling "ephemeral" instance options.  Consider an interface to an
+external "solver".  Our class implements a `solve()` method that takes a
+problem and sends it to the solver along with some solver configuration
+options.  We would like to be able to set those options "persistently"
+on instances of the interface class, but still override them
+"temporarily" for individual calls to `solve()`.  We implement this by
+creating copies of the class's configuration for both specific instances
+and for use by each `solve()` call:
+
+.. doctest::
+    >>> class Solver(object):
+    ...     CONFIG = ConfigBlock()
+    ...     CONFIG.declare('iterlim', ConfigValue(
+    ...         default=10,
+    ...         domain=int,
+    ...     ))
+    ...     def __init__(self, **kwds):
+    ...         self.config = self.CONFIG(kwds)
+    ...     def solve(self, model, **options):
+    ...         config = self.config(options)
+    ...         # Solve the model with the specified iterlim
+    ...         config.display()
+    ...
+    >>> solver = Solver()
+    >>> solver.solve(None)
+    iterlim: 10
+    >>> solver.config.iterlim = 20
+    >>> solver.solve(None)
+    iterlim: 20
+    >>> solver.solve(None, iterlim=50)
+    iterlim: 50
+    >>> solver.solve(None)
+    iterlim: 20
+
+
+In addition to basic storage and retrieval, the Config system provides
+hooks to the argparse command-line argument parsing system.  Individual
+Config entries can be declared as argparse arguments.  To make
+declaration simpler, the `declare` method returns the declared Config
+object so that the argument declaration can be done inline:
+
+
+
+"""
+
 
 def _strip_indentation(doc):
     if not doc:
@@ -332,11 +491,14 @@ class ConfigBase(object):
     def declare_as_argument(self, *args, **kwds):
         """Map this Config item to an argparse argument.
 
-Valid arguments include all valid arguments to argparse's
-ArgumentParser.add_argument() with the exception of 'default'.  In addition,
-you may provide a group keyword argument can be used to either pass in a
-pre-defined option group or subparser, or else pass in the title of a
-group, subparser, or (subparser, group)."""
+        Valid arguments include all valid arguments to argparse's
+        ArgumentParser.add_argument() with the exception of 'default'.
+        In addition, you may provide a group keyword argument can be
+        used to either pass in a pre-defined option group or subparser,
+        or else pass in the title of a group, subparser, or (subparser,
+        group).
+
+        """
 
         if 'default' in kwds:
             raise TypeError(
@@ -625,6 +787,35 @@ group, subparser, or (subparser, group)."""
 
 
 class ConfigValue(ConfigBase):
+    """Store and manipulate a single configuration value.
+
+    Parameters
+    ----------
+    default: optional
+        The default value that this ConfigValue will take if no value is
+        provided.
+    domain: callable, optional
+        The domain can be any callable that accepts a candidate value
+        and returns the value converted to the desired type, optionally
+        performing any data validation.  Examples include type
+        constructors like `int` or `float`.  More complex domain
+        examples include callable objects; for example, the
+        :py:class:`In` class that ensures that the value falls into an
+        acceptable set.
+    description: str, optional
+        The short description of this value
+    doc: str, optional
+        The long documentation string for this value
+    visibility: int, optional
+        The visibility of this ConfigValue when generating templates and
+        documentation.  Visibility supports specification of "advanced"
+        or "developer" options.  ConfigValues with visibility=0 (the
+        default) will always be printed / included.  ConfigValues
+        with higher visibility values will only be included when the
+        generation method specifies a visibility greater than or equal
+        to the visibility of this object.
+
+    """
 
     def __init__(self, *args, **kwds):
         ConfigBase.__init__(self, *args, **kwds)
@@ -1070,3 +1261,43 @@ if six.PY3:
     ConfigBlock.keys = ConfigBlock.iterkeys
     ConfigBlock.values = ConfigBlock.itervalues
     ConfigBlock.items = ConfigBlock.iteritems
+
+
+class In(object):
+    """A ConfigValue domain validator that checks values against a set
+
+    Instances of In map incoming values to the desired type (if domain
+    is specified) and check that the resulting value is in the specified
+    set.
+
+    Examples
+    --------
+    >>> c = ConfigValue(domain=In(['foo', 'bar', '0'], domain=str))
+    >>> c.set_value('foo')
+    >>> c.display
+    foo
+    >>> c.set_value(3)
+    ValueError: invalid value for configuration '':
+            Failed casting 3
+            to <class 'pyutilib.misc.config.In'>
+            Error: value 3 not in domain ['foo', 'bar']
+    >>> c.display
+    foo
+    >>> c.set_value(0)
+    >>> c.display
+    '0'
+
+    """
+
+    def __init__(self, allowable, domain=None):
+        self._allowable = allowable
+        self._domain = domain
+
+    def __call__(self, value):
+        if self._domain is not None:
+            v = self._domain(value)
+        else:
+            v = value
+        if v in self._allowable:
+            return v
+        raise ValueError("value %s not in domain %s" % (value, self._allowable))
