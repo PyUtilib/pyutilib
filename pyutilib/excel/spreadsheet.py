@@ -90,6 +90,6 @@ class ExcelSpreadsheet(ExcelSpreadsheet_base):
                 % (ctype, interfaces.options,))
 
         if not interfaces[ctype].available:
-            raise ImportError("Excel interface %s is not aailable" % (ctype,))
+            raise ImportError("Excel interface %s is not available" % (ctype,))
 
         return interfaces[ctype].module(*args, **kwds)
