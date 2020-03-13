@@ -92,14 +92,8 @@ setup(name="PyUtilib",
         'Topic :: Utilities'],
       packages=packages,
       keywords=['utility'],
-      namespace_packages=['pyutilib', 'pyutilib.component'],
       install_requires=requires,
       entry_points="""
-        [pyutilib.component]
-        component.app = pyutilib.component.app
-        component.config = pyutilib.component.config
-        component.executables = pyutilib.component.executables
-        component.loader = pyutilib.component.loader
         [nose.plugins.0.10]
         nose.testdata = pyutilib.th.nose_testdata:TestData
         nose.forcedgc = pyutilib.th.nose_gc:ForcedGC
