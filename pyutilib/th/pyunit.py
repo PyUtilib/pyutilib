@@ -271,6 +271,7 @@ class TestCase(unittest.TestCase):
         # Compatibility shim: assertRaisesRegexp was renamed to
         # assertRaisesRegex in Python 3.2
         assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
+        assertRegex = unittest.TestCase.assertRegexpMatches
 
     def __init__(self, methodName='runTest'):
         unittest.TestCase.__init__(self, methodName)
