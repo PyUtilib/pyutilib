@@ -22,6 +22,9 @@ logger = logging.getLogger('pyutilib.component.core.pca')
 pkg_resources_avail = None
 
 def _check_pkg_resources():
+    # Defer import of pkg_resources until the EggLoader actually needs
+    # it: loading pkg_resources is relatively slow, so this avoids the
+    # time penalty every time pyutilib is imported.
     global pkg_resources_avail
     global pkg_resources
     try:
