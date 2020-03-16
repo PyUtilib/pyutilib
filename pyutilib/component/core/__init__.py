@@ -19,19 +19,18 @@ NOTE: The PCA does not rely on any other part of PyUtilib.  Consequently,
 this package can be independently used in other projects.
 """
 
-from pyutilib.component.core.core import Plugin, implements, Interface, CreatePluginFactory, \
-           PluginMeta, alias, ExtensionPoint, SingletonPlugin, \
-           PluginFactory, PluginError, PluginGlobals, with_metaclass, \
-           IPluginLoader, IPluginLoadPath, IIgnorePluginWhenLoading, \
-           IOptionDataProvider, PluginEnvironment
-
-PluginGlobals.add_env("pca")
+from pyutilib.component.core.core import (
+    Plugin, implements, Interface, CreatePluginFactory,
+    PluginMeta, alias, ExtensionPoint, SingletonPlugin,
+    PluginFactory, PluginError, PluginGlobals, with_metaclass,
+    IPluginLoader, IPluginLoadPath, IIgnorePluginWhenLoading,
+    IOptionDataProvider, PluginEnvironment
+)
 
 #
 # This declaration is here because this is a convenient place where
 # all symbols in this module have been defined.
 #
-
 
 class IgnorePluginPlugins(SingletonPlugin):
     """Ignore plugins from the pyutilib.component module"""
@@ -40,28 +39,3 @@ class IgnorePluginPlugins(SingletonPlugin):
 
     def ignore(self, name):
         return name in globals()
-
-#
-# Import the 'pyutilib.component' plugins
-#
-try:
-    import pkg_resources
-    #
-    # Load modules associated with Plugins that are defined in
-    # EGG files.
-    #
-    for entrypoint in pkg_resources.iter_entry_points('pyutilib.component'):
-        plugin_class = entrypoint.load()
-        # print "Loading plugins... (%s)" % entrypoint
-except ImportError:
-    pass
-except Exception:
-    import sys
-    err = sys.exc_info()[1]
-    from sys import stderr as SE
-    SE.write("Error loading 'pyutilib.component' entry points: '%s'\n" % err)
-
-#
-# Remove the "pca" environment as the default
-#
-PluginGlobals.pop_env()
