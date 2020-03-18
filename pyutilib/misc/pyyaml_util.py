@@ -25,16 +25,7 @@ try:
     from StringIO import StringIO
 except:
     from io import StringIO
-try:
-    import json
-    json_available = True
-except:
-    json_available = False
-try:
-    import yaml
-    yaml_available = True  #pragma:nocover
-except:  #pragma:nocover
-    yaml_available = False  #pragma:nocover
+
 from pyutilib.misc.comparison import open_possibly_compressed_file
 
 
@@ -153,11 +144,13 @@ def extract_subtext(stream, begin_str='', end_str=None, comment='#'):
 
 
 def load_yaml(str):
+    import yaml
     istream = StringIO(str)
     return yaml.load(istream, Loader=yaml.SafeLoader)
 
 
 def load_json(str):
+    import json
 
     def _to_list(data):
         ans = []
@@ -298,18 +291,19 @@ def compare_strings(baseline,
                     tolerance=0.0,
                     exact=True,
                     using_yaml=True):
-    if using_yaml and not yaml_available:  #pragma:nocover
-        raise IOError(
-            "Cannot compare YAML strings because YAML is not available")
-    if not using_yaml and not json_available:
-        raise IOError(
-            "Cannot compare JSON strings because JSON is not available")
     if using_yaml:
-        baseline_repn = load_yaml(baseline)
-        output_repn = load_yaml(output)
+        try:
+            baseline_repn = load_yaml(baseline)
+            output_repn = load_yaml(output)
+        except ImportError:
+            raise IOError(
+                "Cannot compare YAML strings because YAML is not available")
     else:
         try:
             baseline_repn = load_json(baseline)
+        except ImportError:
+            raise IOError(
+                "Cannot compare JSON strings because JSON is not available")
         except Exception:
             print("Problem parsing JSON baseline")
             print(baseline)

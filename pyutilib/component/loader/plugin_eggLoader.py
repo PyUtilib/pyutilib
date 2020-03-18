@@ -18,26 +18,31 @@ import logging
 from pyutilib.component.config import ManagedPlugin
 from pyutilib.component.core import implements, ExtensionPoint, IPluginLoader
 
-try:
-    if not 'pkg_resources' in sys.modules:
-        #
-        # Avoid a re-import, which causes setup.py warnings...
-        #
-        import pkg_resources
-    from pkg_resources import working_set, DistributionNotFound, VersionConflict, UnknownExtra, Environment
-    pkg_resources_avail = True
-
-    def pkg_environment(path):
-        return Environment(path)
-except ImportError:
-
-    def pkg_environment(path):
-        return None
-
-    pkg_resources_avail = False
-
 logger = logging.getLogger('pyutilib.component.core.pca')
+pkg_resources_avail = None
 
+def _check_pkg_resources():
+    # Defer import of pkg_resources until the EggLoader actually needs
+    # it: loading pkg_resources is relatively slow, so this avoids the
+    # time penalty every time pyutilib is imported.
+    global pkg_resources_avail
+    global pkg_resources
+    try:
+        if 'pkg_resources' not in sys.modules:
+            #
+            # Avoid a re-import, which causes setup.py warnings...
+            #
+            import pkg_resources
+        else:
+            pkg_resources = sys.modules['pkg_resources']
+        pkg_resources_avail = True
+    except ImportError:
+        pkg_resources_avail = False
+
+def pkg_environment(path):
+    if pkg_resources_avail is None:
+        _check_pkg_resources()
+    return pkg_resources.Environment(path) if pkg_resources_avail else None
 
 class EggLoader(ManagedPlugin):
     """
@@ -58,6 +63,8 @@ class EggLoader(ManagedPlugin):
             kwds['name'] = "EggLoader." + kwds['namespace']
         super(EggLoader, self).__init__(**kwds)
         self.entry_point_name = kwds['namespace'] + ".plugins"
+        if pkg_resources_avail is None:
+            _check_pkg_resources()
         if not pkg_resources_avail:
             logger.warning(
                 'A dummy EggLoader service is being constructed, because the pkg_resources package is not available on this machine.')
@@ -71,9 +78,11 @@ class EggLoader(ManagedPlugin):
                     'The EggLoader service is terminating early because the pkg_resources package is not available on this machine.')
             return
 
+        working_set = pkg_resources.working_set
+
         env.log.info('BEGIN -  Loading plugins with an EggLoader service')
         distributions, errors = working_set.find_plugins(
-            pkg_environment(search_path))
+            pkg_resources.Environment(search_path))
         for dist in distributions:
             if name_re.match(str(dist)):
                 if generate_debug_messages:
@@ -87,14 +96,14 @@ class EggLoader(ManagedPlugin):
 
         def _log_error(item, e):
             gen_debug = __debug__ and env.log.isEnabledFor(logging.DEBUG)
-            if isinstance(e, DistributionNotFound):
+            if isinstance(e, pkg_resources.DistributionNotFound):
                 if gen_debug:
                     env.log.debug('Skipping "%s": ("%s" not found)', item, e)
-            elif isinstance(e, VersionConflict):
+            elif isinstance(e, pkg_resources.VersionConflict):
                 if gen_debug:
                     env.log.debug('Skipping "%s": (version conflict "%s")',
                                   item, e)
-            elif isinstance(e, UnknownExtra):
+            elif isinstance(e, pkg_resources.UnknownExtra):
                 env.log.error('Skipping "%s": (unknown extra "%s")', item, e)
             elif isinstance(e, ImportError):
                 env.log.error('Skipping "%s": (can\'t import "%s")', item, e)
@@ -110,8 +119,10 @@ class EggLoader(ManagedPlugin):
                               entry.dist.location)
             try:
                 entry.load(require=True)
-            except (ImportError, DistributionNotFound, VersionConflict,
-                    UnknownExtra):
+            except (ImportError,
+                    pkg_resources.DistributionNotFound,
+                    pkg_resources.VersionConflict,
+                    pkg_resources.UnknownExtra):
                 e = sys.exc_info()[1]
                 _log_error(entry, e)
             else:

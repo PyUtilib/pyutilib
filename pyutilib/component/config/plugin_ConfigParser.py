@@ -13,10 +13,6 @@ __all__ = ['Configuration_ConfigParser']
 import sys
 import os.path
 try:
-    import ConfigParser
-except ImportError:
-    import configparser as ConfigParser
-try:
     from ordereddict import OrderedDict
 except:
     OrderedDict = dict
@@ -25,11 +21,16 @@ from pyutilib.component.config.configuration import ConfigurationError, IConfigu
 from pyutilib.component.config.managed_plugin import ManagedSingletonPlugin
 from pyutilib.component.config.options import declare_option
 
-#
-# Force the config file option manager to be case sensitive
-#
-ConfigParser.RawConfigParser.optionxform = str
-
+def _configParser(**kwds):
+    try:
+        import ConfigParser
+    except ImportError:
+        import configparser as ConfigParser
+    #
+    # Force the config file option manager to be case sensitive
+    #
+    ConfigParser.RawConfigParser.optionxform = str
+    return ConfigParser.ConfigParser(**kwds)
 
 class Configuration_ConfigParser(ManagedSingletonPlugin):
     """A configuration parser that uses the ConfigParser package."""
@@ -42,7 +43,7 @@ class Configuration_ConfigParser(ManagedSingletonPlugin):
 
     def load(self, filename):
         """Returns a list of tuples: [ (section,option,value) ]"""
-        parser = ConfigParser.ConfigParser()
+        parser = _configParser()
         if not os.path.exists(filename):
             raise ConfigurationError("File " + filename + " does not exist!")
         parser.read(filename)
@@ -58,9 +59,9 @@ class Configuration_ConfigParser(ManagedSingletonPlugin):
     def save(self, filename, config, header=None):
         """Save configuration information to the specified file."""
         if sys.version_info[:2] == (2, 6):
-            parser = ConfigParser.ConfigParser(dict_type=OrderedDict)
+            parser = _configParser(dict_type=OrderedDict)
         else:
-            parser = ConfigParser.ConfigParser()
+            parser = _configParser()
         for (section, option, value) in config:
             if not parser.has_section(section):
                 parser.add_section(section)

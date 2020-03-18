@@ -16,15 +16,19 @@ import pickle
 import six
 from six.moves import xrange
 
-try:
-    from yaml import dump
-except ImportError:
-    #dump = lambda x,**y: str(x)
-    # YAML uses lowercase True/False
-    def dump(x, **args):
-        if type(x) is bool:
-            return str(x).lower()
-        return str(x)
+def _dump(*args, **kwds):
+    try:
+        from yaml import dump
+    except ImportError:
+        #dump = lambda x,**y: str(x)
+        # YAML uses lowercase True/False
+        def dump(x, **args):
+            if type(x) is bool:
+                return str(x).lower()
+            return str(x)
+    assert '_dump' in globals()
+    globals()['_dump'] = dump
+    return dump(*args, **kwds)
 
 try:
     import argparse
@@ -236,7 +240,7 @@ def _value2string(prefix, value, obj):
             _data = value._data if value is obj else value
             if getattr(_builtins, _data.__class__.__name__, None
                    ) is not None:
-                _str += dump(_data, default_flow_style=True).rstrip()
+                _str += _dump(_data, default_flow_style=True).rstrip()
                 if _str.endswith("..."):
                     _str = _str[:-3].rstrip()
             else:
@@ -250,7 +254,7 @@ def _value2yaml(prefix, value, obj):
     if value is not None:
         try:
             _data = value._data if value is obj else value
-            _str += dump(_data, default_flow_style=True).rstrip()
+            _str += _dump(_data, default_flow_style=True).rstrip()
             if _str.endswith("..."):
                 _str = _str[:-3].rstrip()
         except:
