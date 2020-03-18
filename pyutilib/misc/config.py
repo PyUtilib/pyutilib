@@ -7,7 +7,10 @@
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
 
-"""The PyUtilib Configuration System
+"""
+=================================
+The PyUtilib Configuration System
+=================================
 
 The PyUtilib config system provides a set of three classes (ConfigDict,
 ConfigList, and ConfigValue) for managing and documenting structured
@@ -604,7 +607,7 @@ class ConfigBase(object):
         kwds['visibility'] = ( self._visibility
                                if visibility is ConfigBase.NoArgument else
                                visibility )
-        if isinstance(self, ConfigBlock):
+        if isinstance(self, ConfigDict):
             kwds['implicit'] = ( self._implicit_declaration
                                  if implicit is ConfigBase.NoArgument else
                                  implicit )
@@ -614,10 +617,10 @@ class ConfigBase(object):
                 implicit_domain )
             if domain is not ConfigBase.NoArgument:
                 logger.warn("domain ignored by __call__(): "
-                            "class is a ConfigBlock" % (type(self),))
+                            "class is a ConfigDict" % (type(self),))
             if default is not ConfigBase.NoArgument:
                 logger.warn("default ignored by __call__(): "
-                            "class is a ConfigBlock" % (type(self),))
+                            "class is a ConfigDict" % (type(self),))
         else:
             kwds['default'] = ( self.value()
                                 if default is ConfigBase.NoArgument else
@@ -627,15 +630,15 @@ class ConfigBase(object):
                                domain )
             if implicit is not ConfigBase.NoArgument:
                 logger.warn("implicit ignored by __call__(): "
-                            "class %s is not a ConfigBlock" % (type(self),))
+                            "class %s is not a ConfigDict" % (type(self),))
             if implicit_domain is not ConfigBase.NoArgument:
                 logger.warn("implicit_domain ignored by __call__(): "
-                            "class %s is not a ConfigBlock" % (type(self),))
+                            "class %s is not a ConfigDict" % (type(self),))
 
         # Copy over any other object-specific information (mostly Block
         # definitions)
         ans = self.__class__(**kwds)
-        if isinstance(self, ConfigBlock):
+        if isinstance(self, ConfigDict):
             for k in self._decl_order:
                 if preserve_implicit or k in self._declared:
                     v = self._data[k]
@@ -830,9 +833,9 @@ class ConfigBase(object):
 
     def display(self, content_filter=None, indent_spacing=2, ostream=None,
                 visibility=None):
-        if content_filter not in ConfigBlock.content_filters:
+        if content_filter not in ConfigDict.content_filters:
             raise ValueError("unknown content filter '%s'; valid values are %s"
-                             % (content_filter, ConfigBlock.content_filters))
+                             % (content_filter, ConfigDict.content_filters))
 
         _blocks = []
         if ostream is None:
@@ -1127,7 +1130,7 @@ class ConfigList(ConfigBase):
             return val
 
     def get(self, key, default=ConfigBase.NoArgument):
-        # Note: get() is borrowed from ConfigBlock for cases where we
+        # Note: get() is borrowed from ConfigDict for cases where we
         # want the raw stored object (and to aviod the implicit
         # conversion of ConfigValue members to their stored data).
         try:
@@ -1187,7 +1190,7 @@ class ConfigList(ConfigBase):
         # entries will get their userSet flag set.  This is wrong, as
         # reset() should conceptually reset teh object to it's default
         # state (e.g., before the user ever had a chance to mess with
-        # things).  As the list could contain a ConfigBlock, this is a
+        # things).  As the list could contain a ConfigDict, this is a
         # recursive operation to put the userSet values back.
         for val in self.user_values():
             val._userSet = False
@@ -1238,7 +1241,7 @@ class ConfigList(ConfigBase):
                 yield v
 
 
-class ConfigBlock(ConfigBase):
+class ConfigDict(ConfigBase):
     """Store and manipulate a dictionary of configuration values.
 
     Parameters
@@ -1293,13 +1296,13 @@ class ConfigBlock(ConfigBase):
         self._data = {}
 
     def __getstate__(self):
-        state = super(ConfigBlock, self).__getstate__()
-        state.update((key, getattr(self, key)) for key in ConfigBlock.__slots__)
+        state = super(ConfigDict, self).__getstate__()
+        state.update((key, getattr(self, key)) for key in ConfigDict.__slots__)
         state['_implicit_domain'] = _picklable(state['_implicit_domain'], self)
         return state
 
     def __setstate__(self, state):
-        state = super(ConfigBlock, self).__setstate__(state)
+        state = super(ConfigDict, self).__setstate__(state)
         for x in six.itervalues(self._data):
             x._parent = self
 
@@ -1343,7 +1346,7 @@ class ConfigBlock(ConfigBase):
 
     def __delitem__(self, key):
         # Note that this will produce a KeyError if the key is not valid
-        # for this ConfigBlock.
+        # for this ConfigDict.
         del self._data[key]
         # Clean up the other data structures
         self._decl_order.remove(key)
@@ -1363,22 +1366,22 @@ class ConfigBlock(ConfigBase):
         # Note: __getattr__ is only called after all "usual" attribute
         # lookup methods have failed.  So, if we get here, we already
         # know that key is not a __slot__ or a method, etc...
-        #if name in ConfigBlock._all_slots:
-        #    return super(ConfigBlock,self).__getattribute__(name)
+        #if name in ConfigDict._all_slots:
+        #    return super(ConfigDict,self).__getattribute__(name)
         if name not in self._data:
             _name = name.replace('_', ' ')
             if _name not in self._data:
                 raise AttributeError("Unknown attribute '%s'" % name)
             name = _name
-        return ConfigBlock.__getitem__(self, name)
+        return ConfigDict.__getitem__(self, name)
 
     def __setattr__(self, name, value):
-        if name in ConfigBlock._all_slots:
-            super(ConfigBlock, self).__setattr__(name, value)
+        if name in ConfigDict._all_slots:
+            super(ConfigDict, self).__setattr__(name, value)
         else:
             if name not in self._data:
                 name = name.replace('_', ' ')
-            ConfigBlock.__setitem__(self, name, value)
+            ConfigDict.__setitem__(self, name, value)
 
     def iterkeys(self):
         return self._decl_order.__iter__()
@@ -1429,16 +1432,16 @@ class ConfigBlock(ConfigBase):
         return ans
 
     def declare_from(self, other, skip=None):
-        if not isinstance(other, ConfigBlock):
+        if not isinstance(other, ConfigDict):
             raise ValueError(
-                "ConfigBlock.declare_from() only accepts other ConfigBlocks")
+                "ConfigDict.declare_from() only accepts other ConfigDicts")
         # Note that we duplicate ["other()"] other so that this
-        # ConfigBlock's entries are independent of the other's
+        # ConfigDict's entries are independent of the other's
         for key in other.iterkeys():
             if skip and key in skip:
                 continue
             if key in self:
-                raise ValueError("ConfigBlock.declare_from passed a block "
+                raise ValueError("ConfigDict.declare_from passed a block "
                                  "with a duplicate field, %s" % (key,))
             self.declare(key, other._data[key]())
 
@@ -1468,7 +1471,7 @@ class ConfigBlock(ConfigBase):
         if value is None:
             return self
         if (type(value) is not dict) and \
-           (not isinstance(value, ConfigBlock)):
+           (not isinstance(value, ConfigDict)):
             raise ValueError("Expected dict value for %s.set_value, found %s" %
                              (self.name(True), type(value).__name__))
         if not value:
@@ -1546,16 +1549,15 @@ class ConfigBlock(ConfigBase):
                                                      visibility, docMode):
                 yield v
 
-# Future-proofing: We will be renaming the ConfigBlock to ConfigDict in
-# the future
-ConfigDict = ConfigBlock
+# Backwards compatibility: ConfigDick was originally named ConfigBlock.
+ConfigBlock = ConfigDict
 
 # In Python3, the items(), etc methods of dict-like things return
 # generator-like objects.
 if six.PY3:
-    ConfigBlock.keys = ConfigBlock.iterkeys
-    ConfigBlock.values = ConfigBlock.itervalues
-    ConfigBlock.items = ConfigBlock.iteritems
+    ConfigDict.keys = ConfigDict.iterkeys
+    ConfigDict.values = ConfigDict.itervalues
+    ConfigDict.items = ConfigDict.iteritems
 
 
 class In(object):
