@@ -20,7 +20,8 @@ PyUtilib is available under the BSD License.
 
     pip install pyutilib
     
-#### BinStar [![Binstar Badge](https://anaconda.org/conda-forge/pyutilib/badges/version.svg)](https://anaconda.org/conda-forge/pyutilib) [![Binstar Badge](https://anaconda.org/conda-forge/pyutilib/badges/downloads.svg)](https://anaconda.org/conda-forge/pyutilib)
+#### Anaconda [![Anaconda
+     version](https://anaconda.org/conda-forge/pyutilib/badges/version.svg)](https://anaconda.org/conda-forge/pyutilib) [![Anaconda downloads](https://anaconda.org/conda-forge/pyutilib/badges/downloads.svg)](https://anaconda.org/conda-forge/pyutilib)
 
     conda install -c https://conda.anaconda.org/conda-forge pyutilib
 
