@@ -7,13 +7,13 @@
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
 
-"""
-=================================
+"""=================================
 The PyUtilib Configuration System
 =================================
 
-The PyUtilib config system provides a set of three classes (ConfigDict,
-ConfigList, and ConfigValue) for managing and documenting structured
+The PyUtilib config system provides a set of three classes
+(:py:class:`ConfigDict`, :py:class:`ConfigList`, and
+:py:class:`ConfigValue`) for managing and documenting structured
 configuration information and user input.  The system is based around
 the ConfigValue class, which provides storage for a single configuration
 entry.  ConfigValue objects can be grouped using two containers
@@ -75,7 +75,7 @@ underscores):
     >>> print(config.iteration_limit)
     20
 
-All Config objects support a `domain` keyword that accepts a callable
+All Config objects support a ``domain`` keyword that accepts a callable
 object (type, function, or callable instance).  The domain callable
 should take data and map it onto the desired domain, optionally
 performing domain validation (see :py:class:`ConfigValue`,
@@ -95,7 +95,7 @@ Configuring class hierarchies
 =============================
 
 A feature of the Config system is that the core classes all implement
-`__call__`, and can themselves be used as `domain` values.  Beyond
+``__call__``, and can themselves be used as ``domain`` values.  Beyond
 providing domain verification for complex hierarchical structures, this
 feature allows ConfigDicts to cleanly support the configuration of
 derived objects.  Consider the following example:
@@ -125,24 +125,24 @@ derived objects.  Consider the following example:
     filename: input.txt
     pattern: .*warning
 
-Here, the base class `Base` declares a class-level attribute CONFIG as a
-ConfigDict containing a single entry (`filename`).  The derived class
-(`Derived`) then starts by making a copy of the base class' `CONFIG`,
+Here, the base class ``Base`` declares a class-level attribute CONFIG as a
+ConfigDict containing a single entry (``filename``).  The derived class
+(``Derived``) then starts by making a copy of the base class' ``CONFIG``,
 and then defines an additional entry (`pattern`).  Instances of the base
-class will still create `c` instances that only have the single
-`filename` entry, whereas instances of the derived class will have `c`
-instances with two entries: the `pattern` entry declared by the derived
-class, and the `filename` entry "inherited" from the base class.
+class will still create ``c`` instances that only have the single
+``filename`` entry, whereas instances of the derived class will have ``c``
+instances with two entries: the ``pattern`` entry declared by the derived
+class, and the ``filename`` entry "inherited" from the base class.
 
 An extension of this design pattern provides a clean approach for
 handling "ephemeral" instance options.  Consider an interface to an
-external "solver".  Our class implements a `solve()` method that takes a
+external "solver".  Our class implements a ``solve()`` method that takes a
 problem and sends it to the solver along with some solver configuration
 options.  We would like to be able to set those options "persistently"
 on instances of the interface class, but still override them
-"temporarily" for individual calls to `solve()`.  We implement this by
+"temporarily" for individual calls to ``solve()``.  We implement this by
 creating copies of the class's configuration for both specific instances
-and for use by each `solve()` call:
+and for use by each ``solve()`` call:
 
 .. doctest::
 
@@ -177,7 +177,7 @@ Interacting with argparse
 In addition to basic storage and retrieval, the Config system provides
 hooks to the argparse command-line argument parsing system.  Individual
 Config entries can be declared as argparse arguments.  To make
-declaration simpler, the `declare` method returns the declared Config
+declaration simpler, the :py:meth:`declare` method returns the declared Config
 object so that the argument declaration can be done inline:
 
 .. doctest::
@@ -261,8 +261,8 @@ Accessing user-specified values
 It is frequently useful to know which values a user explicitly set, and
 which values a user explicitly set, but have never been retrieved.  The
 configuration system provides two gemerator methods to return the items
-that a user explicitly set (`user_values`) and the items that were set
-but never retrieved (`unused_user_values`):
+that a user explicitly set (:py:meth:`user_values`) and the items that
+were set but never retrieved (:py:meth:`unused_user_values`):
 
 .. doctest::
 
@@ -277,11 +277,13 @@ Generating output & documentation
 =================================
 
 Configuration objects support three methods for generating output and
-documentation: `display()`, `generate_yaml_template()`, and
-`generate_documentation()`.  The simplest is `display()`, which prints
-out the current values of the configuration object (and if it is a
-container type, all of it's children).  `generate_yaml_template` is
-simular to `display`, but also includes the description fields as
+documentation: :py:meth:`display()`,
+:py:meth:`generate_yaml_template()`, and
+:py:meth:`generate_documentation()`.  The simplest is
+:py:meth:`display()`, which prints out the current values of the
+configuration object (and if it is a container type, all of it's
+children).  :py:meth:`generate_yaml_template` is simular to
+:py:meth:`display`, but also includes the description fields as
 formatted comments.
 
 .. doctest::
