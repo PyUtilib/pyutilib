@@ -831,12 +831,13 @@ class ConfigBase(object):
             elif item_end:
                 os.write(indent + item_end)
         while level:
-            indent = indent[:-1 * indent_spacing]
             _last = level.pop()
-            if '%s' in block_end:
-                os.write(indent + block_end % _last.name())
-            else:
-                os.write(indent + block_end)
+            if _last is not None:
+                indent = indent[:-1 * indent_spacing]
+                if '%s' in block_end:
+                    os.write(indent + block_end % _last.name())
+                else:
+                    os.write(indent + block_end)
         return os.getvalue()
 
     def user_values(self):
