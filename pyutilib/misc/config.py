@@ -7,55 +7,7 @@
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
 
-import re
-from sys import exc_info, stdout
-from textwrap import wrap
-import logging
-import pickle
-
-import six
-from six.moves import xrange
-
-def _dump(*args, **kwds):
-    try:
-        from yaml import dump
-    except ImportError:
-        #dump = lambda x,**y: str(x)
-        # YAML uses lowercase True/False
-        def dump(x, **args):
-            if type(x) is bool:
-                return str(x).lower()
-            return str(x)
-    assert '_dump' in globals()
-    globals()['_dump'] = dump
-    return dump(*args, **kwds)
-
-try:
-    import argparse
-    argparse_is_available = True
-except ImportError:
-    argparse_is_available = False
-
-try:
-    import builtins as _builtins
-except ImportError:
-    import __builtin__ as _builtins
-
-__all__ = ('ConfigDict', 'ConfigBlock', 'ConfigList', 'ConfigValue')
-
-logger = logging.getLogger('pyutilib.misc.config')
-
-
-def _munge_name(name, space_to_dash=True):
-    if space_to_dash:
-        name = re.sub(r'\s', '-', name)
-    name = re.sub(r'_', '-', name)
-    return re.sub(r'[^a-zA-Z0-9-_]', '_', name)
-
-
-_leadingSpace = re.compile('^([ \n\t]*)')
-
-"""The PyUtilib Config System
+"""The PyUtilib Configuration System
 
 The PyUtilib config system provides a set of three classes (ConfigDict,
 ConfigList, and ConfigValue) for managing and documenting structured
@@ -71,6 +23,7 @@ values for those entries, and retrieve the current values:
 
 .. doctest::
     :hide:
+    >>> import argparse
     >>> from pyutilib.misc.config import (
     ...     ConfigBlock, ConfigList, ConfigValue, In,
     ... )
@@ -210,10 +163,121 @@ Config entries can be declared as argparse arguments.  To make
 declaration simpler, the `declare` method returns the declared Config
 object so that the argument declaration can be done inline:
 
+.. doctest::
+    >>> config = ConfigBlock()
+    >>> config.declare('iterlim', ConfigValue(
+    ...     domain=int,
+    ...     default=100,
+    ...     description="iteration limit",
+    ... )).declare_as_argument()
+    >>> config.declare('lbfgs', ConfigValue(
+    ...     domain=bool,
+    ...     description="use limited memory BFGS update",
+    ... )).declare_as_argument()
+    >>> config.declare('linesearch', ConfigValue(
+    ...     domain=bool,
+    ...     default=True,
+    ...     description="use line search",
+    ... )).declare_as_argument()
+    >>> config.declare('relative tolerance', ConfigValue(
+    ...     domain=float,
+    ...     description="relative convergence tolerance",
+    ... )).declare_as_argument('--reltol', '-r', group='Tolerances')
+    >>> config.declare('absolute tolerance', ConfigValue(
+    ...     domain=float,
+    ...     description="absolute convergence tolerance",
+    ... )).declare_as_argument('--abstol', '-a', group='Tolerances')
 
+
+The ConfigBlock can then be used to initialize (or augment) an argparse
+ArgumentParser object:
+
+.. doctest::
+    >>> parser = argparse.ArgumentParser("tester")
+    >>> config.initialize_argparse(parser)
+
+
+Key information from the ConfigBlock is automatically transferred over
+to the ArgumentParser object:
+
+.. doctest::
+    >>> print(parser.format_help())
+    usage: tester [-h] [--iterlim INT] [--lbfgs] [--disable-linesearch]
+                  [--reltol FLOAT] [--abstol FLOAT]
+    <BLANKLINE>
+    optional arguments:
+      -h, --help            show this help message and exit
+      --iterlim INT         iteration limit
+      --lbfgs               use limited memory BFGS update
+      --disable-linesearch  [DON'T] use line search
+    <BLANKLINE>
+    Tolerances:
+      --reltol FLOAT, -r FLOAT
+                            relative convergence tolerance
+      --abstol FLOAT, -a FLOAT
+                            absolute convergence tolerance
+
+Parsed arguments can then be imported back into the ConfigBlock:
+
+.. doctest::
+    >>> args=parser.parse_args(['--lbfgs', '--reltol', '0.1', '-a', '0.2'])
+    >>> config.import_argparse(args)
+    >>> config.display()
+    iterlim: 100
+    lbfgs: true
+    linesearch: true
+    relative tolerance: 0.1
+    absolute tolerance: 0.2
 
 """
 
+import re
+from sys import exc_info, stdout
+from textwrap import wrap
+import logging
+import pickle
+
+import six
+from six.moves import xrange
+
+def _dump(*args, **kwds):
+    try:
+        from yaml import dump
+    except ImportError:
+        #dump = lambda x,**y: str(x)
+        # YAML uses lowercase True/False
+        def dump(x, **args):
+            if type(x) is bool:
+                return str(x).lower()
+            return str(x)
+    assert '_dump' in globals()
+    globals()['_dump'] = dump
+    return dump(*args, **kwds)
+
+try:
+    import argparse
+    argparse_is_available = True
+except ImportError:
+    argparse_is_available = False
+
+try:
+    import builtins as _builtins
+except ImportError:
+    import __builtin__ as _builtins
+
+__all__ = ('ConfigDict', 'ConfigBlock', 'ConfigList', 'ConfigValue')
+
+logger = logging.getLogger('pyutilib.misc.config')
+
+
+def _munge_name(name, space_to_dash=True):
+    if space_to_dash:
+        name = re.sub(r'\s', '-', name)
+    name = re.sub(r'_', '-', name)
+    return re.sub(r'[^a-zA-Z0-9-_]', '_', name)
+
+
+_leadingSpace = re.compile('^([ \n\t]*)')
 
 def _strip_indentation(doc):
     if not doc:
