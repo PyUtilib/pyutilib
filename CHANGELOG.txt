@@ -3,9 +3,17 @@
 ====================
 
 -------------------------------------------------------------------------------
- Current Development
+ Version 5.8.0   18 Mar 2020
 -------------------------------------------------------------------------------
 
+- Remove use of namespace packages (#85)
+- Rework optional dependency imports (#84, #87)
+- Fix column width in pyutilib.misc config tests (#69)
+- Add a compatibility shim for assertRaisesRegex and assertRegex (#79, #83)
+- Force PyYAML<=5.2 for Python 3.4 tests (#78)
+- Clean up setup.py and setup.cfg (#75)
+- Fix for running tests on Windows with Python 3.8 (#77)
+- Improve output from ConfigBlock display() (#76)
 
 -------------------------------------------------------------------------------
  Version 5.7.3   13 Dec 2019
