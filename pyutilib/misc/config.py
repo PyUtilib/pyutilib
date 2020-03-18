@@ -25,11 +25,11 @@ values for those entries, and retrieve the current values:
     :hide:
     >>> import argparse
     >>> from pyutilib.misc.config import (
-    ...     ConfigBlock, ConfigList, ConfigValue, In,
+    ...     ConfigDict, ConfigList, ConfigValue, In,
     ... )
 
 .. doctest::
-    >>> config = ConfigBlock()
+    >>> config = ConfigDict()
     >>> config.declare('filename', ConfigValue(
     ...     default=None,
     ...     domain=str,
@@ -53,7 +53,7 @@ values for those entries, and retrieve the current values:
     >>> print(config['iteration limit'])
     30
 
-For convenience, ConfigBlock objects support read/write access via
+For convenience, ConfigDict objects support read/write access via
 attributes (with spaces in the declaration names replaced by
 underscores):
 
@@ -70,7 +70,7 @@ All Config objects support a `domain` keyword that accepts a callable
 object (type, function, or callable instance).  The domain callable
 should take data and map it onto the desired domain, optionally
 performing domain validation (see :py:class:`ConfigValue`,
-:py:class:`ConfigBlock`, and :py:class:`ConfigList` for more
+:py:class:`ConfigDict`, and :py:class:`ConfigList` for more
 information).  This allows client code to accept a very flexible set of
 inputs without "cluttering" the code with input validation:
 
@@ -81,16 +81,18 @@ inputs without "cluttering" the code with input validation:
     >>> print(type(config.iteration_limit).__name__)
     int
 
+Configuring class hierarchies
+=============================
 
 A feature of the Config system is that the core classes all implement
 `__call__`, and can themselves be used as `domain` values.  Beyond
 providing domain verification for complex hierarchical structures, this
-feature allows ConfigBlocks to cleanly support the configuration of
+feature allows ConfigDicts to cleanly support the configuration of
 derived objects.  Consider the following example:
 
 .. doctest::
     >>> class Base(object):
-    ...     CONFIG = ConfigBlock()
+    ...     CONFIG = ConfigDict()
     ...     CONFIG.declare('filename', ConfigValue(
     ...         default='input.txt',
     ...         domain=str,
@@ -113,7 +115,7 @@ derived objects.  Consider the following example:
     pattern: .*warning
 
 Here, the base class `Base` declares a class-level attribute CONFIG as a
-ConfigBlock containing a single entry (`filename`).  The derived class
+ConfigDict containing a single entry (`filename`).  The derived class
 (`Derived`) then starts by making a copy of the base class' `CONFIG`,
 and then defines an additional entry (`pattern`).  Instances of the base
 class will still create `c` instances that only have the single
@@ -133,7 +135,7 @@ and for use by each `solve()` call:
 
 .. doctest::
     >>> class Solver(object):
-    ...     CONFIG = ConfigBlock()
+    ...     CONFIG = ConfigDict()
     ...     CONFIG.declare('iterlim', ConfigValue(
     ...         default=10,
     ...         domain=int,
@@ -157,6 +159,9 @@ and for use by each `solve()` call:
     iterlim: 20
 
 
+Interacting with argparse
+=========================
+
 In addition to basic storage and retrieval, the Config system provides
 hooks to the argparse command-line argument parsing system.  Individual
 Config entries can be declared as argparse arguments.  To make
@@ -164,7 +169,7 @@ declaration simpler, the `declare` method returns the declared Config
 object so that the argument declaration can be done inline:
 
 .. doctest::
-    >>> config = ConfigBlock()
+    >>> config = ConfigDict()
     >>> config.declare('iterlim', ConfigValue(
     ...     domain=int,
     ...     default=100,
@@ -188,8 +193,7 @@ object so that the argument declaration can be done inline:
     ...     description="absolute convergence tolerance",
     ... )).declare_as_argument('--abstol', '-a', group='Tolerances')
 
-
-The ConfigBlock can then be used to initialize (or augment) an argparse
+The ConfigDict can then be used to initialize (or augment) an argparse
 ArgumentParser object:
 
 .. doctest::
@@ -197,7 +201,7 @@ ArgumentParser object:
     >>> config.initialize_argparse(parser)
 
 
-Key information from the ConfigBlock is automatically transferred over
+Key information from the ConfigDict is automatically transferred over
 to the ArgumentParser object:
 
 .. doctest::
@@ -217,7 +221,7 @@ to the ArgumentParser object:
       --abstol FLOAT, -a FLOAT
                             absolute convergence tolerance
 
-Parsed arguments can then be imported back into the ConfigBlock:
+Parsed arguments can then be imported back into the ConfigDict:
 
 .. doctest::
     >>> args=parser.parse_args(['--lbfgs', '--reltol', '0.1', '-a', '0.2'])
@@ -228,6 +232,126 @@ Parsed arguments can then be imported back into the ConfigBlock:
     linesearch: true
     relative tolerance: 0.1
     absolute tolerance: 0.2
+
+Accessing user-specified values
+===============================
+
+It is frequently useful to know which values a user explicitly set, and
+which values a user explicitly set, but have never been retrieved.  The
+configuration system provides two gemerator methods to return the items
+that a user explicitly set (`user_values`) and the items that were set
+but never retrieved (`unused_user_values`):
+
+.. doctest::
+    >>> print([val.name() for val in config.user_values()])
+    ['lbfgs', 'relative tolerance', 'absolute tolerance']
+    >>> print(config.relative_tolerance)
+    0.1
+    >>> print([val.name() for val in config.unused_user_values()])
+    ['lbfgs', 'absolute tolerance']
+
+Generating output & documentation
+=================================
+
+Configuration objects support three methods for generating output and
+documentation: `display()`, `generate_yaml_template()`, and
+`generate_documentation()`.  The simplest is `display()`, which prints
+out the current values of the configuration object (and if it is a
+container type, all of it's children).  `generate_yaml_template` is
+simular to `display`, but also includes the description fields as
+formatted comments.
+
+.. doctest::
+    >>> solver_config = config
+    >>> config = ConfigDict()
+    >>> config.declare('output', ConfigValue(
+    ...     default='results.yml',
+    ...     domain=str,
+    ...     description='output results filename'
+    ... ))
+    >>> config.declare('verbose', ConfigValue(
+    ...     default=0,
+    ...     domain=int,
+    ...     description='output verbosity',
+    ...     doc='This sets the system verbosity.  The default (0) only logs '
+    ...     'warnings and errors.  Larger integer values will produce '
+    ...     'additional log messages.',
+    ... ))
+    >>> config.declare('solvers', ConfigList(
+    ...     domain=solver_config,
+    ...     description='list of solvers to apply',
+    ... ))
+    >>> config.display()
+    output: results.yml
+    verbose: 0
+    solvers: []
+    >>> print(config.generate_yaml_template())
+    output: results.yml  # output results filename
+    verbose: 0           # output verbosity
+    solvers: []          # list of solvers to apply
+
+It is important to note that both methods document the current state of
+the configuration object.  So, in the example above, since the `solvers`
+list is empty, you will not get any information on the elements in the
+list.  Of course, if you add a value to the list, then the data will be
+output:
+
+.. doctest::
+    >>> tmp = config()
+    >>> tmp.solvers.append({})
+    >>> tmp.display()
+    output: results.yml
+    verbose: 0
+    solvers:
+      -
+        iterlim: 100
+        lbfgs: true
+        linesearch: true
+        relative tolerance: 0.1
+        absolute tolerance: 0.2
+    >>> print(tmp.generate_yaml_template())
+    output: results.yml          # output results filename
+    verbose: 0                   # output verbosity
+    solvers:                     # list of solvers to apply
+      -
+        iterlim: 100             # iteration limit
+        lbfgs: true              # use limited memory BFGS update
+        linesearch: true         # use line search
+        relative tolerance: 0.1  # relative convergence tolerance
+        absolute tolerance: 0.2  # absolute convergence tolerance
+
+The third method (:py:meth:`generate_documentation`) behaves
+differently.  This method is designed to generate reference
+documentation.  For each configuration item, the `doc` field is output.
+If the item has no `doc`, then the `description` field is used.
+
+List containers have their *domain* documented and not their current
+values.  The documentation can be configured through optional arguments.
+The defaults generate LaTeX documentation:
+
+.. doctest::
+    >>> print(config.generate_documentation())
+    \begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
+      \item[{output}]\hfill
+        \\output results filename
+      \item[{verbose}]\hfill
+        \\This sets the system verbosity.  The default (0) only logs warnings and
+        errors.  Larger integer values will produce additional log messages.
+      \item[{solvers}]\hfill
+        \\list of solvers to apply
+      \begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
+        \item[{iterlim}]\hfill
+          \\iteration limit
+        \item[{lbfgs}]\hfill
+          \\use limited memory BFGS update
+        \item[{linesearch}]\hfill
+          \\use line search
+        \item[{relative tolerance}]\hfill
+          \\relative convergence tolerance
+        \item[{absolute tolerance}]\hfill
+          \\absolute convergence tolerance
+      \end{description}
+    \end{description}
 
 """
 
@@ -863,18 +987,23 @@ class ConfigValue(ConfigBase):
     default: optional
         The default value that this ConfigValue will take if no value is
         provided.
+
     domain: callable, optional
         The domain can be any callable that accepts a candidate value
         and returns the value converted to the desired type, optionally
-        performing any data validation.  Examples include type
-        constructors like `int` or `float`.  More complex domain
-        examples include callable objects; for example, the
-        :py:class:`In` class that ensures that the value falls into an
-        acceptable set.
+        performing any data validation.  The result will be stored into
+        the ConfigValue.  Examples include type constructors like `int`
+        or `float`.  More complex domain examples include callable
+        objects; for example, the :py:class:`In` class that ensures that
+        the value falls into an acceptable set or even a complete
+        :py:class:`ConfigDict` instance.
+
     description: str, optional
         The short description of this value
+
     doc: str, optional
         The long documentation string for this value
+
     visibility: int, optional
         The visibility of this ConfigValue when generating templates and
         documentation.  Visibility supports specification of "advanced"
@@ -906,6 +1035,43 @@ class ConfigValue(ConfigBase):
 
 
 class ConfigList(ConfigBase):
+    """Store and manipulate a list of configuration values.
+
+    Parameters
+    ----------
+    default: optional
+        The default value that this ConfigList will take if no value is
+        provided.  If default is a list or ConfigList, then each member
+        is cast to the ConfigList's domain to build the default value,
+        otherwise the default is cast to the domain and forms a default
+        list with a single element.
+
+    domain: callable, optional
+        The domain can be any callable that accepts a candidate value
+        and returns the value converted to the desired type, optionally
+        performing any data validation.  The result will be stored /
+        added to the ConfigList.  Examples include type constructors
+        like `int` or `float`.  More complex domain examples include
+        callable objects; for example, the :py:class:`In` class that
+        ensures that the value falls into an acceptable set or even a
+        complete :py:class:`ConfigDict` instance.
+
+    description: str, optional
+        The short description of this list
+
+    doc: str, optional
+        The long documentation string for this list
+
+    visibility: int, optional
+        The visibility of this ConfigList when generating templates and
+        documentation.  Visibility supports specification of "advanced"
+        or "developer" options.  ConfigLists with visibility=0 (the
+        default) will always be printed / included.  ConfigLists
+        with higher visibility values will only be included when the
+        generation method specifies a visibility greater than or equal
+        to the visibility of this object.
+
+    """
 
     def __init__(self, *args, **kwds):
         ConfigBase.__init__(self, *args, **kwds)
@@ -1044,6 +1210,37 @@ class ConfigList(ConfigBase):
 
 
 class ConfigBlock(ConfigBase):
+    """Store and manipulate a dictionary of configuration values.
+
+    Parameters
+    ----------
+    description: str, optional
+        The short description of this list
+
+    doc: str, optional
+        The long documentation string for this list
+
+    implicit: bool, optional
+        If True, the ConfigDict will allow "implicitly" declared
+        keys, that is, keys can be stored into the ConfigDict that
+        were not prevously declared using :py:meth:`declare` or
+        :py:meth:`declare_from`.
+
+    implicit_domain: callable, optional
+        The domain that will be used for any implicitly-declared keys.
+        Follows the same rules as :py:meth:`ConfigValue`'s `domain`.
+
+    visibility: int, optional
+        The visibility of this ConfigDict when generating templates and
+        documentation.  Visibility supports specification of "advanced"
+        or "developer" options.  ConfigDicts with visibility=0 (the
+        default) will always be printed / included.  ConfigDicts
+        with higher visibility values will only be included when the
+        generation method specifies a visibility greater than or equal
+        to the visibility of this object.
+
+    """
+
     content_filters = (None, 'all', 'userdata')
 
     __slots__ = ('_decl_order', '_declared', '_implicit_declaration',
