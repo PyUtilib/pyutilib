@@ -23,30 +23,35 @@ values for those entries, and retrieve the current values:
 
 .. doctest::
     :hide:
+
     >>> import argparse
     >>> from pyutilib.misc.config import (
     ...     ConfigDict, ConfigList, ConfigValue, In,
     ... )
 
 .. doctest::
+
     >>> config = ConfigDict()
     >>> config.declare('filename', ConfigValue(
     ...     default=None,
     ...     domain=str,
     ...     description="Input file name",
     ... ))
+    <pyutilib.misc.config.ConfigValue object at ...>
     >>> config.declare("bound tolerance", ConfigValue(
     ...     default=1E-5,
     ...     domain=float,
     ...     description="Bound tolerance",
     ...     doc="Relative tolerance for bound feasibility checks"
     ... ))
+    <pyutilib.misc.config.ConfigValue object at ...>
     >>> config.declare("iteration limit", ConfigValue(
     ...     default=30,
     ...     domain=int,
     ...     description="Iteration limit",
     ...     doc="Number of maximum iterations in the decomposition methods"
     ... ))
+    <pyutilib.misc.config.ConfigValue object at ...>
     >>> config['filename'] = 'tmp.txt'
     >>> print(config['filename'])
     tmp.txt
@@ -58,6 +63,7 @@ attributes (with spaces in the declaration names replaced by
 underscores):
 
 .. doctest::
+
     >>> print(config.filename)
     tmp.txt
     >>> print(config.iteration_limit)
@@ -75,6 +81,7 @@ information).  This allows client code to accept a very flexible set of
 inputs without "cluttering" the code with input validation:
 
 .. doctest::
+
     >>> config.iteration_limit = 35.5
     >>> print(config.iteration_limit)
     35
@@ -91,6 +98,7 @@ feature allows ConfigDicts to cleanly support the configuration of
 derived objects.  Consider the following example:
 
 .. doctest::
+
     >>> class Base(object):
     ...     CONFIG = ConfigDict()
     ...     CONFIG.declare('filename', ConfigValue(
@@ -108,9 +116,9 @@ derived objects.  Consider the following example:
     ...         domain=str,
     ...     ))
     ...
-    >>> Base(filename='foo.txt')
+    >>> tmp = Base(filename='foo.txt')
     filename: foo.txt
-    >>> Derived(pattern='.*warning')
+    >>> tmp = Derived(pattern='.*warning')
     filename: input.txt
     pattern: .*warning
 
@@ -134,6 +142,7 @@ creating copies of the class's configuration for both specific instances
 and for use by each `solve()` call:
 
 .. doctest::
+
     >>> class Solver(object):
     ...     CONFIG = ConfigDict()
     ...     CONFIG.declare('iterlim', ConfigValue(
@@ -169,34 +178,41 @@ declaration simpler, the `declare` method returns the declared Config
 object so that the argument declaration can be done inline:
 
 .. doctest::
+
     >>> config = ConfigDict()
     >>> config.declare('iterlim', ConfigValue(
     ...     domain=int,
     ...     default=100,
     ...     description="iteration limit",
     ... )).declare_as_argument()
+    <pyutilib.misc.config.ConfigValue object at ...>
     >>> config.declare('lbfgs', ConfigValue(
     ...     domain=bool,
     ...     description="use limited memory BFGS update",
     ... )).declare_as_argument()
+    <pyutilib.misc.config.ConfigValue object at ...>
     >>> config.declare('linesearch', ConfigValue(
     ...     domain=bool,
     ...     default=True,
     ...     description="use line search",
     ... )).declare_as_argument()
+    <pyutilib.misc.config.ConfigValue object at ...>
     >>> config.declare('relative tolerance', ConfigValue(
     ...     domain=float,
     ...     description="relative convergence tolerance",
     ... )).declare_as_argument('--reltol', '-r', group='Tolerances')
+    <pyutilib.misc.config.ConfigValue object at ...>
     >>> config.declare('absolute tolerance', ConfigValue(
     ...     domain=float,
     ...     description="absolute convergence tolerance",
     ... )).declare_as_argument('--abstol', '-a', group='Tolerances')
+    <pyutilib.misc.config.ConfigValue object at ...>
 
 The ConfigDict can then be used to initialize (or augment) an argparse
 ArgumentParser object:
 
 .. doctest::
+
     >>> parser = argparse.ArgumentParser("tester")
     >>> config.initialize_argparse(parser)
 
@@ -205,6 +221,7 @@ Key information from the ConfigDict is automatically transferred over
 to the ArgumentParser object:
 
 .. doctest::
+
     >>> print(parser.format_help())
     usage: tester [-h] [--iterlim INT] [--lbfgs] [--disable-linesearch]
                   [--reltol FLOAT] [--abstol FLOAT]
@@ -220,12 +237,14 @@ to the ArgumentParser object:
                             relative convergence tolerance
       --abstol FLOAT, -a FLOAT
                             absolute convergence tolerance
+    <BLANKLINE>
 
 Parsed arguments can then be imported back into the ConfigDict:
 
 .. doctest::
+
     >>> args=parser.parse_args(['--lbfgs', '--reltol', '0.1', '-a', '0.2'])
-    >>> config.import_argparse(args)
+    >>> args = config.import_argparse(args)
     >>> config.display()
     iterlim: 100
     lbfgs: true
@@ -243,6 +262,7 @@ that a user explicitly set (`user_values`) and the items that were set
 but never retrieved (`unused_user_values`):
 
 .. doctest::
+
     >>> print([val.name() for val in config.user_values()])
     ['lbfgs', 'relative tolerance', 'absolute tolerance']
     >>> print(config.relative_tolerance)
@@ -262,6 +282,7 @@ simular to `display`, but also includes the description fields as
 formatted comments.
 
 .. doctest::
+
     >>> solver_config = config
     >>> config = ConfigDict()
     >>> config.declare('output', ConfigValue(
@@ -269,6 +290,7 @@ formatted comments.
     ...     domain=str,
     ...     description='output results filename'
     ... ))
+    <pyutilib.misc.config.ConfigValue object at ...>
     >>> config.declare('verbose', ConfigValue(
     ...     default=0,
     ...     domain=int,
@@ -277,10 +299,12 @@ formatted comments.
     ...     'warnings and errors.  Larger integer values will produce '
     ...     'additional log messages.',
     ... ))
+    <pyutilib.misc.config.ConfigValue object at ...>
     >>> config.declare('solvers', ConfigList(
     ...     domain=solver_config,
     ...     description='list of solvers to apply',
     ... ))
+    <pyutilib.misc.config.ConfigList object at ...>
     >>> config.display()
     output: results.yml
     verbose: 0
@@ -289,6 +313,7 @@ formatted comments.
     output: results.yml  # output results filename
     verbose: 0           # output verbosity
     solvers: []          # list of solvers to apply
+    <BLANKLINE>
 
 It is important to note that both methods document the current state of
 the configuration object.  So, in the example above, since the `solvers`
@@ -297,6 +322,7 @@ list.  Of course, if you add a value to the list, then the data will be
 output:
 
 .. doctest::
+
     >>> tmp = config()
     >>> tmp.solvers.append({})
     >>> tmp.display()
@@ -319,6 +345,7 @@ output:
         linesearch: true         # use line search
         relative tolerance: 0.1  # relative convergence tolerance
         absolute tolerance: 0.2  # absolute convergence tolerance
+    <BLANKLINE>
 
 The third method (:py:meth:`generate_documentation`) behaves
 differently.  This method is designed to generate reference
@@ -330,33 +357,35 @@ values.  The documentation can be configured through optional arguments.
 The defaults generate LaTeX documentation:
 
 .. doctest::
+
     >>> print(config.generate_documentation())
-    \begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
-      \item[{output}]\hfill
-        \\output results filename
-      \item[{verbose}]\hfill
-        \\This sets the system verbosity.  The default (0) only logs warnings and
+    \\begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
+      \\item[{output}]\hfill
+        \\\\output results filename
+      \\item[{verbose}]\hfill
+        \\\\This sets the system verbosity.  The default (0) only logs warnings and
         errors.  Larger integer values will produce additional log messages.
-      \item[{solvers}]\hfill
-        \\list of solvers to apply
-      \begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
-        \item[{iterlim}]\hfill
-          \\iteration limit
-        \item[{lbfgs}]\hfill
-          \\use limited memory BFGS update
-        \item[{linesearch}]\hfill
-          \\use line search
-        \item[{relative tolerance}]\hfill
-          \\relative convergence tolerance
-        \item[{absolute tolerance}]\hfill
-          \\absolute convergence tolerance
-      \end{description}
-    \end{description}
+      \\item[{solvers}]\hfill
+        \\\\list of solvers to apply
+      \\begin{description}[topsep=0pt,parsep=0.5em,itemsep=-0.4em]
+        \\item[{iterlim}]\hfill
+          \\\\iteration limit
+        \\item[{lbfgs}]\hfill
+          \\\\use limited memory BFGS update
+        \\item[{linesearch}]\hfill
+          \\\\use line search
+        \\item[{relative tolerance}]\hfill
+          \\\\relative convergence tolerance
+        \\item[{absolute tolerance}]\hfill
+          \\\\absolute convergence tolerance
+      \\end{description}
+    \\end{description}
+    <BLANKLINE>
 
 """
 
 import re
-from sys import exc_info, stdout
+import sys
 from textwrap import wrap
 import logging
 import pickle
@@ -486,7 +515,7 @@ def _picklable(field,obj):
         # either: exceeding recursion depth raises a RuntimeError
         # through 3.4, then switches to a RecursionError (a derivative
         # of RuntimeError).
-        if isinstance(exc_info()[0], RuntimeError):
+        if isinstance(sys.exc_info()[0], RuntimeError):
             raise
         _picklable.known[ftype] = False
         return _UnpickleableDomain(obj)
@@ -654,7 +683,7 @@ class ConfigBase(object):
                 else:
                     return self._domain()
             except:
-                err = exc_info()[1]
+                err = sys.exc_info()[1]
                 if hasattr(self._domain, '__name__'):
                     _dom = self._domain.__name__
                 else:
@@ -807,7 +836,7 @@ class ConfigBase(object):
 
         _blocks = []
         if ostream is None:
-            ostream=stdout
+            ostream=sys.stdout
 
         for lvl, prefix, value, obj in self._data_collector(0, "", visibility):
             if content_filter == 'userdata' and not obj._userSet:
