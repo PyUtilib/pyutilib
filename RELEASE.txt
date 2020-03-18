@@ -5,8 +5,10 @@ well-developed component architecture.
 
 The following are highlights of the 5.8 release series:
 
-- Removed use of namespace packages
+- Removed use of pyutilib and pyutilib.component namespace packages
 - Reworked optional dependency imports to speed up importing
+
+Additional changes are listed in CHANGELOG.txt
 
 PyUtilib can be installed from PyPI using pip or conda-forge using conda.
 
