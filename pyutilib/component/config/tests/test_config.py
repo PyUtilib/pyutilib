@@ -112,7 +112,6 @@ class Test(unittest.TestCase):
         except ConfigurationError:
             pass
 
-    @unittest.skipIf(sys.version_info[:2] < (2, 6), "Skipping tests because configuration output is not guaranteed to be sorted") # yapf: disable
     def test_load5(self):
         """Test load method"""
         PluginGlobals.add_env("testing.config_loading")
@@ -149,7 +148,6 @@ class Test(unittest.TestCase):
         PluginGlobals.remove_env(
             "testing.config_loading", cleanup=True, singleton=False)
 
-    @unittest.skipIf(sys.version_info[:2] < (2, 6), "Skipping tests because configuration output is not guaranteed to be sorted") # yapf: disable
     def test_save1(self):
         """Test save method"""
         config = Configuration()

@@ -7,10 +7,6 @@ import pyutilib.th as unittest
 import pyutilib.workflow
 import pyutilib.workflow.globals
 
-is_python24or25 = False
-if sys.version_info[0:2] < (2, 6):
-    is_python24or25 = True
-
 
 class DummyResource(pyutilib.workflow.Resource):
 
@@ -228,7 +224,7 @@ Task7 prev: [1] next: [] resources: []""")
         self.assertEqual(
             str(w), "Workflow Task1:\nTask2 prev: [] next: [] resources: []")
 
-    @unittest.skipIf(is_python24or25 or sys.version_info >= (3, 0), "There is a slight (space) formatting differences in different Python version... Skipping test.") # yapf: disable
+    @unittest.skipIf(sys.version_info >= (3, 0), "There is a slight (space) formatting differences in different Python version... Skipping test.") # yapf: disable
     def test2(self):
         # Do we really want to be testing pformat output?  I think we might
         # actually want to override __cmp__ in the workflow.Task code and instead
@@ -286,7 +282,6 @@ Task7 prev: [1] next: [] resources: []""")
                       'Value': 'None'}}}"""
         self.assertEqual(str(A), base)
 
-    @unittest.skipIf(is_python24or25, "There is a slight (space) formatting difference from pformat from Python2.6.  Skipping test.") # yapf: disable
     def test3(self):
         # Do we really want to be testing pformat output?  I think we might
         # actually want to override __cmp__ in the workflow.Task code and instead
@@ -302,7 +297,6 @@ Task7 prev: [1] next: [] resources: []""")
         self.assertFileEqualsBaseline(currdir + 'test3.out',
                                       currdir + 'test3.txt')
 
-    @unittest.skipIf(is_python24or25, "There is a slight (space) formatting difference from pformat from Python2.6.  Skipping test.") # yapf: disable
     def test4(self):
         # Do we really want to be testing pformat output?  I think we might
         # actually want to override __cmp__ in the workflow.Task code and instead
@@ -354,7 +348,6 @@ Task7 prev: [1] next: [] resources: []""")
         # in groups.  The soln is to move to argparse, but I'll save that for later
         #w.print_help()
 
-    @unittest.skipIf(is_python24or25, "There is a slight (space) formatting difference from pformat from Python2.6.  Skipping test.") # yapf: disable
     def test5b(self):
         # Do we really want to be testing pformat output?  I think we might
         # actually want to override __cmp__ in the workflow.Task code and instead

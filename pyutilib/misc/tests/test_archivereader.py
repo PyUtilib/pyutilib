@@ -4,7 +4,6 @@
 #
 
 import os
-import sys
 import fnmatch
 import posixpath
 
@@ -51,7 +50,6 @@ class TestArchiveReaderFactory(unittest.TestCase):
             os.path.join(testdatadir, 'archive_flat.zip'))
         self.assertTrue(isinstance(archive, ZipArchiveReader))
 
-    #@unittest.skipIf(sys.version_info[:2] < (2,7), "Skipping due to bug in python 2.5 and 2.6")
     def test_ArchiveReaderFactory_file(self):
         archive = ArchiveReaderFactory(os.path.join(testdatadir, 'fileC.txt'))
         self.assertTrue(isinstance(archive, FileArchiveReader))

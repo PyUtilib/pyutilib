@@ -49,22 +49,9 @@ def get_desired_chars_from_file(f, nchars, l=""):
     return retBuf
 
 
-if sys.version_info[:2] == (3, 2):
-    #
-    # This fixes a bug in Python 3.2's implementation of GzipFile.
-    #
-    class MyGzipFile(gzip.GzipFile):
-
-        def read1(self, n):
-            return self.read(n)
-
-
 def open_possibly_compressed_file(filename):
     if not os.path.exists(filename):
         raise IOError("cannot find file `" + filename + "'")
-    if sys.version_info[:2] < (2, 6) and zipfile.is_zipfile(filename):
-        raise IOError("cannot unpack a ZIP file with Python %s" %
-                      '.'.join(map(str, sys.version_info)))
     try:
         is_zipfile = zipfile.is_zipfile(filename)
     except:
@@ -82,9 +69,6 @@ def open_possibly_compressed_file(filename):
     elif filename.endswith('.gz'):
         if sys.version_info < (3, 0):
             return gzip.open(filename, "r")
-        elif sys.version_info[:2] == (3, 2):
-            return io.TextIOWrapper(
-                MyGzipFile(filename), encoding='utf-8', newline='')
         else:
             return io.TextIOWrapper(
                 gzip.open(filename, 'r'), encoding='utf-8', newline='')

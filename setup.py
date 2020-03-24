@@ -11,28 +11,8 @@
 Setup for PyUtilib package
 """
 
-import sys
 import os
-from setuptools import setup
-
-
-def _find_packages(path):
-    """
-    Generate a list of nested packages
-    """
-    pkg_list=[]
-    if not os.path.exists(path):
-        return []
-    if not os.path.exists(path+os.sep+"__init__.py"):
-        return []
-    else:
-        pkg_list.append(path)
-    for root, dirs, files in os.walk(path, topdown=True):
-        if root in pkg_list and "__init__.py" in files:
-            for name in dirs:
-                if os.path.exists(root+os.sep+name+os.sep+"__init__.py"):
-                    pkg_list.append(root+os.sep+name)
-    return [pkg for pkg in map(lambda x:x.replace(os.sep,"."), pkg_list)]
+from setuptools import setup, find_packages
 
 def read(*rnames):
     with open(os.path.join(os.path.dirname(__file__), *rnames)) as README:
@@ -46,15 +26,7 @@ def read(*rnames):
                 break
         return line + README.read()
 
-packages = _find_packages('pyutilib')
-
 requires=[ 'nose', 'six' ]
-if sys.version_info < (2,7):
-    requires.append('pbr')
-    requires.append('traceback2')
-    requires.append('unittest2')
-    requires.append('argparse')
-    requires.append('ordereddict')
 
 setup(name="PyUtilib",
     version='5.8.1.dev0',
@@ -90,7 +62,7 @@ setup(name="PyUtilib",
         'Topic :: Scientific/Engineering :: Mathematics',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Utilities'],
-      packages=packages,
+      packages=find_packages(),
       keywords=['utility'],
       install_requires=requires,
       entry_points="""

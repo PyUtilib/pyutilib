@@ -22,9 +22,8 @@ from threading import Thread
 
 _mswindows = sys.platform.startswith('win')
 
-if sys.version_info[0:2] >= (2, 5):
-    if _mswindows:
-        import ctypes
+if _mswindows:
+    import ctypes
 
 # Note: on many python interpreters, WindowsError is only defined on
 # Windows.  Since we want to trap it below, we will declare a local
@@ -102,14 +101,11 @@ def kill_process(process, sig=signal.SIGTERM, verbose=False):
     if GlobalData.debug or verbose:
         print("Killing process %d with signal %d" % (pid, sig))
     if _mswindows:
-        if sys.version_info[0:2] < (2, 5):
-            os.system("taskkill /t /f /pid " + repr(pid))
-        else:
-            PROCESS_TERMINATE = 1
-            handle = ctypes.windll.kernel32.OpenProcess(PROCESS_TERMINATE,
-                                                        False, pid)
-            ctypes.windll.kernel32.TerminateProcess(handle, -1)
-            ctypes.windll.kernel32.CloseHandle(handle)
+        PROCESS_TERMINATE = 1
+        handle = ctypes.windll.kernel32.OpenProcess(PROCESS_TERMINATE,
+                                                    False, pid)
+        ctypes.windll.kernel32.TerminateProcess(handle, -1)
+        ctypes.windll.kernel32.CloseHandle(handle)
     else:
         #
         # Kill process and all its children

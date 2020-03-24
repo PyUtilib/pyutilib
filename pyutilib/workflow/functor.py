@@ -4,7 +4,6 @@ Defining a Functor-specific task class
 
 __all__ = ['functor_api', 'IFunctorTask', 'FunctorAPIFactory', 'FunctorAPIData']
 
-import sys
 import inspect
 import logging
 
@@ -210,12 +209,6 @@ def functor_api(fn=None, implements=None, outputs=None, namespace=None):
         _name = _alias.replace('_', '.')
 
         argspec = inspect.getargspec(fn)
-        if sys.version_info < (2, 6):
-            argspec = pyutilib.misc.Bunch(
-                args=argspec[0],
-                varargs=argspec[1],
-                keywords=argspec[2],
-                defaults=argspec[3])
         if not argspec.varargs is None:
             logger.error(
                 "Attempting to declare Functor task with function '%s' that contains variable arguments"
