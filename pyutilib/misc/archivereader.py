@@ -12,7 +12,6 @@ __all__ = ['ArchiveReaderFactory', 'ArchiveReader', 'ZipArchiveReader',
            'GzipFileArchiveReader', 'BZ2FileArchiveReader']
 
 import os
-import sys
 import tempfile
 import shutil
 import posixpath
@@ -23,12 +22,11 @@ zipfile_available = False
 tarfile_available = False
 gzip_available = False
 bz2_available = False
-if sys.version_info[:2] >= (2, 6):
-    try:
-        import zipfile
-        zipfile_available = True
-    except:
-        pass
+try:
+    import zipfile
+    zipfile_available = True
+except:
+    pass
 try:
     import tarfile
     tarfile_available = True

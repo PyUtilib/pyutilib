@@ -10,7 +10,6 @@
 
 __all__ = ['Configuration_ConfigParser']
 
-import sys
 import os.path
 try:
     from ordereddict import OrderedDict
@@ -58,10 +57,7 @@ class Configuration_ConfigParser(ManagedSingletonPlugin):
 
     def save(self, filename, config, header=None):
         """Save configuration information to the specified file."""
-        if sys.version_info[:2] == (2, 6):
-            parser = _configParser(dict_type=OrderedDict)
-        else:
-            parser = _configParser()
+        parser = _configParser()
         for (section, option, value) in config:
             if not parser.has_section(section):
                 parser.add_section(section)

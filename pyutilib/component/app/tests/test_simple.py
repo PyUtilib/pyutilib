@@ -13,14 +13,12 @@ import pyutilib.subprocess
 
 class Test(unittest.TestCase):
 
-    @unittest.skipIf(sys.version_info[:2] < (2, 6), "Skipping tests because configuration output is not guaranteed to be sorted") # yapf: disable
     def test_app1a(self):
         pyutilib.subprocess.run(sys.executable + " " + currdir + os.sep +
                                 "app1a.py " + currdir)
         self.assertFileEqualsBaseline(currdir + "config1.out",
                                       currdir + "config1.txt")
 
-    @unittest.skipIf(sys.version_info[:2] < (2, 6), "Skipping tests because configuration output is not guaranteed to be sorted") # yapf: disable
     def test_app1b(self):
         pyutilib.subprocess.run(sys.executable + " " + currdir + os.sep +
                                 "app1b.py " + currdir)

@@ -16,19 +16,10 @@ import os
 import sys
 import filecmp
 import re
-if sys.version_info[:2] < (2, 7):
-    try:
-        import unittest2 as unittest
-        main = unittest.main
-        using_unittest2 = True
-    except ImportError:
-        import unittest
-        main = unittest.main
-        using_unittest2 = False
-else:
-    import unittest
-    using_unittest2 = True
-    main = unittest.main
+
+import unittest
+using_unittest2 = True
+main = unittest.main
 
 from six import iteritems, itervalues, PY2
 

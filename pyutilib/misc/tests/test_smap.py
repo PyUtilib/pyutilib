@@ -4,7 +4,6 @@
 #
 
 import os
-import sys
 from os.path import abspath, dirname
 currdir = dirname(abspath(__file__)) + os.sep
 import pyutilib.th as unittest
@@ -12,11 +11,6 @@ import pyutilib.misc
 
 
 class Test(unittest.TestCase):
-
-    def setUp(self):
-        if sys.version_info[:2] < (2, 6):
-            self.skipTest(
-                "SparseMapping not fully defined for Python 2.4 and 2.5")
 
     def test1(self):
         # Validate behavior for empty sparse map

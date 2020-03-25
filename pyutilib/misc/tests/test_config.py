@@ -1030,11 +1030,7 @@ endBlock{}
             item_end=    "endItem\n",
         )
 
-        # re.sub(flags=) was introduced in 2.7
-        if sys.version_info[:2] < (2,7):
-            stripped_reference = re.sub('\{[^\}]*\}','',reference)
-        else:
-            stripped_reference = re.sub('\{[^\}]*\}','',reference,flags=re.M)
+        stripped_reference = re.sub('\{[^\}]*\}','',reference,flags=re.M)
         #print(test)
         self.assertEqual(test, stripped_reference)
 
