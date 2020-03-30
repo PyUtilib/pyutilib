@@ -1068,6 +1068,53 @@ class ConfigValue(ConfigBase):
         yield (level, prefix, self, self)
 
 
+class ImmutableConfigValue(ConfigValue):
+    """
+    A config value that supports temporary immutability.
+
+
+    Parameters
+    ----------
+    default: optional
+        The default value that this ConfigValue will take if no value is
+        provided.
+
+    domain: callable, optional
+        The domain can be any callable that accepts a candidate value
+        and returns the value converted to the desired type, optionally
+        performing any data validation.  The result will be stored into
+        the ConfigValue.  Examples include type constructors like `int`
+        or `float`.  More complex domain examples include callable
+        objects; for example, the :py:class:`In` class that ensures that
+        the value falls into an acceptable set or even a complete
+        :py:class:`ConfigDict` instance.
+
+    description: str, optional
+        The short description of this value
+
+    doc: str, optional
+        The long documentation string for this value
+
+    visibility: int, optional
+        The visibility of this ConfigValue when generating templates and
+        documentation.  Visibility supports specification of "advanced"
+        or "developer" options.  ConfigValues with visibility=0 (the
+        default) will always be printed / included.  ConfigValues
+        with higher visibility values will only be included when the
+        generation method specifies a visibility greater than or equal
+        to the visibility of this object.
+    """
+    def __init__(self, *args, **kwds):
+        self._mutable = True
+        self._immutable_error_message = str(self) + ' is currently immutable.'
+        super(ImmutableConfigValue, self).__init__(*args, **kwds)
+
+    def set_value(self, value):
+        if not self._mutable:
+            raise RuntimeError(self._immutable_error_message)
+        super(ImmutableConfigValue, self).set_value(value)
+
+
 class ConfigList(ConfigBase):
     """Store and manipulate a list of configuration values.
 
