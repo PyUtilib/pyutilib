@@ -1070,7 +1070,9 @@ class ConfigValue(ConfigBase):
 
 class ImmutableConfigValue(ConfigValue):
     def set_value(self, value):
-        raise RuntimeError(str(self) + ' is currently immutable')
+        if self._cast(value) != self._data:
+            raise RuntimeError(str(self) + ' is currently immutable')
+        super(ImmutableConfigValue, self).set_value(value)
 
     def reset(self):
         try:

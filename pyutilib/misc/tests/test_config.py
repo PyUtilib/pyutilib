@@ -54,6 +54,10 @@ class TestImmutableConfigValue(unittest.TestCase):
             config.a = 4
         with self.assertRaises(Exception):
             config.b = 5
+        config.a = 2
+        config.b = 3
+        self.assertEqual(config.a, 2)
+        self.assertEqual(config.b, 3)
         locker.release_lock()
         config.a = 4
         config.b = 5
