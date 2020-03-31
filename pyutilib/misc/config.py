@@ -1074,6 +1074,26 @@ class ImmutableConfigValue(ConfigValue):
 
 
 class MarkImmutable(object):
+    """
+    Mark instances of ConfigValue as immutable.
+
+    Parameters
+    ----------
+    config_value: ConfigValue
+        The ConfigValue instances that should be marked immutable. 
+        Note that multiple instances of ConfigValue can be passed.
+
+    Examples
+    --------
+    >>> config = ConfigBlock()
+    >>> config.declare('a', ConfigValue(default=1, domain=int))
+    >>> config.declare('b', ConfigValue(default=1, domain=int))
+    >>> locker = MarkImmutable(config.get('a'), config.get('b'))
+    
+    Now, config.a and config.b cannot be changed. To make them mutable again, 
+
+    >>> locker.release_lock()
+    """
     def __init__(self, *args):
         self._locked = list()
         try:
