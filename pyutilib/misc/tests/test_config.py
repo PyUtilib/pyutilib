@@ -65,6 +65,18 @@ class TestImmutableConfigValue(unittest.TestCase):
         config.a = 6
         self.assertEqual(config.a, 6)
 
+        config.declare('c', ConfigValue(default=-1, domain=int))
+        locker = MarkImmutable(config.get('a'), config.get('b'))
+        config2 = config({'c': -2})
+        self.assertEqual(config2.a, 6)
+        self.assertEqual(config2.b, 5)
+        self.assertEqual(config2.c, -2)
+        with self.assertRaises(Exception):
+            config3 = config({'a': 1})
+        locker.release_lock()
+        config3 = config({'a': 1})
+        self.assertEqual(config3.a, 1)
+
 
 class Test(unittest.TestCase):
 

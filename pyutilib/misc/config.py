@@ -1072,6 +1072,17 @@ class ImmutableConfigValue(ConfigValue):
     def set_value(self, value):
         raise RuntimeError(str(self) + ' is currently immutable')
 
+    def reset(self):
+        try:
+            super(ImmutableConfigValue, self).set_value(self._default)
+        except:
+            if hasattr(self._default, '__call__'):
+                super(ImmutableConfigValue, self).set_value(self._default())
+            else:
+                raise
+        self._userAccessed = False
+        self._userSet = False
+
 
 class MarkImmutable(object):
     """
