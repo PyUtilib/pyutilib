@@ -179,10 +179,25 @@ class _HierarchicalHelper(object):
     def print(self, indent):
         s = ''
         if len(self.timers) > 0:
+            max_name_len = 12
+            for name in self.timers.keys():
+                if len(name) > max_name_len:
+                    max_name_len = len(name)
+            name_formatter = '{name:<' + str(max_name_len) + '}'
+            s += indent
+            s += (name_formatter +
+                  '{total_time:>15}'
+                  '{num_calls:>15}'
+                  '{time_per_call:>15}'
+                  '{relative_percent:>15}\n').format(name='Identifier',
+                                                     total_time='Time (s)',
+                                                     num_calls='# Calls',
+                                                     time_per_call='Per Call(s)',
+                                                     relative_percent='% Time')
             other_time = self.total_time
             for name, timer in self.timers.items():
                 s += indent
-                s += '{0:<30}'.format(name)
+                s += name_formatter.format(name=name)
                 s += '{0:>15.2e}'.format(timer.total_time)
                 s += '{0:>15d}'.format(timer.n_calls)
                 s += '{0:>15.2e}'.format(timer.total_time/timer.n_calls)
@@ -190,7 +205,7 @@ class _HierarchicalHelper(object):
                 s += timer.print(indent=indent + '    ')
                 other_time -= timer.total_time
             s += indent
-            s += '{0:<30}'.format('other')
+            s += name_formatter.format(name='other')
             s += '{0:>15.2e}'.format(other_time)
             s += '{0:>15}'.format('N/A')
             s += '{0:>15}'.format('N/A')
@@ -204,16 +219,14 @@ class HierarchicalTimer(object):
         self.timers = dict()
 
     def _get_timer(self, identifier, should_exist=False):
-        tmp = self
-        for i in self.stack:
-            tmp = tmp.timers[i]
-        if identifier in tmp.timers:
-            return tmp.timers[identifier]
+        parent = self._get_timer_from_stack(self.stack)
+        if identifier in parent.timers:
+            return parent.timers[identifier]
         else:
             if should_exist:
-                raise RuntimeError('Could not find timer {0}'.format(identifier))
-            tmp.timers[identifier] = _HierarchicalHelper()
-            return tmp.timers[identifier]
+                raise RuntimeError('Could not find timer {0}'.format('.'.join(self.stack + [identifier])))
+            parent.timers[identifier] = _HierarchicalHelper()
+            return parent.timers[identifier]
 
     def start_increment(self, identifier):
         timer = self._get_timer(identifier)
@@ -226,9 +239,20 @@ class HierarchicalTimer(object):
         timer.stop_increment()
 
     def __str__(self):
-        s = ''
+        max_name_len = 12
+        for name in self.timers.keys():
+            if len(name) > max_name_len:
+                max_name_len = len(name)
+        name_formatter = '{name:<' + str(max_name_len) + '}'
+        s = (name_formatter +
+             '{total_time:>15}'
+             '{num_calls:>15}'
+             '{time_per_call:>15}\n').format(name='Identifier',
+                                             total_time='Time (s)',
+                                             num_calls='# Calls',
+                                             time_per_call='Per Call (s)')
         for name, timer in self.timers.items():
-            s += '{0:<30}'.format(name)
+            s += name_formatter.format(name=name)
             s += '{0:>15.2e}'.format(timer.total_time)
             s += '{0:>15d}'.format(timer.n_calls)
             s += '{0:>15.2e}\n'.format(timer.total_time/timer.n_calls)
@@ -239,3 +263,32 @@ class HierarchicalTimer(object):
         self.stack = list()
         self.timers = dict()
 
+    def _get_timer_from_stack(self, stack):
+        tmp = self
+        for i in stack:
+            tmp = tmp.timers[i]
+        return tmp
+
+    def get_total_time(self, identifier):
+        stack = identifier.split('.')
+        timer = self._get_timer_from_stack(stack)
+        return timer.total_time
+
+    def get_num_calls(self, identifier):
+        stack = identifier.split('.')
+        timer = self._get_timer_from_stack(stack)
+        return timer.n_calls
+
+    def get_relative_percent_time(self, identifier):
+        stack = identifier.split('.')
+        timer = self._get_timer_from_stack(stack)
+        parent = self._get_timer_from_stack(stack[:-1])
+        return timer.total_time / parent.total_time * 100
+
+    def get_total_percent_time(self, identifier):
+        stack = identifier.split('.')
+        timer = self._get_timer_from_stack(stack)
+        total_time = 0
+        for _timer in self.timers.values():
+            total_time += _timer.total_time
+        return timer.total_time / total_time * 100
