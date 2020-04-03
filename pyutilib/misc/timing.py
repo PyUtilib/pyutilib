@@ -160,3 +160,82 @@ class TicTocTimer(object):
 _globalTimer = TicTocTimer()
 tic = _globalTimer.tic
 toc = _globalTimer.toc
+
+
+class _HierarchicalHelper(object):
+    def __init__(self):
+        self.total_time = 0
+        self.t0 = None
+        self.n_calls = 0
+        self.timers = dict()
+
+    def start_increment(self):
+        self.t0 = time.time()
+
+    def stop_increment(self):
+        self.total_time += time.time() - self.t0
+        self.n_calls += 1
+
+    def print(self, indent):
+        s = ''
+        if len(self.timers) > 0:
+            other_time = self.total_time
+            for name, timer in self.timers.items():
+                s += indent
+                s += '{0:<30}'.format(name)
+                s += '{0:>15.2e}'.format(timer.total_time)
+                s += '{0:>15d}'.format(timer.n_calls)
+                s += '{0:>15.2e}'.format(timer.total_time/timer.n_calls)
+                s += '{0:>15.1f}%\n'.format(timer.total_time/self.total_time*100)
+                s += timer.print(indent=indent + '    ')
+                other_time -= timer.total_time
+            s += indent
+            s += '{0:<30}'.format('other')
+            s += '{0:>15.2e}'.format(other_time)
+            s += '{0:>15}'.format('N/A')
+            s += '{0:>15}'.format('N/A')
+            s += '{0:>15.1f}%\n'.format(other_time / self.total_time * 100)
+        return s
+
+
+class HierarchicalTimer(object):
+    def __init__(self):
+        self.stack = list()
+        self.timers = dict()
+
+    def _get_timer(self, identifier, should_exist=False):
+        tmp = self
+        for i in self.stack:
+            tmp = tmp.timers[i]
+        if identifier in tmp.timers:
+            return tmp.timers[identifier]
+        else:
+            if should_exist:
+                raise RuntimeError('Could not find timer {0}'.format(identifier))
+            tmp.timers[identifier] = _HierarchicalHelper()
+            return tmp.timers[identifier]
+
+    def start_increment(self, identifier):
+        timer = self._get_timer(identifier)
+        timer.start_increment()
+        self.stack.append(identifier)
+
+    def stop_increment(self, identifier):
+        assert identifier == self.stack.pop()
+        timer = self._get_timer(identifier, should_exist=True)
+        timer.stop_increment()
+
+    def __str__(self):
+        s = ''
+        for name, timer in self.timers.items():
+            s += '{0:<30}'.format(name)
+            s += '{0:>15.2e}'.format(timer.total_time)
+            s += '{0:>15d}'.format(timer.n_calls)
+            s += '{0:>15.2e}\n'.format(timer.total_time/timer.n_calls)
+            s += timer.print(indent='    ')
+        return s
+
+    def reset(self):
+        self.stack = list()
+        self.timers = dict()
+
