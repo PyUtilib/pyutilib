@@ -176,7 +176,7 @@ class _HierarchicalHelper(object):
         self.total_time += time.time() - self.t0
         self.n_calls += 1
 
-    def print(self, indent):
+    def pprint(self, indent):
         s = ''
         if len(self.timers) > 0:
             max_name_len = 12
@@ -203,7 +203,7 @@ class _HierarchicalHelper(object):
                 s += '{0:>15d}'.format(timer.n_calls)
                 s += '{0:>15.2e}'.format(timer.total_time/timer.n_calls)
                 s += '{0:>15.1f}%\n'.format(timer.total_time/self.total_time*100)
-                s += timer.print(indent=indent + '    ')
+                s += timer.pprint(indent=indent + '    ')
                 other_time -= timer.total_time
             s += indent
             s += name_formatter.format(name='other')
@@ -365,7 +365,7 @@ class HierarchicalTimer(object):
             s += '{0:>15.2e}'.format(timer.total_time)
             s += '{0:>15d}'.format(timer.n_calls)
             s += '{0:>15.2e}\n'.format(timer.total_time/timer.n_calls)
-            s += timer.print(indent='    ')
+            s += timer.pprint(indent='    ')
         return s
 
     def reset(self):
