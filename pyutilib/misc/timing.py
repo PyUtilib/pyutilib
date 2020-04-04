@@ -11,6 +11,7 @@
 import sys
 import time
 import traceback
+import math
 
 __all__ = ('TicTocTimer', 'tic', 'toc')
 
@@ -455,7 +456,10 @@ class HierarchicalTimer(object):
         if parent is self:
             return self.get_total_percent_time(identifier)
         else:
-            return timer.total_time / parent.total_time * 100
+            if parent.total_time > 0:
+                return timer.total_time / parent.total_time * 100
+            else:
+                return math.nan
 
     def get_total_percent_time(self, identifier):
         """
@@ -475,4 +479,7 @@ class HierarchicalTimer(object):
         total_time = 0
         for _timer in self.timers.values():
             total_time += _timer.total_time
-        return timer.total_time / total_time * 100
+        if total_time > 0:
+            return timer.total_time / total_time * 100
+        else:
+            return math.nan
