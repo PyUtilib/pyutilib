@@ -175,10 +175,10 @@ class _HierarchicalHelper(object):
     def n_calls(self):
         return self.tic_toc._start_count
 
-    def start_increment(self):
+    def start(self):
         self.tic_toc.start()
 
-    def stop_increment(self):
+    def stop(self):
         self.tic_toc.stop()
 
     def pprint(self, indent):
@@ -227,19 +227,19 @@ class HierarchicalTimer(object):
     --------
     >>> from pyutilib.misc.timing import HierarchicalTimer
     >>> timer = HierarchicalTimer()
-    >>> timer.start_increment('all')
+    >>> timer.start('all')
     >>> for i in range(10):
-    >>>     timer.start_increment('a')
+    >>>     timer.start('a')
     >>>     for i in range(5):
-    >>>         timer.start_increment('aa')
-    >>>         timer.stop_increment('aa')
-    >>>     timer.start_increment('ab')
-    >>>     timer.stop_increment('ab')
-    >>>     timer.stop_increment('a')
+    >>>         timer.start('aa')
+    >>>         timer.stop('aa')
+    >>>     timer.start('ab')
+    >>>     timer.stop('ab')
+    >>>     timer.stop('a')
     >>> for i in range(10):
-    >>>     timer.start_increment('b')
-    >>>     timer.stop_increment('b')
-    >>> timer.stop_increment('all')
+    >>>     timer.start('b')
+    >>>     timer.stop('b')
+    >>> timer.stop('all')
     >>> print(timer)
     Identifier         Time (s)        # Calls   Per Call (s)
     ---------------------------------------------------------
@@ -275,9 +275,9 @@ class HierarchicalTimer(object):
     timers for its children timers. Consider
 
     >>> timer = HierarchicalTimer()
-    >>> timer.start_increment('all')
-    >>> timer.start_increment('a')
-    >>> timer.start_increment('aa')
+    >>> timer.start('all')
+    >>> timer.start('a')
+    >>> timer.start('aa')
 
     After the above code is run, self.stack will be ['all', 'a', 'aa']
     and self.timers will have one key, 'all' and one value which will
@@ -323,7 +323,7 @@ class HierarchicalTimer(object):
             parent.timers[identifier] = _HierarchicalHelper()
             return parent.timers[identifier]
 
-    def start_increment(self, identifier):
+    def start(self, identifier):
         """
         Start incrementing the timer identified with identifier
 
@@ -333,10 +333,10 @@ class HierarchicalTimer(object):
             The name of the timer
         """
         timer = self._get_timer(identifier)
-        timer.start_increment()
+        timer.start()
         self.stack.append(identifier)
 
-    def stop_increment(self, identifier):
+    def stop(self, identifier):
         """
         Stop incrementing the timer identified with identifier
 
@@ -349,7 +349,7 @@ class HierarchicalTimer(object):
             raise ValueError(str(identifier) + ' is not the currently active timer. The only timer that can currently be stopped is ' + '.'.join(self.stack))
         self.stack.pop()
         timer = self._get_timer(identifier, should_exist=True)
-        timer.stop_increment()
+        timer.stop()
 
     def __str__(self):
         max_name_len = 12
@@ -424,7 +424,7 @@ class HierarchicalTimer(object):
         Returns
         -------
         num_calss: int
-            The number of times start_increment was called for the specified timer.
+            The number of times start was called for the specified timer.
         """
         stack = identifier.split('.')
         timer = self._get_timer_from_stack(stack)
