@@ -164,17 +164,22 @@ toc = _globalTimer.toc
 
 class _HierarchicalHelper(object):
     def __init__(self):
-        self.total_time = 0
-        self.t0 = None
-        self.n_calls = 0
+        self.tic_toc = TicTocTimer()
         self.timers = dict()
 
+    @property
+    def total_time(self):
+        return self.tic_toc._cumul
+
+    @property
+    def n_calls(self):
+        return self.tic_toc._start_count
+
     def start_increment(self):
-        self.t0 = time.time()
+        self.tic_toc.start()
 
     def stop_increment(self):
-        self.total_time += time.time() - self.t0
-        self.n_calls += 1
+        self.tic_toc.stop()
 
     def pprint(self, indent):
         s = ''
