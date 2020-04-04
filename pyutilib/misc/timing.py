@@ -452,7 +452,10 @@ class HierarchicalTimer(object):
         stack = identifier.split('.')
         timer = self._get_timer_from_stack(stack)
         parent = self._get_timer_from_stack(stack[:-1])
-        return timer.total_time / parent.total_time * 100
+        if parent is self:
+            return self.get_total_percent_time(identifier)
+        else:
+            return timer.total_time / parent.total_time * 100
 
     def get_total_percent_time(self, identifier):
         """
