@@ -207,7 +207,10 @@ class _HierarchicalHelper(object):
                 s += '{0:>15.2e}'.format(timer.total_time)
                 s += '{0:>15d}'.format(timer.n_calls)
                 s += '{0:>15.2e}'.format(timer.total_time/timer.n_calls)
-                s += '{0:>15.1f}%\n'.format(timer.total_time/self.total_time*100)
+                if self.total_time > 0:
+                    s += '{0:>15.1f}%\n'.format(timer.total_time / self.total_time * 100)
+                else:
+                    s += '{0:>15}\n'.format('nan')
                 s += timer.pprint(indent=indent + '    ')
                 other_time -= timer.total_time
             s += indent
@@ -215,7 +218,10 @@ class _HierarchicalHelper(object):
             s += '{0:>15.2e}'.format(other_time)
             s += '{0:>15}'.format('N/A')
             s += '{0:>15}'.format('N/A')
-            s += '{0:>15.1f}%\n'.format(other_time / self.total_time * 100)
+            if self.total_time > 0:
+                s += '{0:>15.1f}%\n'.format(other_time / self.total_time * 100)
+            else:
+                s += '{0:>15}\n'.format('nan')
         return s
 
 
