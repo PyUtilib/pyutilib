@@ -5,22 +5,22 @@ import pyutilib.th as unittest
 class TestHierarchicalTimer(unittest.TestCase):
     def test_hierarchical_timer(self):
         timer = HierarchicalTimer()
-        timer.start_increment('all')
+        timer.start('all')
         for i in range(10):
-            timer.start_increment('a')
+            timer.start('a')
             for i in range(5):
-                timer.start_increment('aa')
-                timer.stop_increment('aa')
-            timer.start_increment('ab')
-            timer.stop_increment('ab')
-            timer.stop_increment('a')
-            timer.start_increment('b')
-            timer.stop_increment('b')
-        timer.start_increment('a')
+                timer.start('aa')
+                timer.stop('aa')
+            timer.start('ab')
+            timer.stop('ab')
+            timer.stop('a')
+            timer.start('b')
+            timer.stop('b')
+        timer.start('a')
         with self.assertRaisesRegex(ValueError, 'all is not the currently active timer. The only timer that can currently be stopped is all.a'):
-            timer.stop_increment('all')
-        timer.stop_increment('a')
-        timer.stop_increment('all')
+            timer.stop('all')
+        timer.stop('a')
+        timer.stop('all')
 
         a_percent = timer.get_relative_percent_time('all.a')
         aa_percent = timer.get_relative_percent_time('all.a.aa')
