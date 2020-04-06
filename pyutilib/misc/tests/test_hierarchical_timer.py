@@ -17,7 +17,7 @@ class TestHierarchicalTimer(unittest.TestCase):
             timer.start('b')
             timer.stop('b')
         timer.start('a')
-        with self.assertRaisesRegex(ValueError, 'all is not the currently active timer. The only timer that can currently be stopped is all.a'):
+        with self.assertRaisesRegex(ValueError, 'all is not the currently active timer.  The only timer that can currently be stopped is all.a'):
             timer.stop('all')
         timer.stop('a')
         timer.stop('all')
