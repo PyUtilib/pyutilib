@@ -160,3 +160,362 @@ class TicTocTimer(object):
 _globalTimer = TicTocTimer()
 tic = _globalTimer.tic
 toc = _globalTimer.toc
+
+
+class _HierarchicalHelper(object):
+    def __init__(self):
+        self.tic_toc = TicTocTimer()
+        self.timers = dict()
+        self.total_time = 0
+        self.n_calls = 0
+
+    def start(self):
+        self.n_calls += 1
+        self.tic_toc.start()
+
+    def stop(self):
+        self.total_time += self.tic_toc.stop()
+
+    def to_str(self, indent, stage_identifier_lengths):
+        s = ''
+        if len(self.timers) > 0:
+            underline = indent + '-' * (sum(stage_identifier_lengths) + 36) + '\n'
+            s += underline
+            name_formatter = '{name:<' + str(sum(stage_identifier_lengths)) + '}'
+            other_time = self.total_time
+            sub_stage_identifier_lengths = stage_identifier_lengths[1:]
+            for name, timer in self.timers.items():
+                if self.total_time > 0:
+                    _percent = timer.total_time / self.total_time * 100
+                else:
+                    _percent = float('nan')
+                s += indent
+                s += ( name_formatter + '{ncalls:>9d} {cumtime:>9.3f} '
+                       '{percall:>9.3f} {percent:>6.1f}\n' ).format(
+                           name=name,
+                           ncalls=timer.n_calls,
+                           cumtime=timer.total_time,
+                           percall=timer.total_time/timer.n_calls,
+                           percent=_percent )
+                s += timer.to_str(
+                    indent=indent + ' '*stage_identifier_lengths[0],
+                    stage_identifier_lengths=sub_stage_identifier_lengths)
+                other_time -= timer.total_time
+
+            if self.total_time > 0:
+                _percent = other_time / self.total_time * 100
+            else:
+                _percent = float('nan')
+            s += indent
+            s += ( name_formatter + '{ncalls:>9} {cumtime:>9.3f} '
+                   '{percall:>9} {percent:>6.1f}\n' ).format(
+                       name='other',
+                       ncalls='n/a',
+                       cumtime=other_time,
+                       percall='n/a',
+                       percent=_percent )
+            s += underline.replace('-', '=')
+        return s
+
+
+class HierarchicalTimer(object):
+    """A class for hierarchical timing.
+
+    Examples
+    --------
+    >>> import time
+    >>> from pyutilib.misc.timing import HierarchicalTimer
+    >>> timer = HierarchicalTimer()
+    >>> timer.start('all')
+    >>> time.sleep(0.2)
+    >>> for i in range(10):
+    ...     timer.start('a')
+    ...     time.sleep(0.1)
+    ...     for i in range(5):
+    ...         timer.start('aa')
+    ...         time.sleep(0.01)
+    ...         timer.stop('aa')
+    ...     timer.start('ab')
+    ...     timer.stop('ab')
+    ...     timer.stop('a')
+    ...
+    >>> for i in range(10):
+    ...     timer.start('b')
+    ...     time.sleep(0.02)
+    ...     timer.stop('b')
+    ...
+    >>> timer.stop('all')
+    >>> print(timer)
+    Identifier        ncalls   cumtime   percall      %
+    ---------------------------------------------------
+    all                    1     2.248     2.248  100.0
+         ----------------------------------------------
+         a                10     1.787     0.179   79.5
+              -----------------------------------------
+              aa          50     0.733     0.015   41.0
+              ab          10     0.000     0.000    0.0
+              other      n/a     1.055       n/a   59.0
+              =========================================
+         b                10     0.248     0.025   11.0
+         other           n/a     0.213       n/a    9.5
+         ==============================================
+    ===================================================
+    <BLANKLINE>
+
+    The columns are:
+      ncalls : The number of times the timer was started and stopped
+      cumtime: The cumulative time (in seconds) the timer was active
+               (started but not stopped)
+      percall: cumtime (in seconds) / ncalls
+      %      : This is cumtime of the timer divided by cumtime of the
+               parent timer times 100
+
+
+    >>> print('a total time: %f' % timer.get_total_time('all.a'))
+    a total time: 1.902037
+    >>> print('ab num calls: %d' % timer.get_num_calls('all.a.ab'))
+    ab num calls: 10
+    >>> print('aa %% time: %f' % timer.get_relative_percent_time('all.a.aa'))
+    aa % time: 44.144148
+    >>> print('aa %% total: %f' % timer.get_total_percent_time('all.a.aa'))
+    aa % total: 35.976058
+
+    Internal Workings
+    -----------------
+    The HierarchicalTimer use a stack to track which timers are active
+    at any point in time. Additionally, each timer has a dictionary of
+    timers for its children timers. Consider
+
+    >>> timer = HierarchicalTimer()
+    >>> timer.start('all')
+    >>> timer.start('a')
+    >>> timer.start('aa')
+
+    After the above code is run, self.stack will be ['all', 'a', 'aa']
+    and self.timers will have one key, 'all' and one value which will be
+    a _HierarchicalHelper. The _HierarchicalHelper has its own timers
+    dictionary:
+
+    {'a': _HierarchicalHelper}
+
+    and so on. This way, we can easily access any timer with something
+    that looks like the stack. The logic is recursive (although the
+    code is not).
+
+    """
+    def __init__(self):
+        self.stack = list()
+        self.timers = dict()
+
+    def _get_timer(self, identifier, should_exist=False):
+        """
+
+        This method gets the timer associated with the current state
+        of self.stack and the specified identifier.
+
+        Parameters
+        ----------
+        identifier: str
+            The name of the timer
+        should_exist: bool
+            The should_exist is True, and the timer does not already
+            exist, an error will be raised. If should_exist is False, and
+            the timer does not already exist, a new timer will be made.
+
+        Returns
+        -------
+        timer: _HierarchicalHelper
+
+        """
+        parent = self._get_timer_from_stack(self.stack)
+        if identifier in parent.timers:
+            return parent.timers[identifier]
+        else:
+            if should_exist:
+                raise RuntimeError(
+                    'Could not find timer {0}'.format(
+                        '.'.join(self.stack + [identifier])))
+            parent.timers[identifier] = _HierarchicalHelper()
+            return parent.timers[identifier]
+
+    def start(self, identifier):
+        """
+        Start incrementing the timer identified with identifier
+
+        Parameters
+        ----------
+        identifier: str
+            The name of the timer
+        """
+        timer = self._get_timer(identifier)
+        timer.start()
+        self.stack.append(identifier)
+
+    def stop(self, identifier):
+        """
+        Stop incrementing the timer identified with identifier
+
+        Parameters
+        ----------
+        identifier: str
+            The name of the timer
+        """
+        if identifier != self.stack[-1]:
+            raise ValueError(
+                str(identifier) + ' is not the currently active timer.  '
+                'The only timer that can currently be stopped is '
+                + '.'.join(self.stack))
+        self.stack.pop()
+        timer = self._get_timer(identifier, should_exist=True)
+        timer.stop()
+
+    def _get_identifier_len(self):
+        stage_timers = list(self.timers.items())
+        stage_lengths = list()
+
+        while len(stage_timers) > 0:
+            new_stage_timers = list()
+            max_len = 0
+            for identifier, timer in stage_timers:
+                new_stage_timers.extend(timer.timers.items())
+                if len(identifier) > max_len:
+                    max_len = len(identifier)
+            stage_lengths.append(max(max_len, len('other')))
+            stage_timers = new_stage_timers
+
+        return stage_lengths
+
+    def __str__(self):
+        stage_identifier_lengths = self._get_identifier_len()
+        name_formatter = '{name:<' + str(sum(stage_identifier_lengths)) + '}'
+        s = ( name_formatter + '{ncalls:>9} {cumtime:>9} '
+              '{percall:>9} {percent:>6}\n').format(
+                  name='Identifier',
+                  ncalls='ncalls',
+                  cumtime='cumtime',
+                  percall='percall',
+                  percent='%')
+        underline = '-' * (sum(stage_identifier_lengths) + 36) + '\n'
+        s += underline
+        sub_stage_identifier_lengths = stage_identifier_lengths[1:]
+        for name, timer in self.timers.items():
+            s += ( name_formatter + '{ncalls:>9d} {cumtime:>9.3f} '
+                   '{percall:>9.3f} {percent:>6.1f}\n').format(
+                       name=name,
+                       ncalls=timer.n_calls,
+                       cumtime=timer.total_time,
+                       percall=timer.total_time/timer.n_calls,
+                       percent=self.get_total_percent_time(name))
+            s += timer.to_str(
+                indent=' '*stage_identifier_lengths[0],
+                stage_identifier_lengths=sub_stage_identifier_lengths)
+        s += underline.replace('-', '=')
+        return s
+
+    def reset(self):
+        """
+        Completely reset the timer.
+        """
+        self.stack = list()
+        self.timers = dict()
+
+    def _get_timer_from_stack(self, stack):
+        """
+        This method gets the timer associated with stack.
+
+        Parameters
+        ----------
+        stack: list of str
+            A list of identifiers.
+
+        Returns
+        -------
+        timer: _HierarchicalHelper
+        """
+        tmp = self
+        for i in stack:
+            tmp = tmp.timers[i]
+        return tmp
+
+    def get_total_time(self, identifier):
+        """
+        Parameters
+        ----------
+        identifier: str
+            The full name of the timer including parent timers separated
+            with dots.
+
+        Returns
+        -------
+        total_time: float
+            The total time spent with the specified timer active.
+        """
+        stack = identifier.split('.')
+        timer = self._get_timer_from_stack(stack)
+        return timer.total_time
+
+    def get_num_calls(self, identifier):
+        """
+        Parameters
+        ----------
+        identifier: str
+            The full name of the timer including parent timers separated
+            with dots.
+
+        Returns
+        -------
+        num_calss: int
+            The number of times start was called for the specified timer.
+        """
+        stack = identifier.split('.')
+        timer = self._get_timer_from_stack(stack)
+        return timer.n_calls
+
+    def get_relative_percent_time(self, identifier):
+        """
+        Parameters
+        ----------
+        identifier: str
+            The full name of the timer including parent timers separated
+            with dots.
+
+        Returns
+        -------
+        percent_time: float
+            The percent of time spent in the specified timer
+            relative to the timer's immediate parent.
+        """
+        stack = identifier.split('.')
+        timer = self._get_timer_from_stack(stack)
+        parent = self._get_timer_from_stack(stack[:-1])
+        if parent is self:
+            return self.get_total_percent_time(identifier)
+        else:
+            if parent.total_time > 0:
+                return timer.total_time / parent.total_time * 100
+            else:
+                return float('nan')
+
+    def get_total_percent_time(self, identifier):
+        """
+        Parameters
+        ----------
+        identifier: str
+            The full name of the timer including parent timers separated
+            with dots.
+
+        Returns
+        -------
+        percent_time: float
+            The percent of time spent in the specified timer
+            relative to the total time in all timers.
+        """
+        stack = identifier.split('.')
+        timer = self._get_timer_from_stack(stack)
+        total_time = 0
+        for _timer in self.timers.values():
+            total_time += _timer.total_time
+        if total_time > 0:
+            return timer.total_time / total_time * 100
+        else:
+            return float('nan')
