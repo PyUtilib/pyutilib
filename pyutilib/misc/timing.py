@@ -166,25 +166,20 @@ class _HierarchicalHelper(object):
     def __init__(self):
         self.tic_toc = TicTocTimer()
         self.timers = dict()
-
-    @property
-    def total_time(self):
-        return self.tic_toc._cumul
-
-    @property
-    def n_calls(self):
-        return self.tic_toc._start_count
+        self.total_time = 0
+        self.n_calls = 0
 
     def start(self):
+        self.n_calls += 1
         self.tic_toc.start()
 
     def stop(self):
-        self.tic_toc.stop()
+        self.total_time += self.tic_toc.stop()
 
     def pprint(self, indent, stage_identifier_lengths):
         s = ''
         if len(self.timers) > 0:
-            underline = indent + '-' * (sum(stage_identifier_lengths) + 60) + '\n'
+            underline = indent + '-' * (sum(stage_identifier_lengths) + 46) + '\n'
             s += underline
             name_formatter = '{name:<' + str(sum(stage_identifier_lengths)) + '}'
             other_time = self.total_time
@@ -192,25 +187,25 @@ class _HierarchicalHelper(object):
             for name, timer in self.timers.items():
                 s += indent
                 s += name_formatter.format(name=name)
-                s += '{ncalls:>15d}'.format(ncalls=timer.n_calls)
-                s += '{cumtime:>15.2e}'.format(cumtime=timer.total_time)
-                s += '{percall:>15.2e}'.format(percall=timer.total_time/timer.n_calls)
+                s += '{ncalls:>12d}'.format(ncalls=timer.n_calls)
+                s += '{cumtime:>12.3f}'.format(cumtime=timer.total_time)
+                s += '{percall:>12.3f}'.format(percall=timer.total_time/timer.n_calls)
                 if self.total_time > 0:
-                    s += '{percent:>15.1f}\n'.format(percent=timer.total_time / self.total_time * 100)
+                    s += '{percent:>10.1f}\n'.format(percent=timer.total_time / self.total_time * 100)
                 else:
-                    s += '{percent:>15}\n'.format(percent='nan')
+                    s += '{percent:>10}\n'.format(percent='nan')
                 s += timer.pprint(indent=indent + ' '*stage_identifier_lengths[0],
                                   stage_identifier_lengths=sub_stage_identifier_lengths)
                 other_time -= timer.total_time
             s += indent
             s += name_formatter.format(name='other')
-            s += '{ncalls:>15}'.format(ncalls='N/A')
-            s += '{cumtime:>15.2e}'.format(cumtime=other_time)
-            s += '{percall:>15}'.format(percall='N/A')
+            s += '{ncalls:>12}'.format(ncalls='N/A')
+            s += '{cumtime:>12.3f}'.format(cumtime=other_time)
+            s += '{percall:>12}'.format(percall='N/A')
             if self.total_time > 0:
-                s += '{percent:>15.1f}\n'.format(percent=other_time / self.total_time * 100)
+                s += '{percent:>10.1f}\n'.format(percent=other_time / self.total_time * 100)
             else:
-                s += '{percent:>15}\n'.format(percent='nan')
+                s += '{percent:>10}\n'.format(percent='nan')
             s += underline.replace('-', '=')
         return s
 
@@ -237,20 +232,20 @@ class HierarchicalTimer(object):
     >>>     timer.stop('b')
     >>> timer.stop('all')
     >>> print(timer)
-    Identifier              ncalls    cumtime (s)    percall (s)              %
-    ---------------------------------------------------------------------------
-    all                          1       1.32e-01       1.32e-01          100.0
-         ----------------------------------------------------------------------
-         a                      10       1.18e-01       1.18e-02           89.8
-              -----------------------------------------------------------------
-              aa                50       6.72e-02       1.34e-03           56.7
-              ab                10       5.03e-02       5.03e-03           42.5
-              other            N/A       9.79e-04            N/A            0.8
-              =================================================================
-         b                      10       1.32e-02       1.32e-03           10.0
-         other                 N/A       2.10e-04            N/A            0.2
-         ======================================================================
-    ===========================================================================
+    Identifier           ncalls  cumtime(s)  percall(s)         %
+    -------------------------------------------------------------
+    all                       1       0.000       0.000     100.0
+         --------------------------------------------------------
+         a                   10       0.000       0.000      79.2
+              ---------------------------------------------------
+              aa             50       0.000       0.000      35.6
+              ab             10       0.000       0.000       6.9
+              other         N/A       0.000         N/A      57.5
+              ===================================================
+         b                   10       0.000       0.000       5.3
+         other              N/A       0.000         N/A      15.6
+         ========================================================
+    =============================================================
 
     The columns are:
     ncalls     : The number of times the timer was started and stopped
@@ -374,23 +369,23 @@ class HierarchicalTimer(object):
         stage_identifier_lengths = self._get_identifier_len()
         name_formatter = '{name:<' + str(sum(stage_identifier_lengths)) + '}'
         s = (name_formatter +
-             '{ncalls:>15}'
-             '{cumtime:>15}'
-             '{percall:>15}'
-             '{percent:>15}\n').format(name='Identifier',
-                                       ncalls='ncalls',
-                                       cumtime='cumtime (s)',
-                                       percall='percall (s)',
-                                       percent='%')
-        underline = '-' * (sum(stage_identifier_lengths) + 60) + '\n'
+             '{ncalls:>12}'
+             '{cumtime:>12}'
+             '{percall:>12}'
+             '{percent:>10}\n').format(name='Identifier',
+                                      ncalls='ncalls',
+                                      cumtime='cumtime(s)',
+                                      percall='percall(s)',
+                                      percent='%')
+        underline = '-' * (sum(stage_identifier_lengths) + 46) + '\n'
         s += underline
         sub_stage_identifier_lengths = stage_identifier_lengths[1:]
         for name, timer in self.timers.items():
             s += name_formatter.format(name=name)
-            s += '{ncalls:>15d}'.format(ncalls=timer.n_calls)
-            s += '{cumtime:>15.2e}'.format(cumtime=timer.total_time)
-            s += '{percall:>15.2e}'.format(percall=timer.total_time/timer.n_calls)
-            s += '{percent:>15.1f}\n'.format(percent=self.get_total_percent_time(name))
+            s += '{ncalls:>12d}'.format(ncalls=timer.n_calls)
+            s += '{cumtime:>12.3f}'.format(cumtime=timer.total_time)
+            s += '{percall:>12.3f}'.format(percall=timer.total_time/timer.n_calls)
+            s += '{percent:>10.1f}\n'.format(percent=self.get_total_percent_time(name))
             s += timer.pprint(indent=' '*stage_identifier_lengths[0],
                               stage_identifier_lengths=sub_stage_identifier_lengths)
         s += underline.replace('-', '=')
