@@ -17,7 +17,7 @@ currdir = os.path.dirname(os.path.abspath(__file__))
 import pyutilib.th as unittest
 
 import pyutilib.misc.comparison
-from pyutilib.misc.config import ConfigValue, ConfigBlock, ConfigList
+from pyutilib.misc.config import ConfigValue, ConfigBlock, ConfigList, MarkImmutable
 
 from six import PY3, StringIO
 
@@ -38,6 +38,49 @@ def _display(obj, *args):
     test = StringIO()
     obj.display(ostream=test, *args)
     return test.getvalue()
+
+
+class TestImmutableConfigValue(unittest.TestCase):
+    def test_immutable_config_value(self):
+        config = ConfigBlock()
+        config.declare('a', ConfigValue(default=1, domain=int))
+        config.declare('b', ConfigValue(default=1, domain=int))
+        config.a = 2
+        config.b = 3
+        self.assertEqual(config.a, 2)
+        self.assertEqual(config.b, 3)
+        locker = MarkImmutable(config.get('a'), config.get('b'))
+        with self.assertRaises(Exception):
+            config.a = 4
+        with self.assertRaises(Exception):
+            config.b = 5
+        config.a = 2
+        config.b = 3
+        self.assertEqual(config.a, 2)
+        self.assertEqual(config.b, 3)
+        locker.release_lock()
+        config.a = 4
+        config.b = 5
+        self.assertEqual(config.a, 4)
+        self.assertEqual(config.b, 5)
+        with self.assertRaises(ValueError):
+            locker = MarkImmutable(config.get('a'), config.b)
+        self.assertEqual(type(config.get('a')), ConfigValue)
+        config.a = 6
+        self.assertEqual(config.a, 6)
+
+        config.declare('c', ConfigValue(default=-1, domain=int))
+        locker = MarkImmutable(config.get('a'), config.get('b'))
+        config2 = config({'c': -2})
+        self.assertEqual(config2.a, 6)
+        self.assertEqual(config2.b, 5)
+        self.assertEqual(config2.c, -2)
+        with self.assertRaises(Exception):
+            config3 = config({'a': 1})
+        locker.release_lock()
+        config3 = config({'a': 1})
+        self.assertEqual(config3.a, 1)
+
 
 class Test(unittest.TestCase):
 

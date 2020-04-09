@@ -1068,6 +1068,63 @@ class ConfigValue(ConfigBase):
         yield (level, prefix, self, self)
 
 
+class ImmutableConfigValue(ConfigValue):
+    def set_value(self, value):
+        if self._cast(value) != self._data:
+            raise RuntimeError(str(self) + ' is currently immutable')
+        super(ImmutableConfigValue, self).set_value(value)
+
+    def reset(self):
+        try:
+            super(ImmutableConfigValue, self).set_value(self._default)
+        except:
+            if hasattr(self._default, '__call__'):
+                super(ImmutableConfigValue, self).set_value(self._default())
+            else:
+                raise
+        self._userAccessed = False
+        self._userSet = False
+
+
+class MarkImmutable(object):
+    """
+    Mark instances of ConfigValue as immutable.
+
+    Parameters
+    ----------
+    config_value: ConfigValue
+        The ConfigValue instances that should be marked immutable. 
+        Note that multiple instances of ConfigValue can be passed.
+
+    Examples
+    --------
+    >>> config = ConfigBlock()
+    >>> config.declare('a', ConfigValue(default=1, domain=int))
+    >>> config.declare('b', ConfigValue(default=1, domain=int))
+    >>> locker = MarkImmutable(config.get('a'), config.get('b'))
+    
+    Now, config.a and config.b cannot be changed. To make them mutable again, 
+
+    >>> locker.release_lock()
+    """
+    def __init__(self, *args):
+        self._locked = list()
+        try:
+            for arg in args:
+                if type(arg) is not ConfigValue:
+                    raise ValueError('Only ConfigValue instances can be marked immutable.')
+                arg.__class__ = ImmutableConfigValue
+                self._locked.append(arg)
+        except:
+            self.release_lock()
+            raise
+
+    def release_lock(self):
+        for arg in self._locked:
+            arg.__class__ = ConfigValue
+        self._locked = list()
+
+
 class ConfigList(ConfigBase):
     """Store and manipulate a list of configuration values.
 
