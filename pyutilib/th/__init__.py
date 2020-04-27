@@ -25,3 +25,17 @@ try:
     import pyutilib.th.nose_timeout
 except ImportError:
     pass
+
+
+mock_available = False
+try:
+    from unittest import mock
+
+    mock_available = True
+except ImportError:
+    try:
+        import mock
+
+        mock_available = True
+    except ImportError:
+        pass
