@@ -2,8 +2,8 @@ name: PyUtilib Release Distribution Creation
 
 on:
   push:
-    branches:
-    - wheel_creation
+    tags:
+    - '*'
 
 jobs:
   wheelcreation:
