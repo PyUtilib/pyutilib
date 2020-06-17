@@ -6,6 +6,13 @@
  Current Development
 -------------------------------------------------------------------------------
 
+- Updates to pyutilib.misc.config including documentation (#88)
+- Updates to the README (#91, #92)
+- Remove references to Python 2.6 (and older) (#94)
+- Add Hierarchical timer class (#96)
+- Add an ImmutableConfigValue class (#95)
+- Add unittest.mock backport (#98)
+- Automate wheel creation (#99)
 
 -------------------------------------------------------------------------------
  Version 5.8.0   18 Mar 2020
