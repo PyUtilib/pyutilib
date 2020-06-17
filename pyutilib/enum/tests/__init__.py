@@ -7,5 +7,3 @@
 #  the U.S. Government retains certain rights in this software.
 #  _________________________________________________________________________
 #
-
-from pyutilib.enum.enum import Enum, EnumValue
