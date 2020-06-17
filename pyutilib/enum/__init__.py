@@ -8,4 +8,8 @@
 #  _________________________________________________________________________
 #
 
-from pyutilib.enum.enum import Enum, EnumValue
+import sys
+
+if 'nose' not in sys.modules and 'nose2' not in sys.modules:
+    raise ImportError('pyutilib.enum has been deprecated. Similar functionality '
+                      'can be found in the Python enum package')
