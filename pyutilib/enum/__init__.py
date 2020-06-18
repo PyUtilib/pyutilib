@@ -8,4 +8,11 @@
 #  _________________________________________________________________________
 #
 
-from pyutilib.enum.enum import Enum, EnumValue
+import sys
+
+if 'nose' not in sys.modules and 'nose2' not in sys.modules:
+    raise ImportError("""pyutilib.enum has been removed.
+
+Python 3 now has an enum implementation in the standard library (also
+available for older Python versions as the third-party enum34 PyPI
+package) that supersedes this library.""")
