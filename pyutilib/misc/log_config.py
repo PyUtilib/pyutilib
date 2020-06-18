@@ -13,6 +13,7 @@ import sys
 import textwrap
 
 _indention = re.compile('\s*')
+_status_re = re.compile('^\[\s*[A-Za-z0-9\.]+\s*\]')
 
 class LogHandler(logging.Handler):
 
@@ -74,9 +75,10 @@ class LogHandler(logging.Handler):
                 # Blank lines reset the indentation level
                 indent = None
             elif indent == leading:
-                # Catch things like bulleted lists
-                if len(content) > 1 and par_lines and content[1] == ' ' \
-                   and content[0] in '-* ':
+                # Catch things like bulleted lists and '[FAIL]'
+                if len(content) > 1 and par_lines and (
+                        (content[1] == ' ' and content[0] in '-* ') or
+                        (content[0] == '[' and _status_re.match(content))):
                     paragraphs.append((indent, par_lines))
                     par_lines = []
                 par_lines.append( content )
