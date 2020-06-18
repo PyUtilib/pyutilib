@@ -47,6 +47,8 @@ def import_file(filename, context=None, name=None, clear_cache=False):
     This function returns the module object that is created.
     """
 
+    # Support shell-style paths like ~user and $HOME/bin
+    filename = os.path.expanduser(os.path.expandvars(filename))
     #
     # Parse the filename to get the name of the module to be imported
     # and determine if it contains any directory information about
@@ -63,9 +65,7 @@ def import_file(filename, context=None, name=None, clear_cache=False):
     # For 2.4 compatibility we will call endswith() twice.
     if modulename.endswith('.py') or modulename.endswith('.pyc'):
         if not os.path.exists(filename):
-            if not os.path.exists(os.path.expanduser(filename)):
-                raise IOError("File %s does not exist" % (filename))
-            filename = os.path.expanduser(filename)
+            raise IOError("File %s does not exist" % (filename))
         if filename.endswith('.pyc'):
             filename = filename[:-1]
         modulename = modulename.rsplit('.', 1)[0]
