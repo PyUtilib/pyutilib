@@ -29,7 +29,7 @@ def read(*rnames):
 requires=[ 'nose', 'six' ]
 
 setup(name="PyUtilib",
-    version='6.0.0',
+    version='6.0.1.dev0',
     maintainer='William E. Hart',
     maintainer_email='wehart@sandia.gov',
     url = 'https://github.com/PyUtilib/pyutilib',
