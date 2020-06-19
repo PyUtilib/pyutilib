@@ -1,12 +1,13 @@
-We are pleased to announce the release of PyUtilib 5.8.0. The
+We are pleased to announce the release of PyUtilib 6.0.0. The
 PyUtilib project supports the development of an ensemble of Python
 packages that include a wide variety of utilities, including a
 well-developed component architecture.
 
-The following are highlights of the 5.8 release series:
+The following are highlights of the 6.0 release series:
 
-- Removed use of pyutilib and pyutilib.component namespace packages
-- Reworked optional dependency imports to speed up importing
+- Removed the pyutilib.enum package
+- Expanded timer support
+- Automated release management
 
 Additional changes are listed in CHANGELOG.txt
 
