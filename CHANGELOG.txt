@@ -3,16 +3,19 @@
 ====================
 
 -------------------------------------------------------------------------------
- Current Development
+ Version 6.0     19 Jun 2020
 -------------------------------------------------------------------------------
 
 - Updates to pyutilib.misc.config including documentation (#88)
 - Updates to the README (#91, #92)
 - Remove references to Python 2.6 (and older) (#94)
-- Add Hierarchical timer class (#96)
+- Add hierarchical timer class (#96)
 - Add an ImmutableConfigValue class (#95)
 - Add unittest.mock backport (#98)
 - Automate wheel creation (#99)
+- Improve formatting in the log formatter (#102)
+- Remove pyutilib.enum package (#101)
+- Add support for expanding user and environment variables in import_file (#103)
 
 -------------------------------------------------------------------------------
  Version 5.8.0   18 Mar 2020
