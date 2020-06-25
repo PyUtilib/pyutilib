@@ -131,6 +131,10 @@ jobs:
         python -c 'import sys; print("::set-env name=PYTHON_EXE::%s" \
             % (sys.executable,))'
 
+    - name: Install Pyutilib
+      run: |
+        python setup.py develop
+
     - name: Run Pyutilib tests
       run: |
         test.pyutilib --cat=all --cov
