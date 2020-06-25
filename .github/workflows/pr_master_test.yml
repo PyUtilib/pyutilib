@@ -135,24 +135,6 @@ jobs:
       run: |
         python setup.py develop
 
-    - name: Set up coverage tracking
-      run: |
-        if test "${{matrix.TARGET}}" == win; then
-            COVERAGE_BASE=${GITHUB_WORKSPACE}\\.cover
-        else
-            COVERAGE_BASE=${GITHUB_WORKSPACE}/.cover
-        fi
-        COVERAGE_RC=${COVERAGE_BASE}_rc
-        echo "::set-env name=COVERAGE_RCFILE::$COVERAGE_RC"
-        echo "::set-env name=COVERAGE_PROCESS_START::$COVERAGE_RC"
-        cp ${GITHUB_WORKSPACE}/.coveragerc ${COVERAGE_RC}
-        echo "data_file=${COVERAGE_BASE}age" >> ${COVERAGE_RC}
-        SITE_PACKAGES=$($PYTHON_EXE -c "from distutils.sysconfig import \
-            get_python_lib; print(get_python_lib())")
-        echo "Python site-packages: $SITE_PACKAGES"
-        echo 'import coverage; coverage.process_startup()' \
-            > ${SITE_PACKAGES}/run_coverage_at_startup.pth
-
     - name: Run Pyutilib tests
       run: |
         test.pyutilib --cat=all --cov
@@ -161,19 +143,4 @@ jobs:
       env:
         CODECOV_NAME: ${{matrix.TARGET}}/${{matrix.python}}${{matrix.NAME}}
       run: |
-        coverage combine
-        coverage report -i
-        coverage xml -i
-        i=0
-        while : ; do
-            curl --retry 8 -L https://codecov.io/bash -o codecov.sh
-            bash codecov.sh -Z -X gcov -f coverage.xml
-            if test $? == 0; then
-                break
-            elif test $i -ge 4; then
-                exit 1
-            fi
-            DELAY=$(( RANDOM % 30 + 30))
-            echo "Pausing $DELAY seconds before re-attempting upload"
-            sleep $DELAY
-        done
+        codecov
