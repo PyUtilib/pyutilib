@@ -38,7 +38,7 @@ jobs:
         - os: windows-latest
           TARGET: win
           PYENV: conda
-          PACKAGES: setuptools, coverage, nose, xlrd
+          PACKAGES: setuptools coverage nose xlrd
 
         exclude:
         - {os: macos-latest, python: pypy2}
@@ -127,7 +127,7 @@ jobs:
         conda info
         conda config --show-sources
         conda list --show-channel-urls
-        conda install -q -y -c conda-forge ${{matrix.PACKAGES}}
+        conda install -q -y -c conda-forge -c anaconda ${{matrix.PACKAGES}}
         python -c 'import sys; print("::set-env name=PYTHON_EXE::%s" \
             % (sys.executable,))'
 
@@ -143,4 +143,5 @@ jobs:
       env:
         CODECOV_NAME: ${{matrix.TARGET}}/${{matrix.python}}${{matrix.NAME}}
       run: |
+        curl --retry 8 -L https://codecov.io/bash -o codecov.sh
         bash codecov.sh -Z -X gcov -f TEST-pyutilib.xml
