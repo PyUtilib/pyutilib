@@ -137,10 +137,10 @@ jobs:
 
     - name: Run Pyutilib tests
       run: |
-        test.pyutilib --cat=all --cov
+        test.pyutilib --cat=all --cov -v
 
     - name: Process code coverage report
       env:
         CODECOV_NAME: ${{matrix.TARGET}}/${{matrix.python}}${{matrix.NAME}}
       run: |
-        codecov
+        bash codecov.sh -Z -X gcov -f TEST-pyutilib.xml
