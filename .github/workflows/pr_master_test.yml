@@ -133,7 +133,7 @@ jobs:
 
     - name: Install Pyutilib
       run: |
-        python setup.py develop
+        $PYTHON_EXE setup.py develop
 
     - name: Set up coverage tracking
       run: |
