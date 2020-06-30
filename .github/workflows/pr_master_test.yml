@@ -15,7 +15,7 @@ defaults:
 env:
   PYTHONWARNINGS: ignore::UserWarning
   PYTHON_BASE_PKGS: >
-      coverage xlrd codecov
+      coverage xlrd
 
 jobs:
   pyomo-tests:
