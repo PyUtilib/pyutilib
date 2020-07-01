@@ -5,6 +5,8 @@ import os
 from os.path import dirname, abspath, abspath, basename
 import sys
 
+sys.path.insert(0, sys.executable)
+
 currdir = dirname(abspath(__file__))+os.sep
 datadir = currdir
 
@@ -12,15 +14,7 @@ def filter(line):
     return 'Running' in line or "IGNORE" in line or line.startswith('usage:') or 'Sub-commands' in line
 
 class Test(unittest.TestCase):
-
-    def setUp(self):
-        self._path = os.environ['PATH']
-        os.environ['PATH'] = os.path.join(
-            os.path.dirname(sys.executable), os.environ['PATH']
-        )
-
-    def tearDown(self):
-        os.environ['PATH'] = self._path
+    pass
 
 # Find all example*.py files, and use them to define baseline tests
 for file in glob.glob(datadir+'example*.py'):
