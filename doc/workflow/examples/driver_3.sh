@@ -1,5 +1,5 @@
 #!/bin/sh
 
 # @code:
-python driver2.py --help
+$PYTHON_EXE driver2.py --help
 # @:code
