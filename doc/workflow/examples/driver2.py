@@ -1,5 +1,6 @@
 import os
 print(os.getcwd())
+print(os.environ['PYTHONPATH'].split(os.pathsep))
 
 import pyutilib.workflow
 import tasks_yz

@@ -163,7 +163,7 @@ jobs:
 
     - name: Run Pyutilib tests
       run: |
-        test.pyutilib --cat=all -v
+        test.pyutilib --cat=all -v -s
 
     - name: Process code coverage report
       env:
