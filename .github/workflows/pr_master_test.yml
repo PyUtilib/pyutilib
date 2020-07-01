@@ -169,6 +169,7 @@ jobs:
       env:
         CODECOV_NAME: ${{matrix.TARGET}}/${{matrix.python}}${{matrix.NAME}}
       run: |
+        [ ! -d ${GITHUB_WORKSPACE}/cache/download ] && mkdir -pv ${GITHUB_WORKSPACE}/cache/download
         coverage report -i
         coverage xml -i
         ls -la
