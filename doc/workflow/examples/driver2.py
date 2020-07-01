@@ -1,4 +1,5 @@
-
+import os
+print(os.environ(['PATH']))
 import pyutilib.workflow
 import tasks_yz
 
