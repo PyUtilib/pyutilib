@@ -163,6 +163,7 @@ jobs:
         echo "Python site-packages: $SITE_PACKAGES"
         echo 'import coverage; coverage.process_startup()' \
             > ${SITE_PACKAGES}/run_coverage_at_startup.pth
+        cat ${COVERAGE_RC}
 
     - name: Run Pyutilib tests
       run: |
