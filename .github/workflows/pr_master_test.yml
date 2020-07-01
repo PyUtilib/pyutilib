@@ -3,10 +3,10 @@ name: GitHub CI
 on:
   push:
     branches:
-      - github_actions
-  # pull_request:
-  #   branches:
-  #     - master
+      - master
+  pull_request:
+    branches:
+      - master
 
 defaults:
   run:
