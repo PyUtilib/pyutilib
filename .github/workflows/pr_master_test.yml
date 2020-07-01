@@ -69,7 +69,7 @@ jobs:
         path: cache/pip
         key: pip-v2-${{runner.os}}-${{matrix.python}}
 
-    - name: TPL package download cache
+    - name: Download cache
       uses: actions/cache@v1
       id: download-cache
       with:
@@ -182,16 +182,17 @@ jobs:
         CODECOV_NAME: ${{matrix.TARGET}}/${{matrix.python}}${{matrix.NAME}}
       run: |
         ls -la
-        coverage combine
+        ls -la ${GITHUB_WORKSPACE}/cache
         coverage report -i
         coverage xml -i
+        ls -la
         set +e
         # Always attempt to update the codecov script, but fall back on
         # the previously cached script if it fails
         CODECOV="${GITHUB_WORKSPACE}/cache/download/codecov.sh"
         for i in `seq 3`; do
             echo "Downloading current codecov script (attempt ${i})"
-            curl -L https://codecov.io/bash -o $CODECOV
+            curl -L https://codecov.io/bash -O $CODECOV
             if test $? == 0; then
                 break
             fi
