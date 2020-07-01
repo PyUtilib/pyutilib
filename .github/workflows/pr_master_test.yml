@@ -69,6 +69,13 @@ jobs:
         path: cache/pip
         key: pip-v2-${{runner.os}}-${{matrix.python}}
 
+    - name: TPL package download cache
+      uses: actions/cache@v1
+      id: download-cache
+      with:
+        path: cache/download
+        key: download-v4-${{runner.os}}
+
     - name: Configure curl
       run: |
         CURLRC="$(cat <<EOF
@@ -174,7 +181,7 @@ jobs:
       env:
         CODECOV_NAME: ${{matrix.TARGET}}/${{matrix.python}}${{matrix.NAME}}
       run: |
-        ls
+        ls -la
         coverage combine
         coverage report -i
         coverage xml -i
