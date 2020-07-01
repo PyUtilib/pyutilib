@@ -49,20 +49,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    # Ideally we would cache the conda downloads; however, each cache is
-    # over 850MB, and with 5 python versions, that would consume 4.2 of
-    # the 5 GB GitHub allows.
-    #
-    #- name: Conda package cache
-    #  uses: actions/cache@v1
-    #  if: matrix.PYENV == 'conda'
-    #  id: conda-cache
-    #  with:
-    #    path: cache/conda
-    #    key: conda-v2-${{runner.os}}-${{matrix.python}}
-
     - name: Pip package cache
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       if: matrix.PYENV == 'pip'
       id: pip-cache
       with:
@@ -70,7 +58,7 @@ jobs:
         key: pip-v2-${{runner.os}}-${{matrix.python}}
 
     - name: Download cache
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       id: download-cache
       with:
         path: cache/download
@@ -181,8 +169,6 @@ jobs:
       env:
         CODECOV_NAME: ${{matrix.TARGET}}/${{matrix.python}}${{matrix.NAME}}
       run: |
-        ls -la
-        ls -la ${GITHUB_WORKSPACE}/cache
         coverage report -i
         coverage xml -i
         ls -la
@@ -192,7 +178,7 @@ jobs:
         CODECOV="${GITHUB_WORKSPACE}/cache/download/codecov.sh"
         for i in `seq 3`; do
             echo "Downloading current codecov script (attempt ${i})"
-            curl -L https://codecov.io/bash -O $CODECOV
+            curl -L https://codecov.io/bash -o $CODECOV
             if test $? == 0; then
                 break
             fi
@@ -200,6 +186,7 @@ jobs:
             echo "Pausing $DELAY seconds before re-attempting download"
             sleep $DELAY
         done
+        ls -la ${GITHUB_WORKSPACE}/cache/
         i=0
         while : ; do
             ((i+=1))
