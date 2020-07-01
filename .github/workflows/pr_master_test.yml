@@ -3,10 +3,10 @@ name: GitHub CI
 on:
   push:
     branches:
-      - master
-  pull_request:
-    branches:
-      - master
+      - github_actions
+  # pull_request:
+  #   branches:
+  #     - master
 
 defaults:
   run:
@@ -68,6 +68,17 @@ jobs:
       with:
         path: cache/pip
         key: pip-v2-${{runner.os}}-${{matrix.python}}
+
+    - name: Configure curl
+      run: |
+        CURLRC="$(cat <<EOF
+           retry = 0
+           max-time = 30
+        EOF
+        )"
+        echo "$CURLRC" > ${GITHUB_WORKSPACE}/.curlrc
+        echo "$CURLRC" > ${GITHUB_WORKSPACE}/_curlrc
+        echo "::set-env name=CURL_HOME::$GITHUB_WORKSPACE"
 
     - name: Set up Python ${{ matrix.python }}
       if: matrix.PYENV == 'pip'
@@ -164,14 +175,28 @@ jobs:
         coverage combine
         coverage report -i
         coverage xml -i
-        i=0
         set +e
-        while : ; do
-            curl --retry 8 -L https://codecov.io/bash -o codecov.sh \
-                && bash codecov.sh -Z -X gcov -f coverage.xml
+        # Always attempt to update the codecov script, but fall back on
+        # the previously cached script if it fails
+        CODECOV="${GITHUB_WORKSPACE}/cache/download/codecov.sh"
+        for i in `seq 3`; do
+            echo "Downloading current codecov script (attempt ${i})"
+            curl -L https://codecov.io/bash -o $CODECOV
             if test $? == 0; then
                 break
-            elif test $i -ge 4; then
+            fi
+            DELAY=$(( RANDOM % 30 + 30))
+            echo "Pausing $DELAY seconds before re-attempting download"
+            sleep $DELAY
+        done
+        i=0
+        while : ; do
+            ((i+=1))
+            echo "Uploading coverage to codecov (attempt ${i})"
+            bash $CODECOV -Z -X gcov -X s3 -f coverage.xml
+            if test $? == 0; then
+                break
+            elif test $i -ge 5; then
                 exit 1
             fi
             DELAY=$(( RANDOM % 30 + 30))
