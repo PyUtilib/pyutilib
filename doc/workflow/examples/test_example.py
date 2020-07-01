@@ -15,7 +15,7 @@ class Test(unittest.TestCase):
 
     def setUp(self):
         self._path = os.environ['PATH']
-        os.environ['PATH'] = os.pathsep.join(
+        os.environ['PATH'] = os.path.join(
             os.path.dirname(sys.executable), os.environ['PATH']
         )
 
