@@ -11,6 +11,7 @@ datadir = currdir
 def filter(line):
     return 'Running' in line or "IGNORE" in line or line.startswith('usage:') or 'Sub-commands' in line
 
+# Declare an empty TestCase class
 class Test(unittest.TestCase):
     pass
 

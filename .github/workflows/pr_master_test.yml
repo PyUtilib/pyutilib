@@ -164,10 +164,8 @@ jobs:
     - name: Run Pyutilib tests
       run: |
         if [ ${{matrix.TARGET}} == 'osx' ]; then
-          which python
           PYTHON_DIR=`dirname $PYTHON_EXE`
           export PATH=$PYTHON_DIR:$PATH
-          which python
         fi
         test.pyutilib --cat=all -v
 
