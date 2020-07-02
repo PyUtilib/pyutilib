@@ -141,7 +141,9 @@ jobs:
       if: matrix.TARGET == 'osx'
       run: |
         PYTHON_DIR=`dirname $PYTHON_EXE`
+        echo $PYTHON_DIR
         echo "::set-env name=PATH::$PYTHON_DIR:$PATH"
+        which python
 
     - name: Install Pyutilib
       run: |
