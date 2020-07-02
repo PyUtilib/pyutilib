@@ -145,8 +145,6 @@ jobs:
 
     - name: Install Pyutilib
       run: |
-        echo $PATH
-        which python
         $PYTHON_EXE setup.py develop
 
     - name: Set up coverage tracking
@@ -171,6 +169,7 @@ jobs:
 
     - name: Run Pyutilib tests
       run: |
+        which python
         test.pyutilib --cat=all -v
 
     - name: Process code coverage report
