@@ -137,12 +137,6 @@ jobs:
         python -c 'import sys; print("::set-env name=PYTHON_EXE::%s" \
             % (sys.executable,))'
 
-    - name: Correct MacOS path
-      if: matrix.TARGET == 'osx'
-      run: |
-        PYTHON_DIR=`dirname $PYTHON_EXE`
-        echo "::set-env name=PATH::$PYTHON_DIR:$PATH"
-
     - name: Install Pyutilib
       run: |
         $PYTHON_EXE setup.py develop
@@ -169,7 +163,12 @@ jobs:
 
     - name: Run Pyutilib tests
       run: |
-        which python
+        if [ ${{matrix.TARGET}} == 'osx' ]; then
+          which python
+          PYTHON_DIR=`dirname $PYTHON_EXE`
+          export PATH=$PYTHON_DIR:$PATH
+          which python
+        fi
         test.pyutilib --cat=all -v
 
     - name: Process code coverage report
