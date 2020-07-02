@@ -137,6 +137,12 @@ jobs:
         python -c 'import sys; print("::set-env name=PYTHON_EXE::%s" \
             % (sys.executable,))'
 
+    - name: Correct MacOS path
+      if: matrix.TARGET == 'osx'
+      run: |
+        PYTHON_DIR=`dirname $PYTHON_EXE`
+        echo "::set-env PATH::$PYTHON_DIR:$PATH"
+
     - name: Install Pyutilib
       run: |
         $PYTHON_EXE setup.py develop
