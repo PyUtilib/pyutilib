@@ -37,5 +37,4 @@ if not sys.platform.startswith('win'):
 
 # Execute the tests
 if __name__ == '__main__':
-
     unittest.main()
