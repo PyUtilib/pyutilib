@@ -32,7 +32,7 @@ if not sys.platform.startswith('win'):
     for file in glob.glob(datadir+'*.sh'):
         bname = basename(file)
         name=bname.split('.')[0]
-        Test.add_baseline_test(cmd='cd %s; /usr/bin/env sh %s' % (datadir, file),  baseline=datadir+name+'.txt', name=name, filter=filter)
+        Test.add_baseline_test(cmd='cd %s; /usr/bin/env bash %s' % (datadir, file),  baseline=datadir+name+'.txt', name=name, filter=filter)
 
 # Execute the tests
 if __name__ == '__main__':
