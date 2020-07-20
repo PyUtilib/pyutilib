@@ -1,7 +1,7 @@
 # Imports
 import sys
 import os
-from os.path import dirname, abspath, abspath
+from os.path import dirname, abspath
 
 import pyutilib.th as unittest
 
