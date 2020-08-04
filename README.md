@@ -1,6 +1,5 @@
-[![Travis Build Status](https://travis-ci.org/PyUtilib/pyutilib.png?branch=master)](https://travis-ci.org/PyUtilib/pyutilib)
-[![Appveyor Build status](https://ci.appveyor.com/api/projects/status/c8dh5o1blp0sycr6/branch/master?svg=true)](https://ci.appveyor.com/project/WilliamHart/pyutilib/branch/master)
-[![codecov.io](https://codecov.io/github/PyUtilib/pyutilib/coverage.svg?branch=master)](https://codecov.io/github/PyUtilib/pyutilib?branch=master)
+![GitHub CI](https://github.com/PyUtilib/pyutilib/workflows/GitHub%20CI/badge.svg?branch=master)
+![codecov.io](https://codecov.io/github/PyUtilib/pyutilib/coverage.svg?branch=master)
 [![Depsy Software Impact](http://depsy.org/api/package/pypi/PyUtilib/badge.svg)](http://depsy.org/package/python/PyUtilib)
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 
