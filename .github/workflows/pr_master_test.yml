@@ -3,7 +3,7 @@ name: GitHub CI
 on:
   push:
     branches:
-      - master
+      - workflow_logic
   pull_request:
     branches:
       - master
@@ -18,7 +18,7 @@ env:
       coverage xlrd
 
 jobs:
-  pyomo-tests:
+  build:
     name: ${{ matrix.TARGET }}/${{ matrix.python }}${{ matrix.NAME }}
     runs-on: ${{ matrix.os }}
     strategy:
