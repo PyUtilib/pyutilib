@@ -173,7 +173,8 @@ jobs:
       env:
         CODECOV_NAME: ${{matrix.TARGET}}/${{matrix.python}}${{matrix.NAME}}
       run: |
-        coverage combine
+        [ ! -d ${GITHUB_WORKSPACE}/cache/download ] && mkdir -pv ${GITHUB_WORKSPACE}/cache/download
+        coverage combine || echo "Nothing to combine."
         coverage report -i
         coverage xml -i
         set +e
