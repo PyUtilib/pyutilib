@@ -9,6 +9,7 @@
 
 import os
 import importlib
+import importlib.machinery
 import sys
 
 import pyutilib.common
@@ -22,6 +23,17 @@ except ImportError:  #pragma:nocover
         runpy_available = True
     except ImportError:  #pragma:nocover
         runpy_available = False
+
+
+def load_source(modname, filename):
+    loader = importlib.machinery.SourceFileLoader(modname, filename)
+    spec = importlib.util.spec_from_file_location(modname, filename, loader=loader)
+    module = importlib.util.module_from_spec(spec)
+    # The module is always executed and not cached in sys.modules.
+    # Uncomment the following line to cache the module.
+    # sys.modules[module.__name__] = module
+    loader.exec_module(module)
+    return module
 
 
 def import_file(filename, context=None, name=None, clear_cache=False):
@@ -142,7 +154,7 @@ def import_file(filename, context=None, name=None, clear_cache=False):
         try:
             # Note: we are always handing load_source a .py file, but
             #       it will use the .pyc or .pyo file if it exists
-            module = importlib.find_loader(name, pathname)
+            module = load_source(name, pathname)
         except:
             et, e, tb = sys.exc_info()
             import traceback
